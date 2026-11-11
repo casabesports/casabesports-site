@@ -1,7 +1,7 @@
 -- Casa Besports : espace administrateur, équipe de rédaction, demandes d'accès,
 -- messagerie, contenus modifiables en ligne et stockage des images.
 -- À coller une seule fois dans Supabase › SQL Editor › New query, puis « Run ».
--- (Lancez d'abord supabase/messages.sql si ce n'est pas déjà fait.)
+-- Ce fichier suffit à lui seul (il crée aussi la table des messages).
 -- Le script peut être relancé sans risque.
 
 -- ========== 1. L'équipe : qui a accès à l'espace rédaction ==========
@@ -83,6 +83,15 @@ revoke all on function public.traiter_demande(bigint, boolean) from public;
 grant execute on function public.traiter_demande(bigint, boolean) to authenticated;
 
 -- ========== 3. Messagerie : demandes du site + e-mails des adresses suivies ==========
+-- (crée la table des messages si supabase/messages.sql n'a pas été lancé)
+create table if not exists public.messages (
+  id bigint generated always as identity primary key,
+  recu_le timestamptz not null default now(),
+  source text, nom text, email text, telephone text, ville text, profil text,
+  sujet text, message text, consentement text, page text,
+  traite boolean not null default false
+);
+alter table public.messages enable row level security;
 alter table public.messages add column if not exists sens text not null default 'recu';
 alter table public.messages add column if not exists lu boolean not null default false;
 alter table public.messages add column if not exists destinataire text;
