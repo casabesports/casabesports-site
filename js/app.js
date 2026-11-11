@@ -29,6 +29,7 @@ class Component extends DCLogic {
     };
   }
   componentDidMount() {
+    try { window.CasaSite = this; } catch (e) {} // accès console / tests : CasaSite.go('shop')
     // Comptes abonnés (js/comptes.js) : la session Supabase pilote l'état connecté
     if (window.CasaAuth && window.CasaAuth.on) {
       window.CasaAuth.onChange((u) => {
@@ -72,45 +73,9 @@ class Component extends DCLogic {
   data() {
     if (this._d) return this._d;
     const A = (id, sport, tag, date, read, premium, img, alt, title, dek, clubs, points) => ({ id, sport, tag, date, read, premium, img, alt, title, dek, clubs, points });
-    const articles = [
-      A('pointe-hague', 'Football', 'Coupe de France', '17 sept.', '1 min', true, 'assets/img_51314cdd.jpg', 'L’ES Pointe-Hague', 'Pointe-Hague s’apprête à défier Goliath',
-        'L’année de ses trente ans, l’ES Pointe-Hague reçoit l’US Avranches au quatrième tour de la Coupe de France, face à un adversaire invaincu en championnat.',
-        ['esph', 'us-avranches', 'uson-mondeville'], ['Qualifiée aux tirs au but à Mondeville au tour précédent.', 'Reçoit l’US Avranches, invaincue en championnat, au 4e tour.', 'Un défi de taille pour les 30 ans du club haguais.']),
-      A('alexan-morin', 'Trail', 'Portrait', '25 juin', '2 min', true, 'assets/img_2fb41bb1.jpg', 'Alexan Morin et son frère', 'Dans les pas d’Alexan Morin, le trail comme héritage fraternel',
-        'Figure montante du trail dans le Nord-Cotentin, Alexan Morin avance avec talent, ambition et une volonté forte : devenir un modèle pour son frère.',
-        [], ['Figure montante du trail dans le Nord-Cotentin.', 'Une progression portée par le talent et l’ambition.', 'Un moteur : devenir un modèle pour son frère.']),
-      A('marine-nationale', 'Rugby', 'Marine nationale', '18 juin', '1 min', true, 'assets/img_4994dc60.jpg', 'Marine nationale contre British Police', 'Marine nationale × British Police : 400 ans de la Marine',
-        'Un match de rugby anniversaire pour célébrer quatre siècles de Marine nationale.', [], ['Rencontre Marine nationale contre British Police.', 'Organisée pour les 400 ans de la Marine nationale.']),
-      A('beaumont', 'Football', 'Événement', '15 juin', '3 min', true, 'assets/img_11c2b62b.jpg', 'Fête du football à Beaumont', 'Beaumont a vécu trois jours de football total',
-        'Pendant trois jours, Beaumont a vibré au rythme du football : interviews, photos, vidéos et articles réunis pour revivre l’événement complet.',
-        ['esph'], ['Trois jours de football à Beaumont.', 'Interviews, photos, vidéos et articles réunis.', 'Entre terrain, émotions et moments partagés.']),
-      A('redoutables', 'Water-polo', 'Coupe de la Manche', '6 juin', '2 min', false, 'assets/img_d9e43f35.jpg', 'Les Redoutables de Cherbourg', 'Les Redoutables prêts pour la Coupe de la Manche',
-        'Pour leur troisième participation, Les Redoutables de Cherbourg veulent confirmer leur progression face à Granville, Querqueville et Carentan.',
-        ['redoutables'], ['Troisième participation à la Coupe de la Manche.', 'Adversaires : Granville, Querqueville et Carentan.', 'Objectif : confirmer la progression.']),
-      A('photographe', 'Football', 'Regard terrain', '2 juin', '2 min', false, 'assets/a_photographe.jpg', 'AS Cherbourg contre ASTDV B', '« Surpris par la qualité collective de Cherbourg »',
-        'Le photographe Thibault Mariette couvre la rencontre AS Cherbourg – ASTDV B, remportée 8-0 par les Cherbourgeois.',
-        ['as-cherbourg'], ['Le regard du photographe Thibault Mariette.', 'AS Cherbourg s’impose 8-0 face à l’ASTDV B.']),
-      A('benevoles', 'Basketball', 'Tournoi international', '30 mai', '1 min', false, 'assets/a_benevoles.jpg', 'Les bénévoles du tournoi de basket', 'Cœur battant du CBB : merci aux maillots oranges',
-        'Le tournoi international de basket de Cherbourg a aussi été une réussite grâce à ses bénévoles, mobilisés tout le week-end dans l’ombre.',
-        ['marais-basket'], ['Hommage aux bénévoles du tournoi international.', 'Mobilisés tout le week-end pour accueillir et organiser.']),
-      A('buteurs', 'Football', 'Régional 2', '25 mai', '2 min', false, 'assets/a_buteurs.jpg', 'Adrien Cuquemelle et Enzo Perrey', 'Cuquemelle – Perrey : le duel des buteurs de R2',
-        'Entre Adrien Cuquemelle, finisseur du CS Carentan, et Enzo Perrey, revenu à l’AS Tourlaville, la course au titre de meilleur buteur révèle le potentiel du football local.',
-        ['cs-carentan', 'as-tourlaville'], ['Duel pour le titre de meilleur buteur de R2.', 'Adrien Cuquemelle (CS Carentan) face à Enzo Perrey (AS Tourlaville).']),
-      A('fceh', 'Football', 'Régional 2', '24 mai', '1 min', false, 'assets/a_fceh.jpg', 'Les joueurs du FCEH célèbrent', 'Le FCEH écrase Agneaux et valide son maintien en R2',
-        'Large vainqueur d’Agneaux FC au stade Jean-Jaurès, le FCEH signe une victoire majeure et valide son maintien en Régional 2.',
-        ['fceh'], ['Victoire large face à Agneaux FC au stade Jean-Jaurès.', 'Le maintien en Régional 2 est validé.']),
-      A('blue-squad', 'Basketball', 'Tournoi international', '24 mai', '1 min', true, 'assets/a_bluesquad.jpg', 'La Blue Squad en demi-finale', 'La Blue Squad cède en demie, mais vise le podium',
-        'La Blue Squad s’est inclinée en demi-finale face à la Sélection de la Manche. Les jeunes Cherbourgeois joueront la troisième place face à Essonne 91.',
-        [], ['Défaite en demi-finale face à la Sélection de la Manche.', 'Match pour la troisième place contre Essonne 91.']),
-      A('feminines', 'Football', 'Football féminin', '24 mai', '1 min', true, 'assets/a_feminines.jpg', 'Les féminines de l’AS Cherbourg', 'À Postaire, les féminines de l’AS Cherbourg écrivent leur histoire',
-        'Devant leur public, les féminines de l’AS Cherbourg ont vécu un match difficile, mais aussi une étape importante pour la visibilité du projet féminin.',
-        ['as-cherbourg'], ['Match difficile à domicile, à Postaire.', 'Une étape clé pour la visibilité du projet féminin bleu et blanc.'])
-    ];
-    const videos = [
-      { id: 'rcmn', tag: 'Rugby', date: '30 juin', img: 'assets/img_fe51d409.jpg', alt: 'Les joueuses du RCMN', title: 'La fierté des joueuses du RCMN', dek: 'Interviews des capitaines pour les 400 ans de la Marine nationale.', url: 'https://casabesports.fr/videos/itw-caps-marine-nationale', sport: 'Rugby' },
-      { id: 'digosville', tag: 'Football', date: '14 juin', img: 'assets/v_digosville.jpg', alt: 'Thibaut Jorigné, capitaine du FC Digosville', title: 'Le penalty de la victoire pour Digosville', dek: 'Le moment où le FC Digosville a fait basculer le match.', url: 'https://casabesports.fr/videos/penalty-victoire-fc-digosville', sport: 'Football', club: 'fc-digosville' },
-      { id: 'arbitre', tag: 'Football', date: '13 mai', img: 'assets/v_arbitre.jpg', alt: 'Bryan Piedagnel, arbitre', title: 'Bryan Piedagnel, l’arbitre que le football applaudit', dek: 'Dans les coulisses d’une vie d’arbitre, entre passion et exigence.', url: 'https://casabesports.fr/videos/bryan-piedagnel-arbitre-football-applaudit', sport: 'Football' }
-    ];
+    const articles = [];
+    // Vidéos : contenus/videos.js
+    const videos = ((typeof window !== 'undefined' && window.CASA_VIDEOS) || []).slice();
     const C = (id, name, sport, city, img) => ({ id, name, sport, city, img: img || null });
     const clubs = [
       C('esph', 'ES Pointe Hague', 'Football', 'Beaumont-Hague'),
@@ -188,42 +153,9 @@ class Component extends DCLogic {
     const S = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
     const B = (id) => (window.ASSET_DATA[BLOB_FILES[id]] || ('assets/' + (BLOB_FILES[id] || id)));
     const KS = ['6 ans', '8 ans', '10 ans', '12 ans', 'S', 'M', 'L', 'XL', 'XXL'];
-    const products = [
-      P({ id: 'hoodie-signature', line: 'casa', name: 'Hoodie Signature', short: 'Molleton 350 g · broderie', price: 65, type: 'hoodie', img: B('3da9816218acfc421e4732cb9d2f5b52'), gallery: [B('3da9816218acfc421e4732cb9d2f5b52'), B('a7f3ab74b38b934ee0063eba2975cdd6')], colors: [navy], sizes: S, flag: 'Best-seller', pop: 1, desc: 'La pièce emblème : « Casa Besports » brodé en écru et son point or, cordons dorés, molleton brossé 350 g. Coupe légèrement oversize pour les bords de terrain comme pour le canapé.' }),
-      P({ id: 'crew-vestiaire', line: 'casa', name: 'Sweat « Inside Vestiaire Club »', short: 'Col rond, esprit college', price: 55, type: 'crew', img: B('c00d8ac59262a5549ee606cc8fb2de8c'), colors: [ecru], sizes: S, flag: 'Nouveau', isNew: true, pop: 3, desc: 'Le clin d’œil au format « inside vestiaire » de Casa Besports, en typographie college arrondie. Le « 50 » rappelle la Manche. Écru chiné, intérieur gratté.' }),
-      P({ id: 'tee-phare', line: 'casa', name: 'T-shirt « Le Phare »', short: 'Coton bio · coupe droite', price: 32, type: 'tee', img: B('f06f2d89c41fd9b8126e1c5385bb9dcc'), colors: [white], sizes: S, pop: 4, desc: 'Le phare de Gatteville en trait fin, 75 mètres de lumière sur la pointe de Barfleur. Coton biologique 180 g, sérigraphie à l’eau.' }),
-      P({ id: 'tee-rade', line: 'casa', name: 'T-shirt oversize « Rade Club »', short: 'Coupe ample · 220 g', price: 35, type: 'tee', img: B('ca6ba71144c430d01edfdbf1e2a9af0c'), colors: [navy], sizes: S, pop: 5, desc: 'Le t-shirt des matins de rade : lettrage condensé, « Club » en italique or et les vagues de la plus grande rade artificielle du monde.' }),
-      P({ id: 'maillot-retro', line: 'casa', name: 'Maillot rétro personnalisé', short: 'Votre nom, votre numéro', price: 55, type: 'tee', img: B('a48eb676f77a86afa6b51ee515273bef'), colors: [navy], sizes: S, perso: 'num', flag: 'Personnalisable', pop: 2, desc: 'Fines rayures or, col en V contrasté, écusson CB brodé. Floqué à votre nom et numéro par l’atelier Cherwood à Cherbourg.' }),
-      P({ id: 'veste-tribune', line: 'casa', name: 'Veste de survêtement « Tribune »', short: 'Zip intégral · bandes or', price: 75, type: 'hoodie', img: B('131e295ddb6c101579cef305062b367b'), colors: [navy], sizes: S, pop: 7, desc: 'La veste des avant-matchs : col montant, zip métal, double bande or et écru sur les manches, monogramme CB poitrine.' }),
-      P({ id: 'jogger', line: 'casa', name: 'Jogger « Après-match »', short: 'Molleton doux', price: 49, type: 'jogger', img: B('16e026e698fae2bef37b1f79d0419272'), colors: [sand], sizes: S, pop: 8, desc: 'Le bas qui va avec tout : coupe fuselée, chevilles côtelées, cordon marine et petit monogramme brodé.' }),
-      P({ id: 'short-isles', line: 'casa', name: 'Short « Côte des Isles »', short: 'Séchage rapide', price: 35, type: 'short', img: B('5cf5a581ded4f4eb23159f4cd0e9c5c6'), colors: [gold], sizes: S, pop: 11, desc: 'Pour le footing sur la plage de Barneville comme pour la sieste au soleil. Nylon léger, liseré marine.' }),
-      P({ id: 'bob', line: 'casa', name: 'Bob « CB »', short: 'Coton twill', price: 26, type: 'bob', img: B('ca573d60402844d34a66033b90eefbf5'), colors: [sand], pop: 10, desc: 'Le bob des tournois d’été, monogramme brodé et son point or.' }),
-      P({ id: 'casquette', line: 'casa', name: 'Casquette « Casa. »', short: 'Six pans · réglable', price: 28, type: 'cap', img: B('92b8ad3992858d32669bcfea753c86ca'), colors: [navy], pop: 9, desc: 'Logo « Casa » brodé, point or, attache réglable en laiton.' }),
-      P({ id: 'kit-runes', line: 'vikings', name: 'Maillot domicile « Runes »', short: 'Blanc · floqué à votre nom', price: 65, type: 'tee', img: B('9807b5c5369f06c7aaf95b75312f046d'), gallery: [B('9807b5c5369f06c7aaf95b75312f046d'), B('0db18dd911c14da925f4e895f71e4e1c'), B('e615fde32424915e839a12659097f676')], colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, perso: 'num', flag: 'Nouveau', isNew: true, pop: 1, desc: 'Le maillot des Vikings du Cotentin : une bande de runes du futhark nordique, clin d’œil aux origines normandes, l’écusson pentagone CB brodé et des liserés or. Maille respirante, coupe sport. Floqué à votre nom et numéro au dos.' }),
-      P({ id: 'kit-runes-ml', line: 'vikings', name: 'Maillot manches longues « Runes »', short: 'Frises nordiques aux poignets', price: 72, type: 'tee', img: B('f1953e481ef07e95680164a46c2d9f41'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, perso: 'num', isNew: true, pop: 5, desc: 'La version hiver du maillot « Runes » : manches longues, frise nordique aux avant-bras, bande runique verticale. Floquage nom et numéro inclus dans la personnalisation.' }),
-      P({ id: 'short-runes', line: 'vikings', name: 'Short « Runes »', short: 'Assorti au maillot domicile', price: 29, type: 'short', img: B('7622c7f11f14ef0c49d572d2decbbae5'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, isNew: true, pop: 7, desc: 'Short blanc à ceinture élastiquée, écusson pentagone brodé et numéro 10 en jambe. Se complète avec le maillot domicile.' }),
-      P({ id: 'kit-ancre', line: 'vikings', name: 'Maillot « Ancre »', short: 'Blanc et marine, l’esprit du port', price: 59, type: 'tee', img: B('4406cb951b6112ead68dac1d86a30e53'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, perso: 'num', isNew: true, pop: 6, desc: 'Grande ancre marine au centre, col en V et doubles bandes aux manches : un maillot qui sent la rade de Cherbourg. Floquage nom et numéro au choix.' }),
-      P({ id: 'short-ancre', line: 'vikings', name: 'Short « Ancre »', short: 'Cordon et ancres brodées', price: 29, type: 'short', img: B('65c33e4e715ef5dd1201de7343556d4b'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, isNew: true, pop: 9, desc: 'Short blanc à cordon de serrage, ancres brodées et bandes marine en bas de jambe.' }),
-      P({ id: 'kit-ciel', line: 'vikings', name: 'Maillot extérieur « Rayé Ciel »', short: 'Rayures ciel, col marine', price: 59, type: 'tee', img: B('89cc02d697fec04f522599802bf187d8'), colors: [{ name: 'Ciel', hex: '#9ccbea' }], sizes: KS, perso: 'num', isNew: true, pop: 8, desc: 'Rayures verticales bleu ciel, col et poignets marine, mention CASA BESPORTS en poitrine. Le maillot des déplacements.' }),
-      P({ id: 'kit-nuit', line: 'vikings', name: 'Maillot third « Nuit »', short: 'Noir à fines rayures, or', price: 65, type: 'tee', img: B('b04e3dcc6da7234630c60ea939f854eb'), colors: [{ name: 'Noir', hex: '#14171c' }], sizes: KS, perso: 'num', flag: 'Édition limitée', isNew: true, pop: 4, desc: 'Noir profond à fines rayures ton sur ton, médaillon central et écusson pentagone dorés. Série limitée, numérotée à l’intérieur du col.' }),
-      P({ id: 'kit-diagonale', line: 'vikings', name: 'Maillot « Diagonale »', short: 'Bandes ciel, marine et or', price: 59, type: 'tee', img: B('aea7ea50082d523bc83f3f6017ba816f'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, perso: 'num', isNew: true, pop: 10, desc: 'Une diagonale ciel, marine et or traverse le maillot de l’épaule à la hanche. Col rond et poignets marine.' }),
-      P({ id: 'tee-viking', line: 'vikings', name: 'T-shirt « Le Viking »', short: 'La mascotte Casa', price: 32, type: 'tee', img: B('6f95460a58f5dc0c53a254df010b7963'), colors: [{ name: 'Noir', hex: '#14171c' }], sizes: S, flag: 'Mascotte', isNew: true, pop: 3, desc: 'Le Viking de Casa Besports, micro en main et Gazette sous le bras, imprimé en médaillon sur un t-shirt noir en coton.' }),
-      P({ id: 'cap-viking', line: 'vikings', name: 'Casquette « Le Viking »', short: 'Patch brodé', price: 29, type: 'cap', img: B('aa0d7bea1efc166a337ab714b04b33e1'), colors: [{ name: 'Noir', hex: '#14171c' }], isNew: true, pop: 11, desc: 'Casquette six panneaux noire, patch rond de la mascotte. Taille unique réglable.' }),
-      P({ id: 'patch-cb', line: 'vikings', name: 'Écusson brodé « CB »', short: 'Thermocollant', price: 8, type: 'patch', img: B('c4379d1401d63672573652d5be3b7e4e'), colors: [{ name: 'Marine et or', hex: '#0f2236' }], isNew: true, pop: 12, desc: 'Le monogramme pentagone de Casa Besports, brodé or sur marine. Thermocollant : sac, veste, maillot de club. Diamètre 8 cm.' }),
-      P({ id: 'hoodie-roule', line: 'cherwood', name: 'Hoodie « Le Roule »', short: 'Motif Montagne du Roule', price: 69, type: 'hoodie', img: B('981e82bbbb0f7a9367c97e4c848c2fc6'), gallery: [B('981e82bbbb0f7a9367c97e4c848c2fc6'), B('c28fddabc16efa8e58e4c93afee5990d')], colors: [{ name: 'Anthracite', hex: '#2b2f33' }], sizes: S, flag: 'Nouveau', isNew: true, pop: 3, desc: 'La Montagne du Roule et son fort dessinés au trait, dans l’esprit des motifs Cherwood qui racontent Cherbourg. Molleton anthracite, impression écru et or, réalisé à Cherbourg.' }),
-      P({ id: 'crew-presquile', line: 'cherwood', name: 'Sweat « La Presqu’île »', short: 'Le Cotentin et ses villes de sport', price: 59, type: 'crew', img: B('b248d9f3a2edcd1758c3805be91a57a2'), gallery: [B('b248d9f3a2edcd1758c3805be91a57a2'), B('1a81347b7337a4d848621af0fb067688')], colors: [sand], sizes: S, flag: 'Nouveau', isNew: true, pop: 4, desc: 'Le contour du Cotentin et cinq points d’or : Cherbourg, la Hague, Barfleur, Valognes, Carentan. Un sweat col rond sable pour porter la presqu’île, réalisé à Cherbourg.' }),
-      P({ id: 'tee-identitaire', line: 'cherwood', name: 'T-shirt « … du ballon »', short: 'Mention personnalisable', price: 34, type: 'tee', img: B('2c48f7132b968b70be1c7d701dc4a9d6'), colors: [white], sizes: S, perso: 'text', flag: 'Best-seller', pop: 2, desc: 'Le t-shirt identitaire Cherwood revisité pour les sportifs : écrivez votre ville ou votre club au-dessus de « du ballon » (Haguais, Tourlavillais, Valognaise…). Floqué à Cherbourg.' }),
-      P({ id: 'hoodie-csc', line: 'cherwood', name: 'Hoodie « Cotentin Sport Club »', short: 'Série limitée', price: 72, type: 'hoodie', img: B('b75f47de93c1cb54bec627f5067d8110'), colors: [pine], sizes: S, flag: 'Édition limitée', isNew: true, pop: 6, desc: 'Écusson CSC et lettrage en arc, vert sapin et écru : la capsule Cherwood × Casa Besports, brodée dans l’atelier du centre-ville de Cherbourg.' }),
-      P({ id: 'pull-marin', line: 'cherwood', name: 'Pull marin by Cherwood', short: 'Laine · tricoté dans la Manche', price: 155, type: 'pull', img: B('7ee74118a425ec7af743cd47cb36fdc4'), colors: [ecru], sizes: ['S', 'M', 'L', 'XL'], pop: 12, desc: 'La marinière en laine tricotée dans le Val de Saire, boutons dorés à l’épaule. Un classique cotentinais.' }),
-      P({ id: 'tote', line: 'cherwood', name: 'Tote « Supporter du Cotentin »', short: 'Toile épaisse', price: 20, type: 'tote', img: B('a81051d440f01667a54fa15c341bc54f'), colors: [natural], pop: 13, desc: 'Pour le maillot, la gourde et le goûter du match. Toile naturelle, sérigraphie Cherwood.' }),
-      P({ id: 'echarpe', line: 'goodies', name: 'Écharpe supporter', short: 'Tricot jacquard', price: 19, type: 'scarf', colors: [navy, gold], mark: 'CASA BESPORTS', pop: 14, desc: 'L’indispensable des tribunes du Cotentin, tricot jacquard double face.' }),
-      P({ id: 'mug', line: 'goodies', name: 'Mug « Inside vestiaire »', short: 'Céramique', price: 14, type: 'mug', colors: [white, navy], mark: 'INSIDE', pop: 15, desc: 'Le café d’avant-match. Céramique, passe au lave-vaisselle.' }),
-      P({ id: 'gourde', line: 'goodies', name: 'Gourde isotherme', short: '500 ml', price: 22, type: 'bottle', colors: [navy, gold], mark: 'CB', pop: 16, desc: 'Inox double paroi : 12 h au froid, parfaite pour l’entraînement.' }),
-      P({ id: 'affiche', line: 'goodies', name: 'Affiche « Le match du port »', short: 'Impression d’art', price: 29, type: 'poster', sizes: ['A3', 'A2'], colors: [white], flag: 'Best-seller', pop: 17, desc: 'Le tableau emblématique de Casa Besports, partie de football sur les quais, en impression d’art sur papier épais.' }),
-      P({ id: 'stickers', line: 'goodies', name: 'Pack stickers des clubs', short: '12 stickers', price: 6, type: 'stickers', colors: [gold], mark: '', pop: 18, desc: 'Douze stickers vinyle aux couleurs du sport du Cotentin.' }),
-      P({ id: 'porte-cles', line: 'goodies', name: 'Porte-clés décapsuleur', short: 'Métal', price: 8, type: 'keys', colors: [gold, navy], mark: '', pop: 19, desc: 'Pour la troisième mi-temps.' }),
-      P({ id: 'carte-cadeau', line: 'goodies', name: 'Carte cadeau', short: 'Boutique et abonnements', price: 20, type: 'gift', colors: [gold], sizes: ['20 €', '50 €', '100 €'], priceBySize: [20, 50, 100], mark: '', pop: 20, desc: 'Valable sur toute la boutique et sur les abonnements Casa B+ et La Gazette. Envoyée par e-mail.' })
-    ];
+    // Produits de la boutique : contenus/boutique.js (la structure, les tailles et les couleurs restent ici)
+    const colorOf = (c) => (typeof c === 'string' ? ({ marine: navy, sable: sand, ecru, 'écru': ecru, blanc: white, or: gold }[c.toLowerCase()] || { name: c, hex: '#0f2236' }) : c);
+    const products = ((typeof window !== 'undefined' && window.CASA_PRODUITS) || []).filter((o) => o && o.id && o.name).map((o) => P(Object.assign({ sizes: S, price: 0, type: 'tee', short: '', desc: '' }, o, { colors: (o.colors && o.colors.length ? o.colors : ['marine']).map(colorOf) })));
     const paths = {
       tee: 'M38 22 L52 16 Q60 24 68 16 L82 22 L98 38 L86 50 L80 45 L80 104 L40 104 L40 45 L34 50 L22 38 Z',
       hoodie: 'M40 24 Q60 4 80 24 L98 40 L90 60 L82 54 L82 106 L38 106 L38 54 L30 60 L22 40 Z',
@@ -276,38 +208,8 @@ class Component extends DCLogic {
       'gaz-duo': { name: 'La Gazette · Papier + Numérique', mois: 8.9, an: 89, perks: ['Le papier chez vous', 'La liseuse numérique en avant-première', 'Archives complètes'], casab: false, gazette: 'duo', paper: true },
       pack: { name: 'Pack Supporter', mois: 11.9, an: 119, perks: ['Casa B+ complet', 'La Gazette papier + numérique', '−10 % sur la boutique', 'Une écharpe offerte avec l’annuel'], casab: true, gazette: 'duo', paper: true }
     };
-    const places = [
-      { id: 'rade', name: 'La rade de Cherbourg', short: 'Rade de Cherbourg', where: 'Cherbourg-en-Cotentin', year: '1786', img: 'assets/lieu_rade.svg',
-        hook: 'La plus grande rade artificielle du monde, sous la Montagne du Roule.',
-        desc: 'Protégée par de longues digues bâties de la fin du XVIIIe siècle au XIXe siècle, la rade de Cherbourg est présentée comme la plus grande rade artificielle du monde. Au-dessus de la ville, la Montagne du Roule et son fort dominent le port.',
-        moment: 'En juin 1786, Louis XVI se rend à Cherbourg pour assister à l’immersion de l’un des immenses cônes de bois destinés à bâtir la digue. Plus tard, en juin 1944, la prise du fort du Roule précède la libération de la ville, le 26 juin ; le fort abrite aujourd’hui le musée de la Libération.',
-        sport: 'Voile, aviron et nage en eau libre font de la rade un stade nautique à ciel ouvert.' },
-      { id: 'gatteville', name: 'Le phare de Gatteville', short: 'Phare de Gatteville', where: 'Gatteville-le-Phare · pointe de Barfleur', year: '1120', img: 'assets/lieu_gatteville.svg',
-        hook: '75 mètres de lumière, deuxième plus haut phare de France.',
-        desc: 'Allumé en 1835 à la pointe de Barfleur, le phare de Gatteville culmine à 75 mètres : c’est le deuxième plus haut phare de France. Il veille sur l’un des passages les plus dangereux de la Manche.',
-        moment: 'Le 25 novembre 1120, au large de Barfleur, la Blanche-Nef heurte un rocher et sombre. Guillaume Adelin, unique fils légitime du roi d’Angleterre Henri Ier, périt dans le naufrage, ouvrant une longue crise de succession.',
-        sport: 'Les sentiers côtiers du Val de Saire sont un terrain de jeu prisé des traileurs.' },
-      { id: 'mont', name: 'Le Mont-Saint-Michel', short: 'Mont-Saint-Michel', where: 'Baie du Mont-Saint-Michel · sud Manche', year: '708', img: 'assets/lieu_mont.svg',
-        hook: 'La merveille de la Manche, jamais prise par les Anglais.',
-        desc: 'Selon la tradition, Aubert, évêque d’Avranches, fonde en 708 un sanctuaire sur le mont après des apparitions de l’archange saint Michel. L’abbaye et sa baie sont inscrites au patrimoine mondial de l’Unesco depuis 1979.',
-        moment: 'Pendant la guerre de Cent Ans, la place forte résiste aux assauts anglais et ne sera jamais prise, devenant un symbole de résistance pour tout le royaume.',
-        sport: 'Le Mont est la toile de fond de l’US Avranches et de nombreuses courses et randonnées dans la baie.' },
-      { id: 'jobourg', name: 'Le Nez de Jobourg', short: 'Nez de Jobourg', where: 'La Hague', year: '1977', img: 'assets/lieu_jobourg.svg',
-        hook: 'Des falaises parmi les plus hautes d’Europe, face au raz Blanchard.',
-        desc: 'À la pointe de la Hague, les falaises du Nez de Jobourg comptent parmi les plus hautes d’Europe. Le site abrite une réserve ornithologique et offre une vue sur le raz Blanchard, l’un des courants les plus puissants d’Europe.',
-        moment: 'Le poète Jacques Prévert passe ses dernières années à Omonville-la-Petite, dans la Hague, où il s’éteint en 1977. Il repose dans le petit cimetière du village.',
-        sport: 'Le GR223, sentier des douaniers, fait de la Hague une destination de trail et de randonnée.' },
-      { id: 'sme', name: 'Sainte-Mère-Église', short: 'Sainte-Mère-Église', where: 'Centre Cotentin', year: '1944', img: 'assets/lieu_sme.svg',
-        hook: 'L’une des premières communes libérées, le 6 juin 1944.',
-        desc: 'Bourg du centre Cotentin, Sainte-Mère-Église est mondialement connue pour son rôle lors du Débarquement de Normandie. Son église et son musée Airborne attirent chaque année de nombreux visiteurs.',
-        moment: 'Dans la nuit du 5 au 6 juin 1944, des parachutistes américains de la 82e division aéroportée sautent sur la commune, l’une des premières libérées en France. Le parachute du soldat John Steele s’accroche au clocher : un mannequin le rappelle aujourd’hui.',
-        sport: 'Les commémorations accueillent chaque année des courses et marches du souvenir.' },
-      { id: 'gare', name: 'La Gare maritime transatlantique', short: 'Gare maritime', where: 'Cherbourg-en-Cotentin', year: '1912', img: 'assets/lieu_gare.svg',
-        hook: 'Chef-d’œuvre Art déco, aujourd’hui la Cité de la Mer.',
-        desc: 'Inaugurée en 1933, la Gare maritime transatlantique de Cherbourg accueillait les passagers des grands paquebots vers l’Amérique. Ce joyau Art déco abrite aujourd’hui la Cité de la Mer.',
-        moment: 'Le 10 avril 1912, le Titanic fait escale en rade de Cherbourg, sa dernière escale sur le continent. Les passagers rejoignent le paquebot à bord des transbordeurs Nomadic et Traffic.',
-        sport: 'Le port de Cherbourg accueille régulièrement de grandes courses au large.' }
-    ];
+    // Lieux (arrière-plans « Lieux de légende », lieu du jour) : contenus/lieux.js
+    const places = (typeof window !== 'undefined' && Array.isArray(window.CASA_LIEUX) && window.CASA_LIEUX.length) ? window.CASA_LIEUX : [{ id: 'rade', name: 'Casa Besports', short: 'Casa Besports', where: 'Cotentin', year: '', img: 'assets/hero.jpg', hook: '', desc: '', moment: '' }];
     const partners = [
       { id: 'olisto', name: 'OlistO', mono: 'O', sector: 'Crédit immobilier · regroupement de crédits · assurance emprunteur', city: 'Réseau de courtage', tier: 'Platinum', color: '#163a5f', since: 2026, perk: 'Étude de votre projet offerte (à confirmer)', desc: 'Réseau de courtage en crédit immobilier, regroupement de crédits, assurance emprunteur, prêt professionnel et immobilier neuf. Partenaire Casa Besports.', real: true },
     ];
@@ -934,16 +836,12 @@ class Component extends DCLogic {
       { n: '1', title: 'Le tableau', intro: 'L’œuvre qui a donné son visage à Casa Besports.', min: '320px', works: [
         { title: 'Le match du port', author: 'Collection Casa Besports · artiste [À CRÉDITER]', year: '[ANNÉE]', technique: 'Peinture numérique · format portrait', img: B('0855c8136dcdda770cb476333ba7ad46'), alt: 'Partie de football sur les quais, devant des paquebots', ratio: '2 / 3', fit: 'cover', bg: '#1a1a1a', scope: '',
           text: 'Une partie de football improvisée sur les pavés d’un quai, entre grues, caisses et cheminées de paquebots. La scène condense ce que Casa Besports raconte chaque semaine : le jeu au cœur de la vie populaire et portuaire du Cotentin. Elle est disponible en affiche d’art à la boutique.', kind: 'poster' }] },
-      { n: '2', title: 'Lieux de légende', intro: 'Six paysages du territoire, chacun lié à un moment d’histoire.', min: '300px', works: placeW },
-      { n: '3', title: 'Photographie du terrain', intro: 'Le sport amateur saisi au plus près, par la photothèque de la rédaction.', min: '280px', works: [
-        ['L’année des trente ans', '5cd343902a0b6d6a654108dee90d6fc3', 'pointe-hague'], ['La joie du maintien', '824fb1ca8687d16522c2ba8f05d66086', 'fceh'], ['Devant leur public', 'f2d41cc7df08eba8f5272bd4fddfac50', 'feminines'],
-        ['Trois participations, une ambition', '38c25d93ed37833c9d08d0a1d75de3f1', 'redoutables'], ['La fratrie des sentiers', '2b8b1c873d91f86dbbe51fe32be05f69', 'alexan-morin'], ['Demi-finale', '4f81a4491eb301c8894c5d5d2ab04ff6', 'blue-squad']
-      ].map(([title, id, art]) => ({ title, author: 'Photothèque Casa Besports', year: '2026', technique: 'Photographie numérique', img: B(id), alt: title, ratio: '4 / 3', fit: 'cover', bg: '#111', scope: '', text: 'Image issue du reportage publié dans Actualités. Ouvrez l’article pour découvrir l’histoire derrière la photo.', kind: 'article', articleId: art })) },
-      { n: '4', title: 'Design textile', intro: 'Quand l’identité visuelle devient vêtement : maquettes de la collection et de la capsule Cherwood.', min: '240px', works: [
-        ['Cotentin Sport Club', 'd9a1db651fe41d5fd589c366bef1324f', 'hoodie-csc', 'Studio Casa Besports × Cherwood'], ['Le Phare', '32a264a8dac6d54d7c4f1f0be13729ef', 'tee-phare', 'Studio Casa Besports'],
-        ['Inside Vestiaire Club', 'f42d1f454d139e25a1ac0ee024729688', 'crew-vestiaire', 'Studio Casa Besports'], ['Maillot rétro', '9b36fe1ef00b3ec975a9172298a6454c', 'maillot-retro', 'Studio Casa Besports']
-      ].map(([title, id, pid, author]) => ({ title, author, year: '2026', technique: 'Maquette textile · sérigraphie et broderie', img: B(id), alt: 'Vêtement ' + title, ratio: '1 / 1', fit: 'contain', bg: '#f4f1ea', scope: 'cb-scope-light', text: 'Dessin original décliné en vêtement, fabriqué et personnalisé à Cherbourg. Couleurs, typographies et motifs reprennent l’ADN Casa Besports : marine, or, sable, empattements et capitales condensées.', kind: 'product', productId: pid })) }
+      { n: '2', title: 'Lieux de légende', intro: 'Les paysages du territoire, chacun lié à un moment d’histoire.', min: '300px', works: [] },
+      { n: '3', title: 'Photographie du terrain', intro: 'Le sport amateur saisi au plus près, par la photothèque de la rédaction.', min: '280px', works: [] },
+      { n: '4', title: 'Design textile', intro: 'Quand l’identité visuelle devient vêtement.', min: '240px', works: [] }
     ];
+    // Œuvres ajoutées : contenus/culture.js ({ salle: '2', title, author, year, technique, img, alt, text })
+    ((typeof window !== 'undefined' && window.CASA_CULTURE) || []).forEach((w) => { const r = rooms.find((x) => x.n === String(w.salle || '2')); if (r && w.img) r.works.push(Object.assign({ author: 'Casa Besports', year: '', technique: '', alt: w.title || '', ratio: '4 / 3', fit: 'cover', bg: '#111', text: '' }, w)); });
     const flat = [];
     rooms.forEach((r) => r.works.forEach((w, i) => flat.push(Object.assign({}, w, { room: r.n, pos: String(i + 1) }))));
     const routes = [
@@ -1014,13 +912,12 @@ class Component extends DCLogic {
   // ---------- Club House : données (démo, enregistrées sur l’appareil) ----------
   chData() {
     if (this._ch) return this._ch;
-    const stored = this.readLS('cb-clubhouse-v2', null);
+    const stored = this.readLS('cb-clubhouse-v3', null);
     if (stored && stored.posts) { this._ch = stored; return stored; }
     const d = (n) => this.addDays(n);
     this._ch = {
       posts: [
         { id: 's1', author: 'La rédaction', staff: true, room: 'Général', time: 'épinglé', text: 'Bienvenue au Club House ! Respect, bienveillance et passion : la charte est simple. Présentez-vous et dites-nous quel club vous suivez.', likes: 31, liked: false, comments: [] },
-        { id: 's2', author: 'La rédaction', staff: true, room: 'Football', time: 'il y a 3 h', text: 'L’ES Pointe-Hague reçoit l’US Avranches au 4e tour de la Coupe de France. Qui sera en tribune ? Racontez-nous vos plus beaux souvenirs de coupe.', articleId: 'pointe-hague', likes: 24, liked: false, comments: [{ author: 'Yanis B. (démo)', text: 'J’y serai avec mon fils, première fois qu’il voit un match de coupe !' }] },
       ],
       ads: [],
       events: [],
@@ -1180,6 +1077,10 @@ class Component extends DCLogic {
     const RXD = typeof CasaRedac !== 'undefined' ? CasaRedac.data(this, { libImgs, videos: D.videos }) : null;
     const X = this.more();
     const ARTS = this.allArticles();
+    // Valeurs de secours quand une rubrique est encore vide (aucune page de détail n'est alors accessible)
+    const EMPTY_ART = { id: '', sport: '', tag: 'Bientôt', date: '', read: '', premium: false, img: 'assets/hero.jpg', alt: 'Casa Besports', title: 'Les premiers articles arrivent', dek: 'La rédaction Casa Besports prépare ses premiers récits du sport dans le Cotentin.', clubs: [], points: [], body: '' };
+    const EMPTY_VID = { id: '', tag: '', date: '', img: 'assets/hero.jpg', alt: '', title: '', dek: '', url: '' };
+    const EMPTY_PROD = { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: 'assets/hero.jpg', gallery: [], colors: [{ name: 'Marine', hex: '#0f2236' }], sizes: null, perso: null, flag: '', mark: 'CASA', pop: 0, isNew: false, desc: '' };
     const showPlaces = this.props.showPlaces ?? true;
     const accent = 'var(--acc)'; // couleur d’action du thème : noir sur fond clair, blanc sur fond sombre (theme.css)
     const showBg = this.props.showBg ?? true;
@@ -1282,7 +1183,7 @@ class Component extends DCLogic {
     const feed = allA.filter((a) => a.clubs.some((c) => s.follows.indexOf(c) >= 0)).slice(0, 3);
 
     // ---------- article ----------
-    const curA = ARTS.find((a) => a.id === s.articleId) || ARTS[0];
+    const curA = ARTS.find((a) => a.id === s.articleId) || ARTS[0] || EMPTY_ART;
     const artObj = art(curA);
     artObj.openSport = () => this.go('discipline', { discId: curA.sport });
     artObj.points = curA.points.map((t) => ({ t }));
@@ -1297,7 +1198,7 @@ class Component extends DCLogic {
 
     // ---------- vidéos ----------
     const videos = D.videos.map(vidV);
-    const curV = D.videos.find((v) => v.id === s.videoId) || D.videos[0];
+    const curV = D.videos.find((v) => v.id === s.videoId) || D.videos[0] || EMPTY_VID;
 
     // ---------- disciplines ----------
     const disciplines = D.sports.map((sp) => {
@@ -1432,11 +1333,11 @@ class Component extends DCLogic {
     const lineKey = { 'Collection Vikings': 'vikings', 'Casa Besports': 'casa', 'Cherwood × Casa': 'cherwood', 'Goodies': 'goodies', 'Créations Casa': 'atelier' };
     let shopProducts = X.products.filter((p) => shopLineEff === 'Tout' || p.line === lineKey[shopLineEff]);
     shopProducts = shopProducts.slice().sort((a, b) => s.shopSort === 'asc' ? a.price - b.price : s.shopSort === 'desc' ? b.price - a.price : s.shopSort === 'new' ? (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) : a.pop - b.pop).map(prodV);
-    const homeProducts = ['kit-runes', 'tee-viking', 'hoodie-roule', 'kit-nuit'].map((id) => prodV(X.products.find((p) => p.id === id)));
+    const homeProducts = (['kit-runes', 'tee-viking', 'hoodie-roule', 'kit-nuit'].map((id) => X.products.find((p) => p.id === id)).filter(Boolean).concat(X.products)).filter((p, i, a) => a.indexOf(p) === i).slice(0, 4).map(prodV);
     // L’affiche du Cotentin : chaque collection a son affiche de voyage
     const AS = (id) => (typeof BLOB_FILES !== 'undefined' ? (window.ASSET_DATA[BLOB_FILES[id]] || ('assets/' + (BLOB_FILES[id] || id))) : '/_blob/' + id);
     const imgOf = (id) => (X.products.find((p) => p.id === id) || {}).img;
-    const lineStat = (k) => { const ps = X.products.filter((p) => p.line === k); return ps.length + ' pièces · dès ' + eur0(Math.min.apply(null, ps.map((p) => p.price))); };
+    const lineStat = (k) => { const ps = X.products.filter((p) => p.line === k); return ps.length ? ps.length + ' pièces · dès ' + eur0(Math.min.apply(null, ps.map((p) => p.price))) : 'Bientôt disponible'; };
     const shopPosters = [
       { line: 'Collection Vikings', kick: 'Collection', title: 'La Saga des Vikings', tag: 'Maillots Runes, Ancre, Nuit et Rayé Ciel, floqués à votre nom', img: imgOf('kit-runes'), credits: lineStat('vikings') },
       { line: 'Casa Besports', kick: 'Les essentiels', title: 'La Légende Casa', tag: 'Hoodie Signature, Le Phare, Rade Club, veste Tribune…', img: imgOf('hoodie-signature'), credits: lineStat('casa') },
@@ -1463,7 +1364,7 @@ class Component extends DCLogic {
       lead: creaSrv ? 'Articles créés dans le Studio Boutique de l’Atelier' : 'Ajoutez les articles créés dans le Studio Boutique de l’Atelier',
       help: creaSrv ? (creaChief ? 'Les articles envoyés depuis l’Atelier arrivent ici. Publiez-les pour les afficher dans la collection « Créations Casa » du site et de l’application.' : 'Les articles envoyés depuis l’Atelier arrivent en brouillon ; un chef d’édition ou l’administrateur les publie.') : 'Dans l’Atelier, Studio Boutique › Ajouter à la boutique (ou Exporter › Pack boutique) crée un fichier .casa-boutique.json : importez-le ici. Les articles importés restent sur cet appareil.' };
     // fiche produit
-    const curPr = X.products.find((p) => p.id === s.productId) || X.products[0];
+    const curPr = X.products.find((p) => p.id === s.productId) || X.products[0] || EMPTY_PROD;
     const ci = Math.min(s.color, curPr.colors.length - 1);
     const unit = curPr.priceBySize ? curPr.priceBySize[Math.max(0, curPr.sizes.indexOf(s.size))] : curPr.price;
     const persoFee = curPr.perso && s.persoName.trim() ? 8 : 0;
@@ -1871,10 +1772,10 @@ class Component extends DCLogic {
     const uneArts = uneIds.map((id) => allA.find((a) => a.id === id)).filter(Boolean);
     const homeOrder = uneArts.concat(allA.filter((a) => uneArts.indexOf(a) < 0));
     const uneA = homeOrder[0];
-    const une = Object.assign({}, uneA);
+    const une = Object.assign({}, uneA || EMPTY_ART);
     const dashScores = allM.filter((m) => m.status === 'live').concat(allM.filter((m) => m.status === 'done' && m.hs !== '–').sort((a, b) => (a.date > b.date ? -1 : 1))).slice(0, 5);
     const dashNews = homeOrder.slice(0, 4);
-    const dashProducts = ['kit-runes', 'kit-nuit', 'tee-viking'].map((id) => prodV(X.products.find((p) => p.id === id)));
+    const dashProducts = homeProducts.slice(0, 3);
     const dashTable = (X.tables.r2 || []).slice(0, 4).map((r, i) => ({ rank: String(i + 1), team: r.team, pts: String(r.pts) }));
     const dashVideos = videos.slice(0, 2);
     const ldj = X.places[now0.getDate() % X.places.length];
@@ -2101,7 +2002,7 @@ class Component extends DCLogic {
     // ---------- Club House ----------
     const CHD = this.chData();
     const chState = CHD;
-    const saveCh = (patch) => { const v = Object.assign({}, this.chData(), patch); this._ch = v; this.writeLS('cb-clubhouse-v2', v); this.setState({ chRev: (s.chRev || 0) + 1 }); };
+    const saveCh = (patch) => { const v = Object.assign({}, this.chData(), patch); this._ch = v; this.writeLS('cb-clubhouse-v3', v); this.setState({ chRev: (s.chRev || 0) + 1 }); };
     const needLogin = () => { if (!s.loggedIn) { this.setState({ loginOpen: true, linkSent: false }); this.say('Connectez-vous pour participer au Club House'); return true; } return false; };
     const meName = s.role === 'admin' ? (s.name.trim() || 'Administrateur principal') : s.role === 'writer' ? 'Léa Marchand' : (s.name.trim() || (s.email ? s.email.split('@')[0] : 'Vous'));
     const myPosts = chState.posts.filter((p) => p.mine).length;
