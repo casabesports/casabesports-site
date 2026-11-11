@@ -2134,6 +2134,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     </nav>
     <div style="display: flex; align-items: center; gap: .4rem">
       <sc-if value="{{isStaff}}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{isAdmin}}" hint-placeholder-val="{{ false }}"><button type="button" class="cond hidesm" onClick="{{openAdmin}}" style="min-height: 40px; padding: 0 .8rem; border-radius: 0; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg); cursor: pointer; font-size: 13px">Admin</button></sc-if>
         <button type="button" class="cond hidesm" onClick="{{goStudio}}" style="min-height: 40px; padding: 0 .8rem; border-radius: 0; border: 1.5px solid var(--ink); background: var(--surface); cursor: pointer; font-size: 13px; color: var(--ink); display: inline-flex; align-items: center; gap: .4rem">Rédaction<sc-if value="{{hasPending}}" hint-placeholder-val="{{ false }}"><span class="num" style="min-width: 20px; height: 20px; border-radius: 0; background: var(--danger); color: var(--on-inv); font-size: 12px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px">{{pendingCount}}</span></sc-if></button>
       </sc-if>
         <button type="button" class="hdr-ico cond" onClick="{{toggleLang}}" aria-label="{{langAria}}" title="{{langAria}}" style="width: 44px; height: 44px; border: 1px solid var(--line-2); border-radius: 50%; background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); font-size: 13px; font-weight: 800">{{langLabel}}</button>
@@ -4837,6 +4838,17 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     <div class="grid3"><sc-for list="{{savedArticles}}" as="a" hint-placeholder-count="2">
       <div class="card"><button type="button" class="hit" onClick="{{a.open}}"><div style="aspect-ratio: 16 / 9; overflow: hidden"><img class="zimg" src="{{a.img}}" alt="{{a.alt}}"></div><div style="padding: 1rem 1.2rem 1.25rem"><div class="cond" style="font-size: 13px; color: var(--gold-text); margin-bottom: .35rem">{{a.tag}} · <span style="color: var(--muted)">{{a.date}}</span></div><div class="ttl" style="font-size: 22px">{{a.title}}</div></div></button></div>
     </sc-for></div>
+    <sc-if value="{{accShow}}" hint-placeholder-val="{{ false }}"><div id="acces-redaction" style="margin-top: 3rem; border: 1.5px solid var(--ink); padding: 1.25rem 1.4rem">
+      <h2 class="h2" style="font-size: 1.6rem; margin: 0 0 .5rem">Écrire pour Casa Besports</h2>
+      <sc-if value="{{accPending}}" hint-placeholder-val="{{ false }}"><p style="color: var(--text-2); margin: 0">Votre demande d’accès à l’espace rédaction a bien été envoyée le {{accDate}}. L’administrateur vous répondra : l’espace apparaîtra dans votre menu dès qu’il l’aura validée.</p></sc-if>
+      <sc-if value="{{accNone}}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{accRefused}}" hint-placeholder-val="{{ false }}"><p style="color: var(--text-2); margin: 0 0 .6rem">Votre précédente demande n’a pas été retenue. Vous pouvez en envoyer une nouvelle.</p></sc-if>
+        <p style="color: var(--text-2); margin: 0 0 .8rem">L’espace rédaction est réservé aux personnes habilitées par l’administrateur. Présentez-vous (club, discipline, ce que vous souhaitez écrire) pour demander l’accès.</p>
+        <label class="lbl">Votre présentation<textarea class="field" value="{{accMotif}}" onChange="{{onAccMotif}}" style="min-height: 110px; padding: .8rem .9rem; resize: vertical" placeholder="Ex. : correspondant du club de handball de Valognes, je souhaite couvrir les matchs du week-end."></textarea></label>
+        <button type="button" class="btn btn-gold" onClick="{{accSend}}" style="margin-top: .8rem">{{accBtn}}</button>
+      </sc-if>
+    </div></sc-if>
+    <sc-if value="{{isAdmin}}" hint-placeholder-val="{{ false }}"><div style="margin-top: 1.5rem; border: 1.5px solid var(--ink); padding: 1.1rem 1.4rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between"><span><strong>Espace administrateur</strong> · contenus du site, images, messagerie, équipe et demandes d’accès</span><button type="button" class="btn btn-gold" onClick="{{openAdmin}}">Ouvrir</button></div></sc-if>
     <h2 class="h2" style="font-size: 2rem; margin: 3rem 0 1rem">Sécurité</h2>
     <p style="color: var(--text-2); margin: 0 0 1rem">Connectez-vous avec votre e-mail ou votre mobile et votre mot de passe.</p>
     <button type="button" class="btn btn-ghost" onClick="{{openPw}}">{{pwBtnLabel}}</button>
@@ -7527,6 +7539,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="js/langue.js"></script>
 <script src="js/comptes.js"></script>
 <script src="js/app.js"></script>
+<script src="js/admin.js"></script>
 <script>
   mountDC({ template: 'app-template', mount: 'app', props: {"accent": "var(--acc)", "showBg": true, "showPlaces": true, "bgIntensity": 40} });
 </script>

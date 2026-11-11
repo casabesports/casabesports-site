@@ -71,8 +71,76 @@
     verifyMember: function (numero) {
       return use(function (c) { return c.rpc('verifier_membre', { num: numero }); }).then(function (d) { return Array.isArray(d) ? (d[0] || null) : (d || null); });
     },
-    signOut: function () { return use(function (c) { return c.auth.signOut(); }); }
+    signOut: function () { return use(function (c) { return c.auth.signOut(); }); },
+
+    // ---------- Rôles et espace administrateur (voir supabase/administration.sql) ----------
+    // Rôle de la personne connectée d'après la table « equipe » : 'admin', 'redacteur' ou null
+    myRole: function () { return use(function (c) { return c.rpc('mon_role'); }).then(function (r) { return Array.isArray(r) ? (r[0] || null) : (r || null); }); },
+    // Demande d'accès à l'espace rédaction (abonné connecté)
+    requestAccess: function (nom, motif) {
+      return use(function (c) { return c.from('demandes_acces').insert({ nom: nom || null, email: A.user && A.user.email ? A.user.email.toLowerCase() : null, motif: motif }).select().single(); });
+    },
+    myAccessRequest: function () {
+      return use(function (c) { return c.from('demandes_acces').select('statut, cree_le').order('cree_le', { ascending: false }).limit(1); }).then(function (d) { return d && d[0] || null; });
+    },
+    // Accès direct à la base pour l'espace administrateur (les droits sont vérifiés par Supabase)
+    db: function (fn) { return use(fn); },
+    client: function () { return ready; },
+    // Image envoyée dans le stockage public « site » : renvoie son adresse publique
+    uploadImage: function (blob, path) {
+      return use(function (c) { return c.storage.from('site').upload(path, blob, { upsert: true, contentType: blob.type || 'image/jpeg', cacheControl: '31536000' }); }).then(function () {
+        return ready.then(function (c) { return c.storage.from('site').getPublicUrl(path).data.publicUrl; });
+      });
+    },
+    listImages: function (folder) {
+      return use(function (c) { return c.storage.from('site').list(folder || '', { limit: 200, sortBy: { column: 'created_at', order: 'desc' } }); }).then(function (items) {
+        return ready.then(function (c) { return (items || []).filter(function (x) { return x && x.id; }).map(function (x) { var p = (folder ? folder + '/' : '') + x.name; return { name: x.name, path: p, url: c.storage.from('site').getPublicUrl(p).data.publicUrl, size: x.metadata && x.metadata.size || 0 }; }); });
+      });
+    },
+    removeImage: function (path) { return use(function (c) { return c.storage.from('site').remove([path]); }); },
+    // Contenus modifiés depuis l'espace administrateur : remplacent ceux des fichiers contenus/*.js
+    saveContent: function (key, value) {
+      if (CONTENT_KEYS.indexOf(key) < 0) return Promise.reject(new Error('Section inconnue'));
+      // Liste à identifiants (articles…) : on garde la trace des éléments du fichier, pour que ceux ajoutés plus tard
+      // dans le fichier (par l'automatisation « Rédaction quotidienne ») s'affichent quand même.
+      if (Array.isArray(value) && Array.isArray(ORIG[key])) value = { __liste: value, __base: ORIG[key].map(function (x) { return x && x.id; }).filter(Boolean) };
+      return use(function (c) { return c.from('site_contenu').upsert({ cle: key, valeur: value, modifie_le: new Date().toISOString() }, { onConflict: 'cle' }); }).then(function () { applyContent(withKey(key, value)); });
+    },
+    resetContent: function (key) {
+      return use(function (c) { return c.from('site_contenu').delete().eq('cle', key); }).then(function () { var cur = readCache(); delete cur[key]; applyContent(cur); });
+    },
+    originalContent: function (key) { return key in ORIG ? ORIG[key] : window[key]; },
+    contentKeys: function () { return CONTENT_KEYS.slice(); },
+    editedKeys: function () { return Object.keys(readCache()); },
+    // Envoi d'un e-mail depuis la messagerie (fonction serveur « envoyer-email », voir docs/ESPACE-ADMIN.md)
+    sendMail: function (to, subject, text, replyTo) {
+      return use(function (c) { return c.functions.invoke('envoyer-email', { body: { to: to, subject: subject, text: text, reponse_a: replyTo || null } }); });
+    }
   };
+
+  // ---------- Contenus en ligne : appliqués avant l'affichage (copie locale), puis mis à jour ----------
+  var CONTENT_KEYS = ['CASA_ARTICLES', 'CASA_LIEUX', 'CASA_BOUTIQUE', 'CASA_PRODUITS', 'CASA_VIDEOS', 'CASA_CULTURE', 'CASA_FONDS', 'CASA_APROPOS', 'CASA_LEGAL', 'CASA_LEGAL_MAJ', 'CASA_GAZETTE', 'CASA_GAZETTE_NUMERO'];
+  var CKEY = 'cb-contenu';
+  var ORIG = {};
+  CONTENT_KEYS.forEach(function (k) { try { ORIG[k] = JSON.parse(JSON.stringify(window[k] === undefined ? null : window[k])); } catch (e) { ORIG[k] = window[k]; } });
+  function readCache() { try { var v = JSON.parse(localStorage.getItem(CKEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } }
+  function withKey(k, v) { var cur = readCache(); cur[k] = v; return cur; }
+  function applyContent(map, quiet) {
+    CONTENT_KEYS.forEach(function (k) {
+      var v = Object.prototype.hasOwnProperty.call(map, k) ? map[k] : ORIG[k];
+      if (v && typeof v === 'object' && Array.isArray(v.__liste)) {
+        var base = v.__base || [], have = {};
+        v.__liste.forEach(function (x) { if (x && x.id) have[x.id] = 1; });
+        var nouveaux = (Array.isArray(ORIG[k]) ? ORIG[k] : []).filter(function (x) { return x && x.id && base.indexOf(x.id) < 0 && !have[x.id]; });
+        v = nouveaux.concat(v.__liste);
+      }
+      try { window[k] = v == null ? v : JSON.parse(JSON.stringify(v)); } catch (e) { window[k] = v; }
+    });
+    try { localStorage.setItem(CKEY, JSON.stringify(map)); } catch (e) {}
+    if (!quiet && window.CasaSite && window.CasaSite.refreshContent) window.CasaSite.refreshContent();
+  }
+  A.applyContent = applyContent;
+  (function () { var c = readCache(); if (Object.keys(c).length) applyContent(c, true); })();
   if (!A.on) return;
   A.memberLive = true;
 
@@ -115,4 +183,12 @@
     document.head.appendChild(s);
   });
   ready.catch(function () {});
+  // Version en ligne des contenus (lecture publique de la table site_contenu)
+  ready.then(function (c) {
+    return c.from('site_contenu').select('cle, valeur').then(function (r) {
+      if (r.error || !Array.isArray(r.data)) return;
+      var map = {}; r.data.forEach(function (row) { if (CONTENT_KEYS.indexOf(row.cle) >= 0) map[row.cle] = row.valeur; });
+      if (JSON.stringify(map) !== JSON.stringify(readCache())) applyContent(map);
+    });
+  }).catch(function () {});
 })();

@@ -14,10 +14,12 @@ Site statique : aucun serveur à maintenir, aucune base de données, hébergemen
 | `js/config.js`, `js/comptes.js` | Comptes abonnés (e-mail, mobile, mot de passe) : voir `docs/COMPTES-ABONNES.md` |
 | `contenus/` | **Vos contenus** : articles, résultats, boutique, vidéos, culture, lieux, fonds de page, équipe |
 | `supabase/membres.sql` | Cartes membres et QR code : voir `docs/CARTE-MEMBRE.md` |
+| `js/admin.js`, `supabase/administration.sql` | **Espace administrateur** (contenus, images, messagerie, accès rédaction) : voir `docs/ESPACE-ADMIN.md` |
 | `manifest.webmanifest`, `icon.svg` | Installation sur téléphone (« Ajouter à l'écran d'accueil ») |
 
 ## Modifier le site
 
+- **Le plus simple** : connectez-vous sur le site, bouton **Admin** › Contenus du site (voir `docs/ESPACE-ADMIN.md`).
 - **Changer un texte ou un article** : ouvrez `js/app.js`, cherchez le texte actuel (Ctrl+F), remplacez-le.
 - **Changer une photo** : déposez la nouvelle image dans `assets/` **sous le même nom** que l'ancienne (même format .jpg/.svg).
 - **Ajouter une photo** : déposez-la dans `assets/`, puis utilisez `assets/nom-du-fichier.jpg` dans le contenu.

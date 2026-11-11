@@ -4,7 +4,9 @@
  * (lien reçu par e-mail) avec l'adresse indiquée.
  *   role: 'admin'      → administrateur : publie, valide, gère l'équipe, le CRM, la Gazette
  *   role: 'redacteur'  → rédacteur : écrit et soumet des articles
- * Pour ajouter quelqu'un : copiez une ligne, changez le nom et l'e-mail, enregistrez (« Commit changes »).
+ * Les rédacteurs se gèrent désormais dans l'espace administrateur (Admin › Équipe et accès) :
+ * c'est la table « equipe » de Supabase qui fait foi (voir docs/ESPACE-ADMIN.md).
+ * Ce fichier sert de secours tant que supabase/administration.sql n'est pas lancé.
  */
 window.CASA_EQUIPE = [
   { name: 'Kader Allou', email: 'kader.allou.pro@outlook.fr', role: 'admin' }

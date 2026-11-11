@@ -87,7 +87,10 @@
       var r = tr(a); if (r != null && r !== a) el.setAttribute(ATTRS[i], r);
     }
   }
+  // Les zones marquées translate="no" (espace administrateur) restent telles quelles
+  function skip(n) { var e = n.nodeType === 1 ? n : n.parentNode; return !!(e && e.closest && e.closest('[translate="no"]')); }
   function walk(root) {
+    if (skip(root)) return;
     if (root.nodeType === 3) { doText(root); return; }
     if (root.nodeType !== 1) return;
     doEl(root);
@@ -102,6 +105,7 @@
       if (!muts) walk(document.body);
       else for (var i = 0; i < muts.length; i++) {
         var m = muts[i];
+        if (skip(m.target)) continue;
         if (m.type === 'characterData') doText(m.target);
         else if (m.type === 'attributes') doEl(m.target);
         else for (var j = 0; j < m.addedNodes.length; j++) walk(m.addedNodes[j]);

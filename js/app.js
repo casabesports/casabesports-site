@@ -48,7 +48,7 @@ class Component extends DCLogic {
     super(props);
     this.state = {
       view: 'home', hist: [], articleId: null, videoId: null, discId: null, clubId: null, playerId: null, productId: null,
-      q: '', cat: 'Tous', premiumOnly: false, savedOnly: false, clubSport: 'Tous', role: 'Tous', clubTab: 'articles',
+      q: '', cat: 'Tous', premiumOnly: false, savedOnly: false, clubSport: 'Tous', plRole: 'Tous', clubTab: 'articles',
       city: 'Cherbourg', menuOpen: false, moreOpen: false, searchOpen: false, sq: '', loginOpen: false, linkSent: false, loginMode: 'password', pw: '', pw2: '', loginId: '', pwOpen: false, pwDone: false, resetSent: false, hasPassword: false, phone: '', smsCode: '', codeSent: false, authBusy: false,
       loggedIn: false, subs: { casab: false, gazette: null }, name: '', email: '', address: '', subject: '', profile: '', message: '', contactSent: false,
       formError: '', step: 1, period: 'mois', subPlan: 'casab', isGift: false, saved: [], follows: [], followPlayers: [], remind: false,
@@ -60,7 +60,7 @@ class Component extends DCLogic {
       offerTab: 'Tout', readerOpen: false, page: 0, nlEmail: '', nlDone: false, tick: 0,
       hdrY: '0', scrolled: false, placeOverride: null, placeOpen: false, placeIdx: 0, partnerId: null, claimed: [],
       aiOpen: false, aiInput: '', aiTyping: false, aiMsgs: [{ role: 'bot', text: 'Bonjour, je suis Casa IA. Posez-moi une question sur les scores, la boutique, la Gazette, les clubs ou l’histoire du Cotentin.', actions: [] }],
-      readerFont: 1, quizAns: {}, gzVote: this.readLS('cb-gz-vote', null), theme: this.loadTheme(), homeLayout: this.readLS('cb-home-layout', 'dashboard'), mods: this.readLS('cb-home-mods', null), customizeOpen: false, wxExtra: this.readLS('cb-wx-extra', []), wxCity: this.readLS('cb-wx-city', 'Cherbourg'), wxLive: {}, wxLoading: false, priv: null, privFor: null, pvTab: 'jour', pvList: 'courses', pf: {}, pvMember: 'all', chTab: 'fil', bgMode: this.readLS('cb-bg-mode', null), crmTab: 'home', crmSel: null, crmType: 'Tous', crmOwner: 'Tous', crmRev: 0, prodImg: 0, cardColor: this.readLS('cb-card-color', 'noir'), chRoom: 'Tous', chAdCat: 'Tout', chOpen: {}, chf: {}, chRev: 0, cuTab: 'expo', cuKind: 'Tous', workIdx: null, votes: this.readLS('cb-votes', {}), cuf: {}, cuSent: false, tmWork: 40, tmRest: 20, tmRounds: 8, tmRunning: false, tmPhase: 'ready', tmLeft: 40, tmRound: 1, sysDark: this.sysDark(), themeMenuOpen: false, themeAnim: false, legalDoc: 'mentions', role: null, studioTab: 'dash', posts: null, editId: 'p1', edMode: 'write', reviewNote: '', commentDraft: '', aiOutKind: null, stQ: '', stFilter: 'all', inviteEmail: '',
+      readerFont: 1, quizAns: {}, gzVote: this.readLS('cb-gz-vote', null), theme: this.loadTheme(), homeLayout: this.readLS('cb-home-layout', 'dashboard'), mods: this.readLS('cb-home-mods', null), customizeOpen: false, wxExtra: this.readLS('cb-wx-extra', []), wxCity: this.readLS('cb-wx-city', 'Cherbourg'), wxLive: {}, wxLoading: false, priv: null, privFor: null, pvTab: 'jour', pvList: 'courses', pf: {}, pvMember: 'all', chTab: 'fil', bgMode: this.readLS('cb-bg-mode', null), crmTab: 'home', crmSel: null, crmType: 'Tous', crmOwner: 'Tous', crmRev: 0, prodImg: 0, cardColor: this.readLS('cb-card-color', 'noir'), chRoom: 'Tous', chAdCat: 'Tout', chOpen: {}, chf: {}, chRev: 0, cuTab: 'expo', cuKind: 'Tous', workIdx: null, votes: this.readLS('cb-votes', {}), cuf: {}, cuSent: false, tmWork: 40, tmRest: 20, tmRounds: 8, tmRunning: false, tmPhase: 'ready', tmLeft: 40, tmRound: 1, sysDark: this.sysDark(), themeMenuOpen: false, themeAnim: false, legalDoc: 'mentions', role: null, accReq: null, accMotif: '', accBusy: false, studioTab: 'dash', posts: null, editId: 'p1', edMode: 'write', reviewNote: '', commentDraft: '', aiOutKind: null, stQ: '', stFilter: 'all', inviteEmail: '',
       rx: null, rxu: {}, rxServer: null, staffRole: 'redacteur',
       rsu: {}, cvu: {}, clubRoleId: 'esph', clubEditId: null, verifId: '',
       creaN: 0, creaOpen: false, creaMsg: '', creaTeam: null, creaSure: ''
@@ -75,13 +75,16 @@ class Component extends DCLogic {
           const wasIn = this.state.loggedIn;
           const staff = ((window.CASA_EQUIPE) || []).find((m) => m.email && u.email && m.email.trim().toLowerCase() === u.email.trim().toLowerCase());
           this.setState({ loggedIn: true, loginOpen: false, linkSent: false, codeSent: false, smsCode: '', email: u.email || this.state.email, phone: u.phone || this.state.phone, name: u.name || (staff && staff.name) || this.state.name, role: staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null });
+          const firstFor = this._authFor !== u.id; this._authFor = u.id;
+          if (firstFor && window.CasaAuth.myRole) window.CasaAuth.myRole().then((r) => { if (r === undefined || !this.state.loggedIn) return; const fileRole = staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null; const role = r === 'admin' ? 'admin' : r === 'redacteur' ? 'writer' : (fileRole === 'admin' ? 'admin' : null); if (role !== this.state.role) this.setState({ role }); }, () => {});
+          if (firstFor && window.CasaAuth.myAccessRequest) window.CasaAuth.myAccessRequest().then((d) => this.setState({ accReq: d || null }), () => {});
           if (!u.name && this.state.name.trim()) window.CasaAuth.updateName(this.state.name.trim()).catch(() => {});
-          if (window.CasaAuth.registerMember) window.CasaAuth.registerMember(cbMemberNo(u.id), String(u.name || this.state.name || '').trim().split(/\s+/)[0] || null).catch(() => {});
+          if (firstFor && window.CasaAuth.registerMember) window.CasaAuth.registerMember(cbMemberNo(u.id), String(u.name || this.state.name || '').trim().split(/\s+/)[0] || null).catch(() => {});
           this.applyProfileTheme((u.email || u.phone || u.id).toLowerCase());
           const needPw = !u.hasPassword || window.CasaAuth.recovery;
           this.setState({ hasPassword: !!u.hasPassword, pwOpen: needPw && !this.readLS('cb-pw-later-' + u.id, false) || window.CasaAuth.recovery, pw: '', pw2: '', pwDone: false });
           if (!wasIn) this.say('Connecté. Bienvenue !');
-        } else if (this.state.loggedIn) this.setState({ loggedIn: false, role: null, subs: { casab: false, gazette: null } });
+        } else if (this.state.loggedIn) { this._authFor = null; this.setState({ loggedIn: false, role: null, accReq: null, subs: { casab: false, gazette: null } }); if (this.state.view === 'studio') this.go('home'); }
       });
     }
     this._crmIv = setInterval(() => { if (this.state.role === 'admin') { const A = this.crmData().agents; ['qualif', 'hygiene', 'relance', 'fidel', 'rapport'].forEach((k) => { if (A[k] && A[k].on) this.runAgent(k); }); } }, 20000);
@@ -106,8 +109,8 @@ class Component extends DCLogic {
     try { this._mq = window.matchMedia('(prefers-color-scheme: dark)'); this._onMq = (e) => this.setState({ sysDark: e.matches }); if (this._mq.addEventListener) this._mq.addEventListener('change', this._onMq); else this._mq.addListener(this._onMq); } catch (e) {}
     try { document.documentElement.setAttribute('data-cb-theme', this.state.theme); } catch (e) {}
     try {
-      const r0 = cbParseRoute(location.hash); if (r0 && r0.view !== 'home') setTimeout(() => this.go(r0.view, r0), 0);
-      this._onPop = () => { const r = cbParseRoute(location.hash) || { view: 'home' }; this.setState(Object.assign({ menuOpen: false, moreOpen: false, searchOpen: false }, r)); try { window.scrollTo(0, 0); } catch (e) {} };
+      const r0 = cbParseRoute(location.hash); if (r0 && r0.view !== 'home' && r0.view !== 'admin' && r0.view !== 'studio') setTimeout(() => this.go(r0.view, r0), 0);
+      this._onPop = () => { const r = cbParseRoute(location.hash) || { view: 'home' }; if (r.view === 'admin') return; if (r.view === 'studio' && !this.state.role) r.view = 'home'; this.setState(Object.assign({ menuOpen: false, moreOpen: false, searchOpen: false }, r)); try { window.scrollTo(0, 0); } catch (e) {} };
       window.addEventListener('popstate', this._onPop);
     } catch (e) {}
     try { const mq = new URLSearchParams(location.search).get('membre'); if (mq) setTimeout(() => { this.go('verifier', { mbQ: mq.slice(0, 20) }); this.checkMember(mq); }, 0); } catch (e) {}
@@ -1142,6 +1145,8 @@ class Component extends DCLogic {
   }
 
   go(view, extra) {
+    if (view === 'admin') { if (this.state.role === 'admin' && window.CasaAdmin) window.CasaAdmin.open(); else this.say('Espace réservé à l’administrateur du site.'); return; }
+    if (view === 'studio' && !this.state.role) { if (this.state.loggedIn) { this.say('L’espace rédaction est réservé aux personnes habilitées. Demandez l’accès depuis Mon espace.'); view = 'account'; extra = {}; } else { this.setState({ loginOpen: true, linkSent: false }); return; } }
     try { const r = document.documentElement; r.classList.remove('cb-nav'); void r.offsetWidth; r.classList.add('cb-nav'); } catch (e) {}
     const s = this.state;
     const cur = { view: s.view, articleId: s.articleId, videoId: s.videoId, discId: s.discId, clubId: s.clubId, playerId: s.playerId, productId: s.productId };
@@ -1149,6 +1154,19 @@ class Component extends DCLogic {
     try { window.scrollTo(0, 0); } catch (e) {}
     this.syncRoute(Object.assign({}, s, { view }, extra || {}), false);
   }
+  // Demande d'accès à l'espace rédaction (abonné connecté) : table demandes_acces, sinon simple message
+  requestAccess() {
+    const s = this.state; const A = window.CasaAuth; const motif = s.accMotif.trim();
+    if (!s.loggedIn) { this.setState({ loginOpen: true }); return; }
+    if (motif.length < 10) { this.say('Présentez-vous en quelques mots (au moins 10 caractères).'); return; }
+    this.setState({ accBusy: true });
+    const done = (d) => { this.setState({ accBusy: false, accMotif: '', accReq: d || { statut: 'en_attente', cree_le: new Date().toISOString() } }); this.say('Demande envoyée à l’administrateur'); };
+    const viaLead = () => this.sendLead({ source: 'Demande d’accès rédaction', name: s.name, email: s.email, phone: s.phone, subject: 'Accès à l’espace rédaction', message: motif });
+    if (A && A.requestAccess) A.requestAccess(s.name, motif).then(done, () => { viaLead(); done(null); });
+    else { viaLead(); done(null); }
+  }
+  // Rechargement après une modification faite dans l'espace administrateur
+  refreshContent() { this._d = null; this._m = null; this._g = null; this._cu = null; this.setState({ tick: (this.state.tick || 0) + 1 }); }
   syncRoute(st, replace) {
     try {
       const h = st.view === 'home' ? '#/' : cbRouteOf(st);
@@ -1279,9 +1297,9 @@ class Component extends DCLogic {
     const sectionOf = { article: 'news', video: 'videos', discipline: 'disciplines', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
     const activeSec = sectionOf[s.view] || s.view;
     const nav = navDefs.map(([label, v]) => ({ label, color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
-    const moreNavBase = (s.role ? [['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']] : []).concat([['Abonnements', 'offers', 'Casa B+ et La Gazette'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents'], ['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', '19 sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Partenaires', 'partners', 'Offres entreprises et clubs'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']])
+    const moreNavBase = (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat(s.role ? [['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']] : []).concat([['Abonnements', 'offers', 'Casa B+ et La Gazette'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents'], ['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', '19 sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Partenaires', 'partners', 'Offres entreprises et clubs'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']])
       .map(([label, v, sub]) => ({ label, sub, go: () => this.go(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : {}) }));
-    const moreNav = moreNavBase.slice(0, s.role ? 1 : 0).concat([{ label: 'L’application', sub: 'Scores, Club House et réalité augmentée', go: () => this.go('app') }, { label: 'Projet immobilier', sub: 'Avec notre partenaire OlistO', go: () => this.go('olisto') }]).concat(moreNavBase.slice(s.role ? 1 : 0));
+    const nStaff = s.role === 'admin' ? 2 : s.role ? 1 : 0; const moreNav = moreNavBase.slice(0, nStaff).concat([{ label: 'L’application', sub: 'Scores, Club House et réalité augmentée', go: () => this.go('app') }, { label: 'Projet immobilier', sub: 'Avec notre partenaire OlistO', go: () => this.go('olisto') }]).concat(moreNavBase.slice(nStaff));
 
     // ---------- accueil ----------
     const liveCount = allM.filter((m) => m.status === 'live').length;
@@ -1356,9 +1374,9 @@ class Component extends DCLogic {
 
     // ---------- joueurs ----------
     const roles = ['Tous', 'Attaquant', 'Milieu', 'Défenseur', 'Staff & arbitres'];
-    const roleChips = roles.map((r) => Object.assign(pill(r === s.role), { label: r, pick: () => this.setState({ role: r }) }));
+    const roleChips = roles.map((r) => Object.assign(pill(r === s.plRole), { label: r, pick: () => this.setState({ plRole: r }) }));
     const isStaff = (p) => /Arbitre|Entraîneur|VP/.test(p.role);
-    const playerList = D.players.filter((p) => s.role === 'Tous' || (s.role === 'Staff & arbitres' ? isStaff(p) : p.role === s.role)).map(playerV);
+    const playerList = D.players.filter((p) => s.plRole === 'Tous' || (s.plRole === 'Staff & arbitres' ? isStaff(p) : p.role === s.plRole)).map(playerV);
     const curP = D.players.find((p) => p.id === s.playerId) || D.players[0];
     const pf = s.followPlayers.indexOf(curP.id) >= 0;
     const pl = Object.assign(playerV(curP), {
@@ -2104,7 +2122,7 @@ class Component extends DCLogic {
     const chState = CHD;
     const saveCh = (patch) => { const v = Object.assign({}, this.chData(), patch); this._ch = v; this.writeLS('cb-clubhouse-v3', v); this.setState({ chRev: (s.chRev || 0) + 1 }); };
     const needLogin = () => { if (!s.loggedIn) { this.setState({ loginOpen: true, linkSent: false }); this.say('Connectez-vous pour participer au Club House'); return true; } return false; };
-    const meName = s.role === 'admin' ? (s.name.trim() || 'Administrateur principal') : s.role === 'writer' ? 'Léa Marchand' : (s.name.trim() || (s.email ? s.email.split('@')[0] : 'Vous'));
+    const meName = s.role === 'admin' ? (s.name.trim() || 'Administrateur principal') : s.role === 'writer' ? (s.name.trim() || 'Rédaction') : (s.name.trim() || (s.email ? s.email.split('@')[0] : 'Vous'));
     const myPosts = chState.posts.filter((p) => p.mine).length;
     const myComments = chState.posts.reduce((a, p) => a + p.comments.filter((c) => c.mine).length, 0);
     const myAds = chState.ads.filter((a) => a.mine).length;
@@ -2316,7 +2334,6 @@ class Component extends DCLogic {
       hasAvatar: !!CVV.avatar, avatar: CVV.avatar, showInitial: s.loggedIn && !CVV.avatar,
       isClubRole, notClubRole: !isClubRole, canReseau, stReseau: s.studioTab === 'reseau' && canReseau, stClubAny: isClubRole && ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0,
       newPostLabel: isClubRole ? 'Nouveau contenu' : 'Nouvel article',
-      loginClub: () => { this.setState({ loggedIn: true, loginOpen: false, role: 'club', clubRoleId: 'esph' }); this.applyProfileTheme('role-club'); this.go('studio', { studioTab: 'club' }); this.say('Connecté en correspondant de club (démonstration)'); },
       accent, heroOpacity: showBg ? Math.min(1, k * 2.2) : 0, sectionOpacity: showBg ? k * 0.45 : 0, progressW: progress + '%',
       nav, moreNav, menuOpen: s.menuOpen, toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
       moreOpen: s.moreOpen, moreExp: s.moreOpen ? 'true' : 'false', toggleMore: () => this.setState({ moreOpen: !s.moreOpen }),
@@ -2545,11 +2562,13 @@ class Component extends DCLogic {
       aiTyping: s.aiTyping, aiInput: s.aiInput, onAiInput: (e) => this.setState({ aiInput: e.target.value }), aiSend: () => this.aiAsk(s.aiInput),
       aiReset: () => this.setState({ aiMsgs: [{ role: 'bot', text: 'Nouvelle conversation. Que puis-je faire pour vous ?', actions: [] }] }),
       aiSuggest: ['Météo à Cherbourg', 'Ajoute du pain à ma liste de courses', 'Scores en direct', 'Classement R2', 'Tenue chill à moins de 60 €', 'Histoire du phare de Gatteville', 'Ouvre la Gazette page 5', 'Prochain match de Pointe-Hague'].map((l) => ({ label: l, run: () => this.aiAsk(l) })),
+      openAdmin: () => this.go('admin'),
+      accShow: s.loggedIn && !s.role, accNone: !s.accReq || s.accReq.statut === 'refusee', accPending: !!s.accReq && s.accReq.statut === 'en_attente', accRefused: !!s.accReq && s.accReq.statut === 'refusee',
+      accMotif: s.accMotif, onAccMotif: (e) => this.setState({ accMotif: e.target.value }), accSend: () => this.requestAccess(), accBtn: s.accBusy ? 'Envoi…' : 'Demander l’accès',
+      accDate: s.accReq && s.accReq.cree_le ? new Date(s.accReq.cree_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '',
       isStaff: !!s.role, isAdmin, notAdmin: !isAdmin, hasPending: pending.length > 0, pendingCount: String(pending.length),
       goStudio: () => (s.role ? this.go('studio', { studioTab: s.role === 'club' ? 'club' : isAdmin && pending.length ? 'queue' : 'dash' }) : this.setState({ loginOpen: true, linkSent: false })),
-      loginAdmin: () => { this.setState({ loggedIn: true, loginOpen: false, role: 'admin' }); this.applyProfileTheme('role-admin'); this.go('studio', { studioTab: 'dash' }); this.say('Connecté en administrateur principal'); },
-      loginWriter: () => { this.setState({ loggedIn: true, loginOpen: false, role: 'writer' }); this.applyProfileTheme('role-writer'); this.go('studio', { studioTab: 'dash' }); this.say('Connectée en rédactrice : Léa Marchand'); },
-      isStudio: V === 'studio' && !!s.role, me, studioNav, roleSwitch, showRoleSwitch: !window.CB_SERVER && !authLive, kpis, dashList, dashListEmpty: dashList.length === 0, dashListTitle: isAdmin ? 'À relire en priorité' : 'Mes articles en cours', activity, notClubTabs: !isClubRole,
+      isStudio: V === 'studio' && !!s.role, me, studioNav, roleSwitch, showRoleSwitch: false, kpis, dashList, dashListEmpty: dashList.length === 0, dashListTitle: isAdmin ? 'À relire en priorité' : 'Mes articles en cours', activity, notClubTabs: !isClubRole,
       stCrm: s.studioTab === 'crm' && s.role === 'admin', crm,
       stDash: s.studioTab === 'dash' && !isClubRole, stList: s.studioTab === 'list' && !isClubRole, stQueue: s.studioTab === 'queue' && !isClubRole, stEdit: s.studioTab === 'edit' && !isClubRole, stMedia: s.studioTab === 'media' && !isClubRole, stTeam: s.studioTab === 'team' && !isClubRole,
       rx: RXV, stRowsEmpty: (RXV.list && RXV.list.rows || []).length === 0,
