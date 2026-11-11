@@ -574,7 +574,9 @@ class Component extends DCLogic {
       const lines = chunk.split('\n').map((l) => l.trim()).filter(Boolean);
       lines.forEach((l, i) => {
         const clean = (t) => t.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
-        if (/^##\s+/.test(l)) out.push({ t: clean(l.replace(/^##\s+/, '')), isH: true, isP: false, isQ: false, isL: false });
+        const im = l.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
+        if (im) out.push({ t: clean(im[1]), src: im[2], isImg: true, isH: false, isP: false, isQ: false, isL: false });
+        else if (/^##\s+/.test(l)) out.push({ t: clean(l.replace(/^##\s+/, '')), isH: true, isP: false, isQ: false, isL: false });
         else if (/^>\s*/.test(l)) out.push({ t: clean(l.replace(/^>\s*/, '')), isQ: true, isP: false, isH: false, isL: false });
         else if (/^[-•]\s+/.test(l)) out.push({ t: clean(l.replace(/^[-•]\s+/, '')), isL: true, isP: false, isH: false, isQ: false });
         else {
@@ -585,7 +587,7 @@ class Component extends DCLogic {
     });
     return out;
   }
-  textOf(body) { return (body || '').replace(/^##\s+|^>\s*|^[-•]\s+/gm, '').replace(/\*\*/g, ''); }
+  textOf(body) { return (body || '').replace(/^!\[[^\]]*\]\([^)]*\)\s*$/gm, '').replace(/^##\s+|^>\s*|^[-•]\s+/gm, '').replace(/\*\*/g, ''); }
   sentences(t) { return (t || '').replace(/\n+/g, ' ').split(/(?<=[.!?…])\s+/).map((x) => x.trim()).filter((x) => x.length > 1); }
   checksOf(p) {
     const words = this.textOf(p.body).split(/\s+/).filter(Boolean).length;
