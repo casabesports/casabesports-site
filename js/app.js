@@ -1123,7 +1123,7 @@ class Component extends DCLogic {
     if (typeof window !== 'undefined' && window.CasaAR && window.CasaAR.open) {
       const all = this.more().matches || [];
       const live = all.find((m) => m.status === 'live') || all.find((m) => m.status === 'done' && m.hs != null);
-      window.CasaAR.open(mode, { score: live ? { home: live.home, away: live.away, hs: String(live.hs != null ? live.hs : 0), as: String(live.as != null ? live.as : 0), minute: live.status === 'live' ? 'En direct' : 'Terminé', label: 'Le direct' } : null });
+      window.CasaAR.open(mode, { sport: (s.view === 'discipline' && s.discId) || s.dSport || 'Football', score: live ? { home: live.home, away: live.away, hs: String(live.hs != null ? live.hs : 0), as: String(live.as != null ? live.as : 0), minute: live.status === 'live' ? 'En direct' : 'Terminé', label: 'Le direct' } : null });
       return;
     }
     this.go('app'); this.say('Expérience disponible dans l’application Casa Besports');
