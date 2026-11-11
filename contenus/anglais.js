@@ -6,6 +6,7 @@
    Les articles s'écrivent en anglais dans contenus/articles.js (champs titleEn, dekEn, bodyEn).
    ================================================================ */
 window.CASA_EN = {
+  "Notre histoire en dates": "Our story in dates",
   "À venir": "Upcoming",
   "En cours": "In progress",
   "Mi-temps": "Half time",

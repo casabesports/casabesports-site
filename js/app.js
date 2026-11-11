@@ -2509,6 +2509,13 @@ class Component extends DCLogic {
       themeIconSun: curTheme === 'light', themeIconMoon: curTheme === 'dark' || curTheme === 'noir', themeIconPaper: curTheme === 'paper', themeIconAuto: curTheme === 'auto',
       themeSavedNote: s.loggedIn ? 'Enregistré sur cet appareil et dans votre profil.' : 'Enregistré sur cet appareil. Connectez-vous pour le retrouver partout.',
       weather, showWeather: s.dSport === 'Football' || s.dSport === 'Rugby' || s.dSport === 'Trail',
+      about: (() => {
+        const A = window.CASA_APROPOS || {}; const en = window.CasaLang && window.CasaLang.lang === 'en';
+        const pick = (k) => (en && A[k + 'En'] && (Array.isArray(A[k + 'En']) ? A[k + 'En'].length : true)) ? A[k + 'En'] : A[k];
+        const paras = (pick('paragraphes') || []).filter(Boolean).map((t) => ({ t }));
+        const dates = (A.dates || []).filter((d) => d && d.annee).map((d) => ({ annee: d.annee, titre: (en && d.titreEn) || d.titre || '', texte: (en && d.texteEn) || d.texte || '' }));
+        return { surtitre: A.surtitre || 'Notre histoire', titre: pick('titre') || 'Casa Besports', paras, citation: pick('citation') || '', hasQuote: !!pick('citation'), photo: A.photo || 'assets/hero.jpg', dates, hasDates: dates.length > 0, frise: 'Notre histoire en dates' };
+      })(),
       langLabel: window.CasaLang && window.CasaLang.lang === 'en' ? 'FR' : 'EN', langAria: window.CasaLang && window.CasaLang.lang === 'en' ? 'Passer le site en français' : 'Switch the site to English', toggleLang: () => { if (window.CasaLang) window.CasaLang.toggle(); },
       isLegal: V === 'legal', legal, legalTabs, legalLinks, legalMaj: 'Dernière mise à jour : ' + ((window.CASA_LEGAL_MAJ) || '—') + ' · Les passages entre [crochets] sont à compléter.',
       weather, wx, wxCities, wxFind, isMeteo: V === 'meteo', goMeteo: () => this.go('meteo'), goPrivate: () => this.go('private'), goTable: () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' }),

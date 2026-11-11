@@ -4691,19 +4691,26 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <!-- ================= À PROPOS ================= -->
 <sc-if value="{{isAbout}}" hint-placeholder-val="{{ false }}">
   <section style="position: relative; overflow: hidden">
-    <img src="assets/hero.jpg" alt="" style="position: absolute; top: 0; right: 0; width: 50%; height: 100%; object-fit: cover; opacity: {{heroOpacity}}">
+    <img src="{{about.photo}}" alt="" style="position: absolute; top: 0; right: 0; width: 50%; height: 100%; object-fit: cover; opacity: {{heroOpacity}}">
     <div class="veilL" style="position: absolute; inset: 0"></div>
     <div class="wrap" style="position: relative; padding-top: 2rem; padding-bottom: 5rem; max-width: 1280px">
       <div style="max-width: 680px">
-        <div class="eb" style="margin-bottom: .5rem">Notre histoire</div>
-        <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem); margin-bottom: 1.5rem">Le média sport de la Manche, par et pour les passionnés</h1>
-        <p style="font-size: 1.1rem; line-height: 1.75; color: var(--text-2); margin: 0 0 1.25rem">Fondé en 2024 par Kader Allou, ancien footballeur passé par la formation du Paris Saint-Germain, Casa Besports est un média indépendant ancré dans le Cotentin.</p>
-        <p style="font-size: 1.1rem; line-height: 1.75; color: var(--text-2); margin: 0 0 2rem">Clubs, bénévoles, éducateurs, sportifs et partenaires : nous racontons les parcours, les émotions et les coulisses du sport de proximité.</p>
-        <blockquote style="margin: 0 0 2rem; padding-left: 1.5rem; border-left: 3px solid {{accent}}; font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 700; letter-spacing: -.02em; font-size: 2rem; line-height: 1.2; color: var(--ink)">Le sport local ne manque pas d’histoires. Il manque parfois de lumière.</blockquote>
+        <div class="eb" style="margin-bottom: .5rem">{{about.surtitre}}</div>
+        <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem); margin-bottom: 1.5rem">{{about.titre}}</h1>
+        <sc-for list="{{about.paras}}" as="ap" hint-placeholder-count="2"><p style="font-size: 1.1rem; line-height: 1.75; color: var(--text-2); margin: 0 0 1.25rem">{{ap.t}}</p></sc-for>
+        <sc-if value="{{about.hasQuote}}" hint-placeholder-val="{{ true }}"><blockquote style="margin: .75rem 0 2rem; padding-left: 1.5rem; border-left: 3px solid {{accent}}; font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 700; letter-spacing: -.02em; font-size: 2rem; line-height: 1.2; color: var(--ink)">{{about.citation}}</blockquote></sc-if>
         <div style="display: flex; gap: .6rem; flex-wrap: wrap"><button type="button" class="btn btn-dark" onClick="{{goContact}}">Nous écrire</button><button type="button" class="btn btn-ghost" onClick="{{goNews}}">Lire nos récits</button></div>
       </div>
     </div>
   </section>
+  <sc-if value="{{about.hasDates}}" hint-placeholder-val="{{ false }}">
+    <section class="wrap" style="max-width: 900px; padding-bottom: 5rem">
+      <h2 class="h2" style="font-size: 2rem; margin: 0 0 1.5rem">{{about.frise}}</h2>
+      <ol style="list-style: none; margin: 0; padding: 0; border-left: 3px solid var(--ink)">
+        <sc-for list="{{about.dates}}" as="ad" hint-placeholder-count="0"><li style="position: relative; padding: 0 0 1.75rem 1.5rem"><span aria-hidden="true" style="position: absolute; left: -9px; top: .35rem; width: 15px; height: 15px; background: var(--acc); border: 3px solid var(--bg)"></span><div class="num" style="font-size: 1.6rem; color: var(--ink)">{{ad.annee}}</div><div class="ttl" style="font-size: 1.35rem; margin: .1rem 0 .35rem">{{ad.titre}}</div><p style="margin: 0; line-height: 1.7; color: var(--text-2)">{{ad.texte}}</p></li></sc-for>
+      </ol>
+    </section>
+  </sc-if>
 </sc-if>
 
 <!-- ================= CONTACT ================= -->
@@ -7514,6 +7521,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/culture.js"></script>
 <script src="contenus/fonds.js"></script>
 <script src="contenus/legal.js"></script>
+<script src="contenus/apropos.js"></script>
 <script src="contenus/anglais.js"></script>
 <script src="js/langue.js"></script>
 <script src="js/comptes.js"></script>
