@@ -3,13 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Casa Besports — l’application</title>
+<title>Casa Besports — le média sport du Cotentin</title>
 <meta name="description" content="Casa Besports, le média du sport dans la Manche : scores en direct, actualités, vidéos, clubs et joueurs, boutique Cherwood × Casa et La Gazette du Cotentin.">
 <meta name="theme-color" content="#000000">
 <meta property="og:site_name" content="Casa Besports">
 <meta property="og:title" content="Casa Besports — Le média sport de la Manche">
 <meta property="og:description" content="Le sport local mérite une vitrine d’élite.">
-<meta property="og:image" content="assets/hero.jpg">
+<meta property="og:image" content="__SITE_URL__/assets/hero.jpg">
+<meta property="og:url" content="__SITE_URL__/">
+<meta property="og:type" content="website">
+<link rel="canonical" href="__SITE_URL__/">
+<link rel="alternate" hreflang="fr" href="__SITE_URL__/">
+<link rel="alternate" hreflang="en" href="__SITE_URL__/?lang=en">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Casa Besports — Le média sport de la Manche">
+<meta name="twitter:image" content="__SITE_URL__/assets/hero.jpg">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Casa Besports","url":"__SITE_URL__/","logo":"__SITE_URL__/icon.svg","areaServed":"Cotentin, Manche, Normandie","inLanguage":["fr","en"],"sameAs":[]}</script>
 <meta property="og:locale" content="fr_FR">
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAwIDEwMDAiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhc2EgQmVzcG9ydHMiPjx0aXRsZT5DYXNhIEJlc3BvcnRzPC90aXRsZT48cmVjdCB3aWR0aD0iMTAwMCIgaGVpZ2h0PSIxMDAwIiBmaWxsPSIjMDAwMDAwIi8+PHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAwIDMxNi4xKSBzY2FsZSgwLjI3ODY1KSIgZmlsbD0iI0ZGRkZGRiIgZD0iTTAgMEg0NTNRNTY2IDAgNjYyLjUgMzFRNzU5IDYyIDgxOC41IDEzMi41UTg3OCAyMDMgODc4IDMyM1E4NzggNDAyIDg0OC41IDQ2NFE4MTkgNTI2IDc3MC41IDU2NS41UTcyMiA2MDUgNjY1IDYxOFE3MTUgNjI0IDc2Mi41IDY0Ni41UTgxMCA2NjkgODQ4LjUgNzA4LjVRODg3IDc0OCA5MDkuNSA4MDYuNVE5MzIgODY1IDkzMiA5NDVROTMyIDEwNTYgODgyLjUgMTE0MC41UTgzMyAxMjI1IDczOC41IDEyNzIuNVE2NDQgMTMyMCA1MDcgMTMyMEgwWk0yOTkgMTA4MUg0MzVRNDk5IDEwODEgNTM5LjUgMTA2MS41UTU4MCAxMDQyIDU5OSAxMDA1LjVRNjE4IDk2OSA2MTggOTE4UTYxOCA4MzggNTY4LjUgODAwLjVRNTE5IDc2MyA0MzAgNzYzSDI5OVpNMjk5IDUyOUg0MjBRNDczIDUyOSA1MDguNSA1MTBRNTQ0IDQ5MSA1NjIuNSA0NTYuNVE1ODEgNDIyIDU4MSAzNzdRNTgxIDI5NiA1MzUgMjY3LjVRNDg5IDIzOSA0MDkgMjM5SDI5OVogTTEwMzQgMEgxODc3VjI2MkgxMzMyVjUzMUgxODcyVjc4NUgxMzMyVjEwNThIMTg3N1YxMzIwSDEwMzRaIE0yNTg1IDc3OVYxMDY3SDIzMzhWNzc5SDIwNTBWNTM0SDIzMzhWMjQ2SDI1ODVWNTM0SDI4NzFWNzc5WiIvPjwvc3ZnPgo=" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
@@ -5839,7 +5849,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     <article style="background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: clamp(1.25rem, 4vw, 2.5rem)">
       <div class="eb" style="margin-bottom: .4rem">Informations juridiques</div>
       <h1 class="h1" style="font-size: clamp(2rem, 4.5vw, 3.2rem); margin-bottom: .5rem">{{legal.title}}</h1>
-      <p style="color: var(--muted); font-size: 14px; margin: 0 0 1.75rem">Dernière mise à jour : [DATE] · Modèle à faire valider par un professionnel du droit.</p>
+      <p style="color: var(--muted); font-size: 14px; margin: 0 0 1.75rem">{{legalMaj}}</p>
       <sc-for list="{{legal.sections}}" as="ls" hint-placeholder-count="4">
         <h2 class="ttl" style="font-size: 1.5rem; margin: 1.5rem 0 .5rem">{{ls.h}}</h2>
         <p style="line-height: 1.75; color: var(--text); margin: 0">{{ls.p}}</p>
@@ -7285,6 +7295,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/videos.js"></script>
 <script src="contenus/culture.js"></script>
 <script src="contenus/fonds.js"></script>
+<script src="contenus/legal.js"></script>
 <script src="js/comptes.js"></script>
 <script src="js/app.js"></script>
 <script>

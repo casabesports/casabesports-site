@@ -33,6 +33,16 @@ function cbQr(text) {
 }
 function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(location.protocol) ? location.origin + location.pathname : 'https://casabesports.fr/')).replace(/index\.html$/, ''); }
 
+// ---------- adresses partageables : #/page ou #/page/identifiant ----------
+const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
+const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+function cbRouteOf(st) { const k = CB_ROUTE_ID[st.view]; return '#/' + st.view + (k && st[k] != null ? '/' + encodeURIComponent(st[k]) : ''); }
+function cbParseRoute(h) {
+  const m = String(h || '').match(/^#\/([a-z]+)(?:\/(.+))?$/); if (!m) return null;
+  const r = { view: m[1] }; const k = CB_ROUTE_ID[m[1]]; if (k && m[2]) r[k] = decodeURIComponent(m[2]);
+  return r;
+}
+
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -95,6 +105,11 @@ class Component extends DCLogic {
     try { window.addEventListener('keydown', this._onGzKey); } catch (e) {}
     try { this._mq = window.matchMedia('(prefers-color-scheme: dark)'); this._onMq = (e) => this.setState({ sysDark: e.matches }); if (this._mq.addEventListener) this._mq.addEventListener('change', this._onMq); else this._mq.addListener(this._onMq); } catch (e) {}
     try { document.documentElement.setAttribute('data-cb-theme', this.state.theme); } catch (e) {}
+    try {
+      const r0 = cbParseRoute(location.hash); if (r0 && r0.view !== 'home') setTimeout(() => this.go(r0.view, r0), 0);
+      this._onPop = () => { const r = cbParseRoute(location.hash) || { view: 'home' }; this.setState(Object.assign({ menuOpen: false, moreOpen: false, searchOpen: false }, r)); try { window.scrollTo(0, 0); } catch (e) {} };
+      window.addEventListener('popstate', this._onPop);
+    } catch (e) {}
     try { const mq = new URLSearchParams(location.search).get('membre'); if (mq) setTimeout(() => { this.go('verifier', { mbQ: mq.slice(0, 20) }); this.checkMember(mq); }, 0); } catch (e) {}
     try { const vq = new URLSearchParams(location.search).get('verifier'); if (vq) setTimeout(() => this.go('verifier', { verifId: vq.slice(0, 20) }), 0); } catch (e) {}
     this.creaInit();
@@ -1127,12 +1142,29 @@ class Component extends DCLogic {
     const cur = { view: s.view, articleId: s.articleId, videoId: s.videoId, discId: s.discId, clubId: s.clubId, playerId: s.playerId, productId: s.productId };
     this.setState(Object.assign({ view, hist: s.hist.concat([cur]).slice(-40), menuOpen: false, moreOpen: false, searchOpen: false, cartOpen: false, matchId: null, readerOpen: false, placeOpen: false, themeMenuOpen: false, customizeOpen: false, workIdx: null, partnerId: null, hdrY: '0', sq: '', summary: false, listening: false, playing: false, reaction: null, formError: '', prodError: '' }, extra || {}));
     try { window.scrollTo(0, 0); } catch (e) {}
+    this.syncRoute(Object.assign({}, s, { view }, extra || {}), false);
+  }
+  syncRoute(st, replace) {
+    try {
+      const h = st.view === 'home' ? '#/' : cbRouteOf(st);
+      if (location.hash !== h && !(h === '#/' && !location.hash)) history[replace ? 'replaceState' : 'pushState'](null, '', h);
+      let t = CB_TITLES[st.view];
+      try {
+        const D = this.data();
+        if (st.view === 'club') t = ((D.clubs || []).find((c) => c.id === st.clubId) || {}).name;
+        else if (st.view === 'player') t = ((D.players || []).find((c) => c.id === st.playerId) || {}).name;
+        else if (st.view === 'article') t = ((this.allArticles() || []).find((a) => a.id === st.articleId) || {}).title;
+        else if (st.view === 'discipline') t = st.discId;
+      } catch (e) {}
+      document.title = (t ? t + ' · ' : '') + 'Casa Besports — le média sport du Cotentin';
+    } catch (e) {}
   }
   back() {
     const h = this.state.hist.slice();
     const prev = h.pop() || { view: 'home' };
     this.setState(Object.assign({ hist: h, summary: false, listening: false, playing: false, formError: '' }, prev));
     try { window.scrollTo(0, 0); } catch (e) {}
+    this.syncRoute(Object.assign({}, this.state, prev), true);
   }
   say(msg) {
     this.setState({ toast: msg });
@@ -1768,34 +1800,8 @@ class Component extends DCLogic {
     });
     const themeName = THEME_DEFS.find((t) => t[0] === curTheme)[1];
     const effectiveDark = curTheme === 'dark' || curTheme === 'noir' || (curTheme === 'auto' && s.sysDark);
-    const LEGAL = {
-      mentions: { title: 'Mentions légales', sections: [
-        ['Éditeur du site', 'Casa Besports, [forme juridique] au capital de [MONTANT], immatriculée sous le numéro [SIRET], dont le siège est situé [ADRESSE]. Directeur de la publication : [NOM]. Contact : [E-MAIL].'],
-        ['Hébergement', 'Le site est hébergé par [HÉBERGEUR], [ADRESSE DE L’HÉBERGEUR], [TÉLÉPHONE].'],
-        ['Propriété intellectuelle', 'Les textes, photographies, vidéos, illustrations, logos et la charte graphique de Casa Besports sont protégés. Toute reproduction sans autorisation écrite est interdite.'],
-        ['Crédits', 'Photographies : Casa Besports et contributeurs. Illustrations des lieux et des vêtements : Casa Besports. Polices : Google Fonts.']] },
-      confidentialite: { title: 'Politique de confidentialité', sections: [
-        ['Responsable du traitement', 'Casa Besports, [ADRESSE], joignable à [E-MAIL]. Délégué à la protection des données, le cas échéant : [CONTACT].'],
-        ['Données collectées', 'Données de compte (nom, e-mail), commandes et adresses de livraison, abonnements, inscription à la newsletter, préférences d’affichage et d’alertes, messages envoyés via le formulaire de contact.'],
-        ['Finalités et bases légales', 'Exécution des commandes et abonnements (contrat), envoi de la newsletter (consentement), amélioration du service (intérêt légitime), obligations comptables (obligation légale).'],
-        ['Durées de conservation', 'Données de compte : jusqu’à la suppression du compte. Données de commande : [DURÉE] conformément aux obligations comptables. Prospection : 3 ans après le dernier contact.'],
-        ['Vos droits', 'Accès, rectification, effacement, opposition, limitation et portabilité, en écrivant à [E-MAIL]. Vous pouvez introduire une réclamation auprès de la CNIL.'],
-        ['Stockage local et cookies', 'Le thème d’affichage choisi est enregistré dans votre navigateur (stockage local) pour être appliqué dès l’ouverture du site. Aucune donnée publicitaire n’est déposée sans votre consentement.']] },
-      cgv: { title: 'Conditions générales de vente', sections: [
-        ['Objet', 'Les présentes conditions régissent les ventes de la boutique Casa Besports (vêtements, collection Cherwood × Casa Besports, goodies) et les abonnements Casa B+ et La Gazette du Cotentin.'],
-        ['Prix', 'Les prix sont indiqués en euros toutes taxes comprises. Les frais de livraison sont précisés avant la validation de la commande. [GRILLE TARIFAIRE À VALIDER]'],
-        ['Livraison et retrait', 'Livraison à domicile, retrait en boutique Cherwood à Cherbourg ou au stand Casa Besports les jours de grands matchs. Délais indicatifs : [DÉLAIS].'],
-        ['Droit de rétractation', 'Vous disposez de 14 jours à compter de la réception pour vous rétracter, sauf pour les articles personnalisés (flocage, mention), exclus de ce droit.'],
-        ['Garanties', 'Les produits bénéficient de la garantie légale de conformité et de la garantie des vices cachés.'],
-        ['Abonnements', 'Les abonnements mensuels sont sans engagement et résiliables à tout moment depuis Mon espace. Les abonnements annuels courent jusqu’à leur échéance. [CONDITIONS À VALIDER]'],
-        ['Médiation', 'En cas de litige, vous pouvez recourir gratuitement au médiateur de la consommation : [NOM ET COORDONNÉES].']] },
-      cgu: { title: 'Conditions générales d’utilisation', sections: [
-        ['Accès au site', 'Le site est accessible gratuitement. Certains contenus sont réservés aux abonnés Casa B+.'],
-        ['Compte utilisateur', 'Vous êtes responsable de la confidentialité de vos accès. Vos préférences (thème, alertes, clubs suivis) sont associées à votre compte.'],
-        ['Contributions', 'Les résultats transmis, pronostics et messages doivent rester respectueux. Casa Besports peut modérer ou retirer tout contenu inapproprié.'],
-        ['Responsabilité', 'Les scores marqués « Démo » sont illustratifs. Casa Besports s’efforce de publier des informations exactes mais ne peut garantir l’absence d’erreur.'],
-        ['Droit applicable', 'Les présentes conditions sont soumises au droit français.']] }
-    };
+    // Textes juridiques : contenus/legal.js
+    const LEGAL = window.CASA_LEGAL || { mentions: { title: 'Mentions légales', sections: [] } };
     const legalDoc = LEGAL[s.legalDoc] ? s.legalDoc : 'mentions';
     const legal = { title: LEGAL[legalDoc].title, sections: LEGAL[legalDoc].sections.map(([hh, p]) => ({ h: hh, p })) };
     const legalOrder = [['mentions', 'Mentions légales'], ['confidentialite', 'Confidentialité'], ['cgv', 'CGV'], ['cgu', 'CGU']];
@@ -2500,7 +2506,7 @@ class Component extends DCLogic {
       themeIconSun: curTheme === 'light', themeIconMoon: curTheme === 'dark' || curTheme === 'noir', themeIconPaper: curTheme === 'paper', themeIconAuto: curTheme === 'auto',
       themeSavedNote: s.loggedIn ? 'Enregistré sur cet appareil et dans votre profil.' : 'Enregistré sur cet appareil. Connectez-vous pour le retrouver partout.',
       weather, showWeather: s.dSport === 'Football' || s.dSport === 'Rugby' || s.dSport === 'Trail',
-      isLegal: V === 'legal', legal, legalTabs, legalLinks,
+      isLegal: V === 'legal', legal, legalTabs, legalLinks, legalMaj: 'Dernière mise à jour : ' + ((window.CASA_LEGAL_MAJ) || '—') + ' · Les passages entre [crochets] sont à compléter.',
       weather, wx, wxCities, wxFind, isMeteo: V === 'meteo', goMeteo: () => this.go('meteo'), goPrivate: () => this.go('private'), goTable: () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' }),
       isHomeDash: V === 'home' && s.homeLayout !== 'magazine', isHomeMag: V === 'home' && s.homeLayout === 'magazine', toMagazine: () => this.setLayout('magazine'), toDashboard: () => this.setLayout('dashboard'),
       homeMods, noModules: homeMods.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
