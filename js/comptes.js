@@ -63,7 +63,7 @@
   }
   ready = new Promise(function (res, rej) {
     var s = document.createElement('script');
-    s.src = 'js/vendor/supabase-2.45.4.js'; // bibliothèque officielle Supabase, copiée localement
+    s.src = 'js/vendor/supabase-2.117.3.js'; // bibliothèque officielle Supabase, copiée localement
     s.onload = function () {
       client = window.supabase.createClient(cfg.url, cfg.anonKey, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'implicit' } });
       client.auth.onAuthStateChange(function (_e, session) { emit(toUser(session)); });

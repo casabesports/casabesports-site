@@ -9,6 +9,6 @@
  * Tant que ces deux valeurs sont vides, la connexion reste en mode démonstration (rien n'est enregistré en ligne).
  */
 window.CASA_SUPABASE = {
-  url: '',
-  anonKey: ''
+  url: 'https://kexofvitykxrjknnlyvf.supabase.co',
+  anonKey: 'sb_publishable_RVo6Y6M7a0TfdYUwJuEpew_1a_N7oH4'
 };
