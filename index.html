@@ -7279,6 +7279,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script>
   mountDC({ template: 'app-template', mount: 'app', props: {"accent": "var(--acc)", "showBg": true, "showPlaces": true, "bgIntensity": 40} });
 </script>
+<!-- Formulaire caché pour Netlify Forms : permet à Netlify de recevoir les demandes envoyées par le site (ne pas supprimer) -->
+<form name="demandes" data-netlify="true" netlify-honeypot="piege" hidden>
+  <input name="piege"><input name="source"><input name="nom"><input name="email"><input name="telephone"><input name="ville"><input name="profil"><input name="sujet"><textarea name="message"></textarea><input name="consentement"><input name="page">
+</form>
 </body>
 </html>
 

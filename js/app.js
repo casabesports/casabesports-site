@@ -994,7 +994,20 @@ class Component extends DCLogic {
   saveCrm(v) { this._crm = v; this.writeLS('cb-crm-v2', v); this.setState({ crmRev: (this.state.crmRev || 0) + 1 }); }
   crmNow() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0'); }
   // Un événement du site (formulaire, commande, newsletter, OlistO…) crée ou met à jour un contact
+  // Envoi de chaque demande (contact, newsletter, commande, abonnement) à l'équipe :
+  // 1) Netlify Forms (formulaire « demandes », notification e-mail) ; 2) table Supabase « messages » (sauvegarde illimitée)
+  sendLead(ev) {
+    const d = { source: ev.source || 'Site', nom: ev.name || '', email: ev.email || '', telephone: ev.phone || '', ville: ev.city || '', profil: ev.profile || ev.type || '', sujet: ev.subject || '', message: ev.message || ev.note || '', consentement: ev.consent || '', page: location.href };
+    try {
+      if (/^https?:/.test(location.protocol)) {
+        const body = new URLSearchParams(Object.assign({ 'form-name': 'demandes' }, d)).toString();
+        fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }).catch(() => {});
+      }
+    } catch (e) {}
+    try { if (window.CasaAuth && window.CasaAuth.saveLead) window.CasaAuth.saveLead(d).catch(() => {}); } catch (e) {}
+  }
   crmCapture(ev) {
+    this.sendLead(ev);
     const C = Object.assign({}, this.crmData());
     const email = (ev.email || '').trim().toLowerCase();
     let c = email ? C.contacts.find((x) => (x.email || '').trim().toLowerCase() === email) : null;
@@ -2371,7 +2384,7 @@ class Component extends DCLogic {
       onName: (e) => this.setState({ name: e.target.value }), onEmail: (e) => this.setState({ email: e.target.value }), onAddress: (e) => this.setState({ address: e.target.value }), onSubject: (e) => this.setState({ subject: e.target.value }),
       onProfile: (e) => this.setState({ profile: e.target.value }), onMessage: (e) => this.setState({ message: e.target.value }),
       contactOpen: !s.contactSent, contactSent: s.contactSent,
-      sendContact: () => { if (!s.name.trim() || !validEmail || !s.message.trim()) { this.setState({ formError: 'Nom, e-mail valide et message sont requis.' }); return; } this.setState({ contactSent: true, formError: '' }); this.crmCapture({ name: s.name.trim(), email: s.email, source: /olisto/i.test(s.subject || '') ? 'Formulaire OlistO' : 'Formulaire contact', type: ({ Club: 'Club', Annonceur: 'Annonceur', Partenaire: 'Partenaire' })[s.profile] || 'Supporter', consent: '?', note: (s.subject ? s.subject + ' — ' : '') + s.message.trim().slice(0, 200) }); },
+      sendContact: () => { if (!s.name.trim() || !validEmail || !s.message.trim()) { this.setState({ formError: 'Nom, e-mail valide et message sont requis.' }); return; } this.setState({ contactSent: true, formError: '' }); this.crmCapture({ name: s.name.trim(), email: s.email, source: /olisto/i.test(s.subject || '') ? 'Formulaire OlistO' : 'Formulaire contact', type: ({ Club: 'Club', Annonceur: 'Annonceur', Partenaire: 'Partenaire' })[s.profile] || 'Supporter', consent: '?', subject: s.subject, profile: s.profile, message: s.message.trim(), note: (s.subject ? s.subject + ' — ' : '') + s.message.trim().slice(0, 200) }); },
       newMessage: () => this.setState({ contactSent: false, message: '', subject: '' }),
       goals, partnerContact: () => this.go('contact', { subject: 'Partenariat — ' + s.goal, profile: 'Entreprise', contactSent: false }),
       nlOpen: !s.nlDone, nlDone: s.nlDone, nlEmail: s.nlEmail, onNl: (e) => this.setState({ nlEmail: e.target.value }),

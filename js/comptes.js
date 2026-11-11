@@ -59,6 +59,10 @@
       return use(function (c) { return c.auth.resetPasswordForEmail(String(email).trim().toLowerCase(), { redirectTo: location.origin + location.pathname }); });
     },
     recovery: false,
+    // Demandes du formulaire de contact, newsletter, commandes : table « messages » (voir supabase/messages.sql)
+    saveLead: function (d) {
+      return use(function (c) { return c.from('messages').insert({ source: d.source, nom: d.nom, email: d.email, telephone: d.telephone, ville: d.ville, profil: d.profil, sujet: d.sujet, message: d.message, consentement: d.consentement, page: d.page }); });
+    },
     // Carte membre : enregistre le numéro dans la table « membres » (voir docs/CARTE-MEMBRE.md)
     registerMember: function (numero, prenom) {
       return use(function (c) { return c.from('membres').upsert({ id: A.user.id, numero: numero, prenom: prenom || null }, { onConflict: 'id' }); });
