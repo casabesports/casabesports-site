@@ -18,7 +18,9 @@
  *   clubs: ['fceh'],                        // identifiants de clubs liés (voir js/app.js, liste des clubs)
  *   points: ['À retenir 1', 'À retenir 2'], // 2 à 3 points clés
  *   author: 'Kader Allou',
- *   body: 'Texte complet.\n\n## Intertitre\n\nParagraphe…\n\n> Citation'
+ *   body: 'Texte complet.\n\n## Intertitre\n\nParagraphe…\n\n> Citation',
+ *   // Facultatif, version anglaise (bouton EN du site) :
+ *   titleEn: 'Title', dekEn: 'Standfirst', bodyEn: 'Full text…', tagEn: 'Regional 2'
  * }
  */
 window.CASA_ARTICLES = [

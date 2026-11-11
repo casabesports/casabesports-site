@@ -14,6 +14,7 @@ Le site est statique ; les articles ajoutés vivent dans `contenus/articles.js` 
   - corps de 350 à 700 mots, intertitres `## …`, une citation `> …` seulement si elle figure dans les notes ;
   - insère les autres photos dans le corps avec `![légende factuelle](assets/articles/<fichier>)` ;
   - ton : chaleureux, local, précis, sans superlatifs creux ; noms propres et scores **exactement** comme dans les notes.
+- Ajoute la **version anglaise** fidèle (même faits, ton naturel) dans `titleEn`, `dekEn`, `bodyEn` et `tagEn` : elle s'affiche quand le visiteur choisit EN.
 - **N'invente jamais** un fait, un score, une citation, un nom ou une date. S'il manque une info, écris sans elle et liste-la dans ton compte rendu final.
 - Images : convertis en JPEG, largeur max 1600 px, qualité 82 (Python Pillow : `pip install pillow` si besoin), nomme-les `<id-article>-<n>.jpg` dans `assets/articles/`.
 - `id` : `<slug-du-titre>-<AAAA-MM-JJ>` (minuscules, sans accents). `date` : format court français (`12 nov.`). `read` : mots/200 arrondi + ' min'.

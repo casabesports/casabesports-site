@@ -183,7 +183,9 @@ class Component extends DCLogic {
     // Articles ajoutés par la rédaction ou l'automatisation : contenus/articles.js (les plus récents en premier)
     const extra = (typeof window !== 'undefined' && Array.isArray(window.CASA_ARTICLES) ? window.CASA_ARTICLES : [])
       .filter((a) => a && a.id && a.title && !articles.some((b) => b.id === a.id))
-      .map((a) => Object.assign({ sport: 'Multisport', tag: '', date: '', read: '2 min', premium: false, img: 'assets/hero.jpg', alt: a.title, dek: '', clubs: [], points: [], author: 'la rédaction' }, a));
+      .map((a) => Object.assign({ sport: 'Multisport', tag: '', date: '', read: '2 min', premium: false, img: 'assets/hero.jpg', alt: a.title, dek: '', clubs: [], points: [], author: 'la rédaction' }, a,
+        // version anglaise de l'article si elle existe (titleEn, dekEn, bodyEn, tagEn)
+        (window.CasaLang && window.CasaLang.lang === 'en') ? Object.assign({}, a.titleEn ? { title: a.titleEn } : {}, a.dekEn ? { dek: a.dekEn } : {}, a.bodyEn ? { body: a.bodyEn } : {}, a.tagEn ? { tag: a.tagEn } : {}) : {}));
     const allArts = extra.concat(articles);
     // Clubs supplémentaires : contenus/sport.js
     const SP = (typeof window !== 'undefined' && window.CASA_SPORT) || {};
@@ -1156,7 +1158,8 @@ class Component extends DCLogic {
         else if (st.view === 'article') t = ((this.allArticles() || []).find((a) => a.id === st.articleId) || {}).title;
         else if (st.view === 'discipline') t = st.discId;
       } catch (e) {}
-      document.title = (t ? t + ' · ' : '') + 'Casa Besports — le média sport du Cotentin';
+      const LG = window.CasaLang; const en = LG && LG.lang === 'en';
+      document.title = (t ? (LG ? LG.t(t) : t) + ' · ' : '') + (en ? 'Casa Besports — sports media of the Cotentin' : 'Casa Besports — le média sport du Cotentin');
     } catch (e) {}
   }
   back() {
@@ -2506,6 +2509,7 @@ class Component extends DCLogic {
       themeIconSun: curTheme === 'light', themeIconMoon: curTheme === 'dark' || curTheme === 'noir', themeIconPaper: curTheme === 'paper', themeIconAuto: curTheme === 'auto',
       themeSavedNote: s.loggedIn ? 'Enregistré sur cet appareil et dans votre profil.' : 'Enregistré sur cet appareil. Connectez-vous pour le retrouver partout.',
       weather, showWeather: s.dSport === 'Football' || s.dSport === 'Rugby' || s.dSport === 'Trail',
+      langLabel: window.CasaLang && window.CasaLang.lang === 'en' ? 'FR' : 'EN', langAria: window.CasaLang && window.CasaLang.lang === 'en' ? 'Passer le site en français' : 'Switch the site to English', toggleLang: () => { if (window.CasaLang) window.CasaLang.toggle(); },
       isLegal: V === 'legal', legal, legalTabs, legalLinks, legalMaj: 'Dernière mise à jour : ' + ((window.CASA_LEGAL_MAJ) || '—') + ' · Les passages entre [crochets] sont à compléter.',
       weather, wx, wxCities, wxFind, isMeteo: V === 'meteo', goMeteo: () => this.go('meteo'), goPrivate: () => this.go('private'), goTable: () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' }),
       isHomeDash: V === 'home' && s.homeLayout !== 'magazine', isHomeMag: V === 'home' && s.homeLayout === 'magazine', toMagazine: () => this.setLayout('magazine'), toDashboard: () => this.setLayout('dashboard'),
