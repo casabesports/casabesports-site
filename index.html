@@ -4819,7 +4819,10 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     <div class="grid3"><sc-for list="{{savedArticles}}" as="a" hint-placeholder-count="2">
       <div class="card"><button type="button" class="hit" onClick="{{a.open}}"><div style="aspect-ratio: 16 / 9; overflow: hidden"><img class="zimg" src="{{a.img}}" alt="{{a.alt}}"></div><div style="padding: 1rem 1.2rem 1.25rem"><div class="cond" style="font-size: 13px; color: var(--gold-text); margin-bottom: .35rem">{{a.tag}} · <span style="color: var(--muted)">{{a.date}}</span></div><div class="ttl" style="font-size: 22px">{{a.title}}</div></div></button></div>
     </sc-for></div>
-    <button type="button" class="lnk" onClick="{{logout}}" style="margin-top: 3rem">Se déconnecter</button>
+    <h2 class="h2" style="font-size: 2rem; margin: 3rem 0 1rem">Sécurité</h2>
+    <p style="color: var(--text-2); margin: 0 0 1rem">Connectez-vous avec votre e-mail ou votre mobile et votre mot de passe.</p>
+    <button type="button" class="btn btn-ghost" onClick="{{openPw}}">{{pwBtnLabel}}</button>
+    <div><button type="button" class="lnk" onClick="{{logout}}" style="margin-top: 3rem">Se déconnecter</button></div>
   </section>
 </sc-if>
 
@@ -6067,13 +6070,61 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
   </div>
 </sc-if>
 
+<!-- ================= MOT DE PASSE ================= -->
+<sc-if value="{{pwOpen}}" hint-placeholder-val="{{ false }}">
+  <div style="position: fixed; inset: 0; z-index: 61; background: rgba(8,15,26,.45); display: flex; justify-content: center; align-items: center; padding: 1rem">
+    <div role="dialog" aria-label="{{pwTitle}}" style="width: 100%; max-width: 440px; max-height: calc(100dvh - 2rem); overflow-y: auto; background: var(--surface); padding: 2rem; box-shadow: 0 30px 80px rgba(8,15,26,.4)">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem"><div class="ttl" style="font-size: 28px">{{pwTitle}}</div><button type="button" onClick="{{closePw}}" aria-label="Fermer" style="width: 44px; height: 44px; flex: none; border: 0; background: var(--surface-2); border-radius: 50%; cursor: pointer; font-size: 20px; color: var(--text)">×</button></div>
+      <sc-if value="{{pwNotDone}}" hint-placeholder-val="{{ true }}">
+        <p style="color: var(--text-2); margin: 0 0 1rem">Vous vous connecterez ensuite avec votre e-mail (ou votre mobile) et ce mot de passe. 8 caractères minimum.</p>
+        <label class="lbl" style="margin-bottom: 1rem">Nouveau mot de passe<input class="field" type="password" autocomplete="new-password" value="{{pw}}" onChange="{{onPw}}"></label>
+        <label class="lbl" style="margin-bottom: 1rem">Confirmez le mot de passe<input class="field" type="password" autocomplete="new-password" value="{{pw2}}" onChange="{{onPw2}}"></label>
+        <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div role="alert" style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
+        <button type="button" class="btn btn-dark" onClick="{{savePw}}" disabled="{{authBusy}}" style="width: 100%">{{pwSaveLabel}}</button>
+        <button type="button" class="crumb" onClick="{{closePw}}" style="margin-top: .75rem">Plus tard (depuis Mon compte)</button>
+      </sc-if>
+      <sc-if value="{{pwDone}}" hint-placeholder-val="{{ false }}">
+        <p style="color: var(--text-2); margin: 0 0 1.25rem">Mot de passe enregistré. La prochaine fois : « Connexion › J’ai un compte ».</p>
+        <button type="button" class="btn btn-dark" onClick="{{closePw}}" style="width: 100%">Continuer</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
 <!-- ================= CONNEXION ================= -->
 <sc-if value="{{loginOpen}}" hint-placeholder-val="{{ false }}">
   <div style="position: fixed; inset: 0; z-index: 60; background: rgba(8,15,26,.45); display: flex; justify-content: center; align-items: center; padding: 1rem">
     <div role="dialog" aria-label="Connexion" style="width: 100%; max-width: 440px; max-height: calc(100dvh - 2rem); overflow-y: auto; background: var(--surface); border-radius: 0; padding: 2rem; box-shadow: 0 30px 80px rgba(8,15,26,.4)">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem"><div class="ttl" style="font-size: 32px">Connexion</div><button type="button" onClick="{{closeLogin}}" aria-label="Fermer" style="width: 44px; height: 44px; border: 0; background: var(--surface-2); border-radius: 50%; cursor: pointer; font-size: 20px; color: var(--text)">×</button></div>
       <sc-if value="{{linkNotSent}}" hint-placeholder-val="{{ true }}">
-        <p style="color: var(--text-2); margin: 0 0 1rem">Connectez-vous ou créez votre compte en quelques secondes, sans mot de passe.</p>
+        <div role="tablist" aria-label="Compte" style="display: flex; gap: .4rem; margin-bottom: 1.25rem">
+          <button type="button" role="tab" aria-selected="{{loginPwAria}}" class="{{loginPwCls}}" onClick="{{setLoginPw}}" style="flex: 1; min-height: 44px; font-size: 15px">J’ai un compte</button>
+          <button type="button" role="tab" aria-selected="{{loginNewAria}}" class="{{loginNewCls}}" onClick="{{setLoginNew}}" style="flex: 1; min-height: 44px; font-size: 15px">Créer un compte</button>
+        </div>
+        <sc-if value="{{loginByPw}}" hint-placeholder-val="{{ true }}">
+          <label class="lbl" style="margin-bottom: 1rem">E-mail ou numéro de mobile<input class="field" type="text" autocomplete="username" value="{{loginId}}" onChange="{{onLoginId}}" placeholder="vous@exemple.fr ou 06 12 34 56 78"></label>
+          <label class="lbl" style="margin-bottom: 1rem">Mot de passe<input class="field" type="password" autocomplete="current-password" value="{{pw}}" onChange="{{onPw}}"></label>
+          <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div role="alert" style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
+          <button type="button" class="btn btn-dark" onClick="{{pwLogin}}" disabled="{{authBusy}}" style="width: 100%">{{pwLoginLabel}}</button>
+          <div style="display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: .75rem">
+            <button type="button" class="crumb" onClick="{{setLoginReset}}">Mot de passe oublié ?</button>
+            <button type="button" class="crumb" onClick="{{setLoginNew}}">Connexion par lien ou SMS</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{loginByReset}}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{resetNotSent}}" hint-placeholder-val="{{ true }}">
+            <p style="color: var(--text-2); margin: 0 0 1rem">Indiquez l’e-mail de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe. Compte créé par SMS ? Utilisez « Créer un compte › Téléphone mobile » pour recevoir un code.</p>
+            <label class="lbl" style="margin-bottom: 1rem">E-mail<input class="field" type="email" autocomplete="email" value="{{email}}" onChange="{{onEmail}}" placeholder="vous@exemple.fr"></label>
+            <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div role="alert" style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
+            <button type="button" class="btn btn-dark" onClick="{{sendReset}}" disabled="{{authBusy}}" style="width: 100%">{{resetLabel}}</button>
+          </sc-if>
+          <sc-if value="{{resetSent}}" hint-placeholder-val="{{ false }}">
+            <p style="color: var(--text-2); margin: 0 0 1rem">Lien envoyé à <strong>{{email}}</strong>. Ouvrez-le pour choisir votre nouveau mot de passe (pensez aux indésirables).</p>
+          </sc-if>
+          <button type="button" class="crumb" onClick="{{setLoginPw}}" style="margin-top: .75rem">Retour à la connexion</button>
+        </sc-if>
+        <sc-if value="{{loginBySignup}}" hint-placeholder-val="{{ false }}">
+        <p style="color: var(--text-2); margin: 0 0 1rem">Recevez un lien par e-mail ou un code par SMS : votre compte est créé, puis vous choisissez votre mot de passe pour les prochaines fois.</p>
         <div role="tablist" aria-label="Mode de connexion" style="display: flex; gap: .4rem; margin-bottom: 1rem">
           <button type="button" role="tab" aria-selected="{{loginByEmailAria}}" class="{{loginEmailCls}}" onClick="{{setLoginEmail}}" style="flex: 1; min-height: 44px; font-size: 15px">E-mail</button>
           <button type="button" role="tab" aria-selected="{{loginByPhoneAria}}" class="{{loginPhoneCls}}" onClick="{{setLoginPhone}}" style="flex: 1; min-height: 44px; font-size: 15px">Téléphone mobile</button>
@@ -6097,6 +6148,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
             <button type="button" class="btn btn-dark" onClick="{{verifySms}}" disabled="{{authBusy}}" style="width: 100%">{{verifyLabel}}</button>
             <button type="button" class="crumb" onClick="{{resetSms}}" style="margin-top: .5rem">Changer de numéro ou renvoyer le code</button>
           </sc-if>
+        </sc-if>
         </sc-if>
       </sc-if>
       <sc-if value="{{linkSent}}" hint-placeholder-val="{{ false }}">

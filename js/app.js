@@ -11,7 +11,7 @@ class Component extends DCLogic {
     this.state = {
       view: 'home', hist: [], articleId: null, videoId: null, discId: null, clubId: null, playerId: null, productId: null,
       q: '', cat: 'Tous', premiumOnly: false, savedOnly: false, clubSport: 'Tous', role: 'Tous', clubTab: 'articles',
-      city: 'Cherbourg', menuOpen: false, moreOpen: false, searchOpen: false, sq: '', loginOpen: false, linkSent: false, loginMode: 'email', phone: '', smsCode: '', codeSent: false, authBusy: false,
+      city: 'Cherbourg', menuOpen: false, moreOpen: false, searchOpen: false, sq: '', loginOpen: false, linkSent: false, loginMode: 'password', pw: '', pw2: '', loginId: '', pwOpen: false, pwDone: false, resetSent: false, hasPassword: false, phone: '', smsCode: '', codeSent: false, authBusy: false,
       loggedIn: false, subs: { casab: false, gazette: null }, name: '', email: '', address: '', subject: '', profile: '', message: '', contactSent: false,
       formError: '', step: 1, period: 'mois', subPlan: 'casab', isGift: false, saved: [], follows: [], followPlayers: [], remind: false,
       summary: false, listening: false, fontStep: 1, reaction: null, playing: false, goal: 'Visibilité',
@@ -39,6 +39,8 @@ class Component extends DCLogic {
           this.setState({ loggedIn: true, loginOpen: false, linkSent: false, codeSent: false, smsCode: '', email: u.email || this.state.email, phone: u.phone || this.state.phone, name: u.name || (staff && staff.name) || this.state.name, role: staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null });
           if (!u.name && this.state.name.trim()) window.CasaAuth.updateName(this.state.name.trim()).catch(() => {});
           this.applyProfileTheme((u.email || u.phone || u.id).toLowerCase());
+          const needPw = !u.hasPassword || window.CasaAuth.recovery;
+          this.setState({ hasPassword: !!u.hasPassword, pwOpen: needPw && !this.readLS('cb-pw-later-' + u.id, false) || window.CasaAuth.recovery, pw: '', pw2: '', pwDone: false });
           if (!wasIn) this.say('Connecté. Bienvenue !');
         } else if (this.state.loggedIn) this.setState({ loggedIn: false, role: null, subs: { casab: false, gazette: null } });
       });
@@ -2335,7 +2337,7 @@ class Component extends DCLogic {
       alerts, followList, noFollows: followList.length === 0, savedArticles, noSaved: savedArticles.length === 0,
       orders: s.orders, noOrders: s.orders.length === 0,
       logout: () => { if (window.CasaAuth && window.CasaAuth.on) window.CasaAuth.signOut().catch(() => {}); this.setState({ loggedIn: false, role: null, subs: { casab: false, gazette: null } }); this.go('home'); this.say('Vous êtes déconnecté'); },
-      loginOpen: s.loginOpen, openLogin: () => this.setState({ loginOpen: true, linkSent: false, formError: '' }), closeLogin: () => this.setState({ loginOpen: false }),
+      loginOpen: s.loginOpen, openLogin: () => this.setState({ loginOpen: true, linkSent: false, formError: '', loginMode: 'password', resetSent: false }), closeLogin: () => this.setState({ loginOpen: false }),
       linkSent: s.linkSent, linkNotSent: !s.linkSent,
       sendLink: () => {
         if (!validEmail) { this.setState({ formError: 'Saisissez un e-mail valide.' }); return; }
@@ -2344,10 +2346,43 @@ class Component extends DCLogic {
         window.CasaAuth.sendEmail(s.email.trim().toLowerCase(), s.name.trim()).then(() => this.setState({ authBusy: false, linkSent: true }), (e) => this.setState({ authBusy: false, formError: e.message }));
       },
       authLive, authDemo: !authLive, authBusy: s.authBusy,
-      loginByEmail: s.loginMode !== 'phone', loginByPhone: s.loginMode === 'phone',
-      loginByEmailAria: s.loginMode !== 'phone' ? 'true' : 'false', loginByPhoneAria: s.loginMode === 'phone' ? 'true' : 'false',
-      loginEmailCls: s.loginMode !== 'phone' ? 'btn btn-dark' : 'btn btn-ghost', loginPhoneCls: s.loginMode === 'phone' ? 'btn btn-dark' : 'btn btn-ghost',
+      loginByEmail: s.loginMode === 'email', loginByPhone: s.loginMode === 'phone',
+      loginByEmailAria: s.loginMode === 'email' ? 'true' : 'false', loginByPhoneAria: s.loginMode === 'phone' ? 'true' : 'false',
+      loginEmailCls: s.loginMode === 'email' ? 'btn btn-dark' : 'btn btn-ghost', loginPhoneCls: s.loginMode === 'phone' ? 'btn btn-dark' : 'btn btn-ghost',
       setLoginEmail: () => this.setState({ loginMode: 'email', formError: '' }), setLoginPhone: () => this.setState({ loginMode: 'phone', formError: '' }),
+      // ----- mot de passe -----
+      loginByPw: s.loginMode === 'password', loginBySignup: s.loginMode === 'email' || s.loginMode === 'phone', loginByReset: s.loginMode === 'reset',
+      loginNotReset: s.loginMode !== 'reset',
+      loginPwCls: s.loginMode === 'password' || s.loginMode === 'reset' ? 'btn btn-dark' : 'btn btn-ghost', loginNewCls: s.loginMode === 'email' || s.loginMode === 'phone' ? 'btn btn-dark' : 'btn btn-ghost',
+      loginPwAria: s.loginMode === 'password' ? 'true' : 'false', loginNewAria: s.loginMode === 'email' || s.loginMode === 'phone' ? 'true' : 'false',
+      setLoginPw: () => this.setState({ loginMode: 'password', formError: '', resetSent: false }), setLoginNew: () => this.setState({ loginMode: 'email', formError: '' }),
+      setLoginReset: () => this.setState({ loginMode: 'reset', formError: '', resetSent: false, email: s.email || (/@/.test(s.loginId) ? s.loginId : '') }),
+      loginId: s.loginId, onLoginId: (e) => this.setState({ loginId: e.target.value }), pw: s.pw, onPw: (e) => this.setState({ pw: e.target.value }), pw2: s.pw2, onPw2: (e) => this.setState({ pw2: e.target.value }),
+      pwLoginLabel: s.authBusy ? 'Connexion…' : 'Se connecter',
+      pwLogin: () => {
+        if (!s.loginId.trim() || !s.pw) { this.setState({ formError: 'Saisissez votre identifiant et votre mot de passe.' }); return; }
+        if (!authLive) { this.setState({ loggedIn: true, loginOpen: false }); return; }
+        this.setState({ authBusy: true, formError: '' });
+        window.CasaAuth.signInPassword(s.loginId, s.pw).then(() => this.setState({ authBusy: false, pw: '' }), (e) => this.setState({ authBusy: false, formError: e.message }));
+      },
+      resetSent: s.resetSent, resetNotSent: !s.resetSent, resetLabel: s.authBusy ? 'Envoi…' : 'Recevoir le lien de réinitialisation',
+      sendReset: () => {
+        if (!validEmail) { this.setState({ formError: 'Saisissez l’e-mail de votre compte.' }); return; }
+        if (!authLive) { this.setState({ resetSent: true }); return; }
+        this.setState({ authBusy: true, formError: '' });
+        window.CasaAuth.resetPassword(s.email).then(() => this.setState({ authBusy: false, resetSent: true }), (e) => this.setState({ authBusy: false, formError: e.message }));
+      },
+      pwOpen: s.pwOpen && s.loggedIn, hasPassword: s.hasPassword, pwTitle: s.hasPassword && !(window.CasaAuth && window.CasaAuth.recovery) ? 'Changer mon mot de passe' : 'Choisissez votre mot de passe',
+      pwBtnLabel: s.hasPassword ? 'Changer mon mot de passe' : 'Créer mon mot de passe', pwDone: s.pwDone, pwNotDone: !s.pwDone, pwSaveLabel: s.authBusy ? 'Enregistrement…' : 'Enregistrer le mot de passe',
+      openPw: () => this.setState({ pwOpen: true, pw: '', pw2: '', pwDone: false, formError: '' }),
+      closePw: () => { const u = window.CasaAuth && window.CasaAuth.user; if (u && !s.hasPassword) this.writeLS('cb-pw-later-' + u.id, true); if (window.CasaAuth) window.CasaAuth.recovery = false; this.setState({ pwOpen: false, formError: '' }); },
+      savePw: () => {
+        if (String(s.pw).length < 8) { this.setState({ formError: 'Le mot de passe doit contenir au moins 8 caractères.' }); return; }
+        if (s.pw !== s.pw2) { this.setState({ formError: 'Les deux mots de passe ne sont pas identiques.' }); return; }
+        if (!authLive) { this.setState({ pwDone: true, hasPassword: true }); return; }
+        this.setState({ authBusy: true, formError: '' });
+        window.CasaAuth.setPassword(s.pw).then(() => { window.CasaAuth.recovery = false; this.setState({ authBusy: false, pwDone: true, hasPassword: true, pw: '', pw2: '' }); }, (e) => this.setState({ authBusy: false, formError: e.message }));
+      },
       phone: s.phone, onPhone: (e) => this.setState({ phone: e.target.value }), smsCode: s.smsCode, onSmsCode: (e) => this.setState({ smsCode: e.target.value }),
       codeSent: s.codeSent, codeNotSent: !s.codeSent,
       sendLinkLabel: s.authBusy ? 'Envoi…' : 'Recevoir mon lien', sendSmsLabel: s.authBusy ? 'Envoi…' : 'Recevoir un code par SMS', verifyLabel: s.authBusy ? 'Vérification…' : 'Valider le code',

@@ -1,10 +1,12 @@
 # Comptes abonnés : e-mail et téléphone mobile
 
-Le site sait déjà inscrire et connecter les abonnés **sans mot de passe** :
-- **par e-mail** : l'abonné reçoit un lien, il clique, il est connecté ;
-- **par téléphone mobile** : l'abonné reçoit un code à 6 chiffres par SMS.
+Comment ça marche pour l'abonné :
+1. **Créer un compte** (une seule fois) : il reçoit un **lien par e-mail** ou un **code par SMS**, il est connecté.
+2. Le site lui demande aussitôt de **choisir un mot de passe** (8 caractères minimum). Il peut le faire plus tard depuis « Mon compte › Sécurité ».
+3. Les fois suivantes : **Connexion › J'ai un compte** → e-mail (ou numéro de mobile) + mot de passe.
+4. **Mot de passe oublié ?** → il reçoit un lien par e-mail pour en choisir un nouveau (compte créé par SMS : il se reconnecte par code SMS puis change son mot de passe dans « Mon compte »).
 
-Le compte est créé automatiquement à la première connexion. Les comptes sont gérés par **Supabase** (gratuit jusqu'à 50 000 abonnés actifs par mois).
+ Les comptes sont gérés par **Supabase** (gratuit jusqu'à 50 000 abonnés actifs par mois).
 Tant que `js/config.js` est vide, la fenêtre de connexion reste en mode démonstration.
 
 ## 1. Créer le projet Supabase (5 min)
@@ -46,6 +48,12 @@ L'envoi de SMS passe par un opérateur, environ 0,07 à 0,10 € par SMS vers la
 2. Supabase › **Authentication › Sign In / Providers › Phone** : activez, choisissez Twilio, collez les 3 valeurs, enregistrez.
 
 Sans cette étape, l'onglet « Téléphone mobile » affiche « La connexion par SMS n'est pas encore activée ».
+
+## 6. Réglages conseillés pour les mots de passe
+
+Supabase › **Authentication › Sign In / Providers › Email** : laissez « Enable Email provider » activé.
+Supabase › **Authentication › Policies** (ou *Password security*) : longueur minimale **8**, et cochez « Prevent use of leaked passwords » si proposé.
+Le lien « Mot de passe oublié » utilise le modèle d'e-mail **Reset Password** (Authentication › Emails), à traduire en français comme les autres.
 
 ## Voir et gérer les abonnés
 
