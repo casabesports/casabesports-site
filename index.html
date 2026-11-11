@@ -6066,21 +6066,50 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <!-- ================= CONNEXION ================= -->
 <sc-if value="{{loginOpen}}" hint-placeholder-val="{{ false }}">
   <div style="position: fixed; inset: 0; z-index: 60; background: rgba(8,15,26,.45); display: flex; justify-content: center; align-items: center; padding: 1rem">
-    <div role="dialog" aria-label="Connexion" style="width: 100%; max-width: 440px; background: var(--surface); border-radius: 0; padding: 2rem; box-shadow: 0 30px 80px rgba(8,15,26,.4)">
+    <div role="dialog" aria-label="Connexion" style="width: 100%; max-width: 440px; max-height: calc(100dvh - 2rem); overflow-y: auto; background: var(--surface); border-radius: 0; padding: 2rem; box-shadow: 0 30px 80px rgba(8,15,26,.4)">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem"><div class="ttl" style="font-size: 32px">Connexion</div><button type="button" onClick="{{closeLogin}}" aria-label="Fermer" style="width: 44px; height: 44px; border: 0; background: var(--surface-2); border-radius: 50%; cursor: pointer; font-size: 20px; color: var(--text)">×</button></div>
       <sc-if value="{{linkNotSent}}" hint-placeholder-val="{{ true }}">
-        <p style="color: var(--text-2); margin: 0 0 1.25rem">Recevez un lien de connexion par e-mail, sans mot de passe.</p>
-        <label class="lbl" style="margin-bottom: 1rem">E-mail<input class="field" type="email" value="{{email}}" onChange="{{onEmail}}" placeholder="vous@exemple.fr"></label>
-        <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
-        <button type="button" class="btn btn-dark" onClick="{{sendLink}}" style="width: 100%">Recevoir mon lien</button>
+        <p style="color: var(--text-2); margin: 0 0 1rem">Connectez-vous ou créez votre compte en quelques secondes, sans mot de passe.</p>
+        <div role="tablist" aria-label="Mode de connexion" style="display: flex; gap: .4rem; margin-bottom: 1rem">
+          <button type="button" role="tab" aria-selected="{{loginByEmailAria}}" class="{{loginEmailCls}}" onClick="{{setLoginEmail}}" style="flex: 1; min-height: 44px; font-size: 15px">E-mail</button>
+          <button type="button" role="tab" aria-selected="{{loginByPhoneAria}}" class="{{loginPhoneCls}}" onClick="{{setLoginPhone}}" style="flex: 1; min-height: 44px; font-size: 15px">Téléphone mobile</button>
+        </div>
+        <label class="lbl" style="margin-bottom: 1rem">Prénom et nom <span style="font-weight: 500; color: var(--muted)">(pour une inscription)</span><input class="field" type="text" autocomplete="name" value="{{name}}" onChange="{{onName}}" placeholder="Camille Martin"></label>
+        <sc-if value="{{loginByEmail}}" hint-placeholder-val="{{ true }}">
+          <label class="lbl" style="margin-bottom: 1rem">E-mail<input class="field" type="email" autocomplete="email" value="{{email}}" onChange="{{onEmail}}" placeholder="vous@exemple.fr"></label>
+          <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div role="alert" style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
+          <button type="button" class="btn btn-dark" onClick="{{sendLink}}" disabled="{{authBusy}}" style="width: 100%">{{sendLinkLabel}}</button>
+        </sc-if>
+        <sc-if value="{{loginByPhone}}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{codeNotSent}}" hint-placeholder-val="{{ true }}">
+            <label class="lbl" style="margin-bottom: 1rem">Numéro de mobile<input class="field" type="tel" autocomplete="tel" inputmode="tel" value="{{phone}}" onChange="{{onPhone}}" placeholder="06 12 34 56 78"></label>
+            <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div role="alert" style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
+            <button type="button" class="btn btn-dark" onClick="{{sendSms}}" disabled="{{authBusy}}" style="width: 100%">{{sendSmsLabel}}</button>
+          </sc-if>
+          <sc-if value="{{codeSent}}" hint-placeholder-val="{{ false }}">
+            <p style="color: var(--text-2); margin: 0 0 1rem">Code envoyé par SMS au <strong>{{phone}}</strong>.</p>
+            <label class="lbl" style="margin-bottom: 1rem">Code à 6 chiffres<input class="field" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" value="{{smsCode}}" onChange="{{onSmsCode}}" placeholder="123456"></label>
+            <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div role="alert" style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
+            <button type="button" class="btn btn-dark" onClick="{{verifySms}}" disabled="{{authBusy}}" style="width: 100%">{{verifyLabel}}</button>
+            <button type="button" class="crumb" onClick="{{resetSms}}" style="margin-top: .5rem">Changer de numéro ou renvoyer le code</button>
+          </sc-if>
+        </sc-if>
+        <sc-if value="{{authDemo}}" hint-placeholder-val="{{ true }}">
         <div style="border-top: 1px solid var(--line); margin-top: 1.25rem; padding-top: 1rem">
           <div class="cond" style="font-size: 12px; color: var(--muted); margin-bottom: .5rem">Démo · accès rédaction</div>
           <div style="display: flex; gap: .5rem; flex-wrap: wrap"><button type="button" class="btn btn-gold" onClick="{{loginAdmin}}" style="flex: 1 1 180px; font-size: 15px">Administrateur principal</button><button type="button" class="btn btn-ghost" onClick="{{loginWriter}}" style="flex: 1 1 140px; font-size: 15px">Rédacteur</button><button type="button" class="btn btn-ghost" onClick="{{loginClub}}" style="flex: 1 1 200px; font-size: 15px">Correspondant de club</button></div>
         </div>
+        </sc-if>
       </sc-if>
       <sc-if value="{{linkSent}}" hint-placeholder-val="{{ false }}">
-        <p style="color: var(--text-2); margin: 0 0 1.25rem">Un lien a été envoyé à <strong>{{email}}</strong>. Dans ce prototype, simulez l’ouverture du lien :</p>
-        <button type="button" class="btn btn-gold" onClick="{{doLogin}}" style="width: 100%">Ouvrir le lien de connexion</button>
+        <sc-if value="{{authLive}}" hint-placeholder-val="{{ false }}">
+          <p style="color: var(--text-2); margin: 0 0 1.25rem">Un lien de connexion a été envoyé à <strong>{{email}}</strong>. Ouvrez-le depuis cet appareil pour vous connecter. Pensez à regarder dans les indésirables.</p>
+          <button type="button" class="btn btn-ghost" onClick="{{openLogin}}" style="width: 100%">Utiliser une autre adresse</button>
+        </sc-if>
+        <sc-if value="{{authDemo}}" hint-placeholder-val="{{ true }}">
+          <p style="color: var(--text-2); margin: 0 0 1.25rem">Un lien a été envoyé à <strong>{{email}}</strong>. Dans ce prototype, simulez l’ouverture du lien :</p>
+          <button type="button" class="btn btn-gold" onClick="{{doLogin}}" style="width: 100%">Ouvrir le lien de connexion</button>
+        </sc-if>
       </sc-if>
     </div>
   </div>
@@ -7167,6 +7196,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="js/carte-normandie.js"></script>
 <script src="js/reseau.js"></script>
 <script src="js/profil.js"></script>
+<script src="js/config.js"></script>
+<script src="js/comptes.js"></script>
 <script src="js/app.js"></script>
 <script>
   mountDC({ template: 'app-template', mount: 'app', props: {"accent": "var(--acc)", "showBg": true, "showPlaces": true, "bgIntensity": 40} });

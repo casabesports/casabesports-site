@@ -11,7 +11,7 @@ class Component extends DCLogic {
     this.state = {
       view: 'home', hist: [], articleId: null, videoId: null, discId: null, clubId: null, playerId: null, productId: null,
       q: '', cat: 'Tous', premiumOnly: false, savedOnly: false, clubSport: 'Tous', role: 'Tous', clubTab: 'articles',
-      city: 'Cherbourg', menuOpen: false, moreOpen: false, searchOpen: false, sq: '', loginOpen: false, linkSent: false,
+      city: 'Cherbourg', menuOpen: false, moreOpen: false, searchOpen: false, sq: '', loginOpen: false, linkSent: false, loginMode: 'email', phone: '', smsCode: '', codeSent: false, authBusy: false,
       loggedIn: false, subs: { casab: false, gazette: null }, name: '', email: '', address: '', subject: '', profile: '', message: '', contactSent: false,
       formError: '', step: 1, period: 'mois', subPlan: 'casab', isGift: false, saved: [], follows: [], followPlayers: [], remind: false,
       summary: false, listening: false, fontStep: 1, reaction: null, playing: false, goal: 'Visibilité',
@@ -29,6 +29,18 @@ class Component extends DCLogic {
     };
   }
   componentDidMount() {
+    // Comptes abonnés (js/comptes.js) : la session Supabase pilote l'état connecté
+    if (window.CasaAuth && window.CasaAuth.on) {
+      window.CasaAuth.onChange((u) => {
+        if (u) {
+          const wasIn = this.state.loggedIn;
+          this.setState({ loggedIn: true, loginOpen: false, linkSent: false, codeSent: false, smsCode: '', email: u.email || this.state.email, phone: u.phone || this.state.phone, name: u.name || this.state.name });
+          if (!u.name && this.state.name.trim()) window.CasaAuth.updateName(this.state.name.trim()).catch(() => {});
+          this.applyProfileTheme((u.email || u.phone || u.id).toLowerCase());
+          if (!wasIn) this.say('Connecté. Bienvenue !');
+        } else if (this.state.loggedIn && !this.state.role) this.setState({ loggedIn: false, subs: { casab: false, gazette: null } });
+      });
+    }
     this._crmIv = setInterval(() => { if (this.state.role === 'admin') { const A = this.crmData().agents; ['qualif', 'hygiene', 'relance', 'fidel', 'rapport'].forEach((k) => { if (A[k] && A[k].on) this.runAgent(k); }); } }, 20000);
     this._iv = setInterval(() => this.setState({ tick: this.state.tick + 1 }), 15000);
     try { const rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; if (window.CASA_APP && !rm && !window.sessionStorage.getItem('cb-intro')) { window.sessionStorage.setItem('cb-intro', '1'); this.setState({ introOn: true }); this._introT = setTimeout(() => this.setState({ introOn: false }), 3500); } } catch (e) {}
@@ -1609,6 +1621,7 @@ class Component extends DCLogic {
     const sp = X.subPlans[s.subPlan];
     const steps = ['Formule', 'Coordonnées', 'Paiement'].map((label, i) => ({ label, bar: s.step > i ? accent : 'var(--line)', color: s.step > i ? 'var(--ink)' : 'var(--muted-2)' }));
     const validEmail = /.+@.+\..+/.test(s.email);
+    const authLive = !!(window.CasaAuth && window.CasaAuth.on);
     const subNeedsAddress = sp.paper;
 
     // ---------- Gazette liseuse ----------
@@ -2502,10 +2515,38 @@ class Component extends DCLogic {
       displayName: s.name || s.email.split('@')[0] || 'supporter',
       alerts, followList, noFollows: followList.length === 0, savedArticles, noSaved: savedArticles.length === 0,
       orders: s.orders, noOrders: s.orders.length === 0,
-      logout: () => { this.setState({ loggedIn: false, subs: { casab: false, gazette: null } }); this.go('home'); this.say('Vous êtes déconnecté'); },
+      logout: () => { if (window.CasaAuth && window.CasaAuth.on) window.CasaAuth.signOut().catch(() => {}); this.setState({ loggedIn: false, subs: { casab: false, gazette: null } }); this.go('home'); this.say('Vous êtes déconnecté'); },
       loginOpen: s.loginOpen, openLogin: () => this.setState({ loginOpen: true, linkSent: false, formError: '' }), closeLogin: () => this.setState({ loginOpen: false }),
       linkSent: s.linkSent, linkNotSent: !s.linkSent,
-      sendLink: () => (validEmail ? this.setState({ linkSent: true, formError: '' }) : this.setState({ formError: 'Saisissez un e-mail valide.' })),
+      sendLink: () => {
+        if (!validEmail) { this.setState({ formError: 'Saisissez un e-mail valide.' }); return; }
+        if (!authLive) { this.setState({ linkSent: true, formError: '' }); return; }
+        this.setState({ authBusy: true, formError: '' });
+        window.CasaAuth.sendEmail(s.email.trim().toLowerCase(), s.name.trim()).then(() => this.setState({ authBusy: false, linkSent: true }), (e) => this.setState({ authBusy: false, formError: e.message }));
+      },
+      authLive, authDemo: !authLive, authBusy: s.authBusy,
+      loginByEmail: s.loginMode !== 'phone', loginByPhone: s.loginMode === 'phone',
+      loginByEmailAria: s.loginMode !== 'phone' ? 'true' : 'false', loginByPhoneAria: s.loginMode === 'phone' ? 'true' : 'false',
+      loginEmailCls: s.loginMode !== 'phone' ? 'btn btn-dark' : 'btn btn-ghost', loginPhoneCls: s.loginMode === 'phone' ? 'btn btn-dark' : 'btn btn-ghost',
+      setLoginEmail: () => this.setState({ loginMode: 'email', formError: '' }), setLoginPhone: () => this.setState({ loginMode: 'phone', formError: '' }),
+      phone: s.phone, onPhone: (e) => this.setState({ phone: e.target.value }), smsCode: s.smsCode, onSmsCode: (e) => this.setState({ smsCode: e.target.value }),
+      codeSent: s.codeSent, codeNotSent: !s.codeSent,
+      sendLinkLabel: s.authBusy ? 'Envoi…' : 'Recevoir mon lien', sendSmsLabel: s.authBusy ? 'Envoi…' : 'Recevoir un code par SMS', verifyLabel: s.authBusy ? 'Vérification…' : 'Valider le code',
+      sendSms: () => {
+        const ph = window.CasaAuth ? window.CasaAuth.phone(s.phone) : '';
+        if (!ph) { this.setState({ formError: 'Saisissez un numéro de mobile valide (ex. 06 12 34 56 78).' }); return; }
+        if (!authLive) { this.setState({ phone: ph, codeSent: true, formError: '' }); return; }
+        this.setState({ authBusy: true, formError: '', phone: ph });
+        window.CasaAuth.sendSms(ph, s.name.trim()).then(() => this.setState({ authBusy: false, codeSent: true }), (e) => this.setState({ authBusy: false, formError: e.message }));
+      },
+      verifySms: () => {
+        const code = String(s.smsCode || '').replace(/\s/g, '');
+        if (!/^\d{6,8}$/.test(code)) { this.setState({ formError: 'Saisissez le code reçu par SMS.' }); return; }
+        if (!authLive) { this.setState({ loggedIn: true, loginOpen: false, codeSent: false, smsCode: '' }); this.applyProfileTheme(s.phone); this.say('Connecté. Bienvenue !'); return; }
+        this.setState({ authBusy: true, formError: '' });
+        window.CasaAuth.verifySms(s.phone, code).then(() => this.setState({ authBusy: false }), (e) => this.setState({ authBusy: false, formError: e.message }));
+      },
+      resetSms: () => this.setState({ codeSent: false, smsCode: '', formError: '' }),
       doLogin: () => { this.setState({ loggedIn: true, loginOpen: false }); this.applyProfileTheme(s.email.trim().toLowerCase() || 'compte'); this.say('Connecté. Bienvenue !'); },
       searchOpen: s.searchOpen, openSearch: () => this.setState({ searchOpen: true, sq: '', menuOpen: false, moreOpen: false }), closeSearch: () => this.setState({ searchOpen: false }),
       sq: s.sq, onSq: (e) => this.setState({ sq: e.target.value }), noSq: !sq, sResults, sEmpty: !!sq && sResults.length === 0, quick,
@@ -2540,7 +2581,7 @@ class Component extends DCLogic {
       goStudio: () => (s.role ? this.go('studio', { studioTab: s.role === 'club' ? 'club' : isAdmin && pending.length ? 'queue' : 'dash' }) : this.setState({ loginOpen: true, linkSent: false })),
       loginAdmin: () => { this.setState({ loggedIn: true, loginOpen: false, role: 'admin' }); this.applyProfileTheme('role-admin'); this.go('studio', { studioTab: 'dash' }); this.say('Connecté en administrateur principal'); },
       loginWriter: () => { this.setState({ loggedIn: true, loginOpen: false, role: 'writer' }); this.applyProfileTheme('role-writer'); this.go('studio', { studioTab: 'dash' }); this.say('Connectée en rédactrice : Léa Marchand'); },
-      isStudio: V === 'studio' && !!s.role, me, studioNav, roleSwitch, showRoleSwitch: !window.CB_SERVER, kpis, dashList, dashListEmpty: dashList.length === 0, dashListTitle: isAdmin ? 'À relire en priorité' : 'Mes articles en cours', activity, notClubTabs: !isClubRole,
+      isStudio: V === 'studio' && !!s.role, me, studioNav, roleSwitch, showRoleSwitch: !window.CB_SERVER && !authLive, kpis, dashList, dashListEmpty: dashList.length === 0, dashListTitle: isAdmin ? 'À relire en priorité' : 'Mes articles en cours', activity, notClubTabs: !isClubRole,
       stCrm: s.studioTab === 'crm' && s.role === 'admin', crm,
       stDash: s.studioTab === 'dash' && !isClubRole, stList: s.studioTab === 'list' && !isClubRole, stQueue: s.studioTab === 'queue' && !isClubRole, stEdit: s.studioTab === 'edit' && !isClubRole, stMedia: s.studioTab === 'media' && !isClubRole, stTeam: s.studioTab === 'team' && !isClubRole,
       rx: RXV, stRowsEmpty: (RXV.list && RXV.list.rows || []).length === 0,

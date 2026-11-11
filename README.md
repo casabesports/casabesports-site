@@ -11,6 +11,7 @@ Site statique : aucun serveur à maintenir, aucune base de données, hébergemen
 | `js/reseau.js`, `js/profil.js`, `js/redaction.js`, `js/aide.js` | Modules : réseau local, profil membre, rédaction, aide |
 | `js/three.min.js`, `js/leaflet.js`, `js/carte-normandie.js` | Bibliothèques (3D, cartes) : n'y touchez pas |
 | `assets/` | Toutes les images (photos, produits, logo) |
+| `js/config.js`, `js/comptes.js` | Comptes abonnés (e-mail et mobile) : voir `docs/COMPTES-ABONNES.md` |
 | `manifest.webmanifest`, `icon.svg` | Installation sur téléphone (« Ajouter à l'écran d'accueil ») |
 
 ## Modifier le site
@@ -36,7 +37,8 @@ Double-cliquer sur `index.html` fonctionne en partie ; pour un test fidèle :
 
 ## Limites actuelles (version statique)
 
-Tout ce qui demande un serveur fonctionne en mode « sur cet appareil » : comptes, CRM, boutique (commandes), espace rédaction, assistant IA (moteur intégré).
+Les comptes abonnés (e-mail et téléphone) fonctionnent en ligne dès que Supabase est branché (`docs/COMPTES-ABONNES.md`).
+Le reste de ce qui demande un serveur fonctionne en mode « sur cet appareil » : CRM, boutique (commandes), espace rédaction, assistant IA (moteur intégré).
 Les données saisies restent dans le navigateur de la personne. Étape suivante possible : brancher un service en ligne (ex. Supabase, Stripe pour la boutique) pour les comptes, les commandes et la publication d'articles depuis un téléphone.
 
 La météo (Open-Meteo, en direct) et la carte (OpenStreetMap/IGN) fonctionnent sans configuration. Les scores et articles sont des contenus de départ, à mettre à jour dans `js/app.js`.
