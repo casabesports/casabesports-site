@@ -34,11 +34,12 @@ class Component extends DCLogic {
       window.CasaAuth.onChange((u) => {
         if (u) {
           const wasIn = this.state.loggedIn;
-          this.setState({ loggedIn: true, loginOpen: false, linkSent: false, codeSent: false, smsCode: '', email: u.email || this.state.email, phone: u.phone || this.state.phone, name: u.name || this.state.name });
+          const staff = ((window.CASA_EQUIPE) || []).find((m) => m.email && u.email && m.email.trim().toLowerCase() === u.email.trim().toLowerCase());
+          this.setState({ loggedIn: true, loginOpen: false, linkSent: false, codeSent: false, smsCode: '', email: u.email || this.state.email, phone: u.phone || this.state.phone, name: u.name || (staff && staff.name) || this.state.name, role: staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null });
           if (!u.name && this.state.name.trim()) window.CasaAuth.updateName(this.state.name.trim()).catch(() => {});
           this.applyProfileTheme((u.email || u.phone || u.id).toLowerCase());
           if (!wasIn) this.say('Connecté. Bienvenue !');
-        } else if (this.state.loggedIn && !this.state.role) this.setState({ loggedIn: false, subs: { casab: false, gazette: null } });
+        } else if (this.state.loggedIn) this.setState({ loggedIn: false, role: null, subs: { casab: false, gazette: null } });
       });
     }
     this._crmIv = setInterval(() => { if (this.state.role === 'admin') { const A = this.crmData().agents; ['qualif', 'hygiene', 'relance', 'fidel', 'rapport'].forEach((k) => { if (A[k] && A[k].on) this.runAgent(k); }); } }, 20000);
@@ -167,7 +168,15 @@ class Component extends DCLogic {
     ];
     const cities = { 'Cherbourg': [49.639, -1.616], 'Tourlaville': [49.638, -1.565], 'Équeurdreville': [49.655, -1.68], 'Beaumont-Hague': [49.664, -1.84], 'Urville-Nacqueville': [49.674, -1.74], 'Gréville-Hague': [49.677, -1.80], 'Digosville': [49.632, -1.525], 'Tollevast': [49.575, -1.628], 'Bricquebec': [49.47, -1.633], 'Valognes': [49.509, -1.47], 'Barfleur': [49.671, -1.264], 'Barneville-Carteret': [49.383, -1.75], 'Carentan': [49.303, -1.248], 'Saint-Lô': [49.116, -1.09], 'Avranches': [48.684, -1.357], 'Bayeux': [49.276, -0.703], 'Flers': [48.75, -0.57], 'Mondeville': [49.175, -0.32] };
     const sports = ['Football', 'Basketball', 'Rugby', 'Water-polo', 'Trail', 'Natation', 'Pétanque', 'Roller', 'Équitation', 'Ping-pong', 'Kitesurf', 'Karting', 'Judo', 'Volley-ball', 'Tennis', 'Golf', 'Wing foil', 'Hockey', 'Boxe'];
-    this._d = { articles, videos, clubs, players, cities, sports };
+    // Articles ajoutés par la rédaction ou l'automatisation : contenus/articles.js (les plus récents en premier)
+    const extra = (typeof window !== 'undefined' && Array.isArray(window.CASA_ARTICLES) ? window.CASA_ARTICLES : [])
+      .filter((a) => a && a.id && a.title && !articles.some((b) => b.id === a.id))
+      .map((a) => Object.assign({ sport: 'Multisport', tag: '', date: '', read: '2 min', premium: false, img: 'assets/hero.jpg', alt: a.title, dek: '', clubs: [], points: [], author: 'la rédaction' }, a));
+    const allArts = extra.concat(articles);
+    // Clubs supplémentaires : contenus/sport.js
+    const SP = (typeof window !== 'undefined' && window.CASA_SPORT) || {};
+    (SP.clubs || []).forEach((c) => { if (c && c.id && !clubs.some((x) => x.id === c.id)) clubs.push(C(c.id, c.name, c.sport || 'Football', c.city || '', c.img || null)); });
+    this._d = { articles: allArts, videos, clubs, players, cities, sports };
     return this._d;
   }
 
@@ -242,41 +251,24 @@ class Component extends DCLogic {
       M('m-cfa-avranches', 'Football', 'cdf', null, '[Heure]', 'ES Pointe Hague', 'US Avranches MSM', null, null, 'up', { verified: true, venue: 'Beaumont-Hague', article: 'pointe-hague' }),
       M('m-asc-astdv', 'Football', 'r1', '2026-05-31', '15:00', 'AS Cherbourg Football', 'ASTDV B', 8, 0, 'done', { verified: true, article: 'photographe' }),
       M('m-fceh-agneaux', 'Football', 'r2', '2026-05-23', '18:00', 'FCEH', 'Agneaux FC', 5, 1, 'done', { verified: true, venue: 'Stade Jean-Jaurès', article: 'fceh' }),
-      M('d1', 'Football', 'r2', '2026-09-27', '15:00', 'CS Carentan Football', 'AS Tourlaville Football', 2, 2, 'done'),
-      M('d2', 'Football', 'r2', '2026-09-27', '15:00', 'UC Briquebec', 'FCEH', 0, 1, 'done'),
-      M('d3', 'Football', 'r2', '2026-10-04', '15:00', 'FCEH', 'SC Douve Divette', 3, 1, 'done'),
-      M('d4', 'Football', 'r2', '2026-10-04', '15:00', 'AS Tourlaville Football', 'US Côte des Isles', 1, 0, 'done'),
-      M('d5', 'Football', 'r2', '2026-10-06', '20:00', 'Agneaux FC', 'CS Carentan Football', 1, 1, 'live', { minute: 58 }),
-      M('d6', 'Football', 'r2', '2026-10-11', '15:00', 'AS Tourlaville Football', 'FCEH', null, null, 'up'),
-      M('d7', 'Football', 'r2', '2026-10-11', '15:00', 'SC Douve Divette', 'UC Briquebec', null, null, 'up'),
-      M('d8', 'Football', 'r2', '2026-10-18', '15:00', 'US Côte des Isles', 'CS Carentan Football', null, null, 'up'),
-      M('d9', 'Football', 'r2', '2026-10-25', '15:00', 'FCEH', 'Agneaux FC', null, null, 'up'),
-      M('d10', 'Football', 'r2', '2026-11-08', '14:30', 'CS Carentan Football', 'FCEH', null, null, 'up'),
-      M('b1', 'Basketball', 'pnm', '2026-10-03', '20:30', 'Les Marais Cherbourg Basketball', 'UST Basket', 74, 68, 'done'),
-      M('b2', 'Basketball', 'pnm', '2026-10-03', '20:30', 'La Valognaise Basket', 'PL Tourlaville Basket', 61, 65, 'done'),
-      M('b3', 'Basketball', 'pnm', '2026-10-06', '20:30', 'Basket Club de la Hague', 'Les Marais Cherbourg Basketball', 38, 41, 'live', { minute: 22 }),
-      M('b4', 'Basketball', 'pnm', '2026-10-10', '20:30', 'UST Basket', 'La Valognaise Basket', null, null, 'up'),
-      M('b5', 'Basketball', 'pnm', '2026-10-17', '20:30', 'PL Tourlaville Basket', 'Basket Club de la Hague', null, null, 'up'),
       M('b-tic', 'Basketball', 'tic', '2026-05-23', '[Heure]', 'Blue Squad', 'Sélection de la Manche', null, null, 'done', { verified: true, note: 'Défaite en demi-finale', article: 'blue-squad' }),
-      M('w1', 'Water-polo', 'cdm', '2026-09-26', '19:00', 'Les Redoutables', 'Granville', 9, 7, 'done'),
-      M('w2', 'Water-polo', 'cdm', '2026-09-26', '20:15', 'Querqueville', 'Carentan', 6, 6, 'done'),
-      M('w3', 'Water-polo', 'cdm', '2026-10-17', '19:00', 'Carentan', 'Les Redoutables', null, null, 'up'),
-      M('w4', 'Water-polo', 'cdm', '2026-10-17', '20:15', 'Granville', 'Querqueville', null, null, 'up'),
       M('r-gala', 'Rugby', 'gala', '2026-06-18', '[Heure]', 'Marine nationale', 'British Police', null, null, 'done', { verified: true, note: '400 ans de la Marine nationale', article: 'marine-nationale' })
     ];
     const comps = {
-      Football: [{ id: 'r2', label: 'Régional 2' }, { id: 'cdf', label: 'Coupe de France' }, { id: 'r1', label: 'Régional 1' }],
-      Basketball: [{ id: 'pnm', label: 'Championnat' }, { id: 'tic', label: 'Tournoi international' }],
+      Football: [{ id: 'cdf', label: 'Coupe de France' }, { id: 'r2', label: 'Régional 2' }, { id: 'r1', label: 'Régional 1' }],
+      Basketball: [{ id: 'tic', label: 'Tournoi international' }],
       'Water-polo': [{ id: 'cdm', label: 'Coupe de la Manche' }],
       Rugby: [{ id: 'gala', label: 'Matchs de gala' }]
     };
     const T = (team, j, g, n, p, diff, pts, form) => ({ team, j, g, n, p, diff, pts, form });
-    const tables = {
-      r2: [T('FCEH', 3, 3, 0, 0, '+6', 9, 'VVV'), T('AS Tourlaville Football', 3, 2, 1, 0, '+2', 7, 'VNV'), T('CS Carentan Football', 3, 1, 2, 0, '+1', 5, 'NNV'), T('Agneaux FC', 3, 1, 1, 1, '0', 4, 'NVD'), T('US Côte des Isles', 3, 1, 0, 2, '-1', 3, 'DVD'), T('SC Douve Divette', 3, 0, 1, 2, '-3', 1, 'DND'), T('UC Briquebec', 3, 0, 1, 2, '-5', 1, 'DDN')],
-      pnm: [T('Les Marais Cherbourg Basketball', 2, 2, 0, 0, '+14', 4, 'VV'), T('PL Tourlaville Basket', 2, 1, 0, 1, '+2', 3, 'DV'), T('UST Basket', 2, 1, 0, 1, '-3', 3, 'VD'), T('La Valognaise Basket', 2, 0, 0, 2, '-6', 2, 'DD'), T('Basket Club de la Hague', 1, 0, 0, 1, '-7', 1, 'D')],
-      cdm: [T('Les Redoutables', 1, 1, 0, 0, '+2', 3, 'V'), T('Querqueville', 1, 0, 1, 0, '0', 1, 'N'), T('Carentan', 1, 0, 1, 0, '0', 1, 'N'), T('Granville', 1, 0, 0, 1, '-2', 0, 'D')]
-    };
-    const teamClub = { 'FCEH': 'fceh', 'AS Tourlaville Football': 'as-tourlaville', 'CS Carentan Football': 'cs-carentan', 'US Côte des Isles': 'us-cote-isles', 'SC Douve Divette': 'sc-douve', 'UC Briquebec': 'uc-briquebec', 'ES Pointe Hague': 'esph', 'US Avranches MSM': 'us-avranches', 'USON Mondeville FC': 'uson-mondeville', 'AS Cherbourg Football': 'as-cherbourg', 'Les Marais Cherbourg Basketball': 'marais-basket', 'UST Basket': 'ust-basket', 'PL Tourlaville Basket': 'pl-tourlaville', 'La Valognaise Basket': 'valognaise', 'Basket Club de la Hague': 'bc-hague', 'Les Redoutables': 'redoutables' };
+    // Classements et calendriers à jour : contenus/sport.js (mis à jour automatiquement)
+    const SP = (typeof window !== 'undefined' && window.CASA_SPORT) || {};
+    const tables = {};
+    Object.keys(SP.tables || {}).forEach((k) => { tables[k] = (SP.tables[k] || []).map((r) => T(r.team, r.j || 0, r.g || 0, r.n || 0, r.p || 0, r.diff == null ? '' : String(r.diff), r.pts || 0, r.form || '')); });
+    (SP.matches || []).forEach((m) => { if (m && m.id && !matches.some((x) => x.id === m.id)) matches.push(M(m.id, m.sport, m.comp, m.date || null, m.time || '', m.home, m.away, m.hs == null ? null : m.hs, m.as == null ? null : m.as, m.status || (m.hs == null ? 'up' : 'done'), { verified: true, venue: m.venue || '', source: m.source || '' })); });
+    Object.keys(SP.comps || {}).forEach((sp) => { comps[sp] = (comps[sp] || []).filter((c) => !(SP.comps[sp] || []).some((n) => n.id === c.id)).concat(SP.comps[sp] || []); });
+    const teamClubBase = { 'FCEH': 'fceh', 'AS Tourlaville Football': 'as-tourlaville', 'CS Carentan Football': 'cs-carentan', 'US Côte des Isles': 'us-cote-isles', 'SC Douve Divette': 'sc-douve', 'UC Briquebec': 'uc-briquebec', 'ES Pointe Hague': 'esph', 'US Avranches MSM': 'us-avranches', 'USON Mondeville FC': 'uson-mondeville', 'AS Cherbourg Football': 'as-cherbourg', 'Les Marais Cherbourg Basketball': 'marais-basket', 'UST Basket': 'ust-basket', 'PL Tourlaville Basket': 'pl-tourlaville', 'La Valognaise Basket': 'valognaise', 'Basket Club de la Hague': 'bc-hague', 'Les Redoutables': 'redoutables' };
+    const teamClub = Object.assign({}, teamClubBase, SP.teamClub || {});
     const subPlans = {
       casab: { name: 'Casa B+', mois: 4.99, an: 49, perks: ['Tous les articles et vidéos Premium', 'Lecture audio et résumé express', 'Alertes de vos clubs', '−10 % sur la boutique'], casab: true, gazette: null, paper: false },
       'gaz-num': { name: 'La Gazette · Numérique', mois: 3.99, an: 39, perks: ['Chaque numéro en liseuse dès sa parution', 'Archives complètes', 'Sur mobile, tablette et ordinateur'], casab: false, gazette: 'num', paper: false },
@@ -318,49 +310,16 @@ class Component extends DCLogic {
     ];
     const partners = [
       { id: 'olisto', name: 'OlistO', mono: 'O', sector: 'Crédit immobilier · regroupement de crédits · assurance emprunteur', city: 'Réseau de courtage', tier: 'Platinum', color: '#163a5f', since: 2026, perk: 'Étude de votre projet offerte (à confirmer)', desc: 'Réseau de courtage en crédit immobilier, regroupement de crédits, assurance emprunteur, prêt professionnel et immobilier neuf. Partenaire Casa Besports.', real: true },
-      { id: 'kine', name: 'Cotentin Kiné & Sport', mono: 'KS', sector: 'Santé du sportif', city: 'Tourlaville', tier: 'Or', color: '#18705f', since: 2025, perk: 'Bilan postural offert aux licenciés', desc: 'Cabinet de kinésithérapie du sport : prévention, rééducation et préparation physique pour les athlètes amateurs.' },
-      { id: 'phare', name: 'Les Ateliers du Phare', mono: 'AP', sector: 'Menuiserie', city: 'Valognes', tier: 'Or', color: '#9a6410', since: 2026, perk: '−10 % sur les aménagements de club-house', desc: 'Menuiserie artisanale qui équipe vestiaires, buvettes et tribunes des clubs de la région.' },
-      { id: 'comptoir', name: 'Le Comptoir des Isles', mono: 'CI', sector: 'Épicerie fine', city: 'Barneville-Carteret', tier: 'Club', color: '#7a2a33', since: 2026, perk: 'Un panier du terroir à gagner chaque mois', desc: 'Produits de la mer et du terroir normand, fidèle soutien des tournois de la côte des Isles.' },
-      { id: 'mobil', name: 'Hague Mobilités', mono: 'HM', sector: 'Location de vélos', city: 'Beaumont-Hague', tier: 'Club', color: '#3a4a78', since: 2026, perk: '−20 % sur les vélos électriques le week-end', desc: 'Location de vélos et de vélos électriques pour explorer la Hague entre deux matchs.' },
-      { id: 'fournil', name: 'Le Fournil des Remparts', mono: 'FR', sector: 'Boulangerie', city: 'Cherbourg-en-Cotentin', tier: 'Club', color: '#8a4b2a', since: 2025, perk: 'Viennoiseries offertes aux bénévoles le dimanche', desc: 'Boulangerie de quartier qui régale les bénévoles des clubs lors des journées de tournoi.' }
     ];
-    const team = [
-      { id: 'admin', name: 'Administrateur principal', mail: 'admin@casabesports.fr', role: 'admin' },
-      { id: 'lea', name: 'Léa Marchand', mail: 'lea@casabesports.fr', role: 'writer' },
-      { id: 'hugo', name: 'Hugo Lefèvre', mail: 'hugo@casabesports.fr', role: 'writer' },
-      { id: 'ines', name: 'Inès Garnier', mail: 'ines@casabesports.fr', role: 'writer' }
-    ];
-    const seedPosts = [
-      { id: 'p1', author: 'Léa Marchand', status: 'review', updated: 'il y a 2 h', sport: 'Water-polo', tag: 'Coupe de la Manche', clubs: ['redoutables'], img: 'assets/img_d9e43f35.jpg', alt: 'Les Redoutables de Cherbourg à l’entraînement', premium: false, schedule: '',
-        title: 'Coupe de la Manche : Les Redoutables visent plus haut',
-        dek: 'Pour leur troisième participation, les water-poloïstes cherbourgeois veulent confirmer leur progression face à Granville, Querqueville et Carentan.',
-        body: 'Troisième participation, et une ambition intacte. Les Redoutables de Cherbourg abordent la Coupe de la Manche avec un objectif clair : confirmer la progression observée ces dernières saisons.\n\n## Trois adversaires, trois styles\n\nGranville, Querqueville et Carentan se dressent sur leur route. Trois équipes aux profils différents, qui obligeront le groupe cherbourgeois à varier son jeu et à gérer ses temps forts.\n\n> L’objectif est de franchir un cap collectif.\n\n## Une discipline exigeante\n\nLe water-polo demande de l’endurance, de la puissance et une lecture du jeu rapide. Dans le Cotentin, la discipline reste confidentielle, mais elle fidélise ceux qui la découvrent.\n\n- Troisième participation à la Coupe de la Manche\n- Trois adversaires au programme\n- Un groupe qui monte en puissance',
-        log: [{ who: 'Léa Marchand', when: 'il y a 2 h', what: 'Article soumis à la relecture.' }] },
-      { id: 'p2', author: 'Hugo Lefèvre', status: 'review', updated: 'il y a 5 h', sport: 'Basketball', tag: 'Tribune', clubs: ['marais-basket'], img: 'assets/a_benevoles.jpg', alt: 'Bénévoles en maillots oranges au tournoi international de Cherbourg', premium: true, schedule: '',
-        title: 'Tribune : sans bénévoles, pas de sport local',
-        dek: 'Le tournoi international de basket de Cherbourg l’a encore montré : derrière chaque événement réussi, il y a des dizaines de mains invisibles.',
-        body: 'On parle des scores, des paniers à trois points et des trophées. On parle moins de celles et ceux qui ouvrent la salle à sept heures et la ferment à minuit.\n\nAu tournoi international de Cherbourg, les bénévoles en maillots oranges ont tenu les buvettes, les tables de marque, l’accueil des équipes et les vestiaires, tout le week-end. Sans eux, pas de tournoi.\n\n## Un engagement à reconnaître\n\nLe bénévolat sportif s’essouffle dans de nombreux clubs. Les raisons sont connues : manque de temps, sentiment de ne pas être reconnu, charge administrative croissante. Il est temps de valoriser cet engagement, publiquement et durablement.\n\n> Un club, c’est d’abord des gens qui donnent leur temps.\n\nCasa Besports lance une rubrique dédiée. Proposez-nous les bénévoles de votre club.',
-        log: [{ who: 'Hugo Lefèvre', when: 'il y a 5 h', what: 'Article soumis à la relecture.' }] },
-      { id: 'p3', author: 'Inès Garnier', status: 'corrections', updated: 'hier', sport: 'Football', tag: 'Coaching', clubs: [], img: 'assets/a_fceh.jpg', alt: '', premium: false, schedule: '',
-        title: 'Reprise : cinq réflexes',
-        dek: 'Bien reprendre.',
-        body: 'La reprise est un moment clé de la saison et il est très important de bien la préparer car beaucoup de blessures surviennent pendant les premières semaines lorsque les joueurs augmentent trop vite leur charge d’entraînement sans échauffement suffisant et sans écouter les signaux de leur corps.\n\n- Progressivité\n- Échauffement\n- Sommeil et hydratation\n- Écoute du corps\n- Renforcement',
-        log: [{ who: 'Inès Garnier', when: 'avant-hier', what: 'Article soumis à la relecture.' }, { who: 'Administrateur principal', when: 'hier', what: 'Corrections demandées : allonger le chapeau, ajouter un texte alternatif à l’image, découper la première phrase et développer chaque réflexe.' }],
-        note: 'Allonger le chapeau, ajouter un texte alternatif à l’image, découper la première phrase et développer chaque réflexe.' },
-      { id: 'p4', author: 'Hugo Lefèvre', status: 'draft', updated: 'il y a 20 min', sport: 'Football', tag: 'Agenda', clubs: ['fceh', 'as-tourlaville'], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '',
-        title: 'Agenda du week-end : où voir du sport dans le Cotentin', dek: '', body: 'Samedi soir, basket à Équeurdreville. Dimanche, choc de Régional 2 entre l’AS Tourlaville et le FCEH.', log: [{ who: 'Hugo Lefèvre', when: 'il y a 20 min', what: 'Brouillon créé.' }] },
-      { id: 'p5', author: 'Léa Marchand', status: 'scheduled', updated: 'ce matin', sport: 'Football', tag: 'Portrait de club', clubs: ['esph'], img: 'assets/img_51314cdd.jpg', alt: 'Les joueurs de l’ES Pointe-Hague', premium: true, schedule: '2026-10-09T18:00',
-        title: 'ES Pointe-Hague : trente ans de passion haguaise', dek: 'Avant la réception de l’US Avranches en Coupe de France, retour sur trois décennies d’un club qui fait vibrer la Hague.',
-        body: 'Trente ans. L’âge des projets solides et des souvenirs partagés. L’ES Pointe-Hague fête cet anniversaire avec un cadeau inattendu : un quatrième tour de Coupe de France face à l’US Avranches.\n\n## Une qualification arrachée\n\nÀ Mondeville, au tour précédent, les Haguais ont dû passer par la séance de tirs au but. Une qualification au mental, qui a soudé le groupe.\n\n> Recevoir un tel adversaire l’année de ses trente ans, c’est déjà une victoire.',
-        log: [{ who: 'Léa Marchand', when: 'hier', what: 'Article soumis à la relecture.' }, { who: 'Administrateur principal', when: 'ce matin', what: 'Approuvé, publication programmée le 9 octobre à 18 h.' }] }
-    ];
-    const seedAt = { p1: '2026-10-12T14:10:00.000Z', p2: '2026-10-12T11:05:00.000Z', p3: '2026-10-11T17:30:00.000Z', p4: '2026-10-13T08:40:00.000Z', p5: '2026-10-13T07:15:00.000Z' };
+    const team = ((typeof window !== 'undefined' && window.CASA_EQUIPE) || []).map((m, i) => ({ id: i === 0 ? 'admin' : 'm' + i, name: m.name, mail: m.email, role: m.role === 'admin' ? 'admin' : 'writer' }));
+    const seedPosts = [];
+    const seedAt = {};
     const seedType = { p2: 'tribune', p5: 'portrait' };
     seedPosts.forEach((p) => {
       p.type = seedType[p.id] || 'article'; p.updatedAt = seedAt[p.id]; p.log.forEach((l) => { l.at = p.updatedAt; });
       if (typeof CasaRedac !== 'undefined') p.versions = [{ n: 1, at: p.updatedAt, who: p.author, label: p.log[p.log.length - 1].what.replace(/\.$/, ''), snap: CasaRedac.snapOf(p) }];
     });
-    if (typeof CasaRedac !== 'undefined') {
+    if (typeof CasaRedac !== 'undefined' && seedPosts[2]) {
       const p3 = seedPosts[2];
       const v1 = Object.assign({}, p3, { dek: 'Bien reprendre.', body: 'La reprise est un moment clé de la saison.\n\n- Progressivité\n- Échauffement\n- Sommeil' });
       p3.versions = [{ n: 1, at: '2026-10-10T16:00:00.000Z', who: 'Inès Garnier', label: 'Premier jet', snap: CasaRedac.snapOf(v1) }, { n: 2, at: '2026-10-11T09:20:00.000Z', who: 'Inès Garnier', label: 'Article soumis à la relecture', snap: CasaRedac.snapOf(p3) }];
@@ -605,9 +564,8 @@ class Component extends DCLogic {
   me() {
     const r = this.state.role;
     if (r === 'admin') { const n = this.state.name.trim() || 'Administrateur principal'; return { name: n, first: n.split(' ')[0], role: 'admin', roleLabel: 'Administrateur principal · validation et publication' }; }
-    if (r === 'writer' && this.state.staffRole === 'collaborateur') return { name: 'Hugo Lefèvre', first: 'Hugo', role: 'writer', roleLabel: 'Chef d’édition · rédaction, une et Gazette' };
-    if (r === 'writer') return { name: 'Léa Marchand', first: 'Léa', role: 'writer', roleLabel: 'Rédactrice · rédaction et soumission' };
-    if (r === 'club') { const cl = this.data().clubs.find((c) => c.id === this.state.clubRoleId) || this.data().clubs[0]; return { name: 'Correspondant ' + cl.name + ' (démo)', first: 'Correspondant', role: 'club', roleLabel: 'Correspondant de club · ' + cl.name }; }
+    if (r === 'writer') { const n = this.state.name.trim() || 'Rédaction'; return { name: n, first: n.split(' ')[0], role: 'writer', roleLabel: 'Rédaction · écriture et soumission' }; }
+    if (r === 'club') { const cl = this.data().clubs.find((c) => c.id === this.state.clubRoleId) || this.data().clubs[0]; return { name: 'Correspondant ' + cl.name, first: 'Correspondant', role: 'club', roleLabel: 'Correspondant de club · ' + cl.name }; }
     return { name: 'Visiteur', first: 'Visiteur', role: null, roleLabel: '' };
   }
   blocksOf(body) {
@@ -694,7 +652,7 @@ class Component extends DCLogic {
     if (has(/club ?house|clubhouse|communaute|forum|annonce|benevol.*cherche|sondage|carte membre|mes points|fidelite|classement des membres|evenement|covoit/)) {
       if (has(/covoit/)) return { text: 'Le covoiturage pour les matchs se trouve au Club House, rubrique Annonces & entraide.', actions: [act('Voir les trajets', () => this.go('clubhouse', { chTab: 'annonces', chAdCat: 'Covoiturage' }))] };
       if (has(/annonce|benevol/)) return { text: 'Petites annonces du Club House : matériel, bénévolat, joueurs, stages et covoiturage.', actions: [act('Voir les annonces', () => this.go('clubhouse', { chTab: 'annonces' }))] };
-      if (has(/evenement/)) { const ev = this.chData().events; return { text: 'Prochains rendez-vous du Club House (démo) :\n' + ev.map((e) => '• ' + e.title + ' — ' + e.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + e.time).join('\n'), actions: [act('Voir les événements', () => this.go('clubhouse', { chTab: 'events' }))] }; }
+      if (has(/evenement/)) { const ev = this.chData().events; return { text: 'Prochains rendez-vous du Club House :\n' + ev.map((e) => '• ' + e.title + ' — ' + e.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + e.time).join('\n'), actions: [act('Voir les événements', () => this.go('clubhouse', { chTab: 'events' }))] }; }
       if (has(/point|carte|fidelite|classement/)) return { text: 'Vos points se gagnent en pronostiquant, en votant, en participant aux événements et en publiant. Ils déterminent votre niveau : Supporter, Fidèle, Ultra, Légende.', actions: [act('Ma carte membre', () => this.go('clubhouse', { chTab: 'carte' })), act('Classement', () => this.go('clubhouse', { chTab: 'ligue' }))] };
       return { text: 'Le Club House réunit le fil de la communauté, les annonces et l’entraide, les événements, le classement des membres et votre carte de membre.', actions: [act('Entrer au Club House', () => this.go('clubhouse'))] };
     }
@@ -763,7 +721,7 @@ class Component extends DCLogic {
     // scores en direct
     if (has(/direct|live|en cours|score/) && !has(/classement/)) {
       const live = X.matches.filter((m) => m.status === 'live');
-      if (live.length) return { text: 'En direct (données de démonstration) :\n' + live.map((m) => '• ' + m.home + ' ' + score(m) + ' ' + m.away + ' — ' + compName(m)).join('\n'), actions: [act('Ouvrir le Terrain', () => this.go('live', { dTab: 'live' }))] };
+      if (live.length) return { text: 'En direct :\n' + live.map((m) => '• ' + m.home + ' ' + score(m) + ' ' + m.away + ' — ' + compName(m)).join('\n'), actions: [act('Ouvrir le Terrain', () => this.go('live', { dTab: 'live' }))] };
       return { text: 'Aucun match en direct pour le moment.', actions: [act('Voir l’agenda', () => this.go('live', { dTab: 'agenda' }))] };
     }
     // classement
@@ -771,18 +729,18 @@ class Component extends DCLogic {
       const sp = sportOf(); const comp = sp === 'Basketball' ? 'pnm' : sp === 'Water-polo' ? 'cdm' : 'r2';
       const tb = X.tables[comp];
       if (!tb) return { text: 'Pas de classement disponible pour ' + sp + '.', actions: [] };
-      return { text: 'Classement ' + compName({ sport: sp, comp }) + ' (démo) :\n' + tb.slice(0, 3).map((r, i) => (i + 1) + '. ' + r.team + ' — ' + r.pts + ' pts').join('\n'), actions: [act('Classement complet', () => this.go('live', { dSport: sp, dComp: comp, dTab: 'table' }))] };
+      return { text: 'Classement ' + compName({ sport: sp, comp }) + ' :\n' + tb.slice(0, 3).map((r, i) => (i + 1) + '. ' + r.team + ' — ' + r.pts + ' pts').join('\n'), actions: [act('Classement complet', () => this.go('live', { dSport: sp, dComp: comp, dTab: 'table' }))] };
     }
     if (has(/resultat|dernier match|score final|gagne|perdu/)) {
       const sp = sportOf();
       const done = X.matches.filter((m) => m.sport === sp && m.status === 'done').sort((a, b) => (a.verified === b.verified ? (a.date > b.date ? -1 : 1) : a.verified ? -1 : 1)).slice(0, 4);
-      return { text: 'Derniers résultats ' + sp + ' :\n' + done.map((m) => '• ' + m.home + ' ' + score(m) + ' ' + m.away + (m.verified ? ' (vérifié)' : ' (démo)')).join('\n'), actions: [act('Tous les résultats', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'results' }))] };
+      return { text: 'Derniers résultats ' + sp + ' :\n' + done.map((m) => '• ' + m.home + ' ' + score(m) + ' ' + m.away + '').join('\n'), actions: [act('Tous les résultats', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'results' }))] };
     }
     if (has(/prochain|agenda|quand|calendrier|programme|ce week/)) {
       if (has(/pointe|hague|avranches|coupe/)) return { text: 'ES Pointe-Hague – US Avranches, 4e tour de la Coupe de France, à Beaumont-Hague. La date et l’heure restent à confirmer.', actions: [act('Activer un rappel', () => { this.toggleIn('reminders', 'm-cfa-avranches', 'Rappel activé', 'Rappel retiré'); }), act('Pronostiquer', () => this.setState({ matchId: 'm-cfa-avranches', aiOpen: false }))] };
       const sp = sportOf();
       const up = X.matches.filter((m) => m.sport === sp && m.status === 'up' && m.date).sort((a, b) => a.date < b.date ? -1 : 1).slice(0, 4);
-      return { text: 'Prochains matchs ' + sp + ' (démo) :\n' + up.map((m) => '• ' + m.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + m.time + ' : ' + m.home + ' – ' + m.away).join('\n'), actions: [act('Ouvrir l’agenda', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'agenda' }))] };
+      return { text: 'Prochains matchs ' + sp + ' :\n' + up.map((m) => '• ' + m.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + m.time + ' : ' + m.home + ' – ' + m.away).join('\n'), actions: [act('Ouvrir l’agenda', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'agenda' }))] };
     }
     const pl = D.players.find((p) => { const parts = n(p.name).split(' '); return parts.some((w) => w.length >= 5 && new RegExp('\\b' + w + '\\b').test(q)); });
     if (pl) return { text: pl.name + ' — n° ' + pl.num + ', ' + pl.role + ' · ' + pl.clubLabel + '.', actions: [act('Voir le profil', () => this.go('player', { playerId: pl.id }))] };
@@ -936,26 +894,13 @@ class Component extends DCLogic {
   // ---------- espace privé ----------
   privKey() { return 'cb-private:' + this.profileKey(); }
   privSeed() {
-    const id = () => Math.random().toString(36).slice(2, 9);
+    // Espace privé « Mon quotidien » : vide au départ, chacun le remplit
     return {
-      events: [
-        { id: id(), title: 'Entraînement U13 (exemple)', date: this.addDays(0), time: '18:00', cat: 'Sport', place: 'Stade municipal', who: 'leo' },
-        { id: id(), title: 'Réunion des bénévoles (exemple)', date: this.addDays(2), time: '19:30', cat: 'Club', place: '' },
-        { id: id(), title: 'Rendez-vous kiné (exemple)', date: this.addDays(3), time: '08:30', cat: 'Santé', place: '' }],
-      lists: { courses: [{ id: id(), text: 'Bananes', done: false }, { id: id(), text: 'Eau pétillante', done: false }, { id: id(), text: 'Pâtes complètes', done: true }],
-        sac: [{ id: id(), text: 'Protège-tibias', done: false }, { id: id(), text: 'Gourde', done: false }, { id: id(), text: 'Maillot lavé', done: true }],
-        todo: [{ id: id(), text: 'Payer la cotisation', done: false }, { id: id(), text: 'Laver les maillots de l’équipe', done: false }] },
-      notes: [{ id: 'n1', title: 'Composition de samedi', text: 'Gardien : …\nDéfense : …\nRappeler le rendez-vous à 13 h 30 au stade.' }],
-      rides: [{ id: id(), matchId: 'd6', from: 'Parking du stade', driver: 'Sophie (exemple)', seats: 2, mine: false, joined: false }],
-      budget: [{ id: id(), label: 'Licence', amount: 165, cat: 'Licences', date: this.addDays(-20) }, { id: id(), label: 'Crampons', amount: 89.9, cat: 'Équipement', date: this.addDays(-6) }, { id: id(), label: 'Casa B+', amount: 4.99, cat: 'Abonnements', date: this.addDays(-2) }],
-      docs: [{ id: id(), name: 'Certificat médical', who: 'Moi', date: this.addDays(20) }, { id: id(), name: 'Licence', who: 'Léo', date: this.addDays(250) }, { id: id(), name: 'Assurance du club', who: 'Moi', date: this.addDays(-5) }],
-      sessions: [{ id: id(), date: this.addDays(-1), sport: 'Football', min: 90, feel: 'Moyen' }, { id: id(), date: this.addDays(-3), sport: 'Course à pied', min: 40, feel: 'Facile' }, { id: id(), date: this.addDays(-5), sport: 'Renforcement', min: 30, feel: 'Difficile' }],
-      contacts: [{ id: id(), name: 'Coach U13 (exemple)', role: 'Entraîneur', tel: '0600000000' }, { id: id(), name: 'Secrétariat du club (exemple)', role: 'Licences et cotisations', tel: '0200000000' }],
-      goal: 150, noteId: 'n1',
-      meals: { [this.addDays(0)]: { lunch: 'Salade de riz au poulet', dinner: 'Pâtes complètes au saumon' }, [this.addDays(1)]: { lunch: 'Soupe de légumes et pain complet' } },
-      habits: [{ id: 'h1', name: 'Boire 1,5 L d’eau', log: { [this.addDays(-1)]: true, [this.addDays(-2)]: true, [this.addDays(-3)]: true } }, { id: 'h2', name: 'Dormir 8 heures', log: { [this.addDays(-1)]: true, [this.addDays(-4)]: true } }, { id: 'h3', name: 'Étirements 10 min', log: { [this.addDays(-2)]: true } }, { id: 'h4', name: 'Lire 20 minutes', log: {} }],
-      recurs: [{ id: 'r1', title: 'Sortir les poubelles', freq: 'week', dow: 2, dom: 1, done: {} }, { id: 'r2', title: 'Laver les maillots de l’équipe', freq: 'week', dow: 0, dom: 1, done: {} }, { id: 'r3', title: 'Payer la cotisation du club', freq: 'month', dow: 1, dom: 5, done: {} }, { id: 'r4', title: 'Arroser les plantes', freq: 'day', dow: 1, dom: 1, done: {} }],
-      members: [{ id: 'me', name: 'Moi', role: 'Parent · supporter', color: '#0f2236' }, { id: 'leo', name: 'Léo (exemple)', role: 'Fils · football U13', color: '#2e9e6b' }, { id: 'camille', name: 'Camille (exemple)', role: 'Fille · natation', color: '#6aa6c8' }]
+      events: [], lists: { courses: [], sac: [], todo: [] },
+      notes: [{ id: 'n1', title: 'Mes notes', text: '' }],
+      rides: [], budget: [], docs: [], sessions: [], contacts: [],
+      goal: 150, noteId: 'n1', meals: {}, habits: [], recurs: [],
+      members: [{ id: 'me', name: 'Moi', role: '', color: '#0f2236' }]
     };
   }
   priv() {
@@ -1021,9 +966,6 @@ class Component extends DCLogic {
       ['Scriptorial d’Avranches', 'Musée', 'Avranches', 'Il présente les manuscrits médiévaux de l’abbaye du Mont-Saint-Michel.', 'mont']
     ].map(([name, kind, city, desc, placeId]) => ({ name, kind, city, desc, placeId }));
     const entries = [
-      ['Sous les projecteurs de Postaire', 'f2d41cc7df08eba8f5272bd4fddfac50', 'Jeanne D. (démo)', 42], ['Le bain des Redoutables', '38c25d93ed37833c9d08d0a1d75de3f1', 'Marc L. (démo)', 37],
-      ['Le cri du maintien', '824fb1ca8687d16522c2ba8f05d66086', 'Sacha P. (démo)', 29], ['Les maillots oranges', '183faa9bf4b22beda6d2cb41e6b91225', 'Nadia R. (démo)', 25],
-      ['Avant le coup d’envoi', '5cd343902a0b6d6a654108dee90d6fc3', 'Hugo M. (démo)', 18], ['Penalty à Digosville', '020b8966d676cf17abcd5d5bc3a0367d', 'Lou T. (démo)', 12]
     ].map(([title, id, author, base], i) => ({ id: 'e' + i, title, img: B(id), author, base }));
     this._cu = { rooms, flat, routes, venues, entries };
     return this._cu;
@@ -1070,32 +1012,18 @@ class Component extends DCLogic {
   // ---------- Club House : données (démo, enregistrées sur l’appareil) ----------
   chData() {
     if (this._ch) return this._ch;
-    const stored = this.readLS('cb-clubhouse', null);
+    const stored = this.readLS('cb-clubhouse-v2', null);
     if (stored && stored.posts) { this._ch = stored; return stored; }
     const d = (n) => this.addDays(n);
     this._ch = {
       posts: [
         { id: 's1', author: 'La rédaction', staff: true, room: 'Général', time: 'épinglé', text: 'Bienvenue au Club House ! Respect, bienveillance et passion : la charte est simple. Présentez-vous et dites-nous quel club vous suivez.', likes: 31, liked: false, comments: [] },
         { id: 's2', author: 'La rédaction', staff: true, room: 'Football', time: 'il y a 3 h', text: 'L’ES Pointe-Hague reçoit l’US Avranches au 4e tour de la Coupe de France. Qui sera en tribune ? Racontez-nous vos plus beaux souvenirs de coupe.', articleId: 'pointe-hague', likes: 24, liked: false, comments: [{ author: 'Yanis B. (démo)', text: 'J’y serai avec mon fils, première fois qu’il voit un match de coupe !' }] },
-        { id: 's3', author: 'Marion L. (démo)', room: 'Football', time: 'hier', text: 'Quelle soirée au stade Jean-Jaurès pour le maintien du FCEH ! Bravo aux joueurs et aux bénévoles de la buvette.', articleId: 'fceh', likes: 12, liked: false, comments: [{ author: 'Thomas G. (démo)', text: 'Une équipe qui n’a rien lâché.' }] },
-        { id: 's4', author: 'Chloé V. (démo)', room: 'Water-polo', time: 'hier', text: 'Première fois que je regarde du water-polo : impressionnant d’intensité. Allez les Redoutables !', likes: 9, liked: false, comments: [] },
-        { id: 's5', author: 'Thomas G. (démo)', room: 'Basket', time: 'il y a 2 j', text: 'Merci aux maillots oranges du tournoi international, l’organisation était au top.', articleId: 'benevoles', likes: 15, liked: false, comments: [] }
       ],
-      ads: [
-        { id: 'ad1', type: 'Recherche', cat: 'Bénévolat', title: 'Bénévoles pour la buvette du samedi', text: 'Deux heures par mois suffisent, bonne ambiance garantie.', author: 'Un club du Nord-Cotentin (démo)', where: 'Cherbourg-en-Cotentin', time: 'il y a 1 j' },
-        { id: 'ad2', type: 'Propose', cat: 'Matériel', title: 'Crampons enfant, pointure 34', text: 'Portés une saison, très bon état.', author: 'Kevin R. (démo)', where: 'Valognes', time: 'il y a 2 j' },
-        { id: 'ad3', type: 'Donne', cat: 'Matériel', title: 'Lot de chasubles et de plots', text: 'Pour une école de foot ou une association.', author: 'Sarah M. (démo)', where: 'Tourlaville', time: 'il y a 3 j' },
-        { id: 'ad4', type: 'Recherche', cat: 'Joueurs', title: 'Équipe vétérans cherche un gardien', text: 'Matchs le dimanche matin, esprit convivial.', author: 'Julien P. (démo)', where: 'Beaumont-Hague', time: 'il y a 4 j' },
-        { id: 'ad5', type: 'Propose', cat: 'Stages', title: 'Stage multisport pendant les vacances', text: 'Pour les 8-12 ans, programme à venir.', author: 'Une association (démo)', where: 'Équeurdreville', time: 'il y a 5 j' }
-      ],
-      events: [
-        { id: 'e1', kind: 'Rencontre', title: 'Apéro des supporters', desc: 'On se retrouve pour préparer la réception de l’US Avranches en Coupe de France.', date: d(3), time: '19:00', place: '[Lieu à confirmer], Beaumont-Hague', going: 18 },
-        { id: 'e2', kind: 'Sortie sportive', title: 'Footing du dimanche : la boucle de la rade', desc: 'Allure tranquille, tous niveaux, parcours Culture « La boucle de la rade ».', date: d(5), time: '09:30', place: 'Gare maritime, Cherbourg', going: 11 },
-        { id: 'e3', kind: 'Atelier', title: 'Découvrir l’arbitrage', desc: 'Une heure pour comprendre le rôle d’arbitre, ouvert aux ados et aux parents.', date: d(8), time: '14:00', place: '[Lieu à confirmer], Cherbourg', going: 7 },
-        { id: 'e4', kind: 'Convivialité', title: 'Tournoi de pétanque des bénévoles', desc: 'Pour remercier celles et ceux qui font vivre les clubs.', date: d(12), time: '14:30', place: '[Lieu à confirmer], Valognes', going: 24 }
-      ],
+      ads: [],
+      events: [],
       rsvp: {},
-      poll: { q: 'Le moment fort de la saison ?', opts: [{ t: 'Le 5-1 et le maintien du FCEH', v: 18 }, { t: 'Le 8-0 de l’AS Cherbourg', v: 14 }, { t: 'Les Redoutables en Coupe de la Manche', v: 9 }, { t: 'Le parcours de la Blue Squad', v: 7 }] },
+      poll: { q: 'Le moment fort de la saison ?', opts: [{ t: 'Le 5-1 et le maintien du FCEH', v: 0 }, { t: 'Le 8-0 de l’AS Cherbourg', v: 0 }, { t: 'Les Redoutables en Coupe de la Manche', v: 0 }, { t: 'Le parcours de la Blue Squad', v: 0 }] },
       pollVote: null
     };
     return this._ch;
@@ -1104,33 +1032,20 @@ class Component extends DCLogic {
   // ---------- CRM : données et agents autonomes ----------
   crmData() {
     if (this._crm) return this._crm;
-    const st = this.readLS('cb-crm', null);
+    const st = this.readLS('cb-crm-v2', null);
     if (st && st.contacts) { this._crm = st; return st; }
     const d = (n) => this.addDays(n);
     const C = (id, name, org, type, source, city, email, phone, consent, score, last, tags) => ({ id, name, org, type, source, city, email, phone, consent, score, last, tags: tags || [], notes: [], status: score == null ? 'nouveau' : 'qualifié' });
     this._crm = {
       contacts: [
         C('c1', 'Équipe OlistO', 'OlistO', 'Partenaire', 'Partenariat', 'Réseau national', '[contact@olisto]', '[téléphone]', 'oui', 90, d(-2), ['Platinum', 'Immobilier']),
-        C('c2', 'Atelier Cherwood', 'Cherwood', 'Partenaire', 'Partenariat', 'Cherbourg-en-Cotentin', '[contact@cherwood]', '[téléphone]', 'oui', 85, d(-5), ['Boutique', 'Capsule']),
-        C('c3', 'Claire Dumont (démo)', 'Club de football (démo)', 'Club', 'Formulaire contact', 'Valognes', 'claire.dumont@club-demo.fr', '06 00 00 00 01', 'oui', 72, d(-9), ['Résumé de match']),
-        C('c4', 'Marc Lefort (démo)', 'Garage Lefort (démo)', 'Annonceur', 'Salon des partenaires', 'Tourlaville', 'marc@garage-demo.fr', '06 00 00 00 02', 'oui', 64, d(-12), ['Publicité Gazette']),
-        C('c5', 'Sophie Martin (démo)', '', 'Abonné', 'Boutique', 'Cherbourg-en-Cotentin', 'sophie.martin@exemple.fr', '', 'oui', 40, d(-3), ['Casa B+']),
-        C('c6', 'Paul Henry (démo)', 'Association de basket (démo)', 'Club', 'Club House', 'Équeurdreville', 'paul.henry@asso-demo.fr', '', 'non', 55, d(-15), ['Bénévolat']),
-        C('c7', 'Nina Roux (démo)', '', 'Supporter', 'Newsletter', 'Beaumont-Hague', 'nina.roux@exemple.fr', '', 'oui', null, d(0), []),
-        C('c8', 'Jean Morel (démo)', 'Morel Immobilier (démo)', 'Prospect', 'Formulaire OlistO', 'Carentan', 'jean.morel@exemple.fr', '06 00 00 00 03', 'oui', null, d(0), []),
-        C('c9', 'Sophie Martin (démo)', '', 'Supporter', 'Club House', 'Cherbourg', 'Sophie.Martin@exemple.fr ', '', '?', 30, d(-1), [])
+        C('c2', 'Atelier Cherwood', 'Cherwood', 'Partenaire', 'Partenariat', 'Cherbourg-en-Cotentin', '[contact@cherwood]', '[téléphone]', 'oui', 85, d(-5), ['Boutique', 'Capsule'])
       ],
       deals: [
         { id: 'd1', title: 'Partenariat Platinum', org: 'OlistO', contactId: 'c1', amount: 0, stage: 'Gagné', last: d(-2), next: 'Mettre en ligne la page partenaire' },
-        { id: 'd2', title: 'Capsule Cherwood × Casa', org: 'Cherwood', contactId: 'c2', amount: 0, stage: 'Gagné', last: d(-5), next: 'Photos officielles des produits' },
-        { id: 'd3', title: 'Résumés de match · saison', org: 'Club de football (démo)', contactId: 'c3', amount: 2900, stage: 'Proposition', last: d(-9), next: 'Relancer après envoi du devis' },
-        { id: 'd4', title: 'Publicité Gazette · 3 numéros', org: 'Garage Lefort (démo)', contactId: 'c4', amount: 1200, stage: 'Négociation', last: d(-12), next: 'Valider le format' },
-        { id: 'd5', title: 'Résumé de match · finale', org: 'Association de basket (démo)', contactId: 'c6', amount: 290, stage: 'Qualifié', last: d(-4), next: 'Envoyer le devis' },
-        { id: 'd6', title: 'Partenariat Or', org: 'Morel Immobilier (démo)', contactId: 'c8', amount: 3000, stage: 'Nouveau', last: d(0), next: 'Premier appel' },
-        { id: 'd7', title: 'Vidéo de présentation club', org: 'Club de football (démo)', contactId: 'c3', amount: 650, stage: 'Perdu', last: d(-30), next: '—' }
+        { id: 'd2', title: 'Capsule Cherwood × Casa', org: 'Cherwood', contactId: 'c2', amount: 0, stage: 'Gagné', last: d(-5), next: 'Photos officielles des produits' }
       ],
       tasks: [
-        { id: 't1', title: 'Envoyer le devis « Résumé de match · finale »', due: d(1), rel: 'Association de basket (démo)', owner: 'humain', done: false },
         { id: 't2', title: 'Mettre en ligne les photos Cherwood', due: d(-1), rel: 'Cherwood', owner: 'humain', done: false },
         { id: 't3', title: 'Compléter le numéro ORIAS d’OlistO', due: d(2), rel: 'OlistO', owner: 'humain', done: false }
       ],
@@ -1145,7 +1060,7 @@ class Component extends DCLogic {
     };
     return this._crm;
   }
-  saveCrm(v) { this._crm = v; this.writeLS('cb-crm', v); this.setState({ crmRev: (this.state.crmRev || 0) + 1 }); }
+  saveCrm(v) { this._crm = v; this.writeLS('cb-crm-v2', v); this.setState({ crmRev: (this.state.crmRev || 0) + 1 }); }
   crmNow() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0'); }
   // Un événement du site (formulaire, commande, newsletter, OlistO…) crée ou met à jour un contact
   crmCapture(ev) {
@@ -1659,7 +1574,7 @@ class Component extends DCLogic {
     const ptRaw = X.partners.find((p) => p.id === s.partnerId);
     const claimed = ptRaw && s.claimed.indexOf(ptRaw.id) >= 0;
     const pt = Object.assign({}, ptRaw || X.partners[0], {
-      note: ptRaw && ptRaw.real ? 'Partenaire Casa Besports.' : 'Partenaire fictif, créé pour la démonstration.',
+      note: ptRaw && ptRaw.real ? 'Partenaire Casa Besports.' : 'Partenaire Casa Besports.',
       claimLabel: ptRaw && ptRaw.real ? 'Découvrir l’offre OlistO' : claimed ? 'Avantage enregistré ✓' : (subscribed ? 'Profiter de l’avantage' : 'Réservé aux abonnés Casa B+'),
       claim: () => { if (ptRaw && ptRaw.real) { this.go('olisto'); return; } if (!subscribed) { this.go('offers', { offerTab: 'Casa B+' }); return; } if (!claimed) { this.setState({ claimed: s.claimed.concat([ptRaw.id]) }); this.say('Avantage ajouté à Mon espace'); } }
     });
@@ -2184,7 +2099,7 @@ class Component extends DCLogic {
     // ---------- Club House ----------
     const CHD = this.chData();
     const chState = CHD;
-    const saveCh = (patch) => { const v = Object.assign({}, this.chData(), patch); this._ch = v; this.writeLS('cb-clubhouse', v); this.setState({ chRev: (s.chRev || 0) + 1 }); };
+    const saveCh = (patch) => { const v = Object.assign({}, this.chData(), patch); this._ch = v; this.writeLS('cb-clubhouse-v2', v); this.setState({ chRev: (s.chRev || 0) + 1 }); };
     const needLogin = () => { if (!s.loggedIn) { this.setState({ loginOpen: true, linkSent: false }); this.say('Connectez-vous pour participer au Club House'); return true; } return false; };
     const meName = s.role === 'admin' ? (s.name.trim() || 'Administrateur principal') : s.role === 'writer' ? 'Léa Marchand' : (s.name.trim() || (s.email ? s.email.split('@')[0] : 'Vous'));
     const myPosts = chState.posts.filter((p) => p.mine).length;
@@ -2230,7 +2145,7 @@ class Component extends DCLogic {
         remove: () => saveCh({ posts: chState.posts.filter((q) => q.id !== p.id) }) }; });
     const poll = chState.poll;
     const pollTotal = poll.opts.reduce((a, o, i) => a + o.v + (chState.pollVote === i ? 1 : 0), 0);
-    const pollV = { q: poll.q, total: String(pollTotal), opts: poll.opts.map((o, i) => { const v = o.v + (chState.pollVote === i ? 1 : 0); const pc = Math.round(v / pollTotal * 100); const mine = chState.pollVote === i;
+    const pollV = { q: poll.q, total: String(pollTotal), opts: poll.opts.map((o, i) => { const v = o.v + (chState.pollVote === i ? 1 : 0); const pc = pollTotal ? Math.round(v / pollTotal * 100) : 0; const mine = chState.pollVote === i;
       return { t: o.t, pct: pc + ' %', w: pc + '%', bar: mine ? 'var(--acc)' : 'var(--line-2)', border: mine ? 'var(--acc)' : 'var(--line)', pressed: mine ? 'true' : 'false',
         vote: () => { if (needLogin()) return; saveCh({ pollVote: mine ? null : i }); if (!mine) this.say('Vote enregistré · +5 pts'); } }; }) };
     const evDate = (iso) => { const d = pd(iso); return { dow: DOW[d.getDay()], day: String(d.getDate()), mon: MONTHS[d.getMonth()] }; };
@@ -2244,8 +2159,8 @@ class Component extends DCLogic {
     const adCat = AD_CATS.indexOf(s.chAdCat) >= 0 ? s.chAdCat : 'Tout';
     const TYPE_C = { Propose: ['var(--surface-2)', 'var(--success)'], Recherche: ['var(--note-bg)', 'var(--note-fg)'], Donne: ['var(--danger-bg)', 'var(--danger)'] };
     const chAds = chState.ads.filter((a) => adCat === 'Tout' || a.cat === adCat).map((a) => ({ type: a.type, cat: a.cat, title: a.title, text: a.text, author: a.author, where: a.where, time: a.time, mine: !!a.mine, typeBg: TYPE_C[a.type][0], typeFg: TYPE_C[a.type][1],
-      contactLabel: a.mine ? 'Mon annonce' : 'Contacter', contact: () => { if (a.mine || needLogin()) return; this.say('Message envoyé à ' + a.author + ' (démo)'); }, remove: () => saveCh({ ads: chState.ads.filter((x) => x.id !== a.id) }) }));
-    const board = [['Marion L. (démo)', 412], ['Yanis B. (démo)', 356], ['Chloé V. (démo)', 298], ['Thomas G. (démo)', 241], ['Kevin R. (démo)', 187], ['Sarah M. (démo)', 132], ['Julien P. (démo)', 95]].map(([name, p]) => ({ name, p, me: false }));
+      contactLabel: a.mine ? 'Mon annonce' : 'Contacter', contact: () => { if (a.mine || needLogin()) return; this.say('Message envoyé à ' + a.author); }, remove: () => saveCh({ ads: chState.ads.filter((x) => x.id !== a.id) }) }));
+    const board = [];
     if (s.loggedIn) board.push({ name: meName + ' (vous)', p: pts, me: true });
     const boardV = board.sort((a, b) => b.p - a.p).map((b, i) => { const li = LV.reduce((a, l, k) => (b.p >= l[1] ? k : a), 0); return { rank: String(i + 1), name: b.name, points: b.p + ' pts', level: LV[li][0], weight: b.me ? '900' : '700', bg: b.me ? 'var(--surface-2)' : 'var(--surface)', rankBg: i < 3 ? 'var(--acc)' : 'var(--surface-2)', rankFg: i < 3 ? '#080f1a' : 'var(--ink)' }; });
     const ch = { tFil: chTab === 'fil', tAnnonces: chTab === 'annonces', tEvents: chTab === 'events', tLigue: chTab === 'ligue', tCarte: chTab === 'carte',
@@ -2433,7 +2348,7 @@ class Component extends DCLogic {
       roleChips, playerList, pl, cityName: s.city, cityClubs,
       // terrain
       dSports, dComps, hasComps: dComps.length > 0, dSportName: s.dSport, dTabs, sportEmpty: !sportHasData, sportHasData,
-      isDemo: sportHasData, srcLabel: 'Flux officiels à connecter · démo', srcColor: 'var(--gold-text)', updatedAgo: (s.tick % 4) * 15 + 5 + ' s',
+      isDemo: sportHasData, srcLabel: ((window.CASA_SPORT || {}).maj ? 'Données officielles · mise à jour ' + new Date(window.CASA_SPORT.maj).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : 'Résultats vérifiés par la rédaction'), srcColor: 'var(--gold-text)', updatedAgo: (window.CASA_SPORT || {}).maj ? new Date(window.CASA_SPORT.maj).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—',
       tabLive: s.dTab === 'live', tabResults: s.dTab === 'results', tabAgenda: s.dTab === 'agenda', tabCal: s.dTab === 'cal', tabTable: s.dTab === 'table', tabPronos: s.dTab === 'pronos',
       liveCards, noLive: liveM.length === 0, resultRows, noResults: resultRows.length === 0, agendaRows, noAgenda: agendaRows.length === 0,
       hasTable: !!tbl, noTable: !tbl, tableRows,
@@ -2515,7 +2430,7 @@ class Component extends DCLogic {
       displayName: s.name || s.email.split('@')[0] || 'supporter',
       alerts, followList, noFollows: followList.length === 0, savedArticles, noSaved: savedArticles.length === 0,
       orders: s.orders, noOrders: s.orders.length === 0,
-      logout: () => { if (window.CasaAuth && window.CasaAuth.on) window.CasaAuth.signOut().catch(() => {}); this.setState({ loggedIn: false, subs: { casab: false, gazette: null } }); this.go('home'); this.say('Vous êtes déconnecté'); },
+      logout: () => { if (window.CasaAuth && window.CasaAuth.on) window.CasaAuth.signOut().catch(() => {}); this.setState({ loggedIn: false, role: null, subs: { casab: false, gazette: null } }); this.go('home'); this.say('Vous êtes déconnecté'); },
       loginOpen: s.loginOpen, openLogin: () => this.setState({ loginOpen: true, linkSent: false, formError: '' }), closeLogin: () => this.setState({ loginOpen: false }),
       linkSent: s.linkSent, linkNotSent: !s.linkSent,
       sendLink: () => {
