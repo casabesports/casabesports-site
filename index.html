@@ -616,6 +616,12 @@ button.b-card:hover{transform:translateY(-3px);box-shadow:0 20px 40px -26px var(
 .b-card { border-radius: 0; border: 1px solid var(--line); box-shadow: none; }
 button.b-card:hover { transform: none; box-shadow: none; border-color: var(--ink); }
 .tile, .mark, .thm-opt, .thm-sw, .pv-btn { border-radius: 0; }
+/* Choix du thème (Mon espace › Paramètres › Apparence) : vignettes d’aperçu */
+.thm-opt { display: flex; flex-direction: column; align-items: flex-start; gap: .55rem; width: 100%; text-align: left; padding: .7rem; background: var(--surface); color: var(--text); border: 1.5px solid var(--line); cursor: pointer; font: inherit; transition: border-color .2s ease; }
+.thm-opt:hover { border-color: var(--line-2); }
+.thm-opt[aria-checked="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.thm-sw { position: relative; overflow: hidden; width: 100%; aspect-ratio: 16 / 10; border: 1px solid var(--line); }
+@media (max-width: 520px) { .thm-sw { max-height: 96px; } }
 .tile:hover { transform: none; box-shadow: none; }
 .glass { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
 .fab { box-shadow: none; }
