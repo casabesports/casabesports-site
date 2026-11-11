@@ -1,0 +1,2637 @@
+
+/*!
+ * Casa Besports — logique de l’application (état, données, navigation, boutique,
+ * Terrain, Gazette, espace rédaction, assistant Casa IA).
+ * La classe Component est montée par js/dc-runtime.js ; renderVals() fournit les valeurs du gabarit.
+ */
+const BLOB_FILES = {"0855c8136dcdda770cb476333ba7ad46": "hero.jpg", "5cd343902a0b6d6a654108dee90d6fc3": "img_51314cdd.jpg", "66c390103494d9a28a5f34e10524881c": "img_fe51d409.jpg", "2b8b1c873d91f86dbbe51fe32be05f69": "img_2fb41bb1.jpg", "d75f806f46d28a0e206a30c27b8e58ad": "img_4994dc60.jpg", "904540d957c239c0ab657cce252abfb1": "img_11c2b62b.jpg", "38c25d93ed37833c9d08d0a1d75de3f1": "img_d9e43f35.jpg", "8d45daef1b083349dec7666774fc55ff": "img_b0f4c33c.jpg", "c6e9c6ecc949a47ccf67d70d758f0fe5": "img_4606c0a1.jpg", "2010d82cc508d4cb5ef99cb551c26649": "img_a1612881.jpg", "e6132a6993a0d040085ac66b6f46cf6e": "a_photographe.jpg", "183faa9bf4b22beda6d2cb41e6b91225": "a_benevoles.jpg", "33cc6fbd406b8554971d61a0887d4a76": "a_buteurs.jpg", "824fb1ca8687d16522c2ba8f05d66086": "a_fceh.jpg", "4f81a4491eb301c8894c5d5d2ab04ff6": "a_bluesquad.jpg", "f2d41cc7df08eba8f5272bd4fddfac50": "a_feminines.jpg", "020b8966d676cf17abcd5d5bc3a0367d": "v_digosville.jpg", "5841e4625d308992d931ba37f1195ce3": "v_arbitre.jpg", "c83c4c88d71f1d3daf3a3aab27ebcfcf": "p_rouleau.jpg", "100430acc5d688e72f589b6ca475b01d": "p_letan.jpg", "eea5f2cb98593d0a8baa19b10e57a843": "p_piedagnel.jpg", "fe4b5960100016bbbb4080d69cfbb67d": "p_mariette.jpg", "b94216cd40407eb3e572ce66447bac81": "p_cgosselin.jpg", "a2337077993c11e33ea45478e8c0355d": "p_edubois.jpg", "47cc1f566d64d7869adcd6c21cdf47bf": "lieu_gare.svg", "f46b43bf0cb05c3fde4cba8ae7d9c8d5": "lieu_gatteville.svg", "68220997b900b01cc4ef65a2529b0ff1": "lieu_jobourg.svg", "56c5699f8f042372def6ef4a6c5ca373": "lieu_mont.svg", "37f0accd200070c08850e6289a7929b2": "lieu_rade.svg", "66637b2212fc497ace187dc8cf592255": "lieu_sme.svg", "0de7edf37ab180831b6bc0716d103174": "vt_bob.svg", "fd1211c3ff3542889b121013ad1870ef": "vt_casquette.svg", "f42d1f454d139e25a1ac0ee024729688": "vt_crew_vestiaire.svg", "d9a1db651fe41d5fd589c366bef1324f": "vt_hoodie_csc.svg", "deb3fbf78d39b9e4c4113f074d7c9aca": "vt_hoodie_signature.svg", "5b6c3a1ff464e0f2d225ba053daaad40": "vt_jogger.svg", "9b36fe1ef00b3ec975a9172298a6454c": "vt_maillot_retro.svg", "c9a63220440c307d4cb0d4ede91458db": "vt_pull_marin.svg", "5b1edd96ba3ffdebc3e7aa064e7b33aa": "vt_short_isles.svg", "97e778b2f0df4c4eb062d01e0da991b4": "vt_tee_identitaire.svg", "32a264a8dac6d54d7c4f1f0be13729ef": "vt_tee_phare.svg", "826b023bd7ad50930b096cfa62539fbe": "vt_tee_rade.svg", "e4e307f2a97987e98f438ae8fb818be7": "vt_tote.svg", "e2b6c5370ceaeee61a7cce40f0298965": "vt_track_jacket.svg", "abec48f4e69f287e10674c11a8468bec": "livre_impact.svg", "91855c40cd47f028874202e72a33d389": "gz_cover.jpg", "bae1d2ac6cb6529aa1e99e023df405ff": "gz_scarf.jpg", "25fc361529644e7b5978722ef83683b6": "gz_benevole.jpg", "981e82bbbb0f7a9367c97e4c848c2fc6": "ph_hoodie_roule.jpg", "b248d9f3a2edcd1758c3805be91a57a2": "ph_crew_presquile.jpg", "3da9816218acfc421e4732cb9d2f5b52": "ph_hoodie_signature.jpg", "c00d8ac59262a5549ee606cc8fb2de8c": "ph_crew_vestiaire.jpg", "b75f47de93c1cb54bec627f5067d8110": "ph_hoodie_csc.jpg", "2c48f7132b968b70be1c7d701dc4a9d6": "ph_tee_identitaire.jpg", "7ee74118a425ec7af743cd47cb36fdc4": "ph_pull_marin.jpg", "a81051d440f01667a54fa15c341bc54f": "ph_tote.jpg", "f06f2d89c41fd9b8126e1c5385bb9dcc": "ph_tee_phare.jpg", "ca6ba71144c430d01edfdbf1e2a9af0c": "ph_tee_rade.jpg", "a48eb676f77a86afa6b51ee515273bef": "ph_maillot_retro.jpg", "131e295ddb6c101579cef305062b367b": "ph_track_jacket.jpg", "16e026e698fae2bef37b1f79d0419272": "ph_jogger.jpg", "5cf5a581ded4f4eb23159f4cd0e9c5c6": "ph_short_isles.jpg", "ca573d60402844d34a66033b90eefbf5": "ph_bob.jpg", "92b8ad3992858d32669bcfea753c86ca": "ph_casquette.jpg", "c28fddabc16efa8e58e4c93afee5990d": "dt_hoodie_roule.jpg", "1a81347b7337a4d848621af0fb067688": "dt_crew_presquile.jpg", "a7f3ab74b38b934ee0063eba2975cdd6": "dt_hoodie_signature.jpg", "c385b1324c6ffa4e23d8af37ea839381": "gz_foule.jpg", "56cc472c6c2fbb4d9666f881a2e56edf": "gz_duel.jpg", "9807b5c5369f06c7aaf95b75312f046d": "ph_kit_runes.jpg", "0db18dd911c14da925f4e895f71e4e1c": "ph_kit_runes_dos.jpg", "e615fde32424915e839a12659097f676": "dt_kit_runes.jpg", "f1953e481ef07e95680164a46c2d9f41": "ph_kit_runes_ml.jpg", "7622c7f11f14ef0c49d572d2decbbae5": "ph_short_runes.jpg", "4406cb951b6112ead68dac1d86a30e53": "ph_kit_ancre.jpg", "65c33e4e715ef5dd1201de7343556d4b": "ph_short_ancre.jpg", "89cc02d697fec04f522599802bf187d8": "ph_kit_ciel.jpg", "b04e3dcc6da7234630c60ea939f854eb": "ph_kit_nuit.jpg", "aea7ea50082d523bc83f3f6017ba816f": "ph_kit_diagonale.jpg", "6f95460a58f5dc0c53a254df010b7963": "ph_tee_viking.jpg", "aa0d7bea1efc166a337ab714b04b33e1": "ph_cap_viking.jpg", "c4379d1401d63672573652d5be3b7e4e": "ph_patch_cb.jpg", "a1ac42a493284740e4e43b170065bafb": "ia_viking.jpg", "3ffb17091f7c840777e15fe18bb3fbac": "ia_logo.jpg", "1dd9d448ba429149f6f1cde6ac32d694": "logo-casabesports.svg"};
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      view: 'home', hist: [], articleId: null, videoId: null, discId: null, clubId: null, playerId: null, productId: null,
+      q: '', cat: 'Tous', premiumOnly: false, savedOnly: false, clubSport: 'Tous', role: 'Tous', clubTab: 'articles',
+      city: 'Cherbourg', menuOpen: false, moreOpen: false, searchOpen: false, sq: '', loginOpen: false, linkSent: false,
+      loggedIn: false, subs: { casab: false, gazette: null }, name: '', email: '', address: '', subject: '', profile: '', message: '', contactSent: false,
+      formError: '', step: 1, period: 'mois', subPlan: 'casab', isGift: false, saved: [], follows: [], followPlayers: [], remind: false,
+      summary: false, listening: false, fontStep: 1, reaction: null, playing: false, goal: 'Visibilité',
+      alerts: { matchs: true, articles: true, videos: false }, toast: '',
+      dSport: 'Football', dComp: 'r2', dTab: 'live', calMonth: 9, calDay: 10, matchId: null, pronos: {}, reminders: [],
+      shopLine: 'Tout', shopSort: 'pop', color: 0, size: null, qty: 1, persoName: '', persoNum: '', prodError: '', sizeGuide: false,
+      cart: [], cartOpen: false, ship: 'home', giftWrap: false, orderDone: false, orderNo: '', orders: [],
+      offerTab: 'Tout', readerOpen: false, page: 0, nlEmail: '', nlDone: false, tick: 0,
+      hdrY: '0', scrolled: false, placeOverride: null, placeOpen: false, placeIdx: 0, partnerId: null, claimed: [],
+      aiOpen: false, aiInput: '', aiTyping: false, aiMsgs: [{ role: 'bot', text: 'Bonjour, je suis Casa IA. Posez-moi une question sur les scores, la boutique, la Gazette, les clubs ou l’histoire du Cotentin.', actions: [] }],
+      readerFont: 1, quizAns: {}, gzVote: this.readLS('cb-gz-vote', null), theme: this.loadTheme(), homeLayout: this.readLS('cb-home-layout', 'dashboard'), mods: this.readLS('cb-home-mods', null), customizeOpen: false, wxCity: this.readLS('cb-wx-city', 'Cherbourg'), wxLive: {}, wxLoading: false, priv: null, privFor: null, pvTab: 'jour', pvList: 'courses', pf: {}, pvMember: 'all', chTab: 'fil', bgMode: this.readLS('cb-bg-mode', 'aucun'), crmTab: 'home', crmSel: null, crmType: 'Tous', crmOwner: 'Tous', crmRev: 0, prodImg: 0, cardColor: this.readLS('cb-card-color', 'noir'), chRoom: 'Tous', chAdCat: 'Tout', chOpen: {}, chf: {}, chRev: 0, cuTab: 'expo', cuKind: 'Tous', workIdx: null, votes: this.readLS('cb-votes', {}), cuf: {}, cuSent: false, tmWork: 40, tmRest: 20, tmRounds: 8, tmRunning: false, tmPhase: 'ready', tmLeft: 40, tmRound: 1, sysDark: this.sysDark(), themeMenuOpen: false, themeAnim: false, legalDoc: 'mentions', role: null, studioTab: 'dash', posts: null, editId: 'p1', edMode: 'write', reviewNote: '', commentDraft: '', aiOutKind: null, stQ: '', stFilter: 'all', inviteEmail: '',
+      rx: null, rxu: {}, rxServer: null, staffRole: 'redacteur',
+      rsu: {}, cvu: {}, clubRoleId: 'esph', clubEditId: null, verifId: '',
+      creaN: 0, creaOpen: false, creaMsg: '', creaTeam: null, creaSure: ''
+    };
+  }
+  componentDidMount() {
+    this._crmIv = setInterval(() => { if (this.state.role === 'admin') { const A = this.crmData().agents; ['qualif', 'hygiene', 'relance', 'fidel', 'rapport'].forEach((k) => { if (A[k] && A[k].on) this.runAgent(k); }); } }, 20000);
+    this._iv = setInterval(() => this.setState({ tick: this.state.tick + 1 }), 15000);
+    try { const rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; if (window.CASA_APP && !rm && !window.sessionStorage.getItem('cb-intro')) { window.sessionStorage.setItem('cb-intro', '1'); this.setState({ introOn: true }); this._introT = setTimeout(() => this.setState({ introOn: false }), 3500); } } catch (e) {}
+    this._lastY = 0;
+    this._onScroll = () => {
+      const y = window.scrollY || 0; const dy = y - this._lastY; this._lastY = y;
+      if (y > 140 && dy > 6 && this.state.hdrY !== '-120%' && !this.state.menuOpen && !this.state.moreOpen) this.setState({ hdrY: '-120%' });
+      else if ((dy < -6 || y < 140) && this.state.hdrY !== '0') this.setState({ hdrY: '0' });
+      const sc = y > 700; if (sc !== this.state.scrolled) this.setState({ scrolled: sc });
+    };
+    try { window.addEventListener('scroll', this._onScroll, { passive: true }); } catch (e) {}
+    this._onGzKey = (e) => {
+      if (!this.state.readerOpen) return;
+      const t = e.target; if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); this.gzGo(this.state.page + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); this.gzGo(this.state.page - 1); }
+      else if (e.key === 'Escape') this.setState({ readerOpen: false });
+    };
+    try { window.addEventListener('keydown', this._onGzKey); } catch (e) {}
+    try { this._mq = window.matchMedia('(prefers-color-scheme: dark)'); this._onMq = (e) => this.setState({ sysDark: e.matches }); if (this._mq.addEventListener) this._mq.addEventListener('change', this._onMq); else this._mq.addListener(this._onMq); } catch (e) {}
+    try { document.documentElement.setAttribute('data-cb-theme', this.state.theme); } catch (e) {}
+    try { const vq = new URLSearchParams(location.search).get('verifier'); if (vq) setTimeout(() => this.go('verifier', { verifId: vq.slice(0, 20) }), 0); } catch (e) {}
+    this.creaInit();
+    this.fetchWeather(this.state.wxCity); this._wxIv = setInterval(() => { const c = this.state.wxCity; const w = (this.state.wxLive || {})[c]; if (w) { this.setState({ wxLive: Object.assign({}, this.state.wxLive, { [c]: Object.assign({}, w, { at: 0 }) }) }); } this.fetchWeather(c); }, 30 * 60 * 1000);
+  }
+  componentWillUnmount() { clearInterval(this._crmIv); clearInterval(this._iv); clearInterval(this._wxIv); clearInterval(this._tmI); clearTimeout(this._t); clearTimeout(this._ai); try { window.removeEventListener('scroll', this._onScroll); } catch (e) {} try { if (this._mq) (this._mq.removeEventListener ? this._mq.removeEventListener('change', this._onMq) : this._mq.removeListener(this._onMq)); } catch (e) {} clearTimeout(this._th); }
+
+  data() {
+    if (this._d) return this._d;
+    const A = (id, sport, tag, date, read, premium, img, alt, title, dek, clubs, points) => ({ id, sport, tag, date, read, premium, img, alt, title, dek, clubs, points });
+    const articles = [
+      A('pointe-hague', 'Football', 'Coupe de France', '17 sept.', '1 min', true, 'assets/img_51314cdd.jpg', 'L’ES Pointe-Hague', 'Pointe-Hague s’apprête à défier Goliath',
+        'L’année de ses trente ans, l’ES Pointe-Hague reçoit l’US Avranches au quatrième tour de la Coupe de France, face à un adversaire invaincu en championnat.',
+        ['esph', 'us-avranches', 'uson-mondeville'], ['Qualifiée aux tirs au but à Mondeville au tour précédent.', 'Reçoit l’US Avranches, invaincue en championnat, au 4e tour.', 'Un défi de taille pour les 30 ans du club haguais.']),
+      A('alexan-morin', 'Trail', 'Portrait', '25 juin', '2 min', true, 'assets/img_2fb41bb1.jpg', 'Alexan Morin et son frère', 'Dans les pas d’Alexan Morin, le trail comme héritage fraternel',
+        'Figure montante du trail dans le Nord-Cotentin, Alexan Morin avance avec talent, ambition et une volonté forte : devenir un modèle pour son frère.',
+        [], ['Figure montante du trail dans le Nord-Cotentin.', 'Une progression portée par le talent et l’ambition.', 'Un moteur : devenir un modèle pour son frère.']),
+      A('marine-nationale', 'Rugby', 'Marine nationale', '18 juin', '1 min', true, 'assets/img_4994dc60.jpg', 'Marine nationale contre British Police', 'Marine nationale × British Police : 400 ans de la Marine',
+        'Un match de rugby anniversaire pour célébrer quatre siècles de Marine nationale.', [], ['Rencontre Marine nationale contre British Police.', 'Organisée pour les 400 ans de la Marine nationale.']),
+      A('beaumont', 'Football', 'Événement', '15 juin', '3 min', true, 'assets/img_11c2b62b.jpg', 'Fête du football à Beaumont', 'Beaumont a vécu trois jours de football total',
+        'Pendant trois jours, Beaumont a vibré au rythme du football : interviews, photos, vidéos et articles réunis pour revivre l’événement complet.',
+        ['esph'], ['Trois jours de football à Beaumont.', 'Interviews, photos, vidéos et articles réunis.', 'Entre terrain, émotions et moments partagés.']),
+      A('redoutables', 'Water-polo', 'Coupe de la Manche', '6 juin', '2 min', false, 'assets/img_d9e43f35.jpg', 'Les Redoutables de Cherbourg', 'Les Redoutables prêts pour la Coupe de la Manche',
+        'Pour leur troisième participation, Les Redoutables de Cherbourg veulent confirmer leur progression face à Granville, Querqueville et Carentan.',
+        ['redoutables'], ['Troisième participation à la Coupe de la Manche.', 'Adversaires : Granville, Querqueville et Carentan.', 'Objectif : confirmer la progression.']),
+      A('photographe', 'Football', 'Regard terrain', '2 juin', '2 min', false, 'assets/a_photographe.jpg', 'AS Cherbourg contre ASTDV B', '« Surpris par la qualité collective de Cherbourg »',
+        'Le photographe Thibault Mariette couvre la rencontre AS Cherbourg – ASTDV B, remportée 8-0 par les Cherbourgeois.',
+        ['as-cherbourg'], ['Le regard du photographe Thibault Mariette.', 'AS Cherbourg s’impose 8-0 face à l’ASTDV B.']),
+      A('benevoles', 'Basketball', 'Tournoi international', '30 mai', '1 min', false, 'assets/a_benevoles.jpg', 'Les bénévoles du tournoi de basket', 'Cœur battant du CBB : merci aux maillots oranges',
+        'Le tournoi international de basket de Cherbourg a aussi été une réussite grâce à ses bénévoles, mobilisés tout le week-end dans l’ombre.',
+        ['marais-basket'], ['Hommage aux bénévoles du tournoi international.', 'Mobilisés tout le week-end pour accueillir et organiser.']),
+      A('buteurs', 'Football', 'Régional 2', '25 mai', '2 min', false, 'assets/a_buteurs.jpg', 'Adrien Cuquemelle et Enzo Perrey', 'Cuquemelle – Perrey : le duel des buteurs de R2',
+        'Entre Adrien Cuquemelle, finisseur du CS Carentan, et Enzo Perrey, revenu à l’AS Tourlaville, la course au titre de meilleur buteur révèle le potentiel du football local.',
+        ['cs-carentan', 'as-tourlaville'], ['Duel pour le titre de meilleur buteur de R2.', 'Adrien Cuquemelle (CS Carentan) face à Enzo Perrey (AS Tourlaville).']),
+      A('fceh', 'Football', 'Régional 2', '24 mai', '1 min', false, 'assets/a_fceh.jpg', 'Les joueurs du FCEH célèbrent', 'Le FCEH écrase Agneaux et valide son maintien en R2',
+        'Large vainqueur d’Agneaux FC au stade Jean-Jaurès, le FCEH signe une victoire majeure et valide son maintien en Régional 2.',
+        ['fceh'], ['Victoire large face à Agneaux FC au stade Jean-Jaurès.', 'Le maintien en Régional 2 est validé.']),
+      A('blue-squad', 'Basketball', 'Tournoi international', '24 mai', '1 min', true, 'assets/a_bluesquad.jpg', 'La Blue Squad en demi-finale', 'La Blue Squad cède en demie, mais vise le podium',
+        'La Blue Squad s’est inclinée en demi-finale face à la Sélection de la Manche. Les jeunes Cherbourgeois joueront la troisième place face à Essonne 91.',
+        [], ['Défaite en demi-finale face à la Sélection de la Manche.', 'Match pour la troisième place contre Essonne 91.']),
+      A('feminines', 'Football', 'Football féminin', '24 mai', '1 min', true, 'assets/a_feminines.jpg', 'Les féminines de l’AS Cherbourg', 'À Postaire, les féminines de l’AS Cherbourg écrivent leur histoire',
+        'Devant leur public, les féminines de l’AS Cherbourg ont vécu un match difficile, mais aussi une étape importante pour la visibilité du projet féminin.',
+        ['as-cherbourg'], ['Match difficile à domicile, à Postaire.', 'Une étape clé pour la visibilité du projet féminin bleu et blanc.'])
+    ];
+    const videos = [
+      { id: 'rcmn', tag: 'Rugby', date: '30 juin', img: 'assets/img_fe51d409.jpg', alt: 'Les joueuses du RCMN', title: 'La fierté des joueuses du RCMN', dek: 'Interviews des capitaines pour les 400 ans de la Marine nationale.', url: 'https://casabesports.fr/videos/itw-caps-marine-nationale', sport: 'Rugby' },
+      { id: 'digosville', tag: 'Football', date: '14 juin', img: 'assets/v_digosville.jpg', alt: 'Thibaut Jorigné, capitaine du FC Digosville', title: 'Le penalty de la victoire pour Digosville', dek: 'Le moment où le FC Digosville a fait basculer le match.', url: 'https://casabesports.fr/videos/penalty-victoire-fc-digosville', sport: 'Football', club: 'fc-digosville' },
+      { id: 'arbitre', tag: 'Football', date: '13 mai', img: 'assets/v_arbitre.jpg', alt: 'Bryan Piedagnel, arbitre', title: 'Bryan Piedagnel, l’arbitre que le football applaudit', dek: 'Dans les coulisses d’une vie d’arbitre, entre passion et exigence.', url: 'https://casabesports.fr/videos/bryan-piedagnel-arbitre-football-applaudit', sport: 'Football' }
+    ];
+    const C = (id, name, sport, city, img) => ({ id, name, sport, city, img: img || null });
+    const clubs = [
+      C('esph', 'ES Pointe Hague', 'Football', 'Beaumont-Hague'),
+      C('as-cherbourg', 'AS Cherbourg Football', 'Football', 'Cherbourg', 'assets/img_4606c0a1.jpg'),
+      C('as-tourlaville', 'AS Tourlaville Football', 'Football', 'Tourlaville', 'assets/img_a1612881.jpg'),
+      C('a2c', 'A2C', 'Multisport', 'Cherbourg', 'assets/img_b0f4c33c.jpg'),
+      C('fceh', 'FCEH', 'Football', 'Équeurdreville'),
+      C('redoutables', 'Les Redoutables', 'Water-polo', 'Cherbourg'),
+      C('marais-basket', 'Les Marais Cherbourg Basketball', 'Basketball', 'Cherbourg'),
+      C('bc-hague', 'Basket Club de la Hague', 'Basketball', 'Urville-Nacqueville'),
+      C('bayeux-fc', 'Bayeux FC', 'Football', 'Bayeux'),
+      C('cs-barfleur', 'CS Barfleur', 'Football', 'Barfleur'),
+      C('cs-carentan', 'CS Carentan Football', 'Football', 'Carentan'),
+      C('fc-digosville', 'FC Digosville', 'Football', 'Digosville'),
+      C('fc-saint-lo', 'FC Saint-Lô Manche', 'Football', 'Saint-Lô'),
+      C('flers', 'Flers FC', 'Football', 'Flers'),
+      C('gazelec', 'Gazélec FC', 'Football', 'Cherbourg'),
+      C('valognaise', 'La Valognaise Basket', 'Basketball', 'Valognes'),
+      C('pl-octeville', 'PL Octeville', 'Football', 'Cherbourg'),
+      C('pl-tourlaville', 'PL Tourlaville Basket', 'Basketball', 'Tourlaville'),
+      C('sc-douve', 'SC Douve Divette', 'Football', 'Tollevast'),
+      C('uc-briquebec', 'UC Briquebec', 'Football', 'Bricquebec'),
+      C('us-avranches', 'US Avranches MSM', 'Football', 'Avranches'),
+      C('us-cote-isles', 'US Côte des Isles', 'Football', 'Barneville-Carteret'),
+      C('uson-mondeville', 'USON Mondeville FC', 'Football', 'Mondeville'),
+      C('ust-basket', 'UST Basket', 'Basketball', 'Équeurdreville'),
+      C('as-greville', 'AS Gréville-Hague', 'Football', 'Gréville-Hague')
+    ];
+    const P = (id, num, name, role, club, clubLabel, img) => ({ id, num, name, role, club, clubLabel, img: img || null });
+    const players = [
+      P('rouleau', '9', 'Bastien Rouleau', 'Attaquant', 'esph', 'ES Pointe Hague', 'assets/p_rouleau.jpg'),
+      P('letan', '7', 'Brice Letan', 'Attaquant', 'as-cherbourg', 'AS Cherbourg Football', 'assets/p_letan.jpg'),
+      P('piedagnel', '96', 'Bryan Piedagnel', 'Arbitre', null, 'Arbitrage', 'assets/p_piedagnel.jpg'),
+      P('mariette', '99', 'Cloé Mariette', 'Arbitre & VP District', null, 'District de la Manche', 'assets/p_mariette.jpg'),
+      P('c-gosselin', '98', 'Christophe Gosselin', 'Entraîneur', 'as-cherbourg', 'AS Cherbourg Football', 'assets/p_cgosselin.jpg'),
+      P('e-dubois', '52', 'Erwan Dubois', 'Poste 4-5', null, 'Cherbourg Basketball', 'assets/p_edubois.jpg'),
+      P('diabate', '5', 'Abdul-Kader Diabaté', 'Défenseur', 'esph', 'ES Pointe Hague'),
+      P('leterrier', '5', 'Alan Leterrier', 'Défenseur', 'fceh', 'FCEH'),
+      P('baudet', '6', 'Antoine Baudet', 'Milieu', 'esph', 'ES Pointe Hague'),
+      P('halipre', '14', 'Antoine Halipre', 'Attaquant', 'esph', 'ES Pointe Hague'),
+      P('vautier', '6', 'Antonin Vautier', 'Milieu', 'esph', 'ES Pointe Hague'),
+      P('aubin', '11', 'Aubin Pierre', 'Milieu', 'esph', 'ES Pointe Hague'),
+      P('schneider', '9', 'Baptiste Schneider', 'Attaquant', 'as-tourlaville', 'AS Tourlaville Football'),
+      P('lebrun', '7', 'Brice Le Brun', 'Attaquant', 'esph', 'ES Pointe Hague'),
+      P('collet', '8', 'Calvyn Collet', 'Milieu', 'esph', 'ES Pointe Hague'),
+      P('paciorek', '5', 'Dorian Pacioreck', 'Défenseur', 'as-cherbourg', 'AS Cherbourg Football'),
+      P('delente', '11', 'Enzo Delente', 'Attaquant', 'esph', 'ES Pointe Hague'),
+      P('leboullenger', '23', 'Ethan Leboullenger', 'Poste 2-1', null, 'Cherbourg Basketball'),
+      P('lebresne', '10', 'Ethan Lebresne', 'Attaquant', 'esph', 'ES Pointe Hague'),
+      P('renouf', '10', 'Ethan Renouf', 'Attaquant', 'esph', 'ES Pointe Hague'),
+      P('crestey', '12', 'Florent Crestey', 'Attaquant', 'esph', 'ES Pointe Hague'),
+      P('billard', '99', 'Florian Billard', 'Entraîneur', 'fceh', 'FCEH'),
+      P('f-dubois', '5', 'Florian Dubois', 'Défenseur', 'as-cherbourg', 'AS Cherbourg Football'),
+      P('f-gosselin', '8', 'François Gosselin', 'Milieu', 'esph', 'ES Pointe Hague')
+    ];
+    const cities = { 'Cherbourg': [49.639, -1.616], 'Tourlaville': [49.638, -1.565], 'Équeurdreville': [49.655, -1.68], 'Beaumont-Hague': [49.664, -1.84], 'Urville-Nacqueville': [49.674, -1.74], 'Gréville-Hague': [49.677, -1.80], 'Digosville': [49.632, -1.525], 'Tollevast': [49.575, -1.628], 'Bricquebec': [49.47, -1.633], 'Valognes': [49.509, -1.47], 'Barfleur': [49.671, -1.264], 'Barneville-Carteret': [49.383, -1.75], 'Carentan': [49.303, -1.248], 'Saint-Lô': [49.116, -1.09], 'Avranches': [48.684, -1.357], 'Bayeux': [49.276, -0.703], 'Flers': [48.75, -0.57], 'Mondeville': [49.175, -0.32] };
+    const sports = ['Football', 'Basketball', 'Rugby', 'Water-polo', 'Trail', 'Natation', 'Pétanque', 'Roller', 'Équitation', 'Ping-pong', 'Kitesurf', 'Karting', 'Judo', 'Volley-ball', 'Tennis', 'Golf', 'Wing foil', 'Hockey', 'Boxe'];
+    this._d = { articles, videos, clubs, players, cities, sports };
+    return this._d;
+  }
+
+
+  more() {
+    if (this._m) return this._m;
+    const P = (o) => Object.assign({ colors: [{ name: 'Marine', hex: '#0f2236' }], sizes: null, perso: null, flag: '', mark: 'CASA', pop: 50, isNew: false, img: null }, o);
+    const navy = { name: 'Marine', hex: '#0f2236' }, sand = { name: 'Sable', hex: '#d8c8a0' }, ecru = { name: 'Écru', hex: '#f2ece0' }, white = { name: 'Blanc', hex: '#fbfaf7' }, gold = { name: 'Or', hex: '#e8a830' }, pine = { name: 'Vert sapin', hex: '#1f3b33' }, natural = { name: 'Naturel', hex: '#e9dfc8' };
+    const S = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    const B = (id) => (window.ASSET_DATA[BLOB_FILES[id]] || ('assets/' + (BLOB_FILES[id] || id)));
+    const KS = ['6 ans', '8 ans', '10 ans', '12 ans', 'S', 'M', 'L', 'XL', 'XXL'];
+    const products = [
+      P({ id: 'hoodie-signature', line: 'casa', name: 'Hoodie Signature', short: 'Molleton 350 g · broderie', price: 65, type: 'hoodie', img: B('3da9816218acfc421e4732cb9d2f5b52'), gallery: [B('3da9816218acfc421e4732cb9d2f5b52'), B('a7f3ab74b38b934ee0063eba2975cdd6')], colors: [navy], sizes: S, flag: 'Best-seller', pop: 1, desc: 'La pièce emblème : « Casa Besports » brodé en écru et son point or, cordons dorés, molleton brossé 350 g. Coupe légèrement oversize pour les bords de terrain comme pour le canapé.' }),
+      P({ id: 'crew-vestiaire', line: 'casa', name: 'Sweat « Inside Vestiaire Club »', short: 'Col rond, esprit college', price: 55, type: 'crew', img: B('c00d8ac59262a5549ee606cc8fb2de8c'), colors: [ecru], sizes: S, flag: 'Nouveau', isNew: true, pop: 3, desc: 'Le clin d’œil au format « inside vestiaire » de Casa Besports, en typographie college arrondie. Le « 50 » rappelle la Manche. Écru chiné, intérieur gratté.' }),
+      P({ id: 'tee-phare', line: 'casa', name: 'T-shirt « Le Phare »', short: 'Coton bio · coupe droite', price: 32, type: 'tee', img: B('f06f2d89c41fd9b8126e1c5385bb9dcc'), colors: [white], sizes: S, pop: 4, desc: 'Le phare de Gatteville en trait fin, 75 mètres de lumière sur la pointe de Barfleur. Coton biologique 180 g, sérigraphie à l’eau.' }),
+      P({ id: 'tee-rade', line: 'casa', name: 'T-shirt oversize « Rade Club »', short: 'Coupe ample · 220 g', price: 35, type: 'tee', img: B('ca6ba71144c430d01edfdbf1e2a9af0c'), colors: [navy], sizes: S, pop: 5, desc: 'Le t-shirt des matins de rade : lettrage condensé, « Club » en italique or et les vagues de la plus grande rade artificielle du monde.' }),
+      P({ id: 'maillot-retro', line: 'casa', name: 'Maillot rétro personnalisé', short: 'Votre nom, votre numéro', price: 55, type: 'tee', img: B('a48eb676f77a86afa6b51ee515273bef'), colors: [navy], sizes: S, perso: 'num', flag: 'Personnalisable', pop: 2, desc: 'Fines rayures or, col en V contrasté, écusson CB brodé. Floqué à votre nom et numéro par l’atelier Cherwood à Cherbourg.' }),
+      P({ id: 'veste-tribune', line: 'casa', name: 'Veste de survêtement « Tribune »', short: 'Zip intégral · bandes or', price: 75, type: 'hoodie', img: B('131e295ddb6c101579cef305062b367b'), colors: [navy], sizes: S, pop: 7, desc: 'La veste des avant-matchs : col montant, zip métal, double bande or et écru sur les manches, monogramme CB poitrine.' }),
+      P({ id: 'jogger', line: 'casa', name: 'Jogger « Après-match »', short: 'Molleton doux', price: 49, type: 'jogger', img: B('16e026e698fae2bef37b1f79d0419272'), colors: [sand], sizes: S, pop: 8, desc: 'Le bas qui va avec tout : coupe fuselée, chevilles côtelées, cordon marine et petit monogramme brodé.' }),
+      P({ id: 'short-isles', line: 'casa', name: 'Short « Côte des Isles »', short: 'Séchage rapide', price: 35, type: 'short', img: B('5cf5a581ded4f4eb23159f4cd0e9c5c6'), colors: [gold], sizes: S, pop: 11, desc: 'Pour le footing sur la plage de Barneville comme pour la sieste au soleil. Nylon léger, liseré marine.' }),
+      P({ id: 'bob', line: 'casa', name: 'Bob « CB »', short: 'Coton twill', price: 26, type: 'bob', img: B('ca573d60402844d34a66033b90eefbf5'), colors: [sand], pop: 10, desc: 'Le bob des tournois d’été, monogramme brodé et son point or.' }),
+      P({ id: 'casquette', line: 'casa', name: 'Casquette « Casa. »', short: 'Six pans · réglable', price: 28, type: 'cap', img: B('92b8ad3992858d32669bcfea753c86ca'), colors: [navy], pop: 9, desc: 'Logo « Casa » brodé, point or, attache réglable en laiton.' }),
+      P({ id: 'kit-runes', line: 'vikings', name: 'Maillot domicile « Runes »', short: 'Blanc · floqué à votre nom', price: 65, type: 'tee', img: B('9807b5c5369f06c7aaf95b75312f046d'), gallery: [B('9807b5c5369f06c7aaf95b75312f046d'), B('0db18dd911c14da925f4e895f71e4e1c'), B('e615fde32424915e839a12659097f676')], colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, perso: 'num', flag: 'Nouveau', isNew: true, pop: 1, desc: 'Le maillot des Vikings du Cotentin : une bande de runes du futhark nordique, clin d’œil aux origines normandes, l’écusson pentagone CB brodé et des liserés or. Maille respirante, coupe sport. Floqué à votre nom et numéro au dos.' }),
+      P({ id: 'kit-runes-ml', line: 'vikings', name: 'Maillot manches longues « Runes »', short: 'Frises nordiques aux poignets', price: 72, type: 'tee', img: B('f1953e481ef07e95680164a46c2d9f41'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, perso: 'num', isNew: true, pop: 5, desc: 'La version hiver du maillot « Runes » : manches longues, frise nordique aux avant-bras, bande runique verticale. Floquage nom et numéro inclus dans la personnalisation.' }),
+      P({ id: 'short-runes', line: 'vikings', name: 'Short « Runes »', short: 'Assorti au maillot domicile', price: 29, type: 'short', img: B('7622c7f11f14ef0c49d572d2decbbae5'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, isNew: true, pop: 7, desc: 'Short blanc à ceinture élastiquée, écusson pentagone brodé et numéro 10 en jambe. Se complète avec le maillot domicile.' }),
+      P({ id: 'kit-ancre', line: 'vikings', name: 'Maillot « Ancre »', short: 'Blanc et marine, l’esprit du port', price: 59, type: 'tee', img: B('4406cb951b6112ead68dac1d86a30e53'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, perso: 'num', isNew: true, pop: 6, desc: 'Grande ancre marine au centre, col en V et doubles bandes aux manches : un maillot qui sent la rade de Cherbourg. Floquage nom et numéro au choix.' }),
+      P({ id: 'short-ancre', line: 'vikings', name: 'Short « Ancre »', short: 'Cordon et ancres brodées', price: 29, type: 'short', img: B('65c33e4e715ef5dd1201de7343556d4b'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, isNew: true, pop: 9, desc: 'Short blanc à cordon de serrage, ancres brodées et bandes marine en bas de jambe.' }),
+      P({ id: 'kit-ciel', line: 'vikings', name: 'Maillot extérieur « Rayé Ciel »', short: 'Rayures ciel, col marine', price: 59, type: 'tee', img: B('89cc02d697fec04f522599802bf187d8'), colors: [{ name: 'Ciel', hex: '#9ccbea' }], sizes: KS, perso: 'num', isNew: true, pop: 8, desc: 'Rayures verticales bleu ciel, col et poignets marine, mention CASA BESPORTS en poitrine. Le maillot des déplacements.' }),
+      P({ id: 'kit-nuit', line: 'vikings', name: 'Maillot third « Nuit »', short: 'Noir à fines rayures, or', price: 65, type: 'tee', img: B('b04e3dcc6da7234630c60ea939f854eb'), colors: [{ name: 'Noir', hex: '#14171c' }], sizes: KS, perso: 'num', flag: 'Édition limitée', isNew: true, pop: 4, desc: 'Noir profond à fines rayures ton sur ton, médaillon central et écusson pentagone dorés. Série limitée, numérotée à l’intérieur du col.' }),
+      P({ id: 'kit-diagonale', line: 'vikings', name: 'Maillot « Diagonale »', short: 'Bandes ciel, marine et or', price: 59, type: 'tee', img: B('aea7ea50082d523bc83f3f6017ba816f'), colors: [{ name: 'Blanc', hex: '#fbfaf7' }], sizes: KS, perso: 'num', isNew: true, pop: 10, desc: 'Une diagonale ciel, marine et or traverse le maillot de l’épaule à la hanche. Col rond et poignets marine.' }),
+      P({ id: 'tee-viking', line: 'vikings', name: 'T-shirt « Le Viking »', short: 'La mascotte Casa', price: 32, type: 'tee', img: B('6f95460a58f5dc0c53a254df010b7963'), colors: [{ name: 'Noir', hex: '#14171c' }], sizes: S, flag: 'Mascotte', isNew: true, pop: 3, desc: 'Le Viking de Casa Besports, micro en main et Gazette sous le bras, imprimé en médaillon sur un t-shirt noir en coton.' }),
+      P({ id: 'cap-viking', line: 'vikings', name: 'Casquette « Le Viking »', short: 'Patch brodé', price: 29, type: 'cap', img: B('aa0d7bea1efc166a337ab714b04b33e1'), colors: [{ name: 'Noir', hex: '#14171c' }], isNew: true, pop: 11, desc: 'Casquette six panneaux noire, patch rond de la mascotte. Taille unique réglable.' }),
+      P({ id: 'patch-cb', line: 'vikings', name: 'Écusson brodé « CB »', short: 'Thermocollant', price: 8, type: 'patch', img: B('c4379d1401d63672573652d5be3b7e4e'), colors: [{ name: 'Marine et or', hex: '#0f2236' }], isNew: true, pop: 12, desc: 'Le monogramme pentagone de Casa Besports, brodé or sur marine. Thermocollant : sac, veste, maillot de club. Diamètre 8 cm.' }),
+      P({ id: 'hoodie-roule', line: 'cherwood', name: 'Hoodie « Le Roule »', short: 'Motif Montagne du Roule', price: 69, type: 'hoodie', img: B('981e82bbbb0f7a9367c97e4c848c2fc6'), gallery: [B('981e82bbbb0f7a9367c97e4c848c2fc6'), B('c28fddabc16efa8e58e4c93afee5990d')], colors: [{ name: 'Anthracite', hex: '#2b2f33' }], sizes: S, flag: 'Nouveau', isNew: true, pop: 3, desc: 'La Montagne du Roule et son fort dessinés au trait, dans l’esprit des motifs Cherwood qui racontent Cherbourg. Molleton anthracite, impression écru et or, réalisé à Cherbourg.' }),
+      P({ id: 'crew-presquile', line: 'cherwood', name: 'Sweat « La Presqu’île »', short: 'Le Cotentin et ses villes de sport', price: 59, type: 'crew', img: B('b248d9f3a2edcd1758c3805be91a57a2'), gallery: [B('b248d9f3a2edcd1758c3805be91a57a2'), B('1a81347b7337a4d848621af0fb067688')], colors: [sand], sizes: S, flag: 'Nouveau', isNew: true, pop: 4, desc: 'Le contour du Cotentin et cinq points d’or : Cherbourg, la Hague, Barfleur, Valognes, Carentan. Un sweat col rond sable pour porter la presqu’île, réalisé à Cherbourg.' }),
+      P({ id: 'tee-identitaire', line: 'cherwood', name: 'T-shirt « … du ballon »', short: 'Mention personnalisable', price: 34, type: 'tee', img: B('2c48f7132b968b70be1c7d701dc4a9d6'), colors: [white], sizes: S, perso: 'text', flag: 'Best-seller', pop: 2, desc: 'Le t-shirt identitaire Cherwood revisité pour les sportifs : écrivez votre ville ou votre club au-dessus de « du ballon » (Haguais, Tourlavillais, Valognaise…). Floqué à Cherbourg.' }),
+      P({ id: 'hoodie-csc', line: 'cherwood', name: 'Hoodie « Cotentin Sport Club »', short: 'Série limitée', price: 72, type: 'hoodie', img: B('b75f47de93c1cb54bec627f5067d8110'), colors: [pine], sizes: S, flag: 'Édition limitée', isNew: true, pop: 6, desc: 'Écusson CSC et lettrage en arc, vert sapin et écru : la capsule Cherwood × Casa Besports, brodée dans l’atelier du centre-ville de Cherbourg.' }),
+      P({ id: 'pull-marin', line: 'cherwood', name: 'Pull marin by Cherwood', short: 'Laine · tricoté dans la Manche', price: 155, type: 'pull', img: B('7ee74118a425ec7af743cd47cb36fdc4'), colors: [ecru], sizes: ['S', 'M', 'L', 'XL'], pop: 12, desc: 'La marinière en laine tricotée dans le Val de Saire, boutons dorés à l’épaule. Un classique cotentinais.' }),
+      P({ id: 'tote', line: 'cherwood', name: 'Tote « Supporter du Cotentin »', short: 'Toile épaisse', price: 20, type: 'tote', img: B('a81051d440f01667a54fa15c341bc54f'), colors: [natural], pop: 13, desc: 'Pour le maillot, la gourde et le goûter du match. Toile naturelle, sérigraphie Cherwood.' }),
+      P({ id: 'echarpe', line: 'goodies', name: 'Écharpe supporter', short: 'Tricot jacquard', price: 19, type: 'scarf', colors: [navy, gold], mark: 'CASA BESPORTS', pop: 14, desc: 'L’indispensable des tribunes du Cotentin, tricot jacquard double face.' }),
+      P({ id: 'mug', line: 'goodies', name: 'Mug « Inside vestiaire »', short: 'Céramique', price: 14, type: 'mug', colors: [white, navy], mark: 'INSIDE', pop: 15, desc: 'Le café d’avant-match. Céramique, passe au lave-vaisselle.' }),
+      P({ id: 'gourde', line: 'goodies', name: 'Gourde isotherme', short: '500 ml', price: 22, type: 'bottle', colors: [navy, gold], mark: 'CB', pop: 16, desc: 'Inox double paroi : 12 h au froid, parfaite pour l’entraînement.' }),
+      P({ id: 'affiche', line: 'goodies', name: 'Affiche « Le match du port »', short: 'Impression d’art', price: 29, type: 'poster', sizes: ['A3', 'A2'], colors: [white], flag: 'Best-seller', pop: 17, desc: 'Le tableau emblématique de Casa Besports, partie de football sur les quais, en impression d’art sur papier épais.' }),
+      P({ id: 'stickers', line: 'goodies', name: 'Pack stickers des clubs', short: '12 stickers', price: 6, type: 'stickers', colors: [gold], mark: '', pop: 18, desc: 'Douze stickers vinyle aux couleurs du sport du Cotentin.' }),
+      P({ id: 'porte-cles', line: 'goodies', name: 'Porte-clés décapsuleur', short: 'Métal', price: 8, type: 'keys', colors: [gold, navy], mark: '', pop: 19, desc: 'Pour la troisième mi-temps.' }),
+      P({ id: 'carte-cadeau', line: 'goodies', name: 'Carte cadeau', short: 'Boutique et abonnements', price: 20, type: 'gift', colors: [gold], sizes: ['20 €', '50 €', '100 €'], priceBySize: [20, 50, 100], mark: '', pop: 20, desc: 'Valable sur toute la boutique et sur les abonnements Casa B+ et La Gazette. Envoyée par e-mail.' })
+    ];
+    const paths = {
+      tee: 'M38 22 L52 16 Q60 24 68 16 L82 22 L98 38 L86 50 L80 45 L80 104 L40 104 L40 45 L34 50 L22 38 Z',
+      hoodie: 'M40 24 Q60 4 80 24 L98 40 L90 60 L82 54 L82 106 L38 106 L38 54 L30 60 L22 40 Z',
+      pull: 'M40 22 L52 16 Q60 24 68 16 L80 22 L100 72 L90 76 L80 50 L80 106 L40 106 L40 50 L30 76 L20 72 Z',
+      cap: 'M24 74 Q24 38 60 36 Q96 38 96 74 Z M60 76 L108 76 Q108 86 92 86 L60 86 Z',
+      bob: 'M30 66 Q32 36 60 36 Q88 36 90 66 Z M16 68 L104 68 Q104 82 60 82 Q16 82 16 68 Z',
+      scarf: 'M14 50 L106 50 L106 70 L14 70 Z M24 70 L34 70 L34 98 L24 98 Z M86 70 L96 70 L96 98 L86 98 Z',
+      tote: 'M30 46 L90 46 L96 108 L24 108 Z M44 46 Q44 18 60 18 Q76 18 76 46 L70 46 Q70 25 60 25 Q50 25 50 46 Z',
+      mug: 'M28 32 L80 32 L80 100 Q80 106 74 106 L34 106 Q28 106 28 100 Z M80 46 Q102 46 102 64 Q102 82 80 82 L80 74 Q94 74 94 64 Q94 54 80 54 Z',
+      bottle: 'M50 12 L70 12 L70 24 Q84 32 84 48 L84 104 Q84 110 78 110 L42 110 Q36 110 36 104 L36 48 Q36 32 50 24 Z',
+      stickers: 'M20 26 L70 26 L70 76 L20 76 Z M46 46 L100 46 L100 100 L62 100 L46 84 Z',
+      keys: 'M44 18 A24 24 0 1 1 43.9 18 Z M44 30 A12 12 0 1 0 44.1 30 Z M38 64 L50 64 L50 110 L38 110 Z',
+      gift: 'M20 46 L100 46 L100 64 L20 64 Z M26 64 L94 64 L94 106 L26 106 Z M54 46 L66 46 L66 106 L54 106 Z',
+      poster: '',
+      crew: 'M40 24 Q60 4 80 24 L98 40 L90 60 L82 54 L82 106 L38 106 L38 54 L30 60 L22 40 Z',
+      jogger: 'M40 14 L80 14 L84 106 L64 106 L60 50 L56 106 L36 106 Z',
+      short: 'M36 34 L84 34 L90 86 L66 88 L60 60 L54 88 L30 86 Z'
+    };
+    const markPos = { tee: [62, 9], hoodie: [70, 9], pull: [70, 8], cap: [60, 9], bob: [56, 8], scarf: [64, 8], tote: [84, 9], mug: [72, 10], bottle: [74, 9], stickers: [56, 9], keys: [0, 1], gift: [0, 1], poster: [0, 1] };
+
+    // Matchs
+    const M = (id, sport, comp, date, time, home, away, hs, as, status, o) => Object.assign({ id, sport, comp, date, time, home, away, hs, as, status, verified: false, venue: '[Stade]', minute: 0, article: null }, o || {});
+    const matches = [
+      M('m-cfa-mondeville', 'Football', 'cdf', '2026-09-13', '15:00', 'USON Mondeville FC', 'ES Pointe Hague', null, null, 'done', { verified: true, note: 'Qualifié aux tirs au but', article: 'pointe-hague' }),
+      M('m-cfa-avranches', 'Football', 'cdf', null, '[Heure]', 'ES Pointe Hague', 'US Avranches MSM', null, null, 'up', { verified: true, venue: 'Beaumont-Hague', article: 'pointe-hague' }),
+      M('m-asc-astdv', 'Football', 'r1', '2026-05-31', '15:00', 'AS Cherbourg Football', 'ASTDV B', 8, 0, 'done', { verified: true, article: 'photographe' }),
+      M('m-fceh-agneaux', 'Football', 'r2', '2026-05-23', '18:00', 'FCEH', 'Agneaux FC', 5, 1, 'done', { verified: true, venue: 'Stade Jean-Jaurès', article: 'fceh' }),
+      M('d1', 'Football', 'r2', '2026-09-27', '15:00', 'CS Carentan Football', 'AS Tourlaville Football', 2, 2, 'done'),
+      M('d2', 'Football', 'r2', '2026-09-27', '15:00', 'UC Briquebec', 'FCEH', 0, 1, 'done'),
+      M('d3', 'Football', 'r2', '2026-10-04', '15:00', 'FCEH', 'SC Douve Divette', 3, 1, 'done'),
+      M('d4', 'Football', 'r2', '2026-10-04', '15:00', 'AS Tourlaville Football', 'US Côte des Isles', 1, 0, 'done'),
+      M('d5', 'Football', 'r2', '2026-10-06', '20:00', 'Agneaux FC', 'CS Carentan Football', 1, 1, 'live', { minute: 58 }),
+      M('d6', 'Football', 'r2', '2026-10-11', '15:00', 'AS Tourlaville Football', 'FCEH', null, null, 'up'),
+      M('d7', 'Football', 'r2', '2026-10-11', '15:00', 'SC Douve Divette', 'UC Briquebec', null, null, 'up'),
+      M('d8', 'Football', 'r2', '2026-10-18', '15:00', 'US Côte des Isles', 'CS Carentan Football', null, null, 'up'),
+      M('d9', 'Football', 'r2', '2026-10-25', '15:00', 'FCEH', 'Agneaux FC', null, null, 'up'),
+      M('d10', 'Football', 'r2', '2026-11-08', '14:30', 'CS Carentan Football', 'FCEH', null, null, 'up'),
+      M('b1', 'Basketball', 'pnm', '2026-10-03', '20:30', 'Les Marais Cherbourg Basketball', 'UST Basket', 74, 68, 'done'),
+      M('b2', 'Basketball', 'pnm', '2026-10-03', '20:30', 'La Valognaise Basket', 'PL Tourlaville Basket', 61, 65, 'done'),
+      M('b3', 'Basketball', 'pnm', '2026-10-06', '20:30', 'Basket Club de la Hague', 'Les Marais Cherbourg Basketball', 38, 41, 'live', { minute: 22 }),
+      M('b4', 'Basketball', 'pnm', '2026-10-10', '20:30', 'UST Basket', 'La Valognaise Basket', null, null, 'up'),
+      M('b5', 'Basketball', 'pnm', '2026-10-17', '20:30', 'PL Tourlaville Basket', 'Basket Club de la Hague', null, null, 'up'),
+      M('b-tic', 'Basketball', 'tic', '2026-05-23', '[Heure]', 'Blue Squad', 'Sélection de la Manche', null, null, 'done', { verified: true, note: 'Défaite en demi-finale', article: 'blue-squad' }),
+      M('w1', 'Water-polo', 'cdm', '2026-09-26', '19:00', 'Les Redoutables', 'Granville', 9, 7, 'done'),
+      M('w2', 'Water-polo', 'cdm', '2026-09-26', '20:15', 'Querqueville', 'Carentan', 6, 6, 'done'),
+      M('w3', 'Water-polo', 'cdm', '2026-10-17', '19:00', 'Carentan', 'Les Redoutables', null, null, 'up'),
+      M('w4', 'Water-polo', 'cdm', '2026-10-17', '20:15', 'Granville', 'Querqueville', null, null, 'up'),
+      M('r-gala', 'Rugby', 'gala', '2026-06-18', '[Heure]', 'Marine nationale', 'British Police', null, null, 'done', { verified: true, note: '400 ans de la Marine nationale', article: 'marine-nationale' })
+    ];
+    const comps = {
+      Football: [{ id: 'r2', label: 'Régional 2' }, { id: 'cdf', label: 'Coupe de France' }, { id: 'r1', label: 'Régional 1' }],
+      Basketball: [{ id: 'pnm', label: 'Championnat' }, { id: 'tic', label: 'Tournoi international' }],
+      'Water-polo': [{ id: 'cdm', label: 'Coupe de la Manche' }],
+      Rugby: [{ id: 'gala', label: 'Matchs de gala' }]
+    };
+    const T = (team, j, g, n, p, diff, pts, form) => ({ team, j, g, n, p, diff, pts, form });
+    const tables = {
+      r2: [T('FCEH', 3, 3, 0, 0, '+6', 9, 'VVV'), T('AS Tourlaville Football', 3, 2, 1, 0, '+2', 7, 'VNV'), T('CS Carentan Football', 3, 1, 2, 0, '+1', 5, 'NNV'), T('Agneaux FC', 3, 1, 1, 1, '0', 4, 'NVD'), T('US Côte des Isles', 3, 1, 0, 2, '-1', 3, 'DVD'), T('SC Douve Divette', 3, 0, 1, 2, '-3', 1, 'DND'), T('UC Briquebec', 3, 0, 1, 2, '-5', 1, 'DDN')],
+      pnm: [T('Les Marais Cherbourg Basketball', 2, 2, 0, 0, '+14', 4, 'VV'), T('PL Tourlaville Basket', 2, 1, 0, 1, '+2', 3, 'DV'), T('UST Basket', 2, 1, 0, 1, '-3', 3, 'VD'), T('La Valognaise Basket', 2, 0, 0, 2, '-6', 2, 'DD'), T('Basket Club de la Hague', 1, 0, 0, 1, '-7', 1, 'D')],
+      cdm: [T('Les Redoutables', 1, 1, 0, 0, '+2', 3, 'V'), T('Querqueville', 1, 0, 1, 0, '0', 1, 'N'), T('Carentan', 1, 0, 1, 0, '0', 1, 'N'), T('Granville', 1, 0, 0, 1, '-2', 0, 'D')]
+    };
+    const teamClub = { 'FCEH': 'fceh', 'AS Tourlaville Football': 'as-tourlaville', 'CS Carentan Football': 'cs-carentan', 'US Côte des Isles': 'us-cote-isles', 'SC Douve Divette': 'sc-douve', 'UC Briquebec': 'uc-briquebec', 'ES Pointe Hague': 'esph', 'US Avranches MSM': 'us-avranches', 'USON Mondeville FC': 'uson-mondeville', 'AS Cherbourg Football': 'as-cherbourg', 'Les Marais Cherbourg Basketball': 'marais-basket', 'UST Basket': 'ust-basket', 'PL Tourlaville Basket': 'pl-tourlaville', 'La Valognaise Basket': 'valognaise', 'Basket Club de la Hague': 'bc-hague', 'Les Redoutables': 'redoutables' };
+    const subPlans = {
+      casab: { name: 'Casa B+', mois: 4.99, an: 49, perks: ['Tous les articles et vidéos Premium', 'Lecture audio et résumé express', 'Alertes de vos clubs', '−10 % sur la boutique'], casab: true, gazette: null, paper: false },
+      'gaz-num': { name: 'La Gazette · Numérique', mois: 3.99, an: 39, perks: ['Chaque numéro en liseuse dès sa parution', 'Archives complètes', 'Sur mobile, tablette et ordinateur'], casab: false, gazette: 'num', paper: false },
+      'gaz-pap': { name: 'La Gazette · Papier', mois: 6.9, an: 69, perks: ['Le magazine dans votre boîte aux lettres', 'Livraison incluse dans la Manche', 'Posters et cahier pratique'], casab: false, gazette: 'pap', paper: true },
+      'gaz-duo': { name: 'La Gazette · Papier + Numérique', mois: 8.9, an: 89, perks: ['Le papier chez vous', 'La liseuse numérique en avant-première', 'Archives complètes'], casab: false, gazette: 'duo', paper: true },
+      pack: { name: 'Pack Supporter', mois: 11.9, an: 119, perks: ['Casa B+ complet', 'La Gazette papier + numérique', '−10 % sur la boutique', 'Une écharpe offerte avec l’annuel'], casab: true, gazette: 'duo', paper: true }
+    };
+    const places = [
+      { id: 'rade', name: 'La rade de Cherbourg', short: 'Rade de Cherbourg', where: 'Cherbourg-en-Cotentin', year: '1786', img: 'assets/lieu_rade.svg',
+        hook: 'La plus grande rade artificielle du monde, sous la Montagne du Roule.',
+        desc: 'Protégée par de longues digues bâties de la fin du XVIIIe siècle au XIXe siècle, la rade de Cherbourg est présentée comme la plus grande rade artificielle du monde. Au-dessus de la ville, la Montagne du Roule et son fort dominent le port.',
+        moment: 'En juin 1786, Louis XVI se rend à Cherbourg pour assister à l’immersion de l’un des immenses cônes de bois destinés à bâtir la digue. Plus tard, en juin 1944, la prise du fort du Roule précède la libération de la ville, le 26 juin ; le fort abrite aujourd’hui le musée de la Libération.',
+        sport: 'Voile, aviron et nage en eau libre font de la rade un stade nautique à ciel ouvert.' },
+      { id: 'gatteville', name: 'Le phare de Gatteville', short: 'Phare de Gatteville', where: 'Gatteville-le-Phare · pointe de Barfleur', year: '1120', img: 'assets/lieu_gatteville.svg',
+        hook: '75 mètres de lumière, deuxième plus haut phare de France.',
+        desc: 'Allumé en 1835 à la pointe de Barfleur, le phare de Gatteville culmine à 75 mètres : c’est le deuxième plus haut phare de France. Il veille sur l’un des passages les plus dangereux de la Manche.',
+        moment: 'Le 25 novembre 1120, au large de Barfleur, la Blanche-Nef heurte un rocher et sombre. Guillaume Adelin, unique fils légitime du roi d’Angleterre Henri Ier, périt dans le naufrage, ouvrant une longue crise de succession.',
+        sport: 'Les sentiers côtiers du Val de Saire sont un terrain de jeu prisé des traileurs.' },
+      { id: 'mont', name: 'Le Mont-Saint-Michel', short: 'Mont-Saint-Michel', where: 'Baie du Mont-Saint-Michel · sud Manche', year: '708', img: 'assets/lieu_mont.svg',
+        hook: 'La merveille de la Manche, jamais prise par les Anglais.',
+        desc: 'Selon la tradition, Aubert, évêque d’Avranches, fonde en 708 un sanctuaire sur le mont après des apparitions de l’archange saint Michel. L’abbaye et sa baie sont inscrites au patrimoine mondial de l’Unesco depuis 1979.',
+        moment: 'Pendant la guerre de Cent Ans, la place forte résiste aux assauts anglais et ne sera jamais prise, devenant un symbole de résistance pour tout le royaume.',
+        sport: 'Le Mont est la toile de fond de l’US Avranches et de nombreuses courses et randonnées dans la baie.' },
+      { id: 'jobourg', name: 'Le Nez de Jobourg', short: 'Nez de Jobourg', where: 'La Hague', year: '1977', img: 'assets/lieu_jobourg.svg',
+        hook: 'Des falaises parmi les plus hautes d’Europe, face au raz Blanchard.',
+        desc: 'À la pointe de la Hague, les falaises du Nez de Jobourg comptent parmi les plus hautes d’Europe. Le site abrite une réserve ornithologique et offre une vue sur le raz Blanchard, l’un des courants les plus puissants d’Europe.',
+        moment: 'Le poète Jacques Prévert passe ses dernières années à Omonville-la-Petite, dans la Hague, où il s’éteint en 1977. Il repose dans le petit cimetière du village.',
+        sport: 'Le GR223, sentier des douaniers, fait de la Hague une destination de trail et de randonnée.' },
+      { id: 'sme', name: 'Sainte-Mère-Église', short: 'Sainte-Mère-Église', where: 'Centre Cotentin', year: '1944', img: 'assets/lieu_sme.svg',
+        hook: 'L’une des premières communes libérées, le 6 juin 1944.',
+        desc: 'Bourg du centre Cotentin, Sainte-Mère-Église est mondialement connue pour son rôle lors du Débarquement de Normandie. Son église et son musée Airborne attirent chaque année de nombreux visiteurs.',
+        moment: 'Dans la nuit du 5 au 6 juin 1944, des parachutistes américains de la 82e division aéroportée sautent sur la commune, l’une des premières libérées en France. Le parachute du soldat John Steele s’accroche au clocher : un mannequin le rappelle aujourd’hui.',
+        sport: 'Les commémorations accueillent chaque année des courses et marches du souvenir.' },
+      { id: 'gare', name: 'La Gare maritime transatlantique', short: 'Gare maritime', where: 'Cherbourg-en-Cotentin', year: '1912', img: 'assets/lieu_gare.svg',
+        hook: 'Chef-d’œuvre Art déco, aujourd’hui la Cité de la Mer.',
+        desc: 'Inaugurée en 1933, la Gare maritime transatlantique de Cherbourg accueillait les passagers des grands paquebots vers l’Amérique. Ce joyau Art déco abrite aujourd’hui la Cité de la Mer.',
+        moment: 'Le 10 avril 1912, le Titanic fait escale en rade de Cherbourg, sa dernière escale sur le continent. Les passagers rejoignent le paquebot à bord des transbordeurs Nomadic et Traffic.',
+        sport: 'Le port de Cherbourg accueille régulièrement de grandes courses au large.' }
+    ];
+    const partners = [
+      { id: 'olisto', name: 'OlistO', mono: 'O', sector: 'Crédit immobilier · regroupement de crédits · assurance emprunteur', city: 'Réseau de courtage', tier: 'Platinum', color: '#163a5f', since: 2026, perk: 'Étude de votre projet offerte (à confirmer)', desc: 'Réseau de courtage en crédit immobilier, regroupement de crédits, assurance emprunteur, prêt professionnel et immobilier neuf. Partenaire Casa Besports.', real: true },
+      { id: 'kine', name: 'Cotentin Kiné & Sport', mono: 'KS', sector: 'Santé du sportif', city: 'Tourlaville', tier: 'Or', color: '#18705f', since: 2025, perk: 'Bilan postural offert aux licenciés', desc: 'Cabinet de kinésithérapie du sport : prévention, rééducation et préparation physique pour les athlètes amateurs.' },
+      { id: 'phare', name: 'Les Ateliers du Phare', mono: 'AP', sector: 'Menuiserie', city: 'Valognes', tier: 'Or', color: '#9a6410', since: 2026, perk: '−10 % sur les aménagements de club-house', desc: 'Menuiserie artisanale qui équipe vestiaires, buvettes et tribunes des clubs de la région.' },
+      { id: 'comptoir', name: 'Le Comptoir des Isles', mono: 'CI', sector: 'Épicerie fine', city: 'Barneville-Carteret', tier: 'Club', color: '#7a2a33', since: 2026, perk: 'Un panier du terroir à gagner chaque mois', desc: 'Produits de la mer et du terroir normand, fidèle soutien des tournois de la côte des Isles.' },
+      { id: 'mobil', name: 'Hague Mobilités', mono: 'HM', sector: 'Location de vélos', city: 'Beaumont-Hague', tier: 'Club', color: '#3a4a78', since: 2026, perk: '−20 % sur les vélos électriques le week-end', desc: 'Location de vélos et de vélos électriques pour explorer la Hague entre deux matchs.' },
+      { id: 'fournil', name: 'Le Fournil des Remparts', mono: 'FR', sector: 'Boulangerie', city: 'Cherbourg-en-Cotentin', tier: 'Club', color: '#8a4b2a', since: 2025, perk: 'Viennoiseries offertes aux bénévoles le dimanche', desc: 'Boulangerie de quartier qui régale les bénévoles des clubs lors des journées de tournoi.' }
+    ];
+    const team = [
+      { id: 'admin', name: 'Administrateur principal', mail: 'admin@casabesports.fr', role: 'admin' },
+      { id: 'lea', name: 'Léa Marchand', mail: 'lea@casabesports.fr', role: 'writer' },
+      { id: 'hugo', name: 'Hugo Lefèvre', mail: 'hugo@casabesports.fr', role: 'writer' },
+      { id: 'ines', name: 'Inès Garnier', mail: 'ines@casabesports.fr', role: 'writer' }
+    ];
+    const seedPosts = [
+      { id: 'p1', author: 'Léa Marchand', status: 'review', updated: 'il y a 2 h', sport: 'Water-polo', tag: 'Coupe de la Manche', clubs: ['redoutables'], img: 'assets/img_d9e43f35.jpg', alt: 'Les Redoutables de Cherbourg à l’entraînement', premium: false, schedule: '',
+        title: 'Coupe de la Manche : Les Redoutables visent plus haut',
+        dek: 'Pour leur troisième participation, les water-poloïstes cherbourgeois veulent confirmer leur progression face à Granville, Querqueville et Carentan.',
+        body: 'Troisième participation, et une ambition intacte. Les Redoutables de Cherbourg abordent la Coupe de la Manche avec un objectif clair : confirmer la progression observée ces dernières saisons.\n\n## Trois adversaires, trois styles\n\nGranville, Querqueville et Carentan se dressent sur leur route. Trois équipes aux profils différents, qui obligeront le groupe cherbourgeois à varier son jeu et à gérer ses temps forts.\n\n> L’objectif est de franchir un cap collectif.\n\n## Une discipline exigeante\n\nLe water-polo demande de l’endurance, de la puissance et une lecture du jeu rapide. Dans le Cotentin, la discipline reste confidentielle, mais elle fidélise ceux qui la découvrent.\n\n- Troisième participation à la Coupe de la Manche\n- Trois adversaires au programme\n- Un groupe qui monte en puissance',
+        log: [{ who: 'Léa Marchand', when: 'il y a 2 h', what: 'Article soumis à la relecture.' }] },
+      { id: 'p2', author: 'Hugo Lefèvre', status: 'review', updated: 'il y a 5 h', sport: 'Basketball', tag: 'Tribune', clubs: ['marais-basket'], img: 'assets/a_benevoles.jpg', alt: 'Bénévoles en maillots oranges au tournoi international de Cherbourg', premium: true, schedule: '',
+        title: 'Tribune : sans bénévoles, pas de sport local',
+        dek: 'Le tournoi international de basket de Cherbourg l’a encore montré : derrière chaque événement réussi, il y a des dizaines de mains invisibles.',
+        body: 'On parle des scores, des paniers à trois points et des trophées. On parle moins de celles et ceux qui ouvrent la salle à sept heures et la ferment à minuit.\n\nAu tournoi international de Cherbourg, les bénévoles en maillots oranges ont tenu les buvettes, les tables de marque, l’accueil des équipes et les vestiaires, tout le week-end. Sans eux, pas de tournoi.\n\n## Un engagement à reconnaître\n\nLe bénévolat sportif s’essouffle dans de nombreux clubs. Les raisons sont connues : manque de temps, sentiment de ne pas être reconnu, charge administrative croissante. Il est temps de valoriser cet engagement, publiquement et durablement.\n\n> Un club, c’est d’abord des gens qui donnent leur temps.\n\nCasa Besports lance une rubrique dédiée. Proposez-nous les bénévoles de votre club.',
+        log: [{ who: 'Hugo Lefèvre', when: 'il y a 5 h', what: 'Article soumis à la relecture.' }] },
+      { id: 'p3', author: 'Inès Garnier', status: 'corrections', updated: 'hier', sport: 'Football', tag: 'Coaching', clubs: [], img: 'assets/a_fceh.jpg', alt: '', premium: false, schedule: '',
+        title: 'Reprise : cinq réflexes',
+        dek: 'Bien reprendre.',
+        body: 'La reprise est un moment clé de la saison et il est très important de bien la préparer car beaucoup de blessures surviennent pendant les premières semaines lorsque les joueurs augmentent trop vite leur charge d’entraînement sans échauffement suffisant et sans écouter les signaux de leur corps.\n\n- Progressivité\n- Échauffement\n- Sommeil et hydratation\n- Écoute du corps\n- Renforcement',
+        log: [{ who: 'Inès Garnier', when: 'avant-hier', what: 'Article soumis à la relecture.' }, { who: 'Administrateur principal', when: 'hier', what: 'Corrections demandées : allonger le chapeau, ajouter un texte alternatif à l’image, découper la première phrase et développer chaque réflexe.' }],
+        note: 'Allonger le chapeau, ajouter un texte alternatif à l’image, découper la première phrase et développer chaque réflexe.' },
+      { id: 'p4', author: 'Hugo Lefèvre', status: 'draft', updated: 'il y a 20 min', sport: 'Football', tag: 'Agenda', clubs: ['fceh', 'as-tourlaville'], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '',
+        title: 'Agenda du week-end : où voir du sport dans le Cotentin', dek: '', body: 'Samedi soir, basket à Équeurdreville. Dimanche, choc de Régional 2 entre l’AS Tourlaville et le FCEH.', log: [{ who: 'Hugo Lefèvre', when: 'il y a 20 min', what: 'Brouillon créé.' }] },
+      { id: 'p5', author: 'Léa Marchand', status: 'scheduled', updated: 'ce matin', sport: 'Football', tag: 'Portrait de club', clubs: ['esph'], img: 'assets/img_51314cdd.jpg', alt: 'Les joueurs de l’ES Pointe-Hague', premium: true, schedule: '2026-10-09T18:00',
+        title: 'ES Pointe-Hague : trente ans de passion haguaise', dek: 'Avant la réception de l’US Avranches en Coupe de France, retour sur trois décennies d’un club qui fait vibrer la Hague.',
+        body: 'Trente ans. L’âge des projets solides et des souvenirs partagés. L’ES Pointe-Hague fête cet anniversaire avec un cadeau inattendu : un quatrième tour de Coupe de France face à l’US Avranches.\n\n## Une qualification arrachée\n\nÀ Mondeville, au tour précédent, les Haguais ont dû passer par la séance de tirs au but. Une qualification au mental, qui a soudé le groupe.\n\n> Recevoir un tel adversaire l’année de ses trente ans, c’est déjà une victoire.',
+        log: [{ who: 'Léa Marchand', when: 'hier', what: 'Article soumis à la relecture.' }, { who: 'Administrateur principal', when: 'ce matin', what: 'Approuvé, publication programmée le 9 octobre à 18 h.' }] }
+    ];
+    const seedAt = { p1: '2026-10-12T14:10:00.000Z', p2: '2026-10-12T11:05:00.000Z', p3: '2026-10-11T17:30:00.000Z', p4: '2026-10-13T08:40:00.000Z', p5: '2026-10-13T07:15:00.000Z' };
+    const seedType = { p2: 'tribune', p5: 'portrait' };
+    seedPosts.forEach((p) => {
+      p.type = seedType[p.id] || 'article'; p.updatedAt = seedAt[p.id]; p.log.forEach((l) => { l.at = p.updatedAt; });
+      if (typeof CasaRedac !== 'undefined') p.versions = [{ n: 1, at: p.updatedAt, who: p.author, label: p.log[p.log.length - 1].what.replace(/\.$/, ''), snap: CasaRedac.snapOf(p) }];
+    });
+    if (typeof CasaRedac !== 'undefined') {
+      const p3 = seedPosts[2];
+      const v1 = Object.assign({}, p3, { dek: 'Bien reprendre.', body: 'La reprise est un moment clé de la saison.\n\n- Progressivité\n- Échauffement\n- Sommeil' });
+      p3.versions = [{ n: 1, at: '2026-10-10T16:00:00.000Z', who: 'Inès Garnier', label: 'Premier jet', snap: CasaRedac.snapOf(v1) }, { n: 2, at: '2026-10-11T09:20:00.000Z', who: 'Inès Garnier', label: 'Article soumis à la relecture', snap: CasaRedac.snapOf(p3) }];
+    }
+    this._m = { products, paths, markPos, matches, comps, tables, teamClub, subPlans, places, partners, team, seedPosts };
+    return this._m;
+  }
+
+  gazette() {
+    if (this._g) return this._g;
+    const B = (id) => (window.ASSET_DATA[BLOB_FILES[id]] || ('assets/' + (BLOB_FILES[id] || id)));
+    const T = (arr) => (arr || []).map((t) => ({ t }));
+    // sec : cahier du sommaire · band : début du titre posé sur le bandeau noir · choc : encadré « Le détail choc 🔥 » (fait vérifié, avec sa source)
+    const P = (o) => Object.assign({ id: '', sec: '', band: '', kind: 'article', img: null, imgCap: '', script: '', kicker: '', paras: [], quote: '', quoteBy: '', aside: null, score: null, scores: [], rows: null, head: null, cols3: [], drop: true, tilt: false, choc: null, glyph: '' }, o);
+    const pages = [
+      P({ id: 'cover', kind: 'cover', rubric: 'Couverture', title: 'La Gazette du Cotentin' }),
+      P({ id: 'toc', kind: 'toc', rubric: 'Sommaire', title: 'Dans ce numéro', script: 'cinq cahiers, trente pages' }),
+      // ---------- À la une ----------
+      P({ id: 'edito', sec: 'À la une', rubric: 'Édito', title: 'Le sport a une histoire', script: 'et elle s’écrit ici', img: B('bae1d2ac6cb6529aa1e99e023df405ff'), imgCap: 'Photo-illustration',
+        kicker: 'Le sport local ne manque pas d’histoires. Il manque parfois de lumière.',
+        paras: T(['Chaque week-end, du nord de la Hague aux plages de la côte des Isles, des milliers de licenciés, d’éducateurs et de bénévoles font vivre le sport dans le Cotentin. Leurs victoires ne font pas toujours la une. Leurs efforts, eux, sont permanents.',
+          'La Gazette du Cotentin est née de cette conviction : le sport de proximité mérite d’être raconté avec la même exigence que le sport professionnel. Des récits, des portraits, des coulisses, des chiffres utiles et des pages pour se cultiver sur le territoire que l’on défend balle au pied, ballon en main ou baskets aux pieds.',
+          'Nouveauté de ce numéro : « Le détail choc », un fait vérifié qui change le regard sur une histoire. Vous le retrouverez en page 6 et dans les encadrés marqués d’une flamme.',
+          'Ce numéro d’essai est un avant-goût. Dites-nous ce que vous aimez, ce qui manque, ce que vous voulez lire. La Gazette sera ce que vous en ferez.']),
+        quote: 'Rendez-vous au bord des terrains.', quoteBy: 'La rédaction' }),
+      P({ id: 'weekend', sec: 'À la une', kind: 'brief', thumb: B('824fb1ca8687d16522c2ba8f05d66086'), rubric: 'Le week-end en 60 secondes', title: 'Le week-end en 60 secondes', script: 'les résultats, les faits, l’essentiel',
+        blocks: [
+          { sport: 'Football', title: 'Le FCEH valide son maintien', text: 'Large vainqueur d’Agneaux FC au stade Jean-Jaurès, le FCEH s’assure de rester en Régional 2.', home: 'FCEH', away: 'Agneaux FC', hs: '5', as: '1', hasScore: true, img: B('824fb1ca8687d16522c2ba8f05d66086') },
+          { sport: 'Football', title: 'Démonstration cherbourgeoise', text: 'L’AS Cherbourg s’impose 8-0 face à l’ASTDV B, une copie collective saluée par le photographe Thibault Mariette.', home: 'AS Cherbourg', away: 'ASTDV B', hs: '8', as: '0', hasScore: true, img: B('e6132a6993a0d040085ac66b6f46cf6e') },
+          { sport: 'Basket', title: 'La Blue Squad cède en demie', text: 'Battue par la Sélection de la Manche au Tournoi international de Cherbourg, elle a joué la 3e place face à Essonne 91.', hasScore: false, img: B('4f81a4491eb301c8894c5d5d2ab04ff6') },
+          { sport: 'Water-polo', title: 'Les Redoutables en piste', text: 'Troisième participation à la Coupe de la Manche, face à Granville, Querqueville et Carentan.', hasScore: false, img: B('38c25d93ed37833c9d08d0a1d75de3f1') },
+          { sport: 'Rugby', title: '400 ans de Marine', text: 'Pour les 400 ans de la Marine nationale, un match de gala a opposé la Marine à la police britannique. Les capitaines du RCMN se confient en vidéo.', hasScore: false, img: B('d75f806f46d28a0e206a30c27b8e58ad') }
+        ],
+        retenir: [{ n: '1', h: 'Pointe-Hague toujours en vie', t: 'Qualifiés aux tirs au but à Mondeville, les Haguais reçoivent l’US Avranches au 4e tour.' }, { n: '2', h: 'Le maintien pour le FCEH', t: 'Une victoire nette qui sécurise la saison en Régional 2.' }, { n: '3', h: 'Des bénévoles en or', t: 'Les « maillots oranges » ont fait vivre le Tournoi international de basket.' }] }),
+      P({ id: 'dossier', sec: 'À la une', rubric: 'Le dossier', title: 'Pointe-Hague face à Goliath', script: 'une histoire de coupe', img: B('5cd343902a0b6d6a654108dee90d6fc3'), imgCap: 'L’ES Pointe-Hague', tilt: true,
+        kicker: 'L’année de ses trente ans, l’ES Pointe-Hague reçoit l’US Avranches au quatrième tour de la Coupe de France.',
+        paras: T(['Le parcours a déjà le goût de l’exploit. Au tour précédent, à Mondeville, les Haguais ont dû aller jusqu’à la séance de tirs au but pour composter leur billet. Une qualification arrachée au mental, qui a soudé un groupe et un village.',
+          'Le tirage leur offre désormais l’US Avranches, adversaire invaincu en championnat au moment du tirage. Sur le papier, l’écart est immense. Mais la Coupe de France s’est construite sur ces affiches où le petit refuse de se contenter du rôle de figurant.',
+          'Pour un club qui fête ses trente ans, recevoir un tel adversaire est déjà une récompense. Pour les joueurs, c’est l’occasion de vivre un match qui comptera dans une carrière amateur. Et pour toute la Hague, la promesse d’une tribune pleine.']),
+        quote: 'La Coupe dans ce qu’elle a de plus beau.',
+        cols3: [{ h: 'Le contexte', t: 'Trente ans d’histoire pour l’ES Pointe-Hague.' }, { h: 'Le défi', t: 'Une équipe invaincue en championnat en face.' }, { h: 'Le rendez-vous', t: 'Date et heure à confirmer par le district.' }],
+        choc: { t: 'En 2012, l’US Quevilly, club normand de troisième division, a joué la finale de la Coupe de France au Stade de France.', go: 'choc', src: 'Source : finale de la Coupe de France 2012 (Wikipédia)' } }),
+      P({ id: 'choc', sec: 'À la une', kind: 'choc', rubric: 'Le détail choc 🔥', title: 'Le détail choc', script: 'ce qu’on n’oublie plus après l’avoir lu', glyph: '🔥',
+        bigA: 'En 2012, un club normand de troisième division a joué', bigB: 'la finale de la Coupe de France.',
+        who: 'L’US Quevilly · National · saison 2011-2012',
+        stats: [{ k: '3e', l: 'division française : le National' }, { k: '2', l: 'clubs de Ligue 1 éliminés : Marseille, puis Rennes' }, { k: '76 229', l: 'spectateurs au Stade de France' }, { k: '1927', l: 'l’année de sa première finale' }],
+        paras: T(['Saison 2011-2012. L’US Quevilly, club de l’agglomération rouennaise, évolue en National, le troisième échelon du football français. En quart de finale de la Coupe de France, il sort l’Olympique de Marseille. En demi-finale, le Stade rennais.',
+          'Le 28 avril 2012, au Stade de France, devant 76 229 spectateurs, les Normands ne cèdent qu’une fois face à l’Olympique lyonnais : 1-0, sur un but de Lisandro López en première mi-temps.',
+          'Le plus fou ? Ce n’était pas une première. En 1927 déjà, Quevilly avait atteint la finale, perdue 3-0 contre Marseille, au stade de Colombes.']),
+        aside: { h: 'Avant eux : Calais', t: 'En 2000, Calais, club amateur de CFA, avait lui aussi rejoint la finale. Battu 2-1 par Nantes au Stade de France, devant 78 717 spectateurs.' },
+        why: 'L’ES Pointe-Hague reçoit l’US Avranches au 4e tour. En Coupe de France, les petits ont déjà écrit l’histoire.',
+        src: 'Vérifié par la rédaction · Sources : finales de la Coupe de France 1927, 2000 et 2012 (Wikipédia).' }),
+      P({ id: 'vestiaire', sec: 'À la une', kind: 'qa', img: B('c385b1324c6ffa4e23d8af37ea839381'), imgCap: 'Photo-illustration', rubric: 'Dans le vestiaire', title: 'Dans le vestiaire', band: 'Dans le vestiaire', script: '3 questions, pas de langue de bois', who: 'La Coupe de France', whoSub: 'expliquée par la rédaction',
+        qs: [{ n: '1', q: 'Qui peut jouer la Coupe de France ?', a: 'Tous les clubs affiliés à la Fédération française de football. Les premiers tours sont organisés par les ligues régionales, à proximité, entre clubs amateurs de niveaux très différents.' },
+          { n: '2', q: 'Quand arrivent les professionnels ?', a: 'Les clubs de Ligue 2 entrent au septième tour, ceux de Ligue 1 en trente-deuxièmes de finale. Chaque match est à élimination directe, sans match retour.' },
+          { n: '3', q: 'Pourquoi fait-elle rêver ?', a: 'Un seul match, un seul soir, et tout devient possible. Pour un club comme l’ES Pointe-Hague, chaque tour franchi est une page d’histoire locale.' }],
+        quote: 'Un seul match, un seul soir.', card: [{ k: 'Format', v: 'Élimination directe' }, { k: 'Entrée Ligue 2', v: '7e tour' }, { k: 'Entrée Ligue 1', v: '32es de finale' }, { k: 'En cas d’égalité', v: 'Règlement de chaque tour' }] }),
+      P({ id: 'chiffre', sec: 'À la une', kind: 'number', rubric: 'Le chiffre', title: 'Le chiffre', script: 'un nombre, une histoire', big: '30', label: 'ans d’histoire pour l’ES Pointe-Hague', img: B('91855c40cd47f028874202e72a33d389'), imgCap: 'Photo-illustration',
+        lead: 'L’ES Pointe-Hague fête ses trente ans avec un cadeau inattendu : un quatrième tour de Coupe de France à domicile face à l’US Avranches.',
+        text: 'Trois décennies de licenciés, de bénévoles et de week-ends passés au bord du terrain. Un anniversaire qui rappelle ce que représente un club de village : un lieu où l’on grandit, où l’on se retrouve et où l’on transmet.',
+        cols3: [{ h: 'Pourquoi ça compte', t: 'Un club qui dure trente ans, c’est une communauté qui se renouvelle génération après génération.' }, { h: 'Ce que ça dit', t: 'Le football amateur de la Hague garde la capacité de rêver grand.' }, { h: 'La suite', t: 'La réception de l’US Avranches, et la Gazette en tribune.' }] }),
+      // ---------- Le terrain ----------
+      P({ id: 'duel', sec: 'Le terrain', rubric: 'Football · Régional 2', title: 'Le duel des buteurs', script: 'Cuquemelle contre Perrey', img: B('33cc6fbd406b8554971d61a0887d4a76'), imgCap: 'Adrien Cuquemelle et Enzo Perrey',
+        kicker: 'La course au titre de meilleur buteur de R2 raconte bien plus qu’un classement.',
+        paras: T(['D’un côté, Adrien Cuquemelle, finisseur du CS Carentan. De l’autre, Enzo Perrey, joueur décisif revenu à l’AS Tourlaville. Deux profils, deux clubs, une même obsession : faire trembler les filets.',
+          'Leur duel à distance a animé la saison de Régional 2 et rappelé une évidence : le football du Cotentin regorge de talents capables de faire la différence semaine après semaine.',
+          'Au-delà des statistiques, cette rivalité donne aux plus jeunes des modèles proches, visibles, accessibles. Et elle offre aux supporters un fil rouge pour suivre tout un championnat.']) }),
+      P({ id: 'fceh', sec: 'Le terrain', rubric: 'Football · Régional 2', title: 'Le FCEH reste en R2', script: 'la saison sauvée', img: B('824fb1ca8687d16522c2ba8f05d66086'), imgCap: 'La joie des joueurs du FCEH',
+        kicker: 'Une victoire large face à Agneaux FC au stade Jean-Jaurès.', score: { home: 'FCEH', away: 'Agneaux FC', hs: '5', as: '1', cap: 'Stade Jean-Jaurès · Régional 2' },
+        paras: T(['Il fallait un grand match pour sécuriser la saison. Le FCEH l’a livré : large vainqueur d’Agneaux FC, le club d’Équeurdreville-Hainneville a signé une victoire majeure qui valide son maintien en Régional 2.',
+          'Au-delà du score, la manière a marqué les esprits. Une équipe concernée, solidaire, qui a su faire basculer la rencontre et la contrôler jusqu’au bout. Le maintien acquis, le club peut préparer l’avenir avec sérénité, sous la conduite de son entraîneur Florian Billard.']) }),
+      P({ id: 'feminines', sec: 'Le terrain', rubric: 'Football féminin', title: 'Elles écrivent leur histoire', script: 'à Postaire, devant leur public', img: B('f2d41cc7df08eba8f5272bd4fddfac50'), imgCap: 'Les féminines de l’AS Cherbourg',
+        kicker: 'Un match difficile, mais une étape importante pour le projet féminin de l’AS Cherbourg.',
+        paras: T(['Devant leur public, les féminines de l’AS Cherbourg ont vécu une rencontre exigeante. Le résultat n’a pas souri, mais l’essentiel était ailleurs : la visibilité d’un projet qui grandit.',
+          'Le football féminin progresse partout en France, et le Cotentin n’échappe pas à la tendance. Chaque match joué devant des tribunes garnies est un message envoyé aux jeunes filles qui hésitent encore à prendre une licence.',
+          'La Gazette suivra cette équipe tout au long de la saison. Parce que l’histoire se construit aussi dans les matchs difficiles.']) }),
+      P({ id: 'regard', sec: 'Le terrain', rubric: 'Regard terrain', title: 'Derrière l’objectif', script: 'le match vu par le photographe', img: B('e6132a6993a0d040085ac66b6f46cf6e'), imgCap: 'AS Cherbourg – ASTDV B', score: { home: 'AS Cherbourg', away: 'ASTDV B', hs: '8', as: '0', cap: 'Régional 1' },
+        kicker: 'Le photographe Thibault Mariette raconte la victoire 8-0 de l’AS Cherbourg face à l’ASTDV B.',
+        paras: T(['Derrière l’objectif, on voit le match autrement. Thibault Mariette a couvert la rencontre AS Cherbourg – ASTDV B et en retient d’abord la circulation du ballon.',
+          'Le format « Regard terrain » donne la parole à ceux qui observent les matchs depuis la ligne de touche : photographes, vidéastes, arbitres, bénévoles. Une autre façon de raconter le football. Retrouvez l’intégralité de son regard sur casabesports.fr.']),
+        quote: '« J’ai été surpris par la qualité collective de Cherbourg. »', quoteBy: 'Thibault Mariette, photographe' }),
+      P({ id: 'waterpolo', sec: 'Le terrain', rubric: 'Water-polo', title: 'Les Redoutables', script: 'cap sur la Coupe de la Manche', img: B('38c25d93ed37833c9d08d0a1d75de3f1'), imgCap: 'Les Redoutables de Cherbourg', tilt: true,
+        kicker: 'Troisième participation à la Coupe de la Manche pour l’équipe de Cherbourg.',
+        paras: T(['Pour leur troisième participation à la Coupe de la Manche, Les Redoutables de Cherbourg veulent confirmer leur progression. Au programme : Granville, Querqueville et Carentan.',
+          'Le water-polo reste une discipline confidentielle dans le département, mais il attire des profils complets : endurance, puissance, lecture du jeu. Un sport collectif exigeant, souvent découvert par hasard et adopté pour longtemps.']),
+        cols3: [{ h: 'Granville', t: 'Premier adversaire.' }, { h: 'Querqueville', t: 'Le voisin.' }, { h: 'Carentan', t: 'Pour finir.' }] }),
+      P({ id: 'arbitrage', sec: 'Le terrain', rubric: 'Arbitrage', title: 'Ceux qui tiennent le sifflet', script: 'sans eux, pas de match', img: B('5841e4625d308992d931ba37f1195ce3'), imgCap: 'Bryan Piedagnel',
+        kicker: 'Rencontre avec une fonction trop souvent oubliée.',
+        paras: T(['Bryan Piedagnel, arbitre, est au cœur d’un reportage vidéo de Casa Besports consacré aux coulisses d’une vie d’arbitre, entre passion et exigence.',
+          'Cloé Mariette, arbitre et vice-présidente du District de football de la Manche, incarne elle aussi cet engagement, sur le terrain comme dans les instances.',
+          'Chaque saison, les districts recherchent de nouveaux arbitres, dès l’adolescence. Une formation est proposée, et la fonction est rémunérée selon le niveau.']),
+        aside: { h: 'Devenir arbitre', t: 'Le District de football de la Manche organise des formations initiales. Renseignez-vous auprès de votre club.' } }),
+      P({ id: 'tableau', sec: 'Le terrain', kind: 'chalk', img: B('56cc472c6c2fbb4d9666f881a2e56edf'), imgCap: 'Photo-illustration', rubric: 'Le tableau noir', title: 'Le tableau noir', script: 'comprendre le jeu', head2: 'Trois idées pour presser haut',
+        lead: 'Sans prétendre décrire une équipe en particulier, voici trois principes de jeu que l’on retrouve sur bien des terrains amateurs.',
+        steps: [{ n: '01', h: 'Sortie de balle', sub: 'Des solutions courtes et sûres', t: 'Le gardien attire le premier rideau adverse pour libérer les défenseurs centraux. Les milieux se placent entre les lignes et offrent des solutions simples.', hand: 'Créer une supériorité à la relance.' },
+          { n: '02', h: 'Zone de pressing', sub: 'Récupérer haut', t: 'Le pressing se déclenche sur une passe vers le côté. Les attaquants ferment les lignes de passe, les milieux coupent l’intérieur.', hand: 'Orienter, fermer, récupérer.' },
+          { n: '03', h: 'Dernier geste', sub: 'Être juste dans la zone clé', t: 'Une fois le ballon récupéré, l’équipe se projette vite. Les appels dans le demi-espace libèrent centre, passe en profondeur ou frappe.', hand: 'De la vitesse et des choix simples.' }] }),
+      // ---------- Les gens ----------
+      P({ id: 'debat', sec: 'Les gens', kind: 'debat', rubric: 'La question qui divise', title: 'Le dimanche 15 h, intouchable ?', band: 'Le dimanche 15 h', script: 'tradition sacrée ou horaire d’un autre temps', glyph: '?',
+        lead: 'Le coup d’envoi du dimanche après-midi rythme la vie des clubs depuis des générations. Mais les joueurs, les familles et les bénévoles n’ont plus tous le même agenda. Deux camps, deux lignes d’arguments : à vous de trancher.',
+        pour: { h: 'on n’y touche pas', pts: T(['C’est le rendez-vous du village : on vient voir le match après le repas de famille, on y croise tout le monde.', 'La buvette et la tribune vivent de ce créneau, et leurs recettes font tourner le club toute la saison.', 'Les arbitres, les bénévoles et les transports des jeunes sont organisés autour de lui depuis toujours.']) },
+        contre: { h: 'il est temps de bouger', pts: T(['Un match le samedi soir attire un autre public, plus jeune, et rend le dimanche aux familles.', 'Beaucoup de joueurs travaillent le week-end, les plus jeunes ont d’autres activités : un peu de souplesse retient des licenciés.', 'Les terrains éclairés permettent désormais des horaires plus variés, l’hiver comme l’été.']) },
+        note: 'Votre club a changé d’horaire ? Racontez-nous comment ça s’est passé : les meilleurs témoignages seront publiés dans le prochain numéro.' }),
+      P({ id: 'histoire', sec: 'Les gens', kind: 'story', rubric: 'L’histoire', title: 'L’histoire', script: 'ceux qui font vivre le sport d’ici', img: B('25fc361529644e7b5978722ef83683b6'), imgCap: 'Photo-illustration',
+        lead: 'Ils accueillent, tiennent la buvette, tracent les lignes, gèrent la table de marque. Dans le Cotentin, le sport local vit grâce à des femmes et des hommes de l’ombre.',
+        paras: T(['Au Tournoi international de basket de Cherbourg, ils portaient des maillots oranges. Tout le week-end, les bénévoles ont accueilli les équipes, tenu les buvettes, les tables de marque et les vestiaires. Sans eux, pas de tournoi.',
+          'Partout dans la Manche, la même scène se répète chaque samedi : quelqu’un ouvre le stade, quelqu’un lave les maillots, quelqu’un conduit les plus jeunes au match. Ces gestes ne font jamais la une, ils font pourtant tenir les clubs.',
+          'Le bénévolat sportif s’essouffle dans de nombreux clubs : manque de temps, charge administrative, sentiment de ne pas être reconnu. La Gazette ouvre une rubrique pour leur rendre hommage. Proposez-nous les bénévoles de votre club.']),
+        quote: 'Un club, c’est d’abord des gens qui donnent leur temps.',
+        enbref: [{ h: 'Des maillots oranges', t: 'Les bénévoles du Tournoi international de Cherbourg.' }, { h: 'Toutes les générations', t: 'Du parent au retraité, chacun trouve sa place.' }, { h: 'Votre club', t: 'Écrivez-nous pour mettre vos bénévoles à l’honneur.' }] }),
+      P({ id: 'visage', sec: 'Les gens', kind: 'portrait', rubric: 'Le visage du Cotentin', title: 'Le visage du Cotentin', script: 'portrait d’une passion', name: 'Alexan Morin', sport: 'Trail', img: B('2b8b1c873d91f86dbbe51fe32be05f69'),
+        text: 'Figure montante du trail dans le Nord-Cotentin, Alexan Morin avance avec talent, ambition et une volonté forte : devenir un modèle pour son frère. Sentiers côtiers, dénivelés courts mais cassants, vent et embruns : le territoire forge le caractère.',
+        tagline: 'Courir pour montrer la voie.',
+        cols3: [{ h: 'Son sport', t: 'Le trail, sur les sentiers du Nord-Cotentin.' }, { h: 'Sa force', t: 'Le talent et l’ambition.' }, { h: 'Son moteur', t: 'Devenir un modèle pour son frère.' }] }),
+      // ---------- Le territoire ----------
+      P({ id: 'retro', sec: 'Le territoire', kind: 'retro', rubric: 'Rétro', title: 'Il y a dix ans, le Tour dans la Manche', band: 'Il y a dix ans', script: 'juillet 2016 : trois jours, deux maillots jaunes', thumb: B('56c5699f8f042372def6ef4a6c5ca373'),
+        lead: 'Début juillet 2016, la Grande Boucle s’élance de la Manche. Trois étapes, du Mont-Saint-Michel à Granville, et une arrivée en montée au-dessus de Cherbourg qui fait passer le maillot jaune d’épaules en épaules.',
+        timeline: [
+          { d: 'Samedi 2 juillet', h: 'Mont-Saint-Michel → Utah Beach', km: '188 km', t: 'Grand départ au pied du Mont. Mark Cavendish gagne au sprint à Sainte-Marie-du-Mont et endosse le premier maillot jaune de sa carrière.' },
+          { d: 'Dimanche 3 juillet', h: 'Saint-Lô → Cherbourg-en-Cotentin', km: '183 km', t: 'Arrivée en côte après la Glacerie. Peter Sagan, champion du monde en titre, s’impose devant Julian Alaphilippe et Alejandro Valverde, et prend le maillot jaune.' },
+          { d: 'Lundi 4 juillet', h: 'Granville → Angers', km: '', t: 'Le peloton quitte la Manche par Granville. Nouveau sprint, nouvelle victoire de Mark Cavendish.' }],
+        num: { big: '1,9 km', l: 'à 6,5 % de moyenne : la côte de la Glacerie, classée en 3e catégorie, juste avant l’arrivée à Cherbourg-en-Cotentin.' },
+        paras: T(['Pour le Cotentin, c’était un rendez-vous rare : une arrivée d’étape du Tour de France, et un vainqueur en maillot arc-en-ciel de champion du monde.',
+          'Dix ans plus tard, la côte de la Glacerie est toujours là. Et elle pique toujours autant les jambes de ceux qui la montent le dimanche matin.']),
+        choc: { t: 'Il a suffi de cette petite côte de 1,9 km pour que le maillot jaune passe des épaules de Mark Cavendish à celles de Peter Sagan.', src: 'Source : Tour de France 2016, étapes 1 et 2 (Wikipédia)' } }),
+      P({ id: 'rade', sec: 'Le territoire', rubric: 'Lieux de légende', title: 'La rade de Cherbourg', script: 'la plus grande rade artificielle du monde', img: B('37f0accd200070c08850e6289a7929b2'), imgCap: 'Illustration Casa Besports',
+        paras: T(['Protégée par de longues digues bâties entre la fin du XVIIIe siècle et le XIXe siècle, la rade de Cherbourg est présentée comme la plus grande rade artificielle du monde.',
+          'En 1786, Louis XVI se rend à Cherbourg pour assister à l’immersion de l’un des immenses cônes de bois destinés à construire la digue centrale.',
+          'Au-dessus de la ville, le fort du Roule abrite aujourd’hui le musée de la Libération : en juin 1944, la prise du fort précède de peu la libération de Cherbourg, le 26 juin.']),
+        aside: { h: 'Et le sport ?', t: 'Voile, aviron et nage en eau libre font de la rade un stade nautique à ciel ouvert.' },
+        choc: { t: 'Le 10 avril 1912, le Titanic fait escale à Cherbourg moins de deux heures, en début de soirée. Les transbordeurs Nomadic et Traffic lui amènent plus de 270 passagers.', src: 'Source : escale du Titanic à Cherbourg (IrishCentral)' } }),
+      P({ id: 'gatteville', sec: 'Le territoire', rubric: 'Lieux de légende', title: 'Gatteville et la Blanche-Nef', script: '75 mètres de lumière', img: B('f46b43bf0cb05c3fde4cba8ae7d9c8d5'), imgCap: 'Illustration Casa Besports',
+        paras: T(['Allumé en 1835 à la pointe de Barfleur, le phare de Gatteville culmine à 75 mètres : c’est le deuxième plus haut phare de France.',
+          'Au large, le 25 novembre 1120, la Blanche-Nef heurte un rocher et sombre. À bord se trouvait Guillaume Adelin, unique fils légitime du roi d’Angleterre Henri Ier. Sa mort ouvrira une longue crise de succession.',
+          'Aujourd’hui, le site attire randonneurs et traileurs, qui longent le littoral du Val de Saire.']),
+        choc: { t: '365 marches, une par jour de l’année, et 52 fenêtres : le phare de Gatteville a été construit comme un calendrier.', src: 'Source : Figaro Nautisme, « Phare de Gatteville, là-haut en Cotentin »' } }),
+      P({ id: 'mont', sec: 'Le territoire', rubric: 'Lieux de légende', title: 'Le Mont-Saint-Michel', script: 'l’imprenable', img: B('56c5699f8f042372def6ef4a6c5ca373'), imgCap: 'Illustration Casa Besports',
+        paras: T(['Selon la tradition, c’est Aubert, évêque d’Avranches, qui fonde en 708 un sanctuaire sur le mont, après des apparitions de l’archange saint Michel.',
+          'Pendant la guerre de Cent Ans, la place forte résiste aux assauts anglais et ne sera jamais prise : le Mont devient un symbole de résistance.',
+          'Le site est inscrit au patrimoine mondial de l’Unesco depuis 1979. Et pour les supporters de l’US Avranches, il reste la plus belle des toiles de fond.']),
+        choc: { t: 'La baie connaît les plus grandes marées d’Europe continentale : jusqu’à 15 mètres d’écart entre la basse et la pleine mer.', src: 'Source : France.fr, « 6 mystères qui entourent le Mont-Saint-Michel »' } }),
+      // ---------- La pause ----------
+      P({ id: 'forme', sec: 'La pause', rubric: 'En forme', title: 'Reprise et assiette', script: 'les bons réflexes', drop: false, img: B('66c390103494d9a28a5f34e10524881c'), imgCap: 'Les joueuses du RCMN',
+        kicker: 'Repères simples pour les sportifs amateurs. Ces conseils généraux ne remplacent pas l’avis d’un professionnel de santé.',
+        paras: T(['Progressivité : augmentez le volume d’entraînement par paliers plutôt que de reprendre au rythme de la fin de saison.',
+          'Échauffement : dix à quinze minutes d’activation, de mobilité articulaire et d’accélérations progressives avant chaque séance.',
+          'Sommeil et hydratation : les deux piliers de la récupération, souvent négligés.',
+          'Avant le match : un repas riche en glucides complexes, environ trois heures avant le coup d’envoi. Après : glucides et protéines dans l’heure qui suit.',
+          'Écoute du corps : une douleur qui persiste au-delà de quelques jours mérite l’avis d’un professionnel.']),
+        cols3: [{ h: 'Avant', t: 'Glucides complexes, 3 h avant.' }, { h: 'Pendant', t: 'De petites gorgées, régulièrement.' }, { h: 'Après', t: 'Glucides et protéines, puis un vrai repas.' }] }),
+      P({ id: 'lexique', sec: 'La pause', kind: 'lexique', rubric: 'Le lexique', title: 'Le lexique du bord de terrain', script: 'pour briller à la buvette', glyph: 'Aa',
+        lead: 'Dix mots entendus le week-end, de la main courante à la tribune. Une définition chacun, et plus d’excuse pour hocher la tête sans comprendre.',
+        entries: [
+          { w: 'Caviar', s: 'Football', d: 'Une passe parfaite, servie sur un plateau : il ne reste qu’à marquer.' },
+          { w: 'Lucarne', s: 'Football', d: 'L’angle entre la barre et le poteau. Le but qu’on refait dix fois en rentrant.' },
+          { w: 'Panenka', s: 'Football', d: 'Un penalty tiré en cloche, plein centre, pendant que le gardien plonge. Du nom d’Antonín Panenka, qui l’a tenté en finale de l’Euro 1976.' },
+          { w: 'Petit pont', s: 'Football', d: 'Le ballon passe entre les jambes de l’adversaire. Effet garanti, amitié parfois en danger.' },
+          { w: 'Chistera', s: 'Rugby', d: 'Une passe acrobatique en arc de cercle, d’un revers de main, comme le gant d’osier de la pelote basque qui lui donne son nom.' },
+          { w: 'Cadrage-débordement', s: 'Rugby', d: 'Fixer son vis-à-vis vers l’intérieur, puis le déborder par l’extérieur. Un classique des trois-quarts.' },
+          { w: 'Alley-oop', s: 'Basket', d: 'Une passe lobée près du cercle, un coéquipier qui saute, attrape et marque dans la foulée.' },
+          { w: 'Buzzer-beater', s: 'Basket', d: 'Le panier marqué sur la sirène. Le chrono affiche zéro, la salle explose.' },
+          { w: 'Bonnet rouge', s: 'Water-polo', d: 'Celui du gardien de but : en water-polo, c’est la couleur qui le distingue de ses partenaires.' },
+          { w: 'Troisième mi-temps', s: 'Tous sports', d: 'Après le match, autour d’un verre ou d’un repas : le moment où l’on refait la rencontre. Le rugby en a fait une institution.' }] }),
+      P({ id: 'agenda', sec: 'La pause', kind: 'agenda', thumb: B('5cd343902a0b6d6a654108dee90d6fc3'), rubric: 'Avant le coup d’envoi', title: 'Avant le coup d’envoi', script: 'les rendez-vous à ne pas manquer', sub: 'Le prochain week-end sportif dans le Cotentin',
+        top: { sport: 'Football · Coupe de France', home: 'ES Pointe-Hague', away: 'US Avranches', when: '[DATE ET HEURE]', where: 'Beaumont-Hague', note: 'Un 4e tour de Coupe de France pour les 30 ans du club.' },
+        rows: [{ img: B('33cc6fbd406b8554971d61a0887d4a76'), sport: 'Football', match: 'AS Tourlaville – FCEH', when: 'Dim. 15 h', where: 'Tourlaville', note: 'Régional 2 (démo)' }, { img: B('824fb1ca8687d16522c2ba8f05d66086'), sport: 'Football', match: 'SC Douve Divette – UC Briquebec', when: 'Dim. 15 h', where: 'Tollevast', note: 'Régional 2 (démo)' },
+          { img: B('183faa9bf4b22beda6d2cb41e6b91225'), sport: 'Basket', match: 'UST Basket – La Valognaise', when: 'Sam. 20 h 30', where: 'Équeurdreville', note: 'Championnat (démo)' }, { img: B('38c25d93ed37833c9d08d0a1d75de3f1'), sport: 'Water-polo', match: 'Carentan – Les Redoutables', when: 'Sam. 19 h', where: 'Carentan', note: 'Coupe de la Manche (démo)' }],
+        table: [['1', 'FCEH', '9'], ['2', 'AS Tourlaville', '7'], ['3', 'CS Carentan', '5'], ['4', 'Agneaux FC', '4'], ['5', 'US Côte des Isles', '3']].map(([r, t, p]) => ({ r, t, p })),
+        note: 'Un week-end 100 % Cotentin, sur tous les terrains !' }),
+      P({ id: 'boutique', sec: 'La pause', rubric: 'La boutique', title: 'Cherwood × Casa', script: 'l’atelier qui habille le Cotentin', img: B('981e82bbbb0f7a9367c97e4c848c2fc6'), imgCap: 'Hoodie « Le Roule »', tilt: true, strip: [{ src: B('b248d9f3a2edcd1758c3805be91a57a2'), cap: 'Sweat « La Presqu’île »' }, { src: B('2c48f7132b968b70be1c7d701dc4a9d6'), cap: 'T-shirt « … du ballon »' }, { src: B('b75f47de93c1cb54bec627f5067d8110'), cap: 'Hoodie « Cotentin Sport Club »' }],
+        kicker: 'Une marque cherbourgeoise née en 2017, partenaire de la boutique Casa Besports.',
+        paras: T(['Fondée en 2017, Cherwood propose des collections inspirées de la Normandie, avec une démarche écologique et éthique. Ses t-shirts identitaires affichent le nom des habitants : Cherbourgeois, Saint-Lois, Caennais…',
+          'Les vêtements sont dessinés dans le centre-ville de Cherbourg, où un atelier réalise le flocage et la broderie. Ses motifs racontent le territoire, de la statue de Napoléon à la Montagne du Roule. Avec Casa Besports, la capsule revisite ces codes pour les sportifs : hoodie « Le Roule », sweat « La Presqu’île », t-shirt « … du ballon » personnalisable et hoodie Cotentin Sport Club.']),
+        cols3: [{ h: 'Fabriqué', t: 'Dessiné et brodé à Cherbourg.' }, { h: 'Personnalisé', t: 'Votre ville, votre club, votre numéro.' }, { h: 'Retrait', t: 'Gratuit en boutique Cherwood.' }] }),
+      P({ id: 'humeur', sec: 'La pause', kind: 'humeur', rubric: 'L’humeur', title: 'La page qui ne sert à rien', script: 'mais qu’on lit en premier', glyph: '↑↓',
+        baro: [{ dir: 'up', h: 'La Hague', t: 'Un 4e tour de Coupe de France à domicile pour les 30 ans du club. Tribune pleine attendue.' },
+          { dir: 'up', h: 'Les maillots oranges', t: 'Les bénévoles du Tournoi international de basket, impeccables tout le week-end.' },
+          { dir: 'flat', h: 'Le vent', t: 'Présent à tous les matchs, sur tous les terrains. Jamais suspendu.' },
+          { dir: 'down', h: 'Les vestiaires en novembre', t: 'L’eau chaude, cette légende que l’on se transmet de saison en saison.' }],
+        clT: 'Le classement qui ne sert à rien', clSub: 'Les cinq bruits du dimanche au bord du terrain',
+        classement: T(['Les crampons qui claquent sur le béton du couloir.', '« On se parle ! », crié par quelqu’un qui ne parle à personne.', 'La sono de la buvette qui grésille pendant l’annonce des équipes.', 'Le ballon qui finit dans le jardin du voisin. Encore.', 'Le vent. Toujours le vent.']) }),
+      P({ id: 'quiz', sec: 'La pause', kind: 'quiz', thumb: B('f46b43bf0cb05c3fde4cba8ae7d9c8d5'), rubric: 'Jeux', title: 'Le quiz du Cotentin', script: 'dix questions, zéro triche', kicker: 'Testez votre culture sportive et locale, détails chocs compris. Solutions en dernière page.' }),
+      P({ id: 'partenaires', sec: 'La pause', kind: 'ads', thumb: B('0855c8136dcdda770cb476333ba7ad46'), rubric: 'Partenaires', title: 'Ils soutiennent le sport d’ici', script: 'avantages lecteurs', kicker: 'Avantages réservés aux abonnés Casa B+ et aux lecteurs de la Gazette. OlistO est un partenaire réel ; les autres annonceurs sont fictifs.' }),
+      P({ id: 'back', sec: 'La pause', kind: 'back', rubric: 'Dernière page', title: 'Make it happen', script: 'ici, le sport a une histoire', img: B('bae1d2ac6cb6529aa1e99e023df405ff'),
+        solutions: 'Solutions du quiz : 1. 75 mètres · 2. 1120 · 3. Le Titanic · 4. 708 · 5. 8-0 · 6. 30 ans · 7. 2017 · 8. Jacques Prévert · 9. 2012 · 10. Peter Sagan.',
+        ours: 'La Gazette du Cotentin est éditée par Casa Besports, média indépendant du sport local fondé en 2024. Numéro d’essai : contenus de démonstration, annonceurs fictifs, photo-illustrations signalées comme telles. Les détails chocs sont vérifiés et sourcés.' })
+    ];
+    // Typographie française : espace insécable avant ? ! : ; » et après « (pas de ponctuation orpheline en début de ligne)
+    const fr = (v) => typeof v === 'string' ? (/^(assets\/|data:|\/_blob\/)/.test(v) ? v : v.replace(/ ([?!:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0').replace(/(\d) (\d{3})(?!\d)/g, '$1\u00a0$2')) : Array.isArray(v) ? v.map(fr) : v && typeof v === 'object' ? Object.keys(v).reduce((o, k) => { o[k] = fr(v[k]); return o; }, {}) : v;
+    pages.forEach((p, i) => { Object.keys(p).forEach((k) => { p[k] = fr(p[k]); }); p.n = String(i + 1).padStart(2, '0'); p.i = i; });
+    const idx = (id) => Math.max(0, pages.findIndex((p) => p.id === id));
+    const quizImgs = ['f46b43bf0cb05c3fde4cba8ae7d9c8d5', 'f46b43bf0cb05c3fde4cba8ae7d9c8d5', '47cc1f566d64d7869adcd6c21cdf47bf', '56c5699f8f042372def6ef4a6c5ca373', 'e6132a6993a0d040085ac66b6f46cf6e', '5cd343902a0b6d6a654108dee90d6fc3', '2c48f7132b968b70be1c7d701dc4a9d6', '68220997b900b01cc4ef65a2529b0ff1', 'c385b1324c6ffa4e23d8af37ea839381', '37f0accd200070c08850e6289a7929b2'].map(B);
+    const quiz = [
+      ['Quelle est la hauteur du phare de Gatteville ?', ['52 m', '75 m', '96 m'], 1],
+      ['En quelle année la Blanche-Nef sombre-t-elle au large de Barfleur ?', ['1066', '1120', '1204'], 1],
+      ['Quel paquebot fait escale à Cherbourg le 10 avril 1912 ?', ['Le Normandie', 'Le Titanic', 'Le France'], 1],
+      ['Selon la tradition, en quelle année le sanctuaire du Mont-Saint-Michel est-il fondé ?', ['708', '966', '1023'], 0],
+      ['Score de AS Cherbourg – ASTDV B ?', ['3-1', '5-1', '8-0'], 2],
+      ['Quel anniversaire fête l’ES Pointe-Hague ?', ['20 ans', '30 ans', '50 ans'], 1],
+      ['En quelle année Cherwood a-t-elle été fondée ?', ['2012', '2017', '2021'], 1],
+      ['Quel poète a vécu ses dernières années à Omonville-la-Petite ?', ['Jacques Prévert', 'Victor Hugo', 'Paul Éluard'], 0],
+      ['En quelle année l’US Quevilly, club de National, a-t-il joué la finale de la Coupe de France ?', ['2002', '2012', '2022'], 1],
+      ['Qui a pris le maillot jaune à Cherbourg-en-Cotentin en 2016 ?', ['Mark Cavendish', 'Peter Sagan', 'Julian Alaphilippe'], 1]
+    ];
+    quiz.forEach((q) => { q[0] = fr(q[0]); q[1] = fr(q[1]); });
+    const strip = ['weekend', 'choc', 'vestiaire', 'debat', 'retro', 'humeur'].map(idx);
+    const secs = ['À la une', 'Le terrain', 'Les gens', 'Le territoire', 'La pause'];
+    this._g = { pages, quiz, strip, quizImgs, secs, idx };
+    return this._g;
+  }
+
+
+
+  // Liseuse : aller à une page (bornée) et remonter en haut de la page
+  gzGo(i) {
+    const n = this.gazette().pages.length; const p = Math.max(0, Math.min(n - 1, i | 0));
+    this.setState({ page: p, readerOpen: true });
+    const top = () => { try { const sc = document.getElementById('gz-scroll'); if (sc) sc.scrollTop = 0; } catch (e) { /* liseuse fermée */ } };
+    top(); try { (window.requestAnimationFrame || setTimeout)(top); } catch (e) { /* facultatif */ }
+  }
+
+  // ---------- rédaction : utilitaires ----------
+  posts() { return this.state.posts || (window.CB_SERVER ? [] : this.more().seedPosts); }
+  setPost(id, patch, logLine) {
+    const who = this.me().name; const at = new Date().toISOString();
+    const R = typeof CasaRedac !== 'undefined' ? CasaRedac : null;
+    const posts = this.posts().map((p) => {
+      if (p.id !== id) return p;
+      const n = Object.assign({}, p, patch, { updated: 'à l’instant', updatedAt: at, log: logLine ? (p.log || []).concat([{ who, when: 'à l’instant', at, what: logLine }]) : p.log });
+      if (R && logLine) n.versions = R.addVersion(n, who, logLine.replace(/\.$/, ''));
+      if (R && patch.status === 'published') n.online = Object.assign(R.snapOf(n), { at });
+      return n;
+    });
+    this.setState({ posts });
+  }
+  rxGuard(action, p, proceed) {
+    if (typeof CasaRedac === 'undefined') { proceed(''); return; }
+    const isAdmin = this.state.role === 'admin';
+    const ctx = { isAdmin, staffRole: isAdmin ? 'admin' : (this.state.staffRole || 'redacteur'), checksOf: (x) => this.checksOf(x) };
+    CasaRedac.guard(this, ctx, CasaRedac.data(this), action, p, proceed);
+  }
+  me() {
+    const r = this.state.role;
+    if (r === 'admin') { const n = this.state.name.trim() || 'Administrateur principal'; return { name: n, first: n.split(' ')[0], role: 'admin', roleLabel: 'Administrateur principal · validation et publication' }; }
+    if (r === 'writer' && this.state.staffRole === 'collaborateur') return { name: 'Hugo Lefèvre', first: 'Hugo', role: 'writer', roleLabel: 'Chef d’édition · rédaction, une et Gazette' };
+    if (r === 'writer') return { name: 'Léa Marchand', first: 'Léa', role: 'writer', roleLabel: 'Rédactrice · rédaction et soumission' };
+    if (r === 'club') { const cl = this.data().clubs.find((c) => c.id === this.state.clubRoleId) || this.data().clubs[0]; return { name: 'Correspondant ' + cl.name + ' (démo)', first: 'Correspondant', role: 'club', roleLabel: 'Correspondant de club · ' + cl.name }; }
+    return { name: 'Visiteur', first: 'Visiteur', role: null, roleLabel: '' };
+  }
+  blocksOf(body) {
+    const out = [];
+    (body || '').split(/\n\s*\n/).forEach((chunk) => {
+      const lines = chunk.split('\n').map((l) => l.trim()).filter(Boolean);
+      lines.forEach((l, i) => {
+        const clean = (t) => t.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
+        if (/^##\s+/.test(l)) out.push({ t: clean(l.replace(/^##\s+/, '')), isH: true, isP: false, isQ: false, isL: false });
+        else if (/^>\s*/.test(l)) out.push({ t: clean(l.replace(/^>\s*/, '')), isQ: true, isP: false, isH: false, isL: false });
+        else if (/^[-•]\s+/.test(l)) out.push({ t: clean(l.replace(/^[-•]\s+/, '')), isL: true, isP: false, isH: false, isQ: false });
+        else {
+          const last = out[out.length - 1];
+          if (i > 0 && last && last.isP) last.t += ' ' + clean(l); else out.push({ t: clean(l), isP: true, isH: false, isQ: false, isL: false });
+        }
+      });
+    });
+    return out;
+  }
+  textOf(body) { return (body || '').replace(/^##\s+|^>\s*|^[-•]\s+/gm, '').replace(/\*\*/g, ''); }
+  sentences(t) { return (t || '').replace(/\n+/g, ' ').split(/(?<=[.!?…])\s+/).map((x) => x.trim()).filter((x) => x.length > 1); }
+  checksOf(p) {
+    const words = this.textOf(p.body).split(/\s+/).filter(Boolean).length;
+    const longS = this.sentences(this.textOf(p.body)).filter((x) => x.split(/\s+/).length > 35);
+    const c = [
+      [p.title.length >= 20 && p.title.length <= 80, 'Titre entre 20 et 80 caractères'],
+      [p.dek.length >= 60, 'Chapeau d’au moins 60 caractères'],
+      [words >= 150, 'Au moins 150 mots (' + words + ')'],
+      [!!p.img && p.alt.trim().length >= 10, 'Image de une avec texte alternatif'],
+      [/^##\s+/m.test(p.body), 'Au moins un intertitre'],
+      [longS.length === 0, longS.length ? longS.length + ' phrase(s) de plus de 35 mots' : 'Pas de phrase trop longue'],
+      [!!p.sport && !!p.tag.trim(), 'Discipline et rubrique renseignées'],
+      [p.clubs.length > 0, 'Au moins un club lié']
+    ];
+    const ok = c.filter((x) => x[0]).length;
+    return { words, list: c.map(([v, label]) => ({ label, icon: v ? '✓' : '!', color: v ? '#18705f' : '#b0202e' })), score: Math.round(ok / c.length * 100) };
+  }
+
+  // ---------- Casa IA : moteur intégré ----------
+  aiPush(msg) { this.setState({ aiMsgs: this.state.aiMsgs.concat([msg]) }); }
+  aiAsk(text) {
+    const t = (text || '').trim();
+    if (!t) return;
+    this.setState({ aiMsgs: this.state.aiMsgs.concat([{ role: 'user', text: t, actions: [] }]), aiInput: '', aiTyping: true });
+    const local = () => { const r = this.aiRespond(t); this.setState({ aiTyping: false }); this.aiPush({ role: 'bot', text: r.text, actions: r.actions || [] }); };
+    if (typeof window !== 'undefined' && window.CASA_API && typeof fetch === 'function') {
+      const history = this.state.aiMsgs.slice(-8).map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text })).concat([{ role: 'user', content: t }]);
+      fetch(window.CASA_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, view: this.state.view }) })
+        .then((r) => r.ok ? r.json() : Promise.reject(r.status))
+        .then((d) => {
+          const acts = [];
+          if (d.action && d.action.view) acts.push({ label: d.action.label || 'Ouvrir', run: () => this.go(d.action.view, d.action.params || {}) });
+          this.setState({ aiTyping: false });
+          this.aiPush({ role: 'bot', text: d.reply || '…', actions: acts });
+        })
+        .catch(local);
+    } else {
+      clearTimeout(this._ai);
+      this._ai = setTimeout(local, 450);
+    }
+  }
+  aiRespond(raw) {
+    const D = this.data(), X = this.more();
+    const n = (x) => (x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const q = n(raw);
+    const has = (re) => re.test(q);
+    const act = (label, run) => ({ label, run });
+    const eur = (v) => (v % 1 === 0 ? String(v) : v.toFixed(2).replace('.', ',')) + ' €';
+    const sportOf = () => has(/basket/) ? 'Basketball' : has(/water|polo|redoutable/) ? 'Water-polo' : has(/rugby/) ? 'Rugby' : 'Football';
+    const compName = (m) => ((X.comps[m.sport] || []).find((c) => c.id === m.comp) || { label: m.comp }).label;
+    const score = (m) => (m.hs !== null && m.hs !== undefined) ? m.hs + '-' + m.as : (m.status === 'up' ? 'à venir' : 'score non communiqué');
+    const name = this.state.name ? ' ' + this.state.name.split(' ')[0] : '';
+
+    if (has(/^(bonjour|salut|hello|coucou|bonsoir|hey)\b/)) return { text: 'Bonjour' + name + ' ! Je suis Casa IA. Je peux vous donner les scores, conseiller une tenue, ouvrir la Gazette, raconter l’histoire des lieux du Cotentin ou vous guider dans le site.', actions: [act('Scores en direct', () => this.go('live', { dTab: 'live' })), act('Conseil boutique', () => this.aiAsk('Une tenue chill à moins de 60 €'))] };
+    if (has(/\baide\b|que (peux|sais)|tu fais quoi|comment ca marche/)) return { text: 'Voici ce que je sais faire :\n• Scores, résultats, agenda et classements par discipline\n• Conseils boutique et ajout au panier (« ajoute le hoodie signature en M »)\n• Abonnements Casa B+ et La Gazette, ouverture d’une page précise\n• Histoire des lieux du Cotentin\n• Infos clubs, joueurs et partenaires\n• Navigation : « emmène-moi à la boutique »', actions: [] };
+
+    if (has(/realite augmentee|\bar\b|compo|line ?up|composition|3d|selfie|photo supporter|application|appli/)) {
+      if (has(/application|appli/) && !has(/compo|realite|3d/)) return { text: 'L’application Casa Besports réunit scores, Club House, Mon quotidien, la Gazette et les expériences en réalité augmentée. Elle s’installe sur l’écran d’accueil depuis le navigateur.', actions: [act('Découvrir l’application', () => this.go('app'))] };
+      return { text: 'Proposez votre compo en réalité augmentée : système de jeu, noms des joueurs, capitaine, terrain posé sur votre table, puis publication au Club House.', actions: [act('Ma compo en AR', () => this.openAR('lineup')), act('Toutes les expériences', () => this.openAR('hub'))] };
+    }
+    // partenaire OlistO
+    if (has(/olisto|credit|pret immo|emprunt|regroup|rachat de|assurance emprunteur|projet immobilier|immobilier|courtier|mensualite/)) return { text: 'Notre partenaire OlistO, réseau de courtage, accompagne les projets immobiliers, le regroupement de crédits et l’assurance emprunteur. Vous pouvez simuler une mensualité et votre taux d’endettement, puis demander à être rappelé.\nUn crédit vous engage et doit être remboursé. Vérifiez vos capacités de remboursement avant de vous engager.', actions: [act('Simuler avec OlistO', () => this.go('olisto'))] };
+    // club house
+    if (has(/club ?house|clubhouse|communaute|forum|annonce|benevol.*cherche|sondage|carte membre|mes points|fidelite|classement des membres|evenement|covoit/)) {
+      if (has(/covoit/)) return { text: 'Le covoiturage pour les matchs se trouve au Club House, rubrique Annonces & entraide.', actions: [act('Voir les trajets', () => this.go('clubhouse', { chTab: 'annonces', chAdCat: 'Covoiturage' }))] };
+      if (has(/annonce|benevol/)) return { text: 'Petites annonces du Club House : matériel, bénévolat, joueurs, stages et covoiturage.', actions: [act('Voir les annonces', () => this.go('clubhouse', { chTab: 'annonces' }))] };
+      if (has(/evenement/)) { const ev = this.chData().events; return { text: 'Prochains rendez-vous du Club House (démo) :\n' + ev.map((e) => '• ' + e.title + ' — ' + e.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + e.time).join('\n'), actions: [act('Voir les événements', () => this.go('clubhouse', { chTab: 'events' }))] }; }
+      if (has(/point|carte|fidelite|classement/)) return { text: 'Vos points se gagnent en pronostiquant, en votant, en participant aux événements et en publiant. Ils déterminent votre niveau : Supporter, Fidèle, Ultra, Légende.', actions: [act('Ma carte membre', () => this.go('clubhouse', { chTab: 'carte' })), act('Classement', () => this.go('clubhouse', { chTab: 'ligue' }))] };
+      return { text: 'Le Club House réunit le fil de la communauté, les annonces et l’entraide, les événements, le classement des membres et votre carte de membre.', actions: [act('Entrer au Club House', () => this.go('clubhouse'))] };
+    }
+    // culture
+    if (has(/culture|musee|exposition|\bexpo\b|oeuvre|match du port|\bart\b|parcours|balade|visite|millet|theatre|trident|concours photo/)) {
+      const CU = this.culture();
+      if (has(/parcours|balade|courir|velo|randonn/)) return { text: 'Parcours sport & patrimoine :\n' + CU.routes.map((r) => '• ' + r.name + ' (' + r.sport + ', ' + r.area + ')').join('\n'), actions: [act('Voir les parcours', () => this.go('culture', { cuTab: 'parcours' }))] };
+      if (has(/concours|photo|vote/)) return { text: 'Le concours « Regards sur le sport local » est ouvert : votez pour vos images préférées ou proposez la vôtre.', actions: [act('Aller au concours', () => this.go('culture', { cuTab: 'concours' }))] };
+      if (has(/musee|visite|theatre|trident|millet|lieu/)) return { text: 'Lieux de culture de la Manche :\n' + CU.venues.slice(0, 6).map((v) => '• ' + v.name + ' — ' + v.city).join('\n'), actions: [act('Voir les lieux', () => this.go('culture', { cuTab: 'lieux' }))] };
+      return { text: 'L’exposition Casa Besports compte quatre salles : le tableau « Le match du port », les Lieux de légende, la photographie du terrain et le design textile.', actions: [act('Visiter l’exposition', () => this.go('culture', { cuTab: 'expo' })), act('Œuvre du jour', () => this.setState({ workIdx: new Date().getDate() % CU.flat.length, aiOpen: false }))] };
+    }
+    // météo
+    if (has(/meteo|quel temps|pluie|pleuvoir|vent|temperature|soleil|averse/)) {
+      const cities = ['Cherbourg', 'Beaumont-Hague', 'Valognes', 'Barfleur', 'Barneville-Carteret', 'Carentan', 'Saint-Lo', 'Avranches'];
+      const ci = cities.find((c) => q.includes(n(c).replace(/-/g, ' ').split(' ')[0]));
+      const city = ci ? (ci === 'Saint-Lo' ? 'Saint-Lô' : ci) : this.state.wxCity || 'Cherbourg';
+      const Wc = (this.state.wxLive || {})[city] || this.wxDemo(city);
+      const [lab] = this.wxIcon(Wc.cur.code); const d1 = Wc.days[1]; const [lab1] = this.wxIcon(d1.code);
+      return { text: 'Météo à ' + city + (Wc.live ? '' : ' (démo)') + ' : ' + lab.toLowerCase() + ', ' + Wc.cur.t + '°, vent ' + Wc.cur.wind + ' km/h.\nDemain : ' + lab1.toLowerCase() + ', ' + d1.min + '° à ' + d1.max + '°, pluie ' + d1.pp + ' %.', actions: [act('Prévisions détaillées', () => { this.setState({ wxCity: city }); this.go('meteo'); })] };
+    }
+    // espace privé
+    const lm = q.match(/ajoute(?:r)?\s+(.+?)\s+(?:a|dans)\s+(?:ma|la|mes)\s+(?:liste\s+de\s+)?(courses|sac|taches|liste)/);
+    if (lm) {
+      if (!this.state.loggedIn) return { text: 'Connectez-vous pour utiliser vos listes personnelles.', actions: [act('Se connecter', () => this.setState({ loginOpen: true }))] };
+      const lk = lm[2] === 'sac' ? 'sac' : lm[2] === 'taches' ? 'todo' : 'courses';
+      const label = raw.trim().split(/\s+/).slice(1).join(' ').replace(/\s+(à|a|dans)\s+(ma|la|mes)\s+.*$/i, '');
+      const P0 = this.priv();
+      this.setPriv({ lists: Object.assign({}, P0.lists, { [lk]: P0.lists[lk].concat([{ id: Math.random().toString(36).slice(2, 9), text: label.charAt(0).toUpperCase() + label.slice(1), done: false }]) }) });
+      return { text: '« ' + label + ' » ajouté à votre liste ' + (lk === 'sac' ? 'Sac de sport' : lk === 'todo' ? 'À faire' : 'Courses') + '.', actions: [act('Voir la liste', () => { this.setState({ pvTab: 'listes', pvList: lk }); this.go('private'); })] };
+    }
+    if (has(/quotidien|mon agenda|mes notes|ma liste|budget|covoiturage|covoit|certificat|mes documents|activite/)) return { text: 'Votre espace privé « Mon quotidien » regroupe agenda, listes, notes, covoiturage, budget sport, documents et suivi d’activité.', actions: [act('Ouvrir Mon quotidien', () => this.go('private'))] };
+    // ajout au panier
+    const prodMatch = () => {
+      const keys = [['hoodie signature', 'hoodie-signature'], ['signature', 'hoodie-signature'], ['cotentin sport', 'hoodie-csc'], ['csc', 'hoodie-csc'], ['vestiaire', 'crew-vestiaire'], ['sweat', 'crew-vestiaire'], ['phare', 'tee-phare'], ['rade', 'tee-rade'], ['maillot', 'maillot-retro'], ['veste', 'veste-tribune'], ['survet', 'veste-tribune'], ['jogger', 'jogger'], ['jogging', 'jogger'], ['short', 'short-isles'], ['bob', 'bob'], ['casquette', 'casquette'], ['du ballon', 'tee-identitaire'], ['identitaire', 'tee-identitaire'], ['marin', 'pull-marin'], ['tote', 'tote'], ['sac', 'tote'], ['echarpe', 'echarpe'], ['mug', 'mug'], ['gourde', 'gourde'], ['affiche', 'affiche'], ['poster', 'affiche'], ['sticker', 'stickers'], ['porte-cle', 'porte-cles'], ['carte cadeau', 'carte-cadeau'], ['hoodie', 'hoodie-signature'], ['t-shirt', 'tee-phare'], ['tee', 'tee-phare']];
+      const f = keys.find(([k]) => q.includes(k));
+      return f ? X.products.find((p) => p.id === f[1]) : null;
+    };
+    if (has(/\b(ajoute|ajouter|mets|achete|commande|prends)\b/)) {
+      const p = prodMatch();
+      if (p) {
+        const sm = q.match(/\b(xxl|xl|xs|s|m|l|a3|a2)\b(?!\w)/);
+        const size = p.sizes ? (sm ? p.sizes.find((z) => n(z) === sm[1]) : null) : null;
+        if (p.sizes && !size) return { text: 'Quelle taille pour « ' + p.name + ' » (' + eur(p.price) + ') ?', actions: p.sizes.map((z) => act(z, () => { this.addLine(p, 0, z, 1, ''); this.aiPush({ role: 'bot', text: '« ' + p.name + ' » en ' + z + ' est dans votre panier.', actions: [act('Voir le panier', () => this.setState({ cartOpen: true }))] }); })) };
+        this.addLine(p, 0, size, 1, '');
+        return { text: 'C’est fait : « ' + p.name + ' »' + (size ? ' en ' + size : '') + ' a été ajouté au panier.', actions: [act('Voir le panier', () => this.setState({ cartOpen: true })), act('Continuer mes achats', () => this.go('shop'))] };
+      }
+    }
+    // navigation
+    const pagesMap = [['boutique|shop|magasin', 'shop', 'Boutique'], ['tableau de bord|dashboard', 'home', 'l’accueil'], ['terrain', 'live', 'Le Terrain'], ['actu|article|news', 'news', 'Actualités'], ['video', 'videos', 'Vidéos'], ['club', 'clubs', 'Clubs'], ['joueur', 'players', 'Joueurs'], ['discipline|sport', 'disciplines', 'Disciplines'], ['carte|territoire', 'map', 'Territoire'], ['abonnement|offre', 'offers', 'Abonnements'], ['partenaire|sponsor', 'partners', 'Partenaires'], ['contact|ecrire', 'contact', 'Contact'], ['propos|histoire de casa', 'about', 'À propos'], ['panier', 'cart', 'Panier'], ['espace|compte', 'account', 'Mon espace'], ['redaction|studio|relecture', 'studio', 'Espace rédaction'], ['club ?house|communaute', 'clubhouse', 'le Club House'], ['culture|musee|exposition', 'culture', 'Culture'], ['meteo|temps', 'meteo', 'Météo'], ['quotidien|agenda|liste', 'private', 'Mon quotidien'], ['curriculum|mon cv|\\bcv\\b', 'cv', 'votre CV'], ['certificat|verifier', 'verifier', 'la vérification des certificats'], ['accueil|home', 'home', 'Accueil']];
+    if (has(/\b(ouvre|ouvrir|va |aller|emmene|montre|affiche|direction|navigue)/)) {
+      if (has(/gazette|mag/)) { const pm = q.match(/page\s*(\d+)/); const pg = pm ? Math.min(this.gazette().pages.length, Math.max(1, +pm[1])) - 1 : 0; this.setState({ aiOpen: false }); this.gzGo(pg); return { text: 'J’ouvre La Gazette du Cotentin' + (pm ? ' à la page ' + (pg + 1) : '') + '.', actions: [] }; }
+      const m = pagesMap.find(([re]) => new RegExp(re).test(q));
+      if (m) {
+        if (m[1] === 'cart') { this.setState({ cartOpen: true }); return { text: 'Voici votre panier.', actions: [] }; }
+        if (m[1] === 'studio' && !this.state.role) return { text: 'L’espace rédaction est réservé à l’équipe. Connectez-vous en tant qu’administrateur ou rédacteur.', actions: [act('Se connecter', () => this.setState({ loginOpen: true }))] };
+        this.go(m[1]); return { text: 'Direction ' + m[2] + '.', actions: [] };
+      }
+    }
+    // Gazette
+    if (has(/detail choc/)) { const ci = this.gazette().idx('choc'); this.setState({ aiOpen: false }); this.gzGo(ci); return { text: 'Voici le détail choc du numéro, page ' + (ci + 1) + ' : en 2012, un club normand de troisième division a joué la finale de la Coupe de France.', actions: [] }; }
+    if (has(/gazette|magazine|\bmag\b/)) {
+      const pm = q.match(/page\s*(\d+)/);
+      if (pm) { const pg = Math.min(this.gazette().pages.length, Math.max(1, +pm[1])) - 1; this.gzGo(pg); return { text: 'Page ' + (pg + 1) + ' : « ' + this.gazette().pages[pg].title + ' ».', actions: [] }; }
+      return { text: 'La Gazette du Cotentin existe en 3 formules :\n• Numérique : 3,99 € / mois\n• Papier : 6,90 € / mois\n• Papier + numérique : 8,90 € / mois\nUn numéro d’essai complet de ' + this.gazette().pages.length + ' pages est lisible gratuitement, avec son « détail choc ».', actions: [act('Lire le numéro d’essai', () => this.setState({ readerOpen: true, page: 0 })), act('S’abonner', () => this.go('offers', { offerTab: 'La Gazette' }))] };
+    }
+    // scores en direct
+    if (has(/direct|live|en cours|score/) && !has(/classement/)) {
+      const live = X.matches.filter((m) => m.status === 'live');
+      if (live.length) return { text: 'En direct (données de démonstration) :\n' + live.map((m) => '• ' + m.home + ' ' + score(m) + ' ' + m.away + ' — ' + compName(m)).join('\n'), actions: [act('Ouvrir le Terrain', () => this.go('live', { dTab: 'live' }))] };
+      return { text: 'Aucun match en direct pour le moment.', actions: [act('Voir l’agenda', () => this.go('live', { dTab: 'agenda' }))] };
+    }
+    // classement
+    if (has(/classement|leader|premier|en tete|tete du/)) {
+      const sp = sportOf(); const comp = sp === 'Basketball' ? 'pnm' : sp === 'Water-polo' ? 'cdm' : 'r2';
+      const tb = X.tables[comp];
+      if (!tb) return { text: 'Pas de classement disponible pour ' + sp + '.', actions: [] };
+      return { text: 'Classement ' + compName({ sport: sp, comp }) + ' (démo) :\n' + tb.slice(0, 3).map((r, i) => (i + 1) + '. ' + r.team + ' — ' + r.pts + ' pts').join('\n'), actions: [act('Classement complet', () => this.go('live', { dSport: sp, dComp: comp, dTab: 'table' }))] };
+    }
+    if (has(/resultat|dernier match|score final|gagne|perdu/)) {
+      const sp = sportOf();
+      const done = X.matches.filter((m) => m.sport === sp && m.status === 'done').sort((a, b) => (a.verified === b.verified ? (a.date > b.date ? -1 : 1) : a.verified ? -1 : 1)).slice(0, 4);
+      return { text: 'Derniers résultats ' + sp + ' :\n' + done.map((m) => '• ' + m.home + ' ' + score(m) + ' ' + m.away + (m.verified ? ' (vérifié)' : ' (démo)')).join('\n'), actions: [act('Tous les résultats', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'results' }))] };
+    }
+    if (has(/prochain|agenda|quand|calendrier|programme|ce week/)) {
+      if (has(/pointe|hague|avranches|coupe/)) return { text: 'ES Pointe-Hague – US Avranches, 4e tour de la Coupe de France, à Beaumont-Hague. La date et l’heure restent à confirmer.', actions: [act('Activer un rappel', () => { this.toggleIn('reminders', 'm-cfa-avranches', 'Rappel activé', 'Rappel retiré'); }), act('Pronostiquer', () => this.setState({ matchId: 'm-cfa-avranches', aiOpen: false }))] };
+      const sp = sportOf();
+      const up = X.matches.filter((m) => m.sport === sp && m.status === 'up' && m.date).sort((a, b) => a.date < b.date ? -1 : 1).slice(0, 4);
+      return { text: 'Prochains matchs ' + sp + ' (démo) :\n' + up.map((m) => '• ' + m.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + m.time + ' : ' + m.home + ' – ' + m.away).join('\n'), actions: [act('Ouvrir l’agenda', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'agenda' }))] };
+    }
+    const pl = D.players.find((p) => { const parts = n(p.name).split(' '); return parts.some((w) => w.length >= 5 && new RegExp('\\b' + w + '\\b').test(q)); });
+    if (pl) return { text: pl.name + ' — n° ' + pl.num + ', ' + pl.role + ' · ' + pl.clubLabel + '.', actions: [act('Voir le profil', () => this.go('player', { playerId: pl.id }))] };
+    // lieux et histoire
+    const placeKeys = [['\\brade\\b|\\broule\\b|louis xvi|digue|liberation de cherbourg', 'rade'], ['gatteville|phare|blanche|barfleur|1120', 'gatteville'], ['\\bmont\\b|michel|aubert|cent ans', 'mont'], ['jobourg|hague|prevert|falaise', 'jobourg'], ['sainte|mere|1944|parachut|steele|debarquement', 'sme'], ['titanic|gare maritime|cite de la mer|paquebot', 'gare']];
+    const pk = placeKeys.find(([re]) => new RegExp(re).test(q));
+    if (pk && !has(/club|joueur/)) {
+      const p = X.places.find((x) => x.id === pk[1]);
+      return { text: p.name + ' — ' + p.desc + '\n\nMoment d’histoire (' + p.year + ') : ' + p.moment, actions: [act('Voir la fiche du lieu', () => this.setState({ placeOpen: true, placeIdx: X.places.indexOf(p), aiOpen: false })), act('En fond d’écran', () => this.setState({ placeOverride: p.id }))] };
+    }
+    if (has(/histoire|lieu|patrimoine|visiter|tourisme/)) return { text: 'Six lieux de légende accompagnent le site : la rade de Cherbourg, le phare de Gatteville, le Mont-Saint-Michel, le Nez de Jobourg, Sainte-Mère-Église et la Gare maritime. Lequel vous intéresse ?', actions: X.places.map((p) => act(p.short, () => this.aiAsk(p.short))) };
+    // boutique : conseil
+    if (has(/hoodie|sweat|tee|t-shirt|tshirt|maillot|casquette|bob|short|jogger|jogging|veste|pull|tote|boutique|cadeau|offrir|tenue|chill|style|vetement|habit|look|porter/)) {
+      const bm = q.match(/(\d+)\s*(€|e\b|euro)/); const budget = bm ? +bm[1] : null;
+      let pool = X.products.slice();
+      if (has(/chill|cosy|confort|canape|detente/)) pool = pool.filter((p) => ['hoodie-signature', 'crew-vestiaire', 'jogger', 'tee-rade', 'bob', 'hoodie-csc'].indexOf(p.id) >= 0);
+      else if (has(/sport|running|footing|entrainement|match/)) pool = pool.filter((p) => ['maillot-retro', 'veste-tribune', 'short-isles', 'jogger', 'gourde'].indexOf(p.id) >= 0);
+      else if (has(/cadeau|offrir|noel|anniversaire/)) pool = pool.filter((p) => ['carte-cadeau', 'tee-identitaire', 'affiche', 'mug', 'echarpe', 'hoodie-signature'].indexOf(p.id) >= 0);
+      else if (has(/cherwood|local|cherbourg/)) pool = pool.filter((p) => p.line === 'cherwood');
+      else { const pm = prodMatch(); if (pm) pool = [pm].concat(pool.filter((p) => p.type === pm.type && p.id !== pm.id)); }
+      if (budget) pool = pool.filter((p) => p.price <= budget);
+      pool = pool.sort((a, b) => a.pop - b.pop).slice(0, 3);
+      if (!pool.length) return { text: 'Rien ne correspond à ce budget. Les goodies commencent à 6 € et la carte cadeau à 20 €.', actions: [act('Voir les goodies', () => this.go('shop', { shopLine: 'Goodies' }))] };
+      return { text: 'Ma sélection' + (budget ? ' à moins de ' + budget + ' €' : '') + ' :\n' + pool.map((p) => '• ' + p.name + ' — ' + eur(p.price)).join('\n') + (this.state.subs.casab ? '\nRemise abonné −10 % appliquée au panier.' : ''), actions: pool.map((p) => act('Voir ' + p.name.split(' «')[0], () => this.go('product', { productId: p.id, color: 0, size: null, qty: 1, persoName: '', persoNum: '' }))) };
+    }
+    if (has(/abonn|casa b|premium|tarif|prix|pack/)) return { text: 'Les formules :\n• Casa B+ : 4,99 € / mois (articles Premium, alertes, −10 % boutique)\n• La Gazette : dès 3,99 € / mois\n• Pack Supporter : 11,90 € / mois (tout compris)\nEn annuel, deux mois sont offerts.', actions: [act('Comparer les offres', () => this.go('offers'))] };
+    if (has(/partenaire|sponsor|avantage/)) return { text: 'Partenaires (fictifs, démo) :\n' + X.partners.map((p) => '• ' + p.name + ' — ' + p.perk).join('\n'), actions: [act('Voir les partenaires', () => this.go('partners'))] };
+    if (has(/redaction|relecture|relire|valider|publier|admin|brouillon/)) {
+      if (!this.state.role) return { text: 'L’espace rédaction est réservé à l’équipe.', actions: [act('Se connecter', () => this.setState({ loginOpen: true }))] };
+      const pend = this.posts().filter((p) => p.status === 'review');
+      return { text: pend.length + ' article(s) en attente de relecture' + (pend.length ? ' :\n' + pend.map((p) => '• ' + p.title + ' (' + p.author + ')').join('\n') : '.'), actions: [act('Ouvrir la relecture', () => this.go('studio', { studioTab: 'queue' }))] };
+    }
+    // clubs
+    const club = D.clubs.find((c) => { const k = n(c.name).replace(/^(as|es|fc|cs|us|uc|sc|pl|uson|ust)\s/, ''); return k.length > 3 && (q.includes(k) || k.split(' ').some((w) => w.length >= 6 && q.includes(w))); });
+    if (club) {
+      const mm = X.matches.filter((m) => X.teamClub[m.home] === club.id || X.teamClub[m.away] === club.id);
+      return { text: club.name + ' — ' + club.sport + ', ' + club.city + '.' + (mm.length ? '\n' + mm.length + ' match(s) référencé(s) dans le Terrain.' : ''), actions: [act('Fiche du club', () => this.go('club', { clubId: club.id, clubTab: 'articles' })), act('Suivre', () => this.toggleIn('follows', club.id, 'Vous suivez ' + club.name, 'Vous ne suivez plus ' + club.name))] };
+    }
+    // articles
+    const words = q.split(/[^a-z0-9]+/).filter((w) => w.length >= 5);
+    let best = null, bestScore = 0;
+    this.allArticles().forEach((a) => { const hay = n(a.title + ' ' + a.dek + ' ' + a.tag); const sc = words.filter((w) => hay.includes(w)).length; if (sc > bestScore) { best = a; bestScore = sc; } });
+    if (best && bestScore > 0) return { text: '« ' + best.title + ' »\n' + (best.points || []).map((x) => '• ' + x).join('\n'), actions: [act('Lire l’article', () => this.go('article', { articleId: best.id }))] };
+    return { text: 'Je n’ai pas trouvé de réponse précise. Essayez par exemple : « classement basket », « un cadeau à moins de 30 € », « histoire du phare de Gatteville » ou « ouvre la Gazette page 12 ».', actions: [act('Scores en direct', () => this.go('live', { dTab: 'live' })), act('Boutique', () => this.go('shop'))] };
+  }
+  allArticles() {
+    const D = this.data();
+    const pub = this.posts().filter((p) => p.status === 'published' || p.online).map((p) => this.postToArticle(p.status === 'published' || !p.online ? p : Object.assign({}, p, p.online, { id: p.id })));
+    return pub.concat(D.articles);
+  }
+  postToArticle(p) {
+    const words = this.textOf(p.body).split(/\s+/).filter(Boolean).length;
+    return { id: p.id, sport: p.sport, tag: p.tag, date: '6 oct.', read: Math.max(1, Math.round(words / 200)) + ' min', premium: p.premium, img: p.img, alt: p.alt || p.title, title: p.title, dek: p.dek, clubs: p.clubs, points: this.sentences(this.textOf(p.body)).slice(0, 3), body: p.body, author: p.author, fromStudio: true, video: p.video && p.video.url ? p.video : null, related: p.related || [], date: p.online && p.online.at ? (typeof CasaRedac !== 'undefined' ? CasaRedac.fmtDate(p.online.at).replace(/ \d{4}$/, '') : '6 oct.') : '6 oct.' };
+  }
+
+  loadTheme() { try { const t = window.localStorage.getItem('cb-theme'); return ['auto', 'light', 'dark', 'noir', 'paper'].indexOf(t) >= 0 ? t : 'auto'; } catch (e) { return 'auto'; } }
+  sysDark() { try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) { return false; } }
+  profileKey() { const s = this.state; return s.role ? 'role-' + s.role : (s.email.trim().toLowerCase() || 'compte'); }
+  setTheme(id, opts) {
+    const o = opts || {};
+    try { window.localStorage.setItem('cb-theme', id); } catch (e) {}
+    try { document.documentElement.setAttribute('data-cb-theme', id); } catch (e) {}
+    const saveProfile = this.state.loggedIn && !o.fromProfile;
+    if (saveProfile) { try { window.localStorage.setItem('cb-profile-theme:' + this.profileKey(), id); } catch (e) {} }
+    this.setState({ theme: id, themeAnim: true, themeMenuOpen: o.keepMenu ? this.state.themeMenuOpen : false });
+    clearTimeout(this._th); this._th = setTimeout(() => this.setState({ themeAnim: false }), 450);
+    if (!o.silent) {
+      const names = { auto: 'Automatique', light: 'Clair', dark: 'Sombre', noir: 'Noir et or', paper: 'Papier journal' };
+      this.say('Thème ' + names[id] + (saveProfile ? ' · enregistré dans votre profil' : ' · enregistré sur cet appareil'));
+    }
+  }
+  applyProfileTheme(k) {
+    const key = k || this.profileKey();
+    let t = null; try { t = window.localStorage.getItem('cb-profile-theme:' + key); } catch (e) {}
+    if (t && t !== this.state.theme) this.setTheme(t, { fromProfile: true, silent: true });
+    else if (!t) { try { window.localStorage.setItem('cb-profile-theme:' + key, this.state.theme); } catch (e) {} }
+  }
+  // ---------- utilitaires de date ----------
+  today0() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+  isoOf(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  addDays(n) { const d = this.today0(); d.setDate(d.getDate() + n); return this.isoOf(d); }
+  addMyMr(m) { if (typeof CasaCV === 'undefined') return; const P = CasaCV.prof(this); CasaCV.setProf(this, { mr: [m].concat((P.mr || []).filter((x) => x.ref !== m.ref)).slice(0, 30) }, true); }
+  readLS(k, fallback) { try { const v = window.localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } }
+  writeLS(k, v) { try { window.localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+  // ---------- accueil modulable ----------
+  modDefs() {
+    return [['une', 'À la une', 's2 r2'], ['live', 'Le direct', 'r2'], ['meteo', 'Météo', ''], ['private', 'Mon quotidien', ''], ['rdv', 'Le rendez-vous', ''], ['actus', 'Dernières actus', 's2'], ['table', 'Classement', ''], ['gazette', 'La Gazette', ''], ['shop', 'Boutique', 's2'], ['clubhouse', 'Club House', ''], ['oeuvre', 'Œuvre du jour', ''], ['culture', 'Culture & sorties', ''], ['lieu', 'Lieu du jour', ''], ['videos', 'Vidéos', 's2']];
+  }
+  defaultMods() { return this.modDefs().map(([id]) => ({ id, on: true })); }
+  setMods(mods) { this.setState({ mods }); this.writeLS('cb-home-mods', mods); }
+  setLayout(l) { this.setState({ homeLayout: l }); this.writeLS('cb-home-layout', l); }
+
+  // ---------- météo ----------
+  wxIcon(code) {
+    const C = 'M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z';
+    const C2 = 'M7 15h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 15z';
+    if (code === 0) return ['Ensoleillé', 'M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0 M12 2v2 M12 20v2 M4.9 4.9l1.4 1.4 M17.7 17.7l1.4 1.4 M2 12h2 M20 12h2 M4.9 19.1l1.4-1.4 M17.7 6.3l1.4-1.4'];
+    if (code <= 2) return ['Éclaircies', 'M7 19h9a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.6 1.2A2.9 2.9 0 0 0 7 19z M13 6.5a3.5 3.5 0 0 1 5.5 3.5 M16 3v1.2 M20.6 5.2l-.9.9 M22 10h-1.2'];
+    if (code === 3) return ['Couvert', C];
+    if (code === 45 || code === 48) return ['Brouillard', 'M4 8h16 M6 12h12 M4 16h16 M7 20h10'];
+    if (code >= 95) return ['Orage', C2 + ' M13 16l-2 3h3l-2 3'];
+    if (code >= 71 && code <= 77) return ['Neige', C2 + ' M9 19h.01 M13 20h.01 M17 19h.01'];
+    if (code >= 80) return ['Averses', C2 + ' M9 18l-1 2 M13 18l-1 2 M17 18l-1 2'];
+    if (code >= 61) return ['Pluie', C2 + ' M9 18l-1 3 M13 18l-1 3 M17 18l-1 3'];
+    if (code >= 51) return ['Bruine', C2 + ' M10 19h.01 M14 19h.01'];
+    return ['Variable', C];
+  }
+  wxDemo(city) {
+    const seed = [...city].reduce((a, c) => a + c.charCodeAt(0), 0);
+    const codes = [2, 80, 3, 61, 1, 63, 2];
+    const days = [];
+    for (let d = 0; d < 7; d++) {
+      const max = 12 + ((seed + d * 3) % 5); const min = max - 3 - ((seed + d * 2) % 4);
+      days.push({ date: this.addDays(d), code: codes[(seed + d) % 7], max, min, pp: [20, 70, 40, 80, 10, 90, 30][(seed + d) % 7], wind: 15 + ((seed * 3 + d * 11) % 26) });
+    }
+    const h0 = new Date().getHours();
+    const hours = [];
+    for (let i = 0; i < 12; i++) {
+      const h = (h0 + i) % 24; const k = Math.sin(((h - 6) / 24) * Math.PI * 2);
+      hours.push({ h, t: Math.round((days[0].min + days[0].max) / 2 + k * (days[0].max - days[0].min) / 2), code: i % 5 === 3 ? 80 : days[0].code, pp: Math.min(100, Math.max(5, days[0].pp - 10 + (i * 7) % 30)), wind: days[0].wind + (i % 4) * 2 });
+    }
+    const cur = { t: hours[0].t, feels: hours[0].t - Math.round(days[0].wind / 12), code: hours[0].code, wind: days[0].wind, gust: days[0].wind + 18, hum: 72 + (seed % 15), rain: days[0].pp > 60 ? 0.6 : 0, dir: 'O' };
+    return { live: false, cur, hours, days, sunrise: '08:03', sunset: '19:24', waves: (0.8 + (seed % 9) / 10).toFixed(1).replace('.', ',') + ' m' };
+  }
+  fetchWeather(city) {
+    if (typeof window === 'undefined' || !window.CASA_WEATHER || typeof fetch !== 'function') return;
+    const D = this.data(); const c = D.cities[city]; if (!c) return;
+    const [lat, lon] = c;
+    const cached = (this.state.wxLive || {})[city];
+    if (cached && Date.now() - cached.at < 20 * 60 * 1000) return;
+    this.setState({ wxLoading: true });
+    const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+      '&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m' +
+      '&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset' +
+      '&timezone=Europe%2FParis&forecast_days=7';
+    const um = 'https://marine-api.open-meteo.com/v1/marine?latitude=' + lat + '&longitude=' + lon + '&current=wave_height';
+    Promise.all([fetch(u).then((r) => r.json()), fetch(um).then((r) => r.ok ? r.json() : null).catch(() => null)]).then(([w, m]) => {
+      const nowIdx = Math.max(0, w.hourly.time.findIndex((t) => new Date(t) >= new Date(Date.now() - 3600000)));
+      const hours = w.hourly.time.slice(nowIdx, nowIdx + 12).map((t, i) => ({ h: new Date(t).getHours(), t: Math.round(w.hourly.temperature_2m[nowIdx + i]), code: w.hourly.weather_code[nowIdx + i], pp: w.hourly.precipitation_probability[nowIdx + i] || 0, wind: Math.round(w.hourly.wind_speed_10m[nowIdx + i]) }));
+      const days = w.daily.time.map((t, i) => ({ date: t, code: w.daily.weather_code[i], max: Math.round(w.daily.temperature_2m_max[i]), min: Math.round(w.daily.temperature_2m_min[i]), pp: w.daily.precipitation_probability_max[i] || 0, wind: Math.round(w.daily.wind_speed_10m_max[i]) }));
+      const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+      const cc = w.current;
+      const data = { live: true, at: Date.now(), cur: { t: Math.round(cc.temperature_2m), feels: Math.round(cc.apparent_temperature), code: cc.weather_code, wind: Math.round(cc.wind_speed_10m), gust: Math.round(cc.wind_gusts_10m), hum: Math.round(cc.relative_humidity_2m), rain: cc.precipitation, dir: dirs[Math.round(cc.wind_direction_10m / 45) % 8] },
+        hours, days, sunrise: (w.daily.sunrise[0] || '').slice(11, 16), sunset: (w.daily.sunset[0] || '').slice(11, 16),
+        waves: m && m.current && m.current.wave_height != null ? String(m.current.wave_height).replace('.', ',') + ' m' : '—' };
+      this.setState({ wxLive: Object.assign({}, this.state.wxLive, { [city]: data }), wxLoading: false });
+    }).catch(() => this.setState({ wxLoading: false }));
+  }
+
+  // ---------- espace privé ----------
+  privKey() { return 'cb-private:' + this.profileKey(); }
+  privSeed() {
+    const id = () => Math.random().toString(36).slice(2, 9);
+    return {
+      events: [
+        { id: id(), title: 'Entraînement U13 (exemple)', date: this.addDays(0), time: '18:00', cat: 'Sport', place: 'Stade municipal', who: 'leo' },
+        { id: id(), title: 'Réunion des bénévoles (exemple)', date: this.addDays(2), time: '19:30', cat: 'Club', place: '' },
+        { id: id(), title: 'Rendez-vous kiné (exemple)', date: this.addDays(3), time: '08:30', cat: 'Santé', place: '' }],
+      lists: { courses: [{ id: id(), text: 'Bananes', done: false }, { id: id(), text: 'Eau pétillante', done: false }, { id: id(), text: 'Pâtes complètes', done: true }],
+        sac: [{ id: id(), text: 'Protège-tibias', done: false }, { id: id(), text: 'Gourde', done: false }, { id: id(), text: 'Maillot lavé', done: true }],
+        todo: [{ id: id(), text: 'Payer la cotisation', done: false }, { id: id(), text: 'Laver les maillots de l’équipe', done: false }] },
+      notes: [{ id: 'n1', title: 'Composition de samedi', text: 'Gardien : …\nDéfense : …\nRappeler le rendez-vous à 13 h 30 au stade.' }],
+      rides: [{ id: id(), matchId: 'd6', from: 'Parking du stade', driver: 'Sophie (exemple)', seats: 2, mine: false, joined: false }],
+      budget: [{ id: id(), label: 'Licence', amount: 165, cat: 'Licences', date: this.addDays(-20) }, { id: id(), label: 'Crampons', amount: 89.9, cat: 'Équipement', date: this.addDays(-6) }, { id: id(), label: 'Casa B+', amount: 4.99, cat: 'Abonnements', date: this.addDays(-2) }],
+      docs: [{ id: id(), name: 'Certificat médical', who: 'Moi', date: this.addDays(20) }, { id: id(), name: 'Licence', who: 'Léo', date: this.addDays(250) }, { id: id(), name: 'Assurance du club', who: 'Moi', date: this.addDays(-5) }],
+      sessions: [{ id: id(), date: this.addDays(-1), sport: 'Football', min: 90, feel: 'Moyen' }, { id: id(), date: this.addDays(-3), sport: 'Course à pied', min: 40, feel: 'Facile' }, { id: id(), date: this.addDays(-5), sport: 'Renforcement', min: 30, feel: 'Difficile' }],
+      contacts: [{ id: id(), name: 'Coach U13 (exemple)', role: 'Entraîneur', tel: '0600000000' }, { id: id(), name: 'Secrétariat du club (exemple)', role: 'Licences et cotisations', tel: '0200000000' }],
+      goal: 150, noteId: 'n1',
+      meals: { [this.addDays(0)]: { lunch: 'Salade de riz au poulet', dinner: 'Pâtes complètes au saumon' }, [this.addDays(1)]: { lunch: 'Soupe de légumes et pain complet' } },
+      habits: [{ id: 'h1', name: 'Boire 1,5 L d’eau', log: { [this.addDays(-1)]: true, [this.addDays(-2)]: true, [this.addDays(-3)]: true } }, { id: 'h2', name: 'Dormir 8 heures', log: { [this.addDays(-1)]: true, [this.addDays(-4)]: true } }, { id: 'h3', name: 'Étirements 10 min', log: { [this.addDays(-2)]: true } }, { id: 'h4', name: 'Lire 20 minutes', log: {} }],
+      recurs: [{ id: 'r1', title: 'Sortir les poubelles', freq: 'week', dow: 2, dom: 1, done: {} }, { id: 'r2', title: 'Laver les maillots de l’équipe', freq: 'week', dow: 0, dom: 1, done: {} }, { id: 'r3', title: 'Payer la cotisation du club', freq: 'month', dow: 1, dom: 5, done: {} }, { id: 'r4', title: 'Arroser les plantes', freq: 'day', dow: 1, dom: 1, done: {} }],
+      members: [{ id: 'me', name: 'Moi', role: 'Parent · supporter', color: '#0f2236' }, { id: 'leo', name: 'Léo (exemple)', role: 'Fils · football U13', color: '#2e9e6b' }, { id: 'camille', name: 'Camille (exemple)', role: 'Fille · natation', color: '#6aa6c8' }]
+    };
+  }
+  priv() {
+    if (this.state.priv && this.state.privFor === this.privKey()) return this.state.priv;
+    const k = this.privKey();
+    if (!this._pc || this._pc.k !== k) {
+      const stored = this.readLS(k, null); const seed = this.privSeed();
+      const v = stored ? Object.assign({}, stored) : seed;
+      ['meals', 'habits', 'recurs', 'members'].forEach((f) => { if (!(f in v)) v[f] = seed[f]; });
+      this._pc = { k, v };
+    }
+    return this._pc.v;
+  }
+  setPriv(patch) {
+    const v = Object.assign({}, this.priv(), patch);
+    this._pc = { k: this.privKey(), v };
+    this.setState({ priv: v, privFor: this.privKey() });
+    this.writeLS(this.privKey(), v);
+  }
+
+  // ---------- culture : données ----------
+  culture() {
+    if (this._cu) return this._cu;
+    const B = (id) => (window.ASSET_DATA[BLOB_FILES[id]] || ('assets/' + (BLOB_FILES[id] || id)));
+    const X = this.more();
+    const placeW = X.places.map((p) => ({ title: p.name, author: 'Casa Besports', year: '2026', technique: 'Illustration vectorielle · série « Lieux de légende »', img: p.img, alt: 'Illustration : ' + p.name, ratio: '16 / 9', fit: 'cover', bg: '#f3ead6', scope: '',
+      text: p.hook + ' ' + p.moment, kind: 'place', placeId: p.id }));
+    const rooms = [
+      { n: '1', title: 'Le tableau', intro: 'L’œuvre qui a donné son visage à Casa Besports.', min: '320px', works: [
+        { title: 'Le match du port', author: 'Collection Casa Besports · artiste [À CRÉDITER]', year: '[ANNÉE]', technique: 'Peinture numérique · format portrait', img: B('0855c8136dcdda770cb476333ba7ad46'), alt: 'Partie de football sur les quais, devant des paquebots', ratio: '2 / 3', fit: 'cover', bg: '#1a1a1a', scope: '',
+          text: 'Une partie de football improvisée sur les pavés d’un quai, entre grues, caisses et cheminées de paquebots. La scène condense ce que Casa Besports raconte chaque semaine : le jeu au cœur de la vie populaire et portuaire du Cotentin. Elle est disponible en affiche d’art à la boutique.', kind: 'poster' }] },
+      { n: '2', title: 'Lieux de légende', intro: 'Six paysages du territoire, chacun lié à un moment d’histoire.', min: '300px', works: placeW },
+      { n: '3', title: 'Photographie du terrain', intro: 'Le sport amateur saisi au plus près, par la photothèque de la rédaction.', min: '280px', works: [
+        ['L’année des trente ans', '5cd343902a0b6d6a654108dee90d6fc3', 'pointe-hague'], ['La joie du maintien', '824fb1ca8687d16522c2ba8f05d66086', 'fceh'], ['Devant leur public', 'f2d41cc7df08eba8f5272bd4fddfac50', 'feminines'],
+        ['Trois participations, une ambition', '38c25d93ed37833c9d08d0a1d75de3f1', 'redoutables'], ['La fratrie des sentiers', '2b8b1c873d91f86dbbe51fe32be05f69', 'alexan-morin'], ['Demi-finale', '4f81a4491eb301c8894c5d5d2ab04ff6', 'blue-squad']
+      ].map(([title, id, art]) => ({ title, author: 'Photothèque Casa Besports', year: '2026', technique: 'Photographie numérique', img: B(id), alt: title, ratio: '4 / 3', fit: 'cover', bg: '#111', scope: '', text: 'Image issue du reportage publié dans Actualités. Ouvrez l’article pour découvrir l’histoire derrière la photo.', kind: 'article', articleId: art })) },
+      { n: '4', title: 'Design textile', intro: 'Quand l’identité visuelle devient vêtement : maquettes de la collection et de la capsule Cherwood.', min: '240px', works: [
+        ['Cotentin Sport Club', 'd9a1db651fe41d5fd589c366bef1324f', 'hoodie-csc', 'Studio Casa Besports × Cherwood'], ['Le Phare', '32a264a8dac6d54d7c4f1f0be13729ef', 'tee-phare', 'Studio Casa Besports'],
+        ['Inside Vestiaire Club', 'f42d1f454d139e25a1ac0ee024729688', 'crew-vestiaire', 'Studio Casa Besports'], ['Maillot rétro', '9b36fe1ef00b3ec975a9172298a6454c', 'maillot-retro', 'Studio Casa Besports']
+      ].map(([title, id, pid, author]) => ({ title, author, year: '2026', technique: 'Maquette textile · sérigraphie et broderie', img: B(id), alt: 'Vêtement ' + title, ratio: '1 / 1', fit: 'contain', bg: '#f4f1ea', scope: 'cb-scope-light', text: 'Dessin original décliné en vêtement, fabriqué et personnalisé à Cherbourg. Couleurs, typographies et motifs reprennent l’ADN Casa Besports : marine, or, sable, empattements et capitales condensées.', kind: 'product', productId: pid })) }
+    ];
+    const flat = [];
+    rooms.forEach((r) => r.works.forEach((w, i) => flat.push(Object.assign({}, w, { room: r.n, pos: String(i + 1) }))));
+    const routes = [
+      { id: 'rade', name: 'La boucle de la rade', sport: 'Course à pied', area: 'Cherbourg-en-Cotentin', level: 'Accessible', city: 'Cherbourg', img: B('37f0accd200070c08850e6289a7929b2'),
+        desc: 'Une boucle urbaine entre mer et colline : la gare maritime, les quais et la montée vers le fort du Roule.', steps: [['Gare maritime', 'la Cité de la Mer, escale du Titanic en 1912'], ['Les quais', 'face à la plus grande rade artificielle du monde'], ['Montagne du Roule', 'montée vers le musée de la Libération']] },
+      { id: 'hague', name: 'Sentier des douaniers', sport: 'Trail', area: 'La Hague', level: 'Exigeant', city: 'Beaumont-Hague', img: B('68220997b900b01cc4ef65a2529b0ff1'),
+        desc: 'Le littoral sauvage de la Hague par le sentier côtier (GR223), entre falaises, criques et villages de pêcheurs.', steps: [['Nez de Jobourg', 'falaises parmi les plus hautes d’Europe'], ['Sentier du littoral (GR223)', 'l’ancien chemin des douaniers'], ['Omonville-la-Petite', 'le village où vécut Jacques Prévert']] },
+      { id: 'saire', name: 'Du port au phare', sport: 'Vélo · marche', area: 'Val de Saire', level: 'Accessible', city: 'Barfleur', img: B('f46b43bf0cb05c3fde4cba8ae7d9c8d5'),
+        desc: 'De Barfleur à la pointe de Gatteville, sur les traces du naufrage de la Blanche-Nef.', steps: [['Barfleur', 'port normand au large duquel sombra la Blanche-Nef en 1120'], ['Pointe de Barfleur', 'le littoral et ses récifs'], ['Phare de Gatteville', '75 m, allumé en 1835']] },
+      { id: 'juin', name: 'Mémoire du 6 juin', sport: 'Vélo', area: 'Centre Cotentin', level: 'Modéré', city: 'Carentan', img: B('66637b2212fc497ace187dc8cf592255'),
+        desc: 'Un itinéraire du souvenir entre le bourg des parachutistes et la plage du Débarquement.', steps: [['Sainte-Mère-Église', 'les parachutistes de la 82e division aéroportée'], ['Les marais du Cotentin', 'routes de campagne et chemins'], ['Utah Beach', 'plage du Débarquement du 6 juin 1944']] }
+    ];
+    const venues = [
+      ['Cité de la Mer', 'Musée', 'Cherbourg-en-Cotentin', 'Installée dans l’ancienne gare maritime transatlantique, elle est consacrée à l’exploration des océans ; on y visite notamment le sous-marin Le Redoutable.', 'gare'],
+      ['Musée de la Libération', 'Musée', 'Cherbourg-en-Cotentin', 'Au sommet de la Montagne du Roule, dans le fort, il retrace la libération de Cherbourg et de la Normandie en 1944.', 'rade'],
+      ['Musée Thomas-Henry', 'Musée', 'Cherbourg-en-Cotentin', 'Le musée des beaux-arts de Cherbourg conserve notamment un ensemble d’œuvres de Jean-François Millet, enfant de la Hague.', null],
+      ['Le Trident', 'Spectacle', 'Cherbourg-en-Cotentin', 'Scène nationale de Cherbourg-en-Cotentin : théâtre, danse, musique et cirque tout au long de la saison.', null],
+      ['Maison natale de Jean-François Millet', 'Patrimoine', 'Gréville-Hague', 'Au hameau de Gruchy, la maison où naquit en 1814 le peintre de L’Angélus et des Glaneuses.', 'jobourg'],
+      ['Airborne Museum', 'Musée', 'Sainte-Mère-Église', 'Consacré aux parachutistes américains largués sur le Cotentin dans la nuit du 5 au 6 juin 1944.', 'sme'],
+      ['Phare de Gatteville', 'Patrimoine', 'Gatteville-le-Phare', 'Le deuxième plus haut phare de France, 75 mètres face au raz de Barfleur.', 'gatteville'],
+      ['Abbaye du Mont-Saint-Michel', 'Patrimoine', 'Le Mont-Saint-Michel', 'Chef-d’œuvre de l’architecture médiévale, inscrit au patrimoine mondial de l’Unesco depuis 1979.', 'mont'],
+      ['Scriptorial d’Avranches', 'Musée', 'Avranches', 'Il présente les manuscrits médiévaux de l’abbaye du Mont-Saint-Michel.', 'mont']
+    ].map(([name, kind, city, desc, placeId]) => ({ name, kind, city, desc, placeId }));
+    const entries = [
+      ['Sous les projecteurs de Postaire', 'f2d41cc7df08eba8f5272bd4fddfac50', 'Jeanne D. (démo)', 42], ['Le bain des Redoutables', '38c25d93ed37833c9d08d0a1d75de3f1', 'Marc L. (démo)', 37],
+      ['Le cri du maintien', '824fb1ca8687d16522c2ba8f05d66086', 'Sacha P. (démo)', 29], ['Les maillots oranges', '183faa9bf4b22beda6d2cb41e6b91225', 'Nadia R. (démo)', 25],
+      ['Avant le coup d’envoi', '5cd343902a0b6d6a654108dee90d6fc3', 'Hugo M. (démo)', 18], ['Penalty à Digosville', '020b8966d676cf17abcd5d5bc3a0367d', 'Lou T. (démo)', 12]
+    ].map(([title, id, author, base], i) => ({ id: 'e' + i, title, img: B(id), author, base }));
+    this._cu = { rooms, flat, routes, venues, entries };
+    return this._cu;
+  }
+  nextSaturday() { const d = this.today0(); const add = (6 - d.getDay() + 7) % 7 || 7; d.setDate(d.getDate() + add); return this.isoOf(d); }
+  planEvent(title, date, time, cat, place) {
+    if (!this.state.loggedIn) { this.setState({ loginOpen: true, linkSent: false }); this.say('Connectez-vous pour utiliser votre agenda'); return; }
+    const P0 = this.priv();
+    this.setPriv({ events: P0.events.concat([{ id: Math.random().toString(36).slice(2, 9), title, date, time, cat, place: place || '', who: 'me' }]) });
+    this.say('Ajouté à Mon quotidien · ' + date.split('-').reverse().join('/'));
+  }
+
+  // ---------- minuteur de fractionné ----------
+  tmStart() {
+    clearInterval(this._tmI);
+    const s = this.state;
+    if (s.tmPhase === 'ready' || s.tmPhase === 'done') this.setState({ tmPhase: 'work', tmLeft: s.tmWork, tmRound: 1 });
+    this.setState({ tmRunning: true });
+    this._tmI = setInterval(() => this.tmTick(), 1000);
+  }
+  tmPause() { clearInterval(this._tmI); this.setState({ tmRunning: false }); }
+  tmReset() { clearInterval(this._tmI); this.setState({ tmRunning: false, tmPhase: 'ready', tmLeft: this.state.tmWork, tmRound: 1 }); }
+  tmTick() {
+    const s = this.state;
+    if (s.tmLeft > 1) { this.setState({ tmLeft: s.tmLeft - 1 }); return; }
+    if (s.tmPhase === 'work' && s.tmRest > 0 && s.tmRound < s.tmRounds) { this.setState({ tmPhase: 'rest', tmLeft: s.tmRest }); return; }
+    if (s.tmRound < s.tmRounds) { this.setState({ tmPhase: 'work', tmLeft: s.tmWork, tmRound: s.tmRound + 1 }); return; }
+    clearInterval(this._tmI);
+    this.setState({ tmRunning: false, tmPhase: 'done', tmLeft: 0 });
+    const mins = Math.max(1, Math.round((s.tmWork * s.tmRounds + s.tmRest * (s.tmRounds - 1)) / 60));
+    if (this.state.loggedIn) { const P0 = this.priv(); this.setPriv({ sessions: P0.sessions.concat([{ id: Math.random().toString(36).slice(2, 9), date: this.addDays(0), sport: 'Fractionné', min: mins, feel: 'Difficile' }]) }); }
+    this.say('Séance terminée · ' + mins + ' min ajoutées à votre activité');
+  }
+  recurNext(r, fromIso) {
+    const d = new Date(fromIso + 'T00:00:00');
+    for (let i = 0; i < 62; i++) {
+      const ok = r.freq === 'day' || (r.freq === 'week' && d.getDay() === +r.dow) || (r.freq === 'month' && d.getDate() === +r.dom);
+      if (ok) return this.isoOf(d);
+      d.setDate(d.getDate() + 1);
+    }
+    return fromIso;
+  }
+
+  // ---------- Club House : données (démo, enregistrées sur l’appareil) ----------
+  chData() {
+    if (this._ch) return this._ch;
+    const stored = this.readLS('cb-clubhouse', null);
+    if (stored && stored.posts) { this._ch = stored; return stored; }
+    const d = (n) => this.addDays(n);
+    this._ch = {
+      posts: [
+        { id: 's1', author: 'La rédaction', staff: true, room: 'Général', time: 'épinglé', text: 'Bienvenue au Club House ! Respect, bienveillance et passion : la charte est simple. Présentez-vous et dites-nous quel club vous suivez.', likes: 31, liked: false, comments: [] },
+        { id: 's2', author: 'La rédaction', staff: true, room: 'Football', time: 'il y a 3 h', text: 'L’ES Pointe-Hague reçoit l’US Avranches au 4e tour de la Coupe de France. Qui sera en tribune ? Racontez-nous vos plus beaux souvenirs de coupe.', articleId: 'pointe-hague', likes: 24, liked: false, comments: [{ author: 'Yanis B. (démo)', text: 'J’y serai avec mon fils, première fois qu’il voit un match de coupe !' }] },
+        { id: 's3', author: 'Marion L. (démo)', room: 'Football', time: 'hier', text: 'Quelle soirée au stade Jean-Jaurès pour le maintien du FCEH ! Bravo aux joueurs et aux bénévoles de la buvette.', articleId: 'fceh', likes: 12, liked: false, comments: [{ author: 'Thomas G. (démo)', text: 'Une équipe qui n’a rien lâché.' }] },
+        { id: 's4', author: 'Chloé V. (démo)', room: 'Water-polo', time: 'hier', text: 'Première fois que je regarde du water-polo : impressionnant d’intensité. Allez les Redoutables !', likes: 9, liked: false, comments: [] },
+        { id: 's5', author: 'Thomas G. (démo)', room: 'Basket', time: 'il y a 2 j', text: 'Merci aux maillots oranges du tournoi international, l’organisation était au top.', articleId: 'benevoles', likes: 15, liked: false, comments: [] }
+      ],
+      ads: [
+        { id: 'ad1', type: 'Recherche', cat: 'Bénévolat', title: 'Bénévoles pour la buvette du samedi', text: 'Deux heures par mois suffisent, bonne ambiance garantie.', author: 'Un club du Nord-Cotentin (démo)', where: 'Cherbourg-en-Cotentin', time: 'il y a 1 j' },
+        { id: 'ad2', type: 'Propose', cat: 'Matériel', title: 'Crampons enfant, pointure 34', text: 'Portés une saison, très bon état.', author: 'Kevin R. (démo)', where: 'Valognes', time: 'il y a 2 j' },
+        { id: 'ad3', type: 'Donne', cat: 'Matériel', title: 'Lot de chasubles et de plots', text: 'Pour une école de foot ou une association.', author: 'Sarah M. (démo)', where: 'Tourlaville', time: 'il y a 3 j' },
+        { id: 'ad4', type: 'Recherche', cat: 'Joueurs', title: 'Équipe vétérans cherche un gardien', text: 'Matchs le dimanche matin, esprit convivial.', author: 'Julien P. (démo)', where: 'Beaumont-Hague', time: 'il y a 4 j' },
+        { id: 'ad5', type: 'Propose', cat: 'Stages', title: 'Stage multisport pendant les vacances', text: 'Pour les 8-12 ans, programme à venir.', author: 'Une association (démo)', where: 'Équeurdreville', time: 'il y a 5 j' }
+      ],
+      events: [
+        { id: 'e1', kind: 'Rencontre', title: 'Apéro des supporters', desc: 'On se retrouve pour préparer la réception de l’US Avranches en Coupe de France.', date: d(3), time: '19:00', place: '[Lieu à confirmer], Beaumont-Hague', going: 18 },
+        { id: 'e2', kind: 'Sortie sportive', title: 'Footing du dimanche : la boucle de la rade', desc: 'Allure tranquille, tous niveaux, parcours Culture « La boucle de la rade ».', date: d(5), time: '09:30', place: 'Gare maritime, Cherbourg', going: 11 },
+        { id: 'e3', kind: 'Atelier', title: 'Découvrir l’arbitrage', desc: 'Une heure pour comprendre le rôle d’arbitre, ouvert aux ados et aux parents.', date: d(8), time: '14:00', place: '[Lieu à confirmer], Cherbourg', going: 7 },
+        { id: 'e4', kind: 'Convivialité', title: 'Tournoi de pétanque des bénévoles', desc: 'Pour remercier celles et ceux qui font vivre les clubs.', date: d(12), time: '14:30', place: '[Lieu à confirmer], Valognes', going: 24 }
+      ],
+      rsvp: {},
+      poll: { q: 'Le moment fort de la saison ?', opts: [{ t: 'Le 5-1 et le maintien du FCEH', v: 18 }, { t: 'Le 8-0 de l’AS Cherbourg', v: 14 }, { t: 'Les Redoutables en Coupe de la Manche', v: 9 }, { t: 'Le parcours de la Blue Squad', v: 7 }] },
+      pollVote: null
+    };
+    return this._ch;
+  }
+
+  // ---------- CRM : données et agents autonomes ----------
+  crmData() {
+    if (this._crm) return this._crm;
+    const st = this.readLS('cb-crm', null);
+    if (st && st.contacts) { this._crm = st; return st; }
+    const d = (n) => this.addDays(n);
+    const C = (id, name, org, type, source, city, email, phone, consent, score, last, tags) => ({ id, name, org, type, source, city, email, phone, consent, score, last, tags: tags || [], notes: [], status: score == null ? 'nouveau' : 'qualifié' });
+    this._crm = {
+      contacts: [
+        C('c1', 'Équipe OlistO', 'OlistO', 'Partenaire', 'Partenariat', 'Réseau national', '[contact@olisto]', '[téléphone]', 'oui', 90, d(-2), ['Platinum', 'Immobilier']),
+        C('c2', 'Atelier Cherwood', 'Cherwood', 'Partenaire', 'Partenariat', 'Cherbourg-en-Cotentin', '[contact@cherwood]', '[téléphone]', 'oui', 85, d(-5), ['Boutique', 'Capsule']),
+        C('c3', 'Claire Dumont (démo)', 'Club de football (démo)', 'Club', 'Formulaire contact', 'Valognes', 'claire.dumont@club-demo.fr', '06 00 00 00 01', 'oui', 72, d(-9), ['Résumé de match']),
+        C('c4', 'Marc Lefort (démo)', 'Garage Lefort (démo)', 'Annonceur', 'Salon des partenaires', 'Tourlaville', 'marc@garage-demo.fr', '06 00 00 00 02', 'oui', 64, d(-12), ['Publicité Gazette']),
+        C('c5', 'Sophie Martin (démo)', '', 'Abonné', 'Boutique', 'Cherbourg-en-Cotentin', 'sophie.martin@exemple.fr', '', 'oui', 40, d(-3), ['Casa B+']),
+        C('c6', 'Paul Henry (démo)', 'Association de basket (démo)', 'Club', 'Club House', 'Équeurdreville', 'paul.henry@asso-demo.fr', '', 'non', 55, d(-15), ['Bénévolat']),
+        C('c7', 'Nina Roux (démo)', '', 'Supporter', 'Newsletter', 'Beaumont-Hague', 'nina.roux@exemple.fr', '', 'oui', null, d(0), []),
+        C('c8', 'Jean Morel (démo)', 'Morel Immobilier (démo)', 'Prospect', 'Formulaire OlistO', 'Carentan', 'jean.morel@exemple.fr', '06 00 00 00 03', 'oui', null, d(0), []),
+        C('c9', 'Sophie Martin (démo)', '', 'Supporter', 'Club House', 'Cherbourg', 'Sophie.Martin@exemple.fr ', '', '?', 30, d(-1), [])
+      ],
+      deals: [
+        { id: 'd1', title: 'Partenariat Platinum', org: 'OlistO', contactId: 'c1', amount: 0, stage: 'Gagné', last: d(-2), next: 'Mettre en ligne la page partenaire' },
+        { id: 'd2', title: 'Capsule Cherwood × Casa', org: 'Cherwood', contactId: 'c2', amount: 0, stage: 'Gagné', last: d(-5), next: 'Photos officielles des produits' },
+        { id: 'd3', title: 'Résumés de match · saison', org: 'Club de football (démo)', contactId: 'c3', amount: 2900, stage: 'Proposition', last: d(-9), next: 'Relancer après envoi du devis' },
+        { id: 'd4', title: 'Publicité Gazette · 3 numéros', org: 'Garage Lefort (démo)', contactId: 'c4', amount: 1200, stage: 'Négociation', last: d(-12), next: 'Valider le format' },
+        { id: 'd5', title: 'Résumé de match · finale', org: 'Association de basket (démo)', contactId: 'c6', amount: 290, stage: 'Qualifié', last: d(-4), next: 'Envoyer le devis' },
+        { id: 'd6', title: 'Partenariat Or', org: 'Morel Immobilier (démo)', contactId: 'c8', amount: 3000, stage: 'Nouveau', last: d(0), next: 'Premier appel' },
+        { id: 'd7', title: 'Vidéo de présentation club', org: 'Club de football (démo)', contactId: 'c3', amount: 650, stage: 'Perdu', last: d(-30), next: '—' }
+      ],
+      tasks: [
+        { id: 't1', title: 'Envoyer le devis « Résumé de match · finale »', due: d(1), rel: 'Association de basket (démo)', owner: 'humain', done: false },
+        { id: 't2', title: 'Mettre en ligne les photos Cherwood', due: d(-1), rel: 'Cherwood', owner: 'humain', done: false },
+        { id: 't3', title: 'Compléter le numéro ORIAS d’OlistO', due: d(2), rel: 'OlistO', owner: 'humain', done: false }
+      ],
+      agents: {
+        qualif: { on: true, mode: 'auto', runs: 0, actions: 0, last: null },
+        relance: { on: true, mode: 'suggest', runs: 0, actions: 0, last: null },
+        fidel: { on: true, mode: 'suggest', runs: 0, actions: 0, last: null },
+        hygiene: { on: true, mode: 'auto', runs: 0, actions: 0, last: null },
+        rapport: { on: true, mode: 'auto', runs: 0, actions: 0, last: null }
+      },
+      approvals: [], log: [], report: null
+    };
+    return this._crm;
+  }
+  saveCrm(v) { this._crm = v; this.writeLS('cb-crm', v); this.setState({ crmRev: (this.state.crmRev || 0) + 1 }); }
+  crmNow() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0'); }
+  // Un événement du site (formulaire, commande, newsletter, OlistO…) crée ou met à jour un contact
+  crmCapture(ev) {
+    const C = Object.assign({}, this.crmData());
+    const email = (ev.email || '').trim().toLowerCase();
+    let c = email ? C.contacts.find((x) => (x.email || '').trim().toLowerCase() === email) : null;
+    const note = { when: this.addDays(0) + ' ' + this.crmNow().slice(0, 5), by: 'Site', text: ev.note };
+    if (c) C.contacts = C.contacts.map((x) => x === c ? Object.assign({}, x, { last: this.addDays(0), notes: x.notes.concat([note]) }) : x);
+    else C.contacts = [{ id: 'c' + Date.now(), name: ev.name || email || 'Visiteur', org: ev.org || '', type: ev.type || 'Supporter', source: ev.source, city: ev.city || '', email: ev.email || '', phone: '', consent: ev.consent || '?', score: null, last: this.addDays(0), tags: ev.tags || [], notes: [note], status: 'nouveau' }].concat(C.contacts);
+    this.saveCrm(C);
+    if ((C.agents.qualif || {}).on) setTimeout(() => this.runAgent('qualif'), 600);
+  }
+  runAgent(id) {
+    const C = JSON.parse(JSON.stringify(this.crmData()));
+    const A = C.agents[id]; if (!A || !A.on) return;
+    const t = this.crmNow(); const today = this.addDays(0);
+    const log = (text, dot) => C.log.unshift({ agent: id, text, when: t, dot: dot || '#2e9e6b' });
+    const days = (iso) => Math.round((this.today0() - new Date(iso + 'T00:00:00')) / 86400000);
+    let n = 0;
+    if (id === 'qualif') {
+      C.contacts.forEach((c) => {
+        if (c.status !== 'nouveau') return;
+        let sc = { 'Formulaire OlistO': 70, 'Formulaire contact': 60, 'Boutique': 50, 'Abonnement': 55, 'Club House': 30, 'Newsletter': 20 }[c.source] || 35;
+        if (c.org) sc += 10; if (/cotentin|cherbourg|valognes|hague|carentan|tourlaville|équeurdreville|barfleur/i.test(c.city + ' ' + c.note)) sc += 10;
+        if (c.consent === 'oui') sc += 5;
+        c.score = Math.min(100, sc); c.status = 'qualifié';
+        if (c.source === 'Formulaire OlistO') { c.type = 'Prospect'; c.tags = (c.tags || []).concat(['OlistO']); }
+        if (sc >= 60) { C.tasks.unshift({ id: 't' + Date.now() + n, title: 'Rappeler ' + c.name + ' sous 24 h', due: this.addDays(1), rel: c.org || c.source, owner: 'Agent Qualification', done: false }); }
+        log('a qualifié ' + c.name + ' (score ' + c.score + ')' + (sc >= 60 ? ' et créé une tâche de rappel' : ''), '#2e9e6b'); n++;
+      });
+    }
+    if (id === 'relance') {
+      C.deals.forEach((dl) => {
+        if (['Proposition', 'Négociation', 'Qualifié'].indexOf(dl.stage) < 0 || days(dl.last) < 7) return;
+        if (C.approvals.some((a) => a.dealId === dl.id) || C.tasks.some((k) => k.dealId === dl.id && !k.done)) return;
+        const ct = C.contacts.find((c) => c.id === dl.contactId) || { name: dl.org, email: '' };
+        const mail = 'Objet : ' + dl.title + ' — on avance ensemble ?\n\nBonjour ' + ct.name.replace(/ \(démo\)$/, '') + ',\n\nJe reviens vers vous au sujet de « ' + dl.title + ' ». Avez-vous pu en discuter avec votre équipe ? Je reste disponible pour ajuster la proposition à vos besoins.\n\nSportivement,\nL’équipe Casa Besports';
+        if (A.mode === 'auto') { dl.last = today; C.tasks.unshift({ id: 't' + Date.now() + n, dealId: dl.id, title: 'Vérifier la réponse de ' + dl.org, due: this.addDays(3), rel: dl.title, owner: 'Agent Relances', done: false }); log('a envoyé une relance à ' + dl.org + ' (' + dl.title + ')', '#e8a830'); }
+        else { C.approvals.unshift({ id: 'ap' + Date.now() + n, agent: 'Agent Relances', dealId: dl.id, title: 'Relancer ' + dl.org, text: mail, when: t, kind: 'relance' }); log('propose une relance pour ' + dl.org + ' (en attente de validation)', '#e8a830'); }
+        n++;
+      });
+    }
+    if (id === 'fidel') {
+      C.contacts.forEach((c) => {
+        if (c.type !== 'Abonné' || days(c.last) < 2 || (c.tags || []).indexOf('Offre annuelle proposée') >= 0) return;
+        const text = 'Objet : Passez à l’annuel, 2 mois offerts\n\nBonjour ' + c.name.replace(/ \(démo\)$/, '') + ',\n\nMerci de suivre le sport du Cotentin avec Casa B+. En passant à la formule annuelle, deux mois vous sont offerts. Votre avantage partenaire reste actif toute l’année.\n\nÀ très vite au bord des terrains !';
+        if (A.mode === 'auto') { c.tags = (c.tags || []).concat(['Offre annuelle proposée']); log('a proposé l’offre annuelle à ' + c.name, '#6aa6c8'); }
+        else if (!C.approvals.some((a) => a.contactId === c.id)) { C.approvals.unshift({ id: 'ap' + Date.now() + n, agent: 'Agent Fidélisation', contactId: c.id, title: 'Offre annuelle pour ' + c.name, text, when: t, kind: 'fidel' }); log('prépare une offre de fidélisation pour ' + c.name, '#6aa6c8'); }
+        n++;
+      });
+    }
+    if (id === 'hygiene') {
+      const seen = {};
+      const keep = [];
+      C.contacts.forEach((c) => {
+        const em = (c.email || '').trim().toLowerCase();
+        if (em && !em.startsWith('[') && seen[em]) { const m = seen[em]; m.notes = m.notes.concat(c.notes); m.tags = Array.from(new Set(m.tags.concat(c.tags))); log('a fusionné un doublon : ' + c.name + ' (' + em + ')', '#8e7cc3'); n++; return; }
+        if (c.email && c.email !== c.email.trim().toLowerCase() && !c.email.startsWith('[')) { c.email = c.email.trim().toLowerCase(); log('a normalisé l’e-mail de ' + c.name, '#8e7cc3'); n++; }
+        if (c.consent !== 'oui' && c.consent !== 'non' && (c.tags || []).indexOf('Consentement à vérifier') < 0) { c.tags = (c.tags || []).concat(['Consentement à vérifier']); log('a signalé un consentement à vérifier pour ' + c.name, '#8e7cc3'); n++; }
+        if (em) seen[em] = c; keep.push(c);
+      });
+      C.contacts = keep;
+    }
+    if (id === 'rapport') {
+      const open = C.deals.filter((d) => ['Gagné', 'Perdu'].indexOf(d.stage) < 0);
+      const won = C.deals.filter((d) => d.stage === 'Gagné').length, lost = C.deals.filter((d) => d.stage === 'Perdu').length;
+      const late = C.tasks.filter((k) => !k.done && k.due < today).length;
+      C.report = 'Pipeline ouvert : ' + open.reduce((a, d) => a + d.amount, 0).toLocaleString('fr-FR') + ' € sur ' + open.length + ' affaire(s) · taux de réussite ' + (won + lost ? Math.round(won / (won + lost) * 100) : 0) + ' % · ' + late + ' tâche(s) en retard.';
+      log('a mis à jour le rapport : ' + C.report, '#3a4a78'); n++;
+    }
+    A.runs += 1; A.actions += n; A.last = t;
+    C.log = C.log.slice(0, 60);
+    this.saveCrm(C);
+  }
+
+  openAR(mode) {
+    const s = this.state;
+    if (typeof window !== 'undefined' && window.CasaAR && window.CasaAR.open) {
+      const all = this.more().matches || [];
+      const live = all.find((m) => m.status === 'live') || all.find((m) => m.status === 'done' && m.hs != null);
+      window.CasaAR.open(mode, { score: live ? { home: live.home, away: live.away, hs: String(live.hs != null ? live.hs : 0), as: String(live.as != null ? live.as : 0), minute: live.status === 'live' ? 'En direct' : 'Terminé', label: 'Le direct' } : null });
+      return;
+    }
+    this.go('app'); this.say('Expérience disponible dans l’application Casa Besports');
+  }
+  go(view, extra) {
+    try { const r = document.documentElement; r.classList.remove('cb-nav'); void r.offsetWidth; r.classList.add('cb-nav'); } catch (e) {}
+    const s = this.state;
+    const cur = { view: s.view, articleId: s.articleId, videoId: s.videoId, discId: s.discId, clubId: s.clubId, playerId: s.playerId, productId: s.productId };
+    this.setState(Object.assign({ view, hist: s.hist.concat([cur]).slice(-40), menuOpen: false, moreOpen: false, searchOpen: false, cartOpen: false, matchId: null, readerOpen: false, placeOpen: false, themeMenuOpen: false, customizeOpen: false, workIdx: null, partnerId: null, hdrY: '0', sq: '', summary: false, listening: false, playing: false, reaction: null, formError: '', prodError: '' }, extra || {}));
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  back() {
+    const h = this.state.hist.slice();
+    const prev = h.pop() || { view: 'home' };
+    this.setState(Object.assign({ hist: h, summary: false, listening: false, playing: false, formError: '' }, prev));
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  say(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 2400);
+  }
+  toggleIn(key, id, on, off) {
+    const list = this.state[key];
+    const has = list.indexOf(id) >= 0;
+    this.setState({ [key]: has ? list.filter((x) => x !== id) : list.concat([id]) });
+    if (has ? off : on) this.say(has ? off : on);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const D = this.data();
+    const libImgs = [['5cd343902a0b6d6a654108dee90d6fc3', 'ES Pointe-Hague'], ['38c25d93ed37833c9d08d0a1d75de3f1', 'Les Redoutables'], ['183faa9bf4b22beda6d2cb41e6b91225', 'Bénévoles TIC'], ['824fb1ca8687d16522c2ba8f05d66086', 'FCEH'], ['f2d41cc7df08eba8f5272bd4fddfac50', 'Féminines ASC'], ['4f81a4491eb301c8894c5d5d2ab04ff6', 'Blue Squad'], ['33cc6fbd406b8554971d61a0887d4a76', 'Duel des buteurs'], ['e6132a6993a0d040085ac66b6f46cf6e', 'AS Cherbourg'], ['2b8b1c873d91f86dbbe51fe32be05f69', 'Trail'], ['d75f806f46d28a0e206a30c27b8e58ad', 'Marine nationale'], ['0855c8136dcdda770cb476333ba7ad46', 'Le match du port'], ['66c390103494d9a28a5f34e10524881c', 'RCMN']].map(([id, label]) => ({ id, src: (window.ASSET_DATA[BLOB_FILES[id]] || ('assets/' + (BLOB_FILES[id] || id))), label }));
+    const RXD = typeof CasaRedac !== 'undefined' ? CasaRedac.data(this, { libImgs, videos: D.videos }) : null;
+    const X = this.more();
+    const ARTS = this.allArticles();
+    const showPlaces = this.props.showPlaces ?? true;
+    const accent = 'var(--acc)'; // couleur d’action du thème : noir sur fond clair, blanc sur fond sombre (theme.css)
+    const showBg = this.props.showBg ?? true;
+    const k = (this.props.bgIntensity ?? 40) / 100;
+    const eur = (n) => (Math.round(n * 100) / 100).toFixed(2).replace('.', ',') + ' €';
+    const eur0 = (n) => (n % 1 === 0 ? String(n) : n.toFixed(2).replace('.', ',')) + ' €';
+    const norm = (t) => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const clubById = (id) => D.clubs.find((c) => c.id === id);
+    const monoColors = ['#0f2236', '#20405e', '#9a6410', '#18705f', '#7a2a33', '#3a4a78'];
+    const initials = (n) => n.replace(/^(AS|ES|FC|CS|US|UC|SC|PL|USON|UST)\s/, '').split(/[\s-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+    const pill = (on) => ({ bg: on ? 'var(--inv-bg)' : 'var(--surface)', fg: on ? 'var(--on-inv)' : 'var(--text)', border: on ? 'var(--ink)' : 'var(--line-2)', pressed: on ? 'true' : 'false' });
+    const subscribed = !!s.subs.casab;
+    const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+    const MONTHS_L = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    const DOW = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+    const pd = (iso) => { if (!iso) return null; const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
+    const dateLabel = (iso) => { const d = pd(iso); return d ? DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] : 'Date à confirmer'; };
+
+    // ---------- articles / clubs / joueurs ----------
+    const art = (a) => {
+      const saved = s.saved.indexOf(a.id) >= 0;
+      return Object.assign({}, a, {
+        open: () => this.go('article', { articleId: a.id }),
+        toggleSave: () => this.toggleIn('saved', a.id, 'Ajouté à vos favoris', 'Retiré de vos favoris'),
+        saveFill: saved ? 'currentColor' : 'none', saveColor: saved ? 'var(--gold-text)' : 'var(--text)', saveLabel: saved ? 'Retirer des favoris' : 'Ajouter aux favoris',
+        hasBody: !!a.body, noBody: !a.body, blocks: a.body ? this.blocksOf(a.body) : [], author: a.author || 'la rédaction'
+      });
+    };
+    const clubV = (c, i) => {
+      const f = s.follows.indexOf(c.id) >= 0;
+      return Object.assign({}, c, {
+        initials: initials(c.name), mono: monoColors[(i ?? D.clubs.indexOf(c)) % monoColors.length],
+        open: () => this.go('club', { clubId: c.id, clubTab: 'articles' }),
+        toggleFollow: () => this.toggleIn('follows', c.id, 'Vous suivez ' + c.name, 'Vous ne suivez plus ' + c.name),
+        fLabel: f ? 'Suivi ✓' : 'Suivre', fBg: f ? 'var(--inv-bg)' : 'var(--surface)', fFg: f ? 'var(--on-inv)' : 'var(--ink)'
+      });
+    };
+    const playerV = (p) => Object.assign({}, p, { club: p.clubLabel, hasImg: !!p.img, noImg: !p.img, open: () => this.go('player', { playerId: p.id }) });
+    const vidV = (v) => { const dm = RXD && RXD.media.find((m) => m.id === 'video:' + v.id); const duree = (dm && dm.duree) || v.duree || ''; return Object.assign({}, v, { open: () => this.go('video', { videoId: v.id }), duree, hasDuree: !!duree }); };
+
+    // ---------- matchs ----------
+    const compLabel = (sp, id) => ((X.comps[sp] || []).find((c) => c.id === id) || { label: id }).label;
+    const openClubByTeam = (t) => () => { const id = X.teamClub[t]; if (id) this.go('club', { clubId: id, clubTab: 'matchs' }); else this.say('Club non référencé pour l’instant'); };
+    const pronoOpts = (m) => {
+      const mine = s.pronos[m.id];
+      return [['1', m.home.split(' ').slice(-1)[0] + ' gagne'], ['N', 'Match nul'], ['2', m.away.split(' ').slice(-1)[0] + ' gagne']].map(([v, label]) => Object.assign(pill(mine === v), { label,
+        pick: () => { this.setState({ pronos: Object.assign({}, s.pronos, { [m.id]: v }) }); this.say('Prono enregistré'); } }));
+    };
+    const matchV = (m) => {
+      const live = m.status === 'live';
+      const done = m.status === 'done';
+      const minute = live ? (m.sport === 'Basketball' ? Math.min(40, m.minute + s.tick) : Math.min(90, m.minute + s.tick)) : 0;
+      const hasScore = m.hs !== null && m.hs !== undefined;
+      const rem = s.reminders.indexOf(m.id) >= 0;
+      const statusLabel = live ? 'En direct · ' + minute + (m.sport === 'Basketball' ? '′ de jeu' : '′') : done ? (m.note || 'Terminé') : 'À venir';
+      return Object.assign({}, m, {
+        compId: m.comp, compLabel: compLabel(m.sport, m.comp), comp: compLabel(m.sport, m.comp), dateLabel: dateLabel(m.date),
+        hs: hasScore ? String(m.hs) : '–', as: hasScore ? String(m.as) : '–',
+        scoreMid: hasScore ? m.hs + ' – ' + m.as : (done ? '·' : 'vs'),
+        statusLabel, stColor: live ? 'var(--danger)' : done ? 'var(--muted)' : 'var(--gold-text)', pulse: live ? 'pulse' : '',
+        progress: live ? Math.round(minute / (m.sport === 'Basketball' ? 40 : 90) * 100) + '%' : done ? '100%' : '0%',
+        vLabel: m.verified ? 'Vérifié' : 'Démo', vColor: m.verified ? 'var(--success)' : 'var(--gold-text)',
+        homeW: hasScore && m.hs > m.as ? '800' : '600', awayW: hasScore && m.as > m.hs ? '800' : '600',
+        open: () => this.setState({ matchId: m.id }),
+        upcoming: m.status === 'up', opts: pronoOpts(m),
+        rLabel: rem ? 'Rappel activé ✓' : 'Me le rappeler', rBg: rem ? 'var(--inv-bg)' : 'var(--surface)', rFg: rem ? 'var(--on-inv)' : 'var(--ink)',
+        toggleRemind: () => this.toggleIn('reminders', m.id, 'Rappel activé', 'Rappel retiré'),
+        hasArticle: !!m.article, openArticle: () => this.go('article', { articleId: m.article }),
+        openHome: openClubByTeam(m.home), openAway: openClubByTeam(m.away)
+      });
+    };
+    const allM = X.matches.map(matchV);
+    const byDate = (a, b) => (a.date || '9999') < (b.date || '9999') ? -1 : 1;
+
+    // ---------- navigation ----------
+    const navDefs = [['Le Terrain', 'live'], ['Actualités', 'news'], ['Club House', 'clubhouse'], ['Culture', 'culture'], ['Clubs', 'clubs'], ['Boutique', 'shop']];
+    const sectionOf = { article: 'news', video: 'videos', discipline: 'disciplines', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
+    const activeSec = sectionOf[s.view] || s.view;
+    const nav = navDefs.map(([label, v]) => ({ label, color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
+    const moreNavBase = (s.role ? [['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']] : []).concat([['Abonnements', 'offers', 'Casa B+ et La Gazette'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents'], ['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', '19 sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Partenaires', 'partners', 'Offres entreprises et clubs'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']])
+      .map(([label, v, sub]) => ({ label, sub, go: () => this.go(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : {}) }));
+    const moreNav = moreNavBase.slice(0, s.role ? 1 : 0).concat([{ label: 'L’application', sub: 'Scores, Club House et réalité augmentée', go: () => this.go('app') }, { label: 'Projet immobilier', sub: 'Avec notre partenaire OlistO', go: () => this.go('olisto') }]).concat(moreNavBase.slice(s.role ? 1 : 0));
+
+    // ---------- accueil ----------
+    const liveCount = allM.filter((m) => m.status === 'live').length;
+    const gateways = [
+      { eb: liveCount + ' match(s) en direct', title: 'Le Terrain', sub: 'Résultats, agenda et classements de chaque discipline.', cta: 'Voir les scores', go: () => this.go('live'), deep: 'cb-deep', bg: 'var(--inv-bg)', fg: 'var(--on-inv)', subColor: 'var(--on-inv-2)', ebColor: 'var(--gold-on-inv)', ctaColor: accent, dot: '#e03040', pulseClass: 'pulse' },
+      { eb: 'Récits du terrain', title: 'Actualités', sub: 'Reportages, portraits et coulisses du sport local.', cta: 'Lire l’actu', deep: '', go: () => this.go('news'), bg: 'var(--surface-2)', fg: 'var(--ink)', subColor: 'var(--text-2)', ebColor: 'var(--gold-text)', ctaColor: 'var(--ink)', dot: 'var(--ink)', pulseClass: '' },
+      { eb: 'Avec Cherwood', title: 'Boutique', sub: 'Vêtements, maillots floqués et goodies.', cta: 'Faire un tour', deep: '', go: () => this.go('shop'), bg: 'var(--acc)', fg: 'var(--on-acc)', subColor: 'var(--on-acc)', ebColor: 'var(--on-acc)', ctaColor: 'var(--on-acc)', dot: 'var(--on-acc)', pulseClass: '' },
+      { eb: 'Le mag', title: 'La Gazette', sub: 'Numérique, papier ou les deux.', cta: 'S’abonner', deep: '', go: () => this.go('offers', { offerTab: 'La Gazette' }), bg: 'var(--sand)', fg: 'var(--ink)', subColor: 'var(--text-2)', ebColor: 'var(--gold-text)', ctaColor: 'var(--ink)', dot: 'var(--ink)', pulseClass: '' }
+    ];
+
+    // ---------- actualités ----------
+    const allA = ARTS.map(art);
+    const cats = ['Tous', 'Football', 'Basketball', 'Rugby', 'Water-polo', 'Trail'];
+    const q = norm(s.q.trim());
+    const newsArticles = allA.filter((a) => (s.cat === 'Tous' || a.sport === s.cat) && (!s.premiumOnly || a.premium) && (!s.savedOnly || s.saved.indexOf(a.id) >= 0) &&
+      (!q || norm(a.title + ' ' + a.dek + ' ' + a.tag + ' ' + a.sport + ' ' + a.clubs.map((c) => (clubById(c) || {}).name).join(' ')).includes(q)));
+    const chips = cats.map((c) => Object.assign(pill(c === s.cat), { label: c, pick: () => this.setState({ cat: c }) }));
+    const feed = allA.filter((a) => a.clubs.some((c) => s.follows.indexOf(c) >= 0)).slice(0, 3);
+
+    // ---------- article ----------
+    const curA = ARTS.find((a) => a.id === s.articleId) || ARTS[0];
+    const artObj = art(curA);
+    artObj.openSport = () => this.go('discipline', { discId: curA.sport });
+    artObj.points = curA.points.map((t) => ({ t }));
+    artObj.clubs = curA.clubs.map((id) => clubById(id)).filter(Boolean).map((c) => clubV(c));
+    artObj.hasClubs = artObj.clubs.length > 0;
+    artObj.hasVideo = !!(curA.video && curA.video.url); artObj.videoUrl = curA.video ? curA.video.url : ''; artObj.videoDur = curA.video ? curA.video.duree || '' : ''; artObj.hasVideoDur = !!artObj.videoDur;
+    const linkedA = (curA.related || []).map((id) => allA.find((a) => a.id === id)).filter(Boolean);
+    const related = linkedA.concat(allA.filter((a) => a.id !== curA.id && linkedA.indexOf(a) < 0 && (a.sport === curA.sport || a.clubs.some((c) => curA.clubs.indexOf(c) >= 0)))).slice(0, 3);
+    const locked = curA.premium && !subscribed;
+    const fontSizes = ['16px', '18px', '20px', '23px'];
+    const reactions = ['Bravo', 'Quelle ambiance', 'Fierté locale'].map((r) => Object.assign(pill(s.reaction === r), { label: r, pick: () => { this.setState({ reaction: s.reaction === r ? null : r }); if (s.reaction !== r) this.say('Merci pour votre réaction'); } }));
+
+    // ---------- vidéos ----------
+    const videos = D.videos.map(vidV);
+    const curV = D.videos.find((v) => v.id === s.videoId) || D.videos[0];
+
+    // ---------- disciplines ----------
+    const disciplines = D.sports.map((sp) => {
+      const na = ARTS.filter((a) => a.sport === sp).length;
+      const nv = D.videos.filter((v) => v.sport === sp).length;
+      const nc = D.clubs.filter((c) => c.sport === sp).length;
+      const any = na + nv + nc > 0;
+      return { name: sp, stats: na + ' article' + (na > 1 ? 's' : '') + ' · ' + nv + ' vidéo' + (nv > 1 ? 's' : '') + ' · ' + nc + ' club' + (nc > 1 ? 's' : ''),
+        badge: any ? 'Explorer →' : 'Bientôt', badgeColor: any ? 'var(--gold-text)' : 'var(--muted)', bg: any ? 'var(--surface)' : 'var(--surface-3)', open: () => this.go('discipline', { discId: sp }) };
+    });
+    const dName = s.discId || 'Football';
+    const dArts = allA.filter((a) => a.sport === dName);
+    const dClubs = D.clubs.filter((c) => c.sport === dName).map((c) => clubV(c));
+    const firstComp = (sp) => ((X.comps[sp] || [])[0] || { id: null }).id;
+    const disc = { name: dName, stats: (disciplines.find((d) => d.name === dName) || {}).stats, articles: dArts, clubs: dClubs,
+      hasArticles: dArts.length > 0, hasClubs: dClubs.length > 0, empty: dArts.length + dClubs.length === 0,
+      openBoard: () => this.go('live', { dSport: dName, dComp: firstComp(dName), dTab: 'results' }), openShop: () => this.go('shop') };
+
+    // ---------- clubs ----------
+    const clubSports = ['Tous', 'Football', 'Basketball', 'Water-polo', 'Multisport'];
+    const clubChips = clubSports.map((c) => Object.assign(pill(c === s.clubSport), { label: c, pick: () => this.setState({ clubSport: c }) }));
+    const clubList = D.clubs.filter((c) => s.clubSport === 'Tous' || c.sport === s.clubSport).map((c) => clubV(c));
+    const curC = clubById(s.clubId) || D.clubs[0];
+    const club = clubV(curC);
+    club.hasImg = !!curC.img;
+    club.openSport = () => this.go('discipline', { discId: curC.sport });
+    club.openCity = () => this.go('map', { city: curC.city });
+    club.articles = allA.filter((a) => a.clubs.indexOf(curC.id) >= 0);
+    club.noArticles = club.articles.length === 0;
+    club.players = D.players.filter((p) => p.club === curC.id).map(playerV);
+    club.noPlayers = club.players.length === 0;
+    club.matches = allM.filter((m) => X.teamClub[m.home] === curC.id || X.teamClub[m.away] === curC.id).sort(byDate);
+    club.noMatches = club.matches.length === 0;
+    const tabs = [['articles', 'Articles'], ['matchs', 'Matchs'], ['players', 'Effectif'], ['infos', 'Infos club']];
+    const clubTabs = tabs.map(([id, label]) => ({ label, sel: s.clubTab === id ? 'true' : 'false', color: s.clubTab === id ? 'var(--ink)' : 'var(--muted)', line: s.clubTab === id ? accent : 'transparent', pick: () => this.setState({ clubTab: id }) }));
+
+    // ---------- joueurs ----------
+    const roles = ['Tous', 'Attaquant', 'Milieu', 'Défenseur', 'Staff & arbitres'];
+    const roleChips = roles.map((r) => Object.assign(pill(r === s.role), { label: r, pick: () => this.setState({ role: r }) }));
+    const isStaff = (p) => /Arbitre|Entraîneur|VP/.test(p.role);
+    const playerList = D.players.filter((p) => s.role === 'Tous' || (s.role === 'Staff & arbitres' ? isStaff(p) : p.role === s.role)).map(playerV);
+    const curP = D.players.find((p) => p.id === s.playerId) || D.players[0];
+    const pf = s.followPlayers.indexOf(curP.id) >= 0;
+    const pl = Object.assign(playerV(curP), {
+      hasClub: !!curP.club, noClub: !curP.club, openClub: () => this.go('club', { clubId: curP.club, clubTab: 'players' }),
+      toggleFollow: () => this.toggleIn('followPlayers', curP.id, 'Vous suivez ' + curP.name, 'Vous ne suivez plus ' + curP.name),
+      fLabel: pf ? 'Suivi ✓' : 'Suivre ce joueur', fBg: pf ? 'var(--inv-bg)' : 'var(--surface)', fFg: pf ? 'var(--on-inv)' : 'var(--ink)'
+    });
+
+    // ---------- carte ----------
+    const lat0 = 49.78, lat1 = 48.6, lon0 = -1.98, lon1 = -0.2;
+    const cityNames = Object.keys(D.cities).filter((c) => D.clubs.some((cl) => cl.city === c));
+    const cityDots = cityNames.map((name) => {
+      const [la, lo] = D.cities[name];
+      const n = D.clubs.filter((c) => c.city === name).length;
+      const sel = s.city === name;
+      return { x: (6 + (lo - lon0) / (lon1 - lon0) * 88).toFixed(1) + '%', y: (6 + (lat0 - la) / (lat0 - lat1) * 88).toFixed(1) + '%',
+        size: (14 + n * 5) + 'px', sizeL: (30 + n * 6) + 'px', count: String(n), bg: sel ? 'var(--inv-bg)' : accent, fg: sel ? 'var(--on-inv)' : 'var(--on-acc)',
+        aria: name + ', ' + n + ' club' + (n > 1 ? 's' : ''), pick: () => this.setState({ city: name }) };
+    });
+    const cityClubs = D.clubs.filter((c) => c.city === s.city).map((c) => clubV(c));
+
+    // ---------- TERRAIN ----------
+    const boardSports = ['Football', 'Basketball', 'Water-polo', 'Rugby', 'Trail', 'Natation', 'Judo', 'Tennis'];
+    const dSports = boardSports.map((sp) => Object.assign(pill(sp === s.dSport), { label: sp, hasLive: allM.some((m) => m.sport === sp && m.status === 'live'),
+      pick: () => this.setState({ dSport: sp, dComp: firstComp(sp), matchId: null }) }));
+    const compsHere = X.comps[s.dSport] || [];
+    const dCompId = compsHere.some((c) => c.id === s.dComp) ? s.dComp : (compsHere[0] || {}).id;
+    const dComps = compsHere.map((c) => Object.assign(pill(c.id === dCompId), { label: c.label, pick: () => this.setState({ dComp: c.id }) }));
+    const inComp = allM.filter((m) => m.sport === s.dSport && m.compId === dCompId);
+    const sportHasData = inComp.length > 0;
+    const tabDefs = [['live', 'Direct'], ['results', 'Résultats'], ['agenda', 'Agenda'], ['cal', 'Calendrier'], ['table', 'Classement'], ['pronos', 'Pronos']];
+    const dTabs = tabDefs.map(([id, label]) => ({ label, sel: s.dTab === id ? 'true' : 'false', color: s.dTab === id ? 'var(--ink)' : 'var(--muted)', line: s.dTab === id ? accent : 'transparent', pick: () => this.setState({ dTab: id }) }));
+    const liveM = inComp.filter((m) => m.status === 'live');
+    const upM = inComp.filter((m) => m.status === 'up').sort(byDate);
+    const liveCards = liveM.length ? liveM : upM.slice(0, 3);
+    const resultRows = inComp.filter((m) => m.status === 'done').sort((a, b) => (a.date > b.date ? -1 : 1));
+    const agendaRows = upM.map((m) => { const d = pd(m.date); return Object.assign({}, m, { dow: d ? DOW[d.getDay()] : '—', day: d ? String(d.getDate()) : '?', mon: d ? MONTHS[d.getMonth()] : 'à conf.' }); });
+    const tbl = X.tables[dCompId];
+    const tableRows = (tbl || []).map((r, i) => {
+      const cid = X.teamClub[r.team];
+      const followed = cid && s.follows.indexOf(cid) >= 0;
+      return Object.assign({}, r, { rank: String(i + 1), j: String(r.j), g: String(r.g), n: String(r.n), p: String(r.p), pts: String(r.pts), followed: !!followed,
+        bg: followed ? 'var(--note-bg)' : 'var(--surface)', rankBg: i === 0 ? accent : i === tbl.length - 1 ? 'var(--danger-bg)' : 'var(--surface-2)', rankFg: i === 0 ? 'var(--on-acc)' : 'var(--ink)',
+        form: r.form.split('').map((l) => ({ l, bg: l === 'V' ? '#18705f' : l === 'N' ? '#8f9aa8' : 'var(--danger)' })), open: openClubByTeam(r.team) });
+    });
+    // calendrier
+    const year = 2026, month = s.calMonth;
+    const first = new Date(year, month, 1);
+    const offset = (first.getDay() + 6) % 7;
+    const nDays = new Date(year, month + 1, 0).getDate();
+    const sportM = allM.filter((m) => m.sport === s.dSport && m.date);
+    const calCells = [];
+    for (let i = 0; i < offset; i++) calCells.push({ n: '', disabled: true, aria: 'vide', border: 'transparent', bg: 'transparent', fg: 'var(--text)', dot: 'transparent', op: 1, pick: () => {} });
+    for (let d = 1; d <= nDays; d++) {
+      const iso = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      const has = sportM.filter((m) => m.date === iso);
+      const sel = s.calDay === d;
+      const today = month === 9 && d === 6;
+      calCells.push({ n: String(d), disabled: false, aria: d + ' ' + MONTHS_L[month] + (has.length ? ', ' + has.length + ' match(s)' : ''), border: today ? accent : sel ? 'var(--ink)' : 'var(--line)',
+        bg: sel ? 'var(--inv-bg)' : 'var(--surface)', fg: sel ? 'var(--on-inv)' : 'var(--text)', dot: has.length ? (has.some((m) => m.status === 'live') ? '#e03040' : sel ? 'var(--on-inv)' : 'var(--ink)') : 'transparent', op: 1, pick: () => this.setState({ calDay: d }) });
+    }
+    const selIso = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(s.calDay).padStart(2, '0');
+    const calDayMatches = sportM.filter((m) => m.date === selIso);
+    // pronos
+    const pronoRows = allM.filter((m) => m.status === 'up' && m.sport === s.dSport);
+    const pronoCount = String(Object.keys(s.pronos).length);
+    // fiche match
+    const mxRaw = allM.find((m) => m.id === s.matchId);
+    const mx = mxRaw || allM[0];
+
+    // ---------- BOUTIQUE ----------
+    const lineName = { casa: 'Casa Besports', cherwood: 'Cherwood × Casa', goodies: 'Goodies', vikings: 'Collection Vikings', atelier: 'Créations Casa' };
+    const tints = { casa: '#f4f1ea', cherwood: '#eef1ec', goodies: '#f7f0e2', vikings: '#efeeea', atelier: '#efeeea' };
+    const prodV = (p) => {
+      const c = p.colors[0];
+      const mp = X.markPos[p.type] || [60, 9];
+      const dark = ['#0f2236', '#1f3b33'].indexOf(c.hex) >= 0;
+      return Object.assign({}, p, {
+        tint: tints[p.line], color: c.hex, path: X.paths[p.type], isPoster: p.type === 'poster', notPoster: p.type !== 'poster', hasImg: !!p.img, isIcon: !p.img && p.type !== 'poster',
+        mark: mp[0] ? p.mark : '', markY: String(mp[0]), markSize: String(p.mark.length > 9 ? 6 : mp[1]), markColor: dark ? '#ffffff' : '#0f2236',
+        line: lineName[p.line], badgeBg: p.line === 'cherwood' ? '#1f3b33' : p.line === 'goodies' ? '#8a5a0e' : p.line === 'vikings' || p.line === 'atelier' ? '#14171c' : '#080f1a', badgeFg: '#ffffff',
+        priceLabel: (p.priceBySize ? 'dès ' : '') + eur0(p.price), hasFlag: !!p.flag,
+        open: () => this.go('product', { productId: p.id, color: 0, size: null, qty: 1, persoName: '', persoNum: '', sizeGuide: false, prodImg: 0 }),
+        quickLabel: p.sizes ? 'Choisir' : 'Ajouter au panier',
+        quickAdd: () => { if (p.sizes) { this.go('product', { productId: p.id, color: 0, size: null, qty: 1, persoName: '', persoNum: '' }); return; } this.addLine(p, 0, null, 1, ''); }
+      });
+    };
+    const creaProducts = X.products.filter((p) => p.line === 'atelier'); const hasCrea = creaProducts.length > 0; const shopLineEff = s.shopLine === 'Créations Casa' && !hasCrea ? 'Tout' : s.shopLine;
+    const shopLinesDefs = ['Tout', 'Collection Vikings', 'Casa Besports', 'Cherwood × Casa', 'Goodies'].concat(hasCrea ? ['Créations Casa'] : []);
+    const shopLines = shopLinesDefs.map((l) => Object.assign(pill(l === shopLineEff), { label: l, pick: () => this.setState({ shopLine: l }) }));
+    const lineKey = { 'Collection Vikings': 'vikings', 'Casa Besports': 'casa', 'Cherwood × Casa': 'cherwood', 'Goodies': 'goodies', 'Créations Casa': 'atelier' };
+    let shopProducts = X.products.filter((p) => shopLineEff === 'Tout' || p.line === lineKey[shopLineEff]);
+    shopProducts = shopProducts.slice().sort((a, b) => s.shopSort === 'asc' ? a.price - b.price : s.shopSort === 'desc' ? b.price - a.price : s.shopSort === 'new' ? (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) : a.pop - b.pop).map(prodV);
+    const homeProducts = ['kit-runes', 'tee-viking', 'hoodie-roule', 'kit-nuit'].map((id) => prodV(X.products.find((p) => p.id === id)));
+    // L’affiche du Cotentin : chaque collection a son affiche de voyage
+    const AS = (id) => (typeof BLOB_FILES !== 'undefined' ? (window.ASSET_DATA[BLOB_FILES[id]] || ('assets/' + (BLOB_FILES[id] || id))) : '/_blob/' + id);
+    const imgOf = (id) => (X.products.find((p) => p.id === id) || {}).img;
+    const lineStat = (k) => { const ps = X.products.filter((p) => p.line === k); return ps.length + ' pièces · dès ' + eur0(Math.min.apply(null, ps.map((p) => p.price))); };
+    const shopPosters = [
+      { line: 'Collection Vikings', kick: 'Collection', title: 'La Saga des Vikings', tag: 'Maillots Runes, Ancre, Nuit et Rayé Ciel, floqués à votre nom', img: imgOf('kit-runes'), credits: lineStat('vikings') },
+      { line: 'Casa Besports', kick: 'Les essentiels', title: 'La Légende Casa', tag: 'Hoodie Signature, Le Phare, Rade Club, veste Tribune…', img: imgOf('hoodie-signature'), credits: lineStat('casa') },
+      { line: 'Cherwood × Casa', kick: 'Capsule Cherwood', title: 'Fait à Cherbourg', tag: 'Le Roule, La Presqu’île, le pull marin : la capsule Cherwood × Casa', img: imgOf('crew-presquile'), credits: lineStat('cherwood') },
+      { line: 'Goodies', kick: 'Pour le stade', title: 'Le Butin des Supporters', tag: 'Écharpe, mug, gourde, affiche, stickers et carte cadeau', img: AS('bae1d2ac6cb6529aa1e99e023df405ff'), credits: lineStat('goodies') }
+    ].map((d) => Object.assign({ pressed: s.shopLine === d.line ? 'true' : 'false', aria: d.title + ' : afficher la collection ' + d.line, cta: s.shopLine === d.line ? 'Collection affichée' : 'Voir la collection', pick: () => this.setState({ shopLine: s.shopLine === d.line ? 'Tout' : d.line }) }, d));
+    const nuitP = X.products.find((p) => p.id === 'kit-nuit');
+    const trailer = nuitP ? { name: nuitP.name, title: 'Nuit', sub: 'Le maillot third des Vikings du Cotentin : noir profond à fines rayures, médaillon et écusson pentagone dorés.', img: nuitP.img, price: eur0(nuitP.price), open: () => this.go('product', { productId: 'kit-nuit', color: 0, size: null, qty: 1, persoName: '', persoNum: '', sizeGuide: false, prodImg: 0 }) } : {};
+    const showTrailer = !!nuitP && (s.shopLine === 'Tout' || s.shopLine === 'Collection Vikings');
+    // Créations Casa : le bandeau de la collection et la gestion des articles venus de l’Atelier
+    const openPr = (id) => this.go('product', { productId: id, color: 0, size: null, qty: 1, persoName: '', persoNum: '', sizeGuide: false, prodImg: 0 });
+    const creaSorted = creaProducts.slice().reverse();
+    const creaBanner = { show: hasCrea && (shopLineEff === 'Tout' || shopLineEff === 'Créations Casa'), sub: (() => { const ps = creaProducts.map((p) => p.price); const lo = Math.min.apply(null, ps.concat([1e9])), hi = Math.max.apply(null, ps.concat([0])); return creaProducts.length + (creaProducts.length > 1 ? ' pièces dessinées' : ' pièce dessinée') + ' dans l’Atelier Casa Besports, ' + (lo === hi ? 'à ' + eur0(lo) : 'de ' + eur0(lo) + ' à ' + eur0(hi)) + '.'; })(),
+      cta: shopLineEff === 'Créations Casa' ? 'Voir toute la boutique' : 'Voir les créations', go: () => this.setState({ shopLine: shopLineEff === 'Créations Casa' ? 'Tout' : 'Créations Casa' }),
+      items: creaSorted.slice(0, 3).map((p) => ({ img: p.img, price: eur0(p.price), aria: p.name + ', ' + eur0(p.price), open: () => openPr(p.id) })) };
+    const creaSrv = !!(window.CB_SERVER && window.CB); const creaTeamOn = creaSrv && !!window.CB.siteRole && ['admin', 'writer'].indexOf(window.CB.siteRole) >= 0; const creaChief = creaSrv && !!window.CB.user && ['admin', 'collaborateur'].indexOf(window.CB.user.role) >= 0;
+    const creaList = creaSrv ? (s.creaTeam || []) : (this._crea || []);
+    const creaItems = creaList.map((p) => { const st = p.status || 'publie'; const can = !creaSrv || creaChief; return { img: p.img, name: p.name, meta: (p.supportName ? p.supportName + ' · ' : '') + eur0(p.price) + (p.technique ? ' · ' + p.technique : ''), statusLabel: st === 'publie' ? 'En boutique' : st === 'retire' ? 'Retiré' : 'Brouillon',
+      open: () => { if (X.products.some((x) => x.id === p.id)) openPr(p.id); else this.say('Article pas encore en boutique'); }, canToggle: can, toggleLabel: st === 'publie' ? 'Retirer' : creaSrv ? 'Publier' : 'Remettre en boutique', toggle: () => this.creaSet(p.id, st === 'publie' ? 'retire' : 'publie'),
+      canDel: can || (creaSrv && st !== 'publie' && window.CB.user && p.byId === window.CB.user.id), delLabel: s.creaSure === p.id ? 'Confirmer la suppression' : 'Supprimer', del: () => this.creaDel(p.id) }; });
+    const crea = { show: creaSrv ? creaTeamOn : true, open: !!s.creaOpen, openAria: s.creaOpen ? 'true' : 'false', toggleLabel: s.creaOpen ? 'Masquer la liste' : 'Gérer les articles' + (creaList.length ? ' (' + creaList.length + ')' : ''),
+      toggle: () => { const o = !s.creaOpen; this.setState({ creaOpen: o }); if (o) this.creaTeamLoad(); }, onFile: (e) => { const f = e.target.files && e.target.files[0]; try { e.target.value = ''; } catch (er) {} this.creaImport(f); },
+      msg: s.creaMsg || '', items: creaItems, empty: !creaItems.length, emptyText: creaSrv ? 'Aucun article de l’Atelier pour l’instant : créez-en un dans l’Atelier › Studio Boutique.' : 'Aucun article importé sur cet appareil pour l’instant.',
+      lead: creaSrv ? 'Articles créés dans le Studio Boutique de l’Atelier' : 'Ajoutez les articles créés dans le Studio Boutique de l’Atelier',
+      help: creaSrv ? (creaChief ? 'Les articles envoyés depuis l’Atelier arrivent ici. Publiez-les pour les afficher dans la collection « Créations Casa » du site et de l’application.' : 'Les articles envoyés depuis l’Atelier arrivent en brouillon ; un chef d’édition ou l’administrateur les publie.') : 'Dans l’Atelier, Studio Boutique › Ajouter à la boutique (ou Exporter › Pack boutique) crée un fichier .casa-boutique.json : importez-le ici. Les articles importés restent sur cet appareil.' };
+    // fiche produit
+    const curPr = X.products.find((p) => p.id === s.productId) || X.products[0];
+    const ci = Math.min(s.color, curPr.colors.length - 1);
+    const unit = curPr.priceBySize ? curPr.priceBySize[Math.max(0, curPr.sizes.indexOf(s.size))] : curPr.price;
+    const persoFee = curPr.perso && s.persoName.trim() ? 8 : 0;
+    const prod = Object.assign(prodV(curPr), {
+      color: curPr.colors[ci].hex, colorName: curPr.colors[ci].name, lineLong: curPr.line === 'cherwood' ? 'Cherwood × Casa Besports · fait à Cherbourg' : curPr.line === 'atelier' ? 'Créations Casa · dessinées dans l’Atelier Casa Besports' : lineName[curPr.line],
+      persoTitle: curPr.line === 'atelier' ? 'Personnalisation' : 'Personnalisation · atelier Cherwood',
+      markColor: ['#0f2236', '#1f3b33'].indexOf(curPr.colors[ci].hex) >= 0 ? '#ffffff' : '#0f2236',
+      hasColors: curPr.colors.length > 1, colors: curPr.colors.map((c, i) => ({ name: c.name, hex: c.hex, pressed: i === ci ? 'true' : 'false', ring: i === ci ? 'var(--ink)' : 'var(--line-2)', pick: () => this.setState({ color: i }) })),
+      hasSizes: !!curPr.sizes, sizes: (curPr.sizes || []).map((z) => Object.assign(pill(z === s.size), { l: z, pick: () => this.setState({ size: z, prodError: '' }) })),
+      persoable: !!curPr.perso, persoNum: curPr.perso === 'num', persoLabel: curPr.perso === 'num' ? 'Nom au dos' : 'Votre mention (ville, club, prénom)', persoPh: curPr.perso === 'num' ? 'MARTIN' : 'HAGUAIS',
+      persoText: curPr.perso ? (s.persoName.toUpperCase() + (s.persoNum ? ' ' + s.persoNum : '')) : '', persoY: '92',
+      priceLabel: eur0(unit)
+    });
+    if (curPr.perso === 'text' && s.persoName.trim()) { prod.mark = s.persoName.toUpperCase().slice(0, 14); prod.persoText = ''; }
+    const gal = (curPr.imgsByColor && curPr.imgsByColor[ci] && curPr.imgsByColor[ci].length ? curPr.imgsByColor[ci] : curPr.gallery) || [];
+    const gIdx = Math.min(s.prodImg || 0, Math.max(0, gal.length - 1));
+    if (gal.length) prod.img = gal[gIdx];
+    prod.hasGallery = gal.length > 1;
+    prod.gallery = gal.map((src, i) => ({ src, aria: (curPr.views && curPr.views[i]) || (i === 0 ? 'Vue d’ensemble' : 'Vue de détail'), pressed: i === gIdx ? 'true' : 'false', ring: i === gIdx ? 'var(--acc)' : '#ffffff', pick: () => this.setState({ prodImg: i }) }));
+    prod.hasOverlay = curPr.perso === 'text' && gIdx === 0; prod.ovTop = '47%'; prod.overlayText = (s.persoName.trim() || 'CHERBOURGEOIS').toUpperCase().slice(0, 14);
+    if (curPr.perso === 'text') { prod.mark = ''; }
+    prod.hasBackPreview = curPr.perso === 'num' && !!s.persoName.trim(); prod.backText = s.persoName.toUpperCase().slice(0, 14) + (s.persoNum ? ' · ' + s.persoNum : '');
+    // Casa Cinéma : le générique de la pièce (uniquement des informations publiées par la boutique)
+    const textile = ['tee', 'hoodie', 'crew', 'short', 'jogger', 'pull', 'cap', 'bob', 'patch', 'tote', 'scarf'].indexOf(curPr.type) >= 0;
+    prod.credits = [{ role: curPr.line === 'atelier' ? 'Une pièce des' : 'Une pièce de la', name: curPr.line === 'cherwood' ? 'Capsule Cherwood × Casa' : lineName[curPr.line] }];
+    if (curPr.line === 'atelier') { prod.credits.push({ role: 'Dessinée dans', name: 'l’Atelier Casa Besports' }); if (curPr.technique) prod.credits.push({ role: 'Marquage', name: curPr.technique }); if (curPr.supportName) prod.credits.push({ role: 'Support', name: curPr.supportName }); }
+    if (curPr.line !== 'goodies' && curPr.line !== 'atelier') prod.credits.push({ role: 'Dessinée dans le', name: 'Cotentin' });
+    if (textile && curPr.line !== 'goodies' && curPr.line !== 'atelier') prod.credits.push({ role: 'Floquée et brodée à', name: 'Cherbourg' });
+    if (curPr.perso && curPr.line !== 'atelier') prod.credits.push({ role: 'Personnalisation', name: 'Atelier Cherwood' });
+    if (curPr.line === 'cherwood') prod.credits.push({ role: 'Avec', name: 'Cherwood, née à Cherbourg en 2017' });
+    prod.star = curPr.line === 'atelier' ? (curPr.perso === 'num' ? 'Et votre nom au dos, au numéro de votre choix.' : '') : curPr.perso === 'num' ? 'Et votre nom au dos, floqué à Cherbourg.' : curPr.perso ? 'Et votre mention personnalisée, réalisée à Cherbourg.' : '';
+    prod.hasStar = !!prod.star;
+    const crossSell = X.products.filter((p) => p.id !== curPr.id && (p.line !== curPr.line || p.type !== curPr.type)).sort((a, b) => a.pop - b.pop).slice(0, 4).map(prodV);
+    // panier
+    const cartLines = s.cart.map((l, idx) => {
+      const p = X.products.find((x) => x.id === l.id); if (!p) return null;
+      return { hasImg: !!p.img, img: p.img, isIcon: !p.img, name: p.name, variant: [p.colors[l.color].name, l.size, l.perso].filter(Boolean).join(' · '), qty: String(l.qty), total: eur(l.unit * l.qty), tint: tints[p.line], color: p.colors[l.color].hex, path: X.paths[p.type] || X.paths.gift,
+        open: () => this.go('product', { productId: p.id, color: l.color, size: l.size, qty: 1 }),
+        inc: () => this.setState({ cart: s.cart.map((x, i) => i === idx ? Object.assign({}, x, { qty: x.qty + 1 }) : x) }),
+        dec: () => this.setState({ cart: s.cart.map((x, i) => i === idx ? Object.assign({}, x, { qty: x.qty - 1 }) : x).filter((x) => x.qty > 0) }),
+        remove: () => { this.setState({ cart: s.cart.filter((x, i) => i !== idx) }); this.say('Article retiré'); } };
+    }).filter(Boolean);
+    const cartCount = s.cart.reduce((n, l) => n + l.qty, 0);
+    const sub = s.cart.reduce((n, l) => n + l.unit * l.qty, 0);
+    const disc10 = subscribed ? Math.round(sub * 10) / 100 : 0;
+    const net = sub - disc10;
+    const FREE = 60;
+    const shipPrice = { home: net >= FREE ? 0 : 4.9, cherwood: 0, stade: 0 }[s.ship];
+    const total = net + shipPrice + (s.giftWrap ? 3 : 0);
+    const shipOpts = [['home', 'Livraison à domicile', '2 à 4 jours ouvrés', net >= FREE ? 'Offerte' : eur(4.9)], ['cherwood', 'Retrait boutique Cherwood', 'Centre-ville de Cherbourg · prêt sous 24 h', 'Gratuit'], ['stade', 'Retrait au stade', 'Au stand Casa Besports les jours de grands matchs', 'Gratuit']]
+      .map(([id, label, sub2, price]) => ({ label, sub: sub2, price, pressed: s.ship === id ? 'true' : 'false', border: s.ship === id ? 'var(--ink)' : 'var(--line)', pick: () => this.setState({ ship: id }) }));
+
+    // ---------- ABONNEMENTS ----------
+    const period = s.period;
+    const priceOf = (id) => X.subPlans[id][period === 'an' ? 'an' : 'mois'];
+    const perLabel = period === 'an' ? '/ an' : '/ mois';
+    const periods = [['mois', 'Mensuel'], ['an', 'Annuel · 2 mois offerts']].map(([id, label]) => Object.assign(pill(s.period === id), { label, pick: () => this.setState({ period: id }) }));
+    const offerTabsDefs = ['Tout', 'Casa B+', 'La Gazette', 'Packs'];
+    const offerTabs = offerTabsDefs.map((t) => ({ label: t, sel: s.offerTab === t ? 'true' : 'false', color: s.offerTab === t ? 'var(--ink)' : 'var(--muted)', line: s.offerTab === t ? accent : 'transparent', pick: () => this.setState({ offerTab: t }) }));
+    const tabPlans = { 'Tout': ['casab', 'gaz-duo', 'pack'], 'Casa B+': ['casab', 'pack'], 'La Gazette': ['gaz-num', 'gaz-pap', 'gaz-duo'], 'Packs': ['pack', 'gaz-duo'] }[s.offerTab];
+    const owned = (id) => { const p = X.subPlans[id]; return (p.casab ? s.subs.casab : true) && (p.gazette ? s.subs.gazette === p.gazette || (s.subs.gazette === 'duo' && p.gazette !== 'duo') : true) && (p.casab || p.gazette); };
+    const offerCards = tabPlans.map((id) => {
+      const p = X.subPlans[id];
+      const hero = id === 'pack' || (s.offerTab === 'La Gazette' && id === 'gaz-duo');
+      const has = owned(id);
+      return { name: p.name, price: eur(priceOf(id)), per: perLabel, note: period === 'an' ? 'soit ' + eur(priceOf(id) / 12) + ' / mois' : 'Sans engagement',
+        perks: p.perks.map((t) => ({ t })), badge: id === 'pack' ? 'Le plus complet' : id === 'gaz-duo' ? 'Recommandé' : id === 'casab' ? 'Le digital' : id === 'gaz-pap' ? 'Le papier' : 'Le numérique',
+        deep: hero ? 'cb-deep' : '', bg: hero ? 'var(--inv-bg)' : 'var(--surface)', fg: hero ? 'var(--on-inv-2)' : 'var(--text)', border: hero ? 'var(--inv-bg)' : 'var(--line)', titleColor: hero ? 'var(--on-inv)' : 'var(--ink)',
+        badgeBg: hero ? accent : 'var(--surface-2)', badgeFg: hero ? 'var(--on-acc)' : 'var(--gold-text)', ctaBg: hero ? accent : 'var(--inv-bg)', ctaFg: hero ? 'var(--on-acc)' : 'var(--on-inv)',
+        cta: has ? 'Déjà abonné ✓' : 'Choisir', go: () => (has ? this.go('account') : this.go('checkout', { subPlan: id, step: 1, isGift: false })) };
+    });
+    const sp = X.subPlans[s.subPlan];
+    const steps = ['Formule', 'Coordonnées', 'Paiement'].map((label, i) => ({ label, bar: s.step > i ? accent : 'var(--line)', color: s.step > i ? 'var(--ink)' : 'var(--muted-2)' }));
+    const validEmail = /.+@.+\..+/.test(s.email);
+    const subNeedsAddress = sp.paper;
+
+    // ---------- Gazette liseuse ----------
+    // ---------- lieux ----------
+    const placeByView = { home: 'rade', news: 'gatteville', article: 'gatteville', live: 'mont', videos: 'gare', video: 'gare', disciplines: 'sme', discipline: 'sme', clubs: 'jobourg', club: 'jobourg', map: 'jobourg', players: 'sme', player: 'sme', shop: 'rade', product: 'rade', order: 'rade', offers: 'gatteville', checkout: 'gatteville', partners: 'gare', about: 'mont', contact: 'jobourg', account: 'jobourg', studio: 'rade', legal: 'mont', meteo: 'gatteville', private: 'rade', culture: 'mont', clubhouse: 'jobourg', olisto: 'rade', app: 'gatteville' };
+    const placeId = s.placeOverride || placeByView[s.view] || 'rade';
+    const placeRaw = X.places.find((p) => p.id === placeId) || X.places[0];
+    const place = placeRaw;
+    const places = X.places.map((p, i) => Object.assign({}, p, { open: () => this.setState({ placeOpen: true, placeIdx: i }) }));
+    const ppRaw = X.places[s.placeIdx] || placeRaw;
+    const pi = X.places.indexOf(ppRaw);
+    const pinned = s.placeOverride === ppRaw.id;
+    const pp = Object.assign({}, ppRaw, {
+      prev: () => this.setState({ placeIdx: (pi + X.places.length - 1) % X.places.length }), next: () => this.setState({ placeIdx: (pi + 1) % X.places.length }),
+      pinLabel: pinned ? 'Revenir au fond automatique' : 'Garder ce lieu en fond', pin: () => { this.setState({ placeOverride: pinned ? null : ppRaw.id }); this.say(pinned ? 'Fond automatique selon la page' : ppRaw.short + ' en arrière-plan'); }
+    });
+    // ---------- fond photo : vraies images du sport du Cotentin ----------
+    const PH = { pointe: ['assets/img_51314cdd.jpg', 'center 35%'], beaumont: ['assets/img_11c2b62b.jpg', 'center 40%'], asc: ['assets/a_photographe.jpg', 'center 30%'], rcmn: ['assets/img_fe51d409.jpg', 'center 40%'],
+      basket: ['assets/a_bluesquad.jpg', 'center 30%'], feminines: ['assets/a_feminines.jpg', 'center 40%'], fceh: ['assets/a_fceh.jpg', 'center 45%'], digos: ['assets/v_digosville.jpg', 'center 35%'],
+      marine: ['assets/img_4994dc60.jpg', 'center 50%'], benevoles: ['assets/a_benevoles.jpg', 'center 40%'], tableau: ['assets/hero.jpg', 'center 30%'] };
+    const photoByView = { home: 'pointe', news: 'beaumont', article: 'beaumont', live: 'asc', videos: 'rcmn', video: 'rcmn', disciplines: 'basket', discipline: 'basket', clubs: 'feminines', club: 'feminines', players: 'fceh', player: 'fceh',
+      shop: 'digos', product: 'digos', order: 'digos', checkout: 'digos', offers: 'marine', account: 'marine', private: 'fceh', clubhouse: 'benevoles', culture: 'tableau', meteo: 'pointe', partners: 'beaumont', olisto: 'marine',
+      about: 'beaumont', contact: 'asc', legal: 'marine', app: 'rcmn', studio: 'asc' };
+    const bgMode = ['photo', 'lieux', 'aucun'].indexOf(s.bgMode) >= 0 ? s.bgMode : 'aucun';
+    const phKey = photoByView[s.view];
+    const usePhoto = bgMode === 'photo' && !s.placeOverride && !!phKey && showPlaces;
+    const bg = { isPhoto: usePhoto, isIllu: !usePhoto && bgMode !== 'aucun', img: usePhoto ? PH[phKey][0] : '', pos: usePhoto ? PH[phKey][1] : 'center', op: s.view === 'studio' ? '.35' : '1' };
+    const bgModes = [['aucun', 'Fond uni', 'Blanc ou noir, comme le logo'], ['photo', 'Photos du terrain', 'Vraies images des clubs, en noir et blanc'], ['lieux', 'Lieux de légende', 'Illustrations du patrimoine']].map(([id, label, sub]) => ({ label, sub, checked: id === bgMode ? 'true' : 'false', border: id === bgMode ? 'var(--acc)' : 'var(--line)', pick: () => { this.setState({ bgMode: id, placeOverride: null }); this.writeLS('cb-bg-mode', id); } }));
+    const placeOpacity = showPlaces && bgMode !== 'aucun' ? (s.view === 'studio' ? 0.06 : Math.min(0.5, k * 0.55)) : 0;
+
+    // ---------- partenaires ----------
+    const partners = X.partners.map((p) => Object.assign({}, p, { open: () => this.setState({ partnerId: p.id }) }));
+    const tiersDef = [['Platinum', 'Partenaire Platinum', '#e8a830', '360px', '130px'], ['Or', 'Partenaires Or', '#9a6410', '300px', '110px'], ['Club', 'Partenaires Club', '#8f9aa8', '260px', '100px']];
+    const partnerTiers = tiersDef.map(([id, label, line, min, h]) => ({ label, line, min, h, items: partners.filter((p) => p.tier === id) }));
+    const ptRaw = X.partners.find((p) => p.id === s.partnerId);
+    const claimed = ptRaw && s.claimed.indexOf(ptRaw.id) >= 0;
+    const pt = Object.assign({}, ptRaw || X.partners[0], {
+      note: ptRaw && ptRaw.real ? 'Partenaire Casa Besports.' : 'Partenaire fictif, créé pour la démonstration.',
+      claimLabel: ptRaw && ptRaw.real ? 'Découvrir l’offre OlistO' : claimed ? 'Avantage enregistré ✓' : (subscribed ? 'Profiter de l’avantage' : 'Réservé aux abonnés Casa B+'),
+      claim: () => { if (ptRaw && ptRaw.real) { this.go('olisto'); return; } if (!subscribed) { this.go('offers', { offerTab: 'Casa B+' }); return; } if (!claimed) { this.setState({ claimed: s.claimed.concat([ptRaw.id]) }); this.say('Avantage ajouté à Mon espace'); } }
+    });
+
+    // ---------- Gazette (liseuse, édition « Le bandeau ») ----------
+    const G = this.gazette();
+    const NP = G.pages.length;
+    const pIdx = Math.max(0, Math.min(NP - 1, s.page || 0));
+    const pgRaw = G.pages[pIdx];
+    const gzGo = (i) => this.gzGo(i);
+    const initials2 = (t) => t.replace(/^(AS|ES|FC|CS|US|UC|SC)\s/, '').split(/[\s-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+    // Titre : le début posé sur le bandeau noir, comme le logo ; la suite en noir sur le papier
+    const splitT = (t, band) => {
+      t = String(t || '');
+      if (band && t.indexOf(band) === 0) return { a: band, b: t.slice(band.length) };
+      const w = t.split(' ');
+      if (w.length <= 2) return { a: t, b: '' };
+      const k = w[0].length <= 3 ? 2 : 1;
+      return { a: w.slice(0, k).join(' '), b: ' ' + w.slice(k).join(' ') };
+    };
+    const tt = splitT(pgRaw.title, pgRaw.band);
+    const chocI = G.idx('choc'), chocP = G.pages[chocI];
+    const gzCh = pgRaw.kind !== 'choc' ? pgRaw.choc : null;
+    const K = pgRaw.kind;
+    const pg = Object.assign({}, pgRaw, {
+      isCover: K === 'cover', isToc: K === 'toc', isArticle: K === 'article', isBrief: K === 'brief', isQa: K === 'qa', isNumber: K === 'number', isStory: K === 'story', isPortrait: K === 'portrait', isChalk: K === 'chalk', isAgenda: K === 'agenda', isQuiz: K === 'quiz', isAds: K === 'ads', isBack: K === 'back',
+      isChoc: K === 'choc', isDebat: K === 'debat', isRetro: K === 'retro', isLexique: K === 'lexique', isHumeur: K === 'humeur',
+      pageCls: K === 'choc' ? 'is-noir' : K === 'cover' ? 'is-une' : '',
+      hasRunning: ['cover', 'back'].indexOf(K) < 0, showH: K !== 'choc', tA: tt.a, tB: tt.b, hasTB: !!tt.b, hasScript: !!pgRaw.script,
+      // article : chapô court (ou absent) et pas de score → photo en pleine largeur sous le chapô ; sinon chapô et photo côte à côte
+      artCls: K === 'article' && !pgRaw.score && String(pgRaw.kicker || '').length < 160 ? 'is-wide' : '',
+      hasKicker: !!pgRaw.kicker, hasImg: !!pgRaw.img, hasQuote: !!pgRaw.quote, hasQuoteBy: !!pgRaw.quoteBy, hasAside: !!pgRaw.aside, hasCols3: (pgRaw.cols3 || []).length > 0, hasScore: !!pgRaw.score, hasParas: (pgRaw.paras || []).length > 0,
+      score: pgRaw.score ? Object.assign({}, pgRaw.score, { hi: initials2(pgRaw.score.home), ai: initials2(pgRaw.score.away) }) : { home: '', away: '', hs: '', as: '', cap: '', hi: '', ai: '' },
+      aside: pgRaw.aside || { h: '', t: '' }, figClass: pgRaw.tilt ? 'gz-cadre' : '', dropClass: pgRaw.drop ? 'gz-drop' : '', imgFit: pgRaw.imgLight ? 'contain' : 'cover', hasStrip: !!(pgRaw.strip || []).length, strip: pgRaw.strip || [],
+      hasChoc: !!gzCh, choc: gzCh ? { t: gzCh.t, src: gzCh.src || '', hasSrc: !!gzCh.src, hasGo: !!gzCh.go, goLabel: 'Lire le détail choc · p. ' + chocP.n } : { t: '', src: '', hasSrc: false, hasGo: false, goLabel: '' },
+      // nouvelles rubriques
+      stats: pgRaw.stats || [], why: pgRaw.why || '', src: pgRaw.src || '', bigA: pgRaw.bigA || '', bigB: pgRaw.bigB || '', who: pgRaw.who || '',
+      pourH: (pgRaw.pour || {}).h || '', pourPts: (pgRaw.pour || {}).pts || [], contreH: (pgRaw.contre || {}).h || '', contrePts: (pgRaw.contre || {}).pts || [], note: pgRaw.note || '',
+      timeline: (pgRaw.timeline || []).map((x, i) => Object.assign({ n: String(i + 1), hasKm: !!x.km }, x)), num: pgRaw.num || { big: '', l: '' },
+      entries: pgRaw.entries || [],
+      baro: (pgRaw.baro || []).map((b) => ({ h: b.h, t: b.t, cls: 'is-' + b.dir, sym: { up: '↑', down: '↓', flat: '→' }[b.dir] || '→', aria: { up: 'En hausse', down: 'En baisse', flat: 'Stable' }[b.dir] || '' })),
+      classement: (pgRaw.classement || []).map((x, i) => ({ n: String(i + 1), t: x.t })), clT: pgRaw.clT || '', clSub: pgRaw.clSub || ''
+    });
+    const tocItem = (p) => ({ p: p.n, rubric: p.rubric, title: p.title, thumb: p.img || p.thumb || '', hasThumb: !!(p.img || p.thumb), noThumb: !(p.img || p.thumb), glyph: p.glyph || '·', cls: p.id === 'choc' ? 'is-choc' : '', go: () => gzGo(p.i) });
+    const tocSecs = G.secs.map((label) => ({ label, items: G.pages.filter((p) => p.sec === label).map(tocItem) }));
+    const gzStrip = G.strip.map((i) => { const p = G.pages[i]; return { h: p.rubric, t: p.title, p: 'P. ' + p.n, cls: p.id === 'choc' ? 'is-choc' : '', go: () => gzGo(i) }; });
+    const thumbs = G.pages.map((p, i) => ({ n: p.id === 'choc' ? '🔥' : p.n, cur: i === pIdx ? 'page' : 'false', cls: p.id === 'choc' ? 'is-choc' : '', label: 'Page ' + p.n + ' : ' + p.title, go: () => gzGo(i) }));
+    const quiz = G.quiz.map(([qq, opts, good], qi) => ({ n: String(qi + 1), q: qq, img: G.quizImgs[qi], opts: opts.map((t, oi) => {
+      const pick = s.quizAns[qi];
+      const answered = pick !== undefined;
+      const right = oi === good, chosen = pick === oi;
+      return { t: answered && right ? '✓ ' + t : answered && chosen ? '✕ ' + t : t, cls: answered ? (right ? 'is-ok' : chosen ? 'is-ko' : 'is-dim') : '', pressed: chosen ? 'true' : 'false',
+        pick: () => { if (!answered) this.setState({ quizAns: Object.assign({}, s.quizAns, { [qi]: oi }) }); } };
+    }) }));
+    const quizScore = String(G.quiz.filter(([, , good], qi) => s.quizAns[qi] === good).length);
+    // La question qui divise : l’avis reste sur l’appareil ; pour qu’il compte, le lecteur l’envoie à la rédaction (formulaire de contact → CRM)
+    const voteTxt = { pour: 'je garde le dimanche 15 h', contre: 'il est temps de changer d’horaire' };
+    const gzVote = { done: !!voteTxt[s.gzVote], msg: voteTxt[s.gzVote] ? 'Votre avis : ' + voteTxt[s.gzVote] + '. Envoyez-le à la rédaction pour qu’il compte dans le prochain numéro.' : '',
+      opts: [['pour', 'Je garde le dimanche 15 h'], ['contre', 'Je change d’horaire']].map(([id, label]) => ({ label, pressed: s.gzVote === id ? 'true' : 'false', pick: () => { this.setState({ gzVote: id }); this.writeLS('cb-gz-vote', id); } })),
+      send: () => this.go('contact', { subject: 'Gazette · La question qui divise', message: 'Mon avis : ' + (voteTxt[s.gzVote] || '') + '.\n\n', contactSent: false, formError: '' }) };
+    const readerSizes = ['15px', '17px', '19px'];
+
+    // ---------- Espace rédaction ----------
+    const me = this.me();
+    const isAdmin = me.role === 'admin';
+    const posts = this.posts();
+    const ST = { draft: ['Brouillon', '#ebe6db', '#3f4f61'], review: ['En relecture', '#fff1d6', '#7a5208'], corrections: ['Corrections demandées', '#fde2e4', '#9b1c2b'], scheduled: ['Programmé', '#dfe8f5', '#20406e'], published: ['Publié', '#d8efe6', '#11583f'], rejected: ['Refusé', '#e6e6e6', '#555'] };
+    const stV = (p) => ({ sLabel: ST[p.status][0], sBg: ST[p.status][1], sFg: ST[p.status][2] });
+    const pending = posts.filter((p) => p.status === 'review');
+    const openEdit = (p, mode) => this.go('studio', { studioTab: 'edit', editId: p.id, edMode: mode || 'write', reviewNote: '', aiOutKind: null, formError: '' });
+    const isClubRole = s.role === 'club';
+    const canReseau = isAdmin || (s.role === 'writer' && (s.staffRole || 'redacteur') === 'collaborateur');
+    const studioTabs = isClubRole ? [['club', 'Mon club'], ['clist', 'Mes contenus'], ['fiche', 'Fiche du club'], ['charte', 'Bonnes pratiques']]
+      : [['dash', 'Tableau de bord'], ['list', 'Articles'], ['queue', 'Relecture'], ['une', 'La une'], ['prod', 'Éditions · Gazette'], ['media', 'Médiathèque'], ['fil', 'Le Fil'], ['ia', 'IA'], ['team', 'Équipe et règles']].concat(canReseau ? [['reseau', 'Réseau']] : []).concat(me.role === 'admin' ? [['exports', 'Exports'], ['crm', 'CRM & agents']] : []);
+    const curTab = s.studioTab;
+    const studioNav0 = studioTabs.map(([id, label]) => ({ label, bg: curTab === id || (curTab === 'edit' && id === 'list') ? 'var(--inv-bg)' : 'transparent', fg: curTab === id || (curTab === 'edit' && id === 'list') ? 'var(--on-inv)' : 'var(--text)', hasBadge: id === 'queue' && pending.length > 0, badge: String(pending.length), go: () => this.setState({ studioTab: id }), cur: curTab === id || (curTab === 'edit' && id === 'list') || (curTab === 'cedit' && id === 'clist') ? 'page' : 'false' }));
+    const roleSwitch = [['admin', 'Admin', ''], ['writer', 'Chef d’édition', 'collaborateur'], ['writer', 'Rédactrice', 'redacteur'], ['club', 'Correspondant club', '']].map(([id, label, sr]) => { const on = s.role === id && (id === 'admin' || id === 'club' || (s.staffRole || 'redacteur') === sr); return { label, bg: on ? 'var(--inv-bg)' : 'var(--surface)', fg: on ? 'var(--on-inv)' : 'var(--text)', border: on ? 'var(--ink)' : 'var(--line-2)', pick: () => this.setState(Object.assign({ role: id, studioTab: id === 'club' ? 'club' : ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0 ? 'dash' : s.studioTab }, sr ? { staffRole: sr } : {})) }; });
+    const kpis = [['review', 'À relire', 'var(--gold-text)'], ['corrections', 'Corrections', 'var(--danger)'], ['draft', 'Brouillons', 'var(--text-2)'], ['scheduled', 'Programmés', 'var(--text)']].map(([st, l, color]) => ({ v: String(posts.filter((p) => p.status === st).length), l, color, go: () => this.setState({ studioTab: 'list', stFilter: st }) }))
+      .concat([{ v: String(D.articles.length + posts.filter((p) => p.status === 'published').length), l: 'Publiés', color: 'var(--success)', go: () => this.setState({ studioTab: 'list', stFilter: 'published' }) }]);
+    const mine = posts.filter((p) => p.author === me.name);
+    const dashSrc = isAdmin ? pending : mine.filter((p) => p.status !== 'published');
+    const dashList = dashSrc.map((p) => Object.assign({ title: p.title, author: p.author, updated: p.updated, open: () => openEdit(p, isAdmin && p.status === 'review' ? 'preview' : 'write') }, stV(p)));
+    const activity = posts.reduce((acc, p) => acc.concat(p.log.map((l) => ({ who: l.who, what: l.what + ' — « ' + p.title + ' »', when: l.when, dot: /Approuv|publi/i.test(l.what) ? '#18705f' : /Correction|Refus/i.test(l.what) ? 'var(--danger)' : '#e8a830' }))), []).reverse().slice(0, 7);
+    const stFiltersDef = [['all', 'Tous'], ['review', 'En relecture'], ['corrections', 'Corrections'], ['draft', 'Brouillons'], ['scheduled', 'Programmés'], ['published', 'Publiés']];
+    const stFilters = stFiltersDef.map(([id, label]) => Object.assign(pill(s.stFilter === id), { label, n: String(id === 'all' ? posts.length : posts.filter((p) => p.status === id).length), pick: () => this.setState({ stFilter: id }) }));
+    const stq = norm(s.stQ);
+    const stRows0 = posts.filter((p) => (s.stFilter === 'all' || p.status === s.stFilter) && (!stq || norm(p.title + ' ' + p.author).includes(stq)))
+      .map((p) => Object.assign({ title: p.title, author: p.author, sport: p.sport, updated: p.updated, canReview: isAdmin && p.status === 'review', edit: () => openEdit(p, 'write'), review: () => openEdit(p, 'preview') }, stV(p)));
+    const queue = pending.map((p) => ({ title: p.title, author: p.author, updated: p.updated, words: String(this.checksOf(p).words), score: String(this.checksOf(p).score), review: () => openEdit(p, 'preview'), isClub: p.source === 'club', club: p.clubName || ((clubById(p.clubId) || {}).name || '') }));
+    const edRaw = posts.find((p) => p.id === s.editId) || posts[0] || { id: '', author: '', status: 'draft', updated: '', sport: 'Football', tag: '', clubs: [], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '', title: 'Aucun article', dek: '', body: '', log: [] };
+    const chk = this.checksOf(edRaw);
+    const edLocked = !isAdmin && (edRaw.author !== me.name || ['review', 'scheduled', 'published', 'rejected'].indexOf(edRaw.status) >= 0);
+    const ed = Object.assign({}, edRaw, stV(edRaw), {
+      titleLen: String(edRaw.title.length), titleColor: edRaw.title.length > 80 ? 'var(--danger)' : 'var(--muted)',
+      words: String(chk.words), read: Math.max(1, Math.round(chk.words / 200)) + ' min de lecture', blocks: this.blocksOf(edRaw.body),
+      score: String(chk.score), scoreW: chk.score + '%', scoreColor: chk.score >= 75 ? 'var(--success)' : chk.score >= 50 ? 'var(--gold-text)' : 'var(--danger)', checks: chk.list,
+      correction: edRaw.status === 'corrections', lastNote: edRaw.note || '', log: edRaw.log.slice().reverse()
+    });
+    const upd = (patch) => this.setPost(edRaw.id, patch);
+    const sportOpts = ['Football', 'Basketball', 'Rugby', 'Water-polo', 'Trail', 'Handball', 'Natation', 'Tennis', 'Judo', 'Autre'].map((v) => ({ v }));
+    const edClubs = D.clubs.slice(0, 14).map((c) => { const on = edRaw.clubs.indexOf(c.id) >= 0; return { label: c.name.replace(/ Football$/, ''), bg: on ? 'var(--inv-bg)' : 'var(--surface)', fg: on ? 'var(--on-inv)' : 'var(--text)', border: on ? 'var(--ink)' : 'var(--line-2)', pick: () => upd({ clubs: on ? edRaw.clubs.filter((x) => x !== c.id) : edRaw.clubs.concat([c.id]) }) }; });
+    const edImgs = libImgs.map((m) => ({ src: m.src, ring: edRaw.img === m.src ? accent : 'transparent', pick: () => upd({ img: m.src }) }));
+    const toolbar = [['Intertitre', '\n\n## Intertitre', 'Insérer un intertitre'], ['Citation', '\n\n> Citation', 'Insérer une citation'], ['Liste', '\n- Élément', 'Insérer une liste'], ['Paragraphe', '\n\nNouveau paragraphe.', 'Insérer un paragraphe'], ['Gras', ' **texte important**', 'Insérer du texte en gras']].map(([label, snip, aria]) => ({ label, aria, run: () => upd({ body: edRaw.body + snip }) }));
+    const edModes = [['write', 'Rédaction'], ['preview', 'Aperçu']].map(([id, label]) => ({ label, bg: s.edMode === id ? 'var(--inv-bg)' : 'var(--surface)', fg: s.edMode === id ? 'var(--on-inv)' : 'var(--ink)', pick: () => this.setState({ edMode: id }) }));
+    // assistant de rédaction
+    const STOP = new Set('les des une pour dans avec sur par aux que qui est son ses leur leurs plus mais nous vous elle elles ils cette ces entre comme tout tous sans sont ont fait faire avant apres depuis encore deja aussi bien tres'.split(' '));
+    const kw = (() => { const f = {}; norm(this.textOf(edRaw.title + ' ' + edRaw.dek + ' ' + edRaw.body)).split(/[^a-z0-9]+/).filter((w) => w.length > 4 && !STOP.has(w)).forEach((w) => { f[w] = (f[w] || 0) + 1; }); return Object.keys(f).sort((a, b) => f[b] - f[a]).slice(0, 6); })();
+    const cap = (w) => w ? w[0].toUpperCase() + w.slice(1) : w;
+    const sents = this.sentences(this.textOf(edRaw.body.split('\n').filter((l) => !/^##\s/.test(l.trim())).join('\n')));
+    let aiOut = [], aiOutTitle = '';
+    if (s.aiOutKind === 'titles') {
+      aiOutTitle = 'Propositions de titres';
+      const core = edRaw.title.split(/[:—–-]/)[0].trim() || cap(kw[0] || 'Le sport local');
+      const opts = [core + ' : ' + (edRaw.tag ? edRaw.tag.toLowerCase() : 'le récit'), cap(kw[0] || 'Cotentin') + ', ' + (kw[1] || 'la saison') + ' et ' + (kw[2] || 'les ambitions'), edRaw.sport + ' · ' + core];
+      aiOut = opts.map((t) => ({ t, canApply: !edLocked, apply: () => upd({ title: t.slice(0, 80) }) }));
+    } else if (s.aiOutKind === 'dek') {
+      aiOutTitle = 'Proposition de chapeau';
+      const d = sents.slice(0, 2).join(' ').slice(0, 220);
+      aiOut = [{ t: d || 'Ajoutez du texte pour générer un chapeau.', canApply: !!d && !edLocked, apply: () => upd({ dek: d }) }];
+    } else if (s.aiOutKind === 'proof') {
+      aiOutTitle = 'Relecture automatique';
+      const issues = [];
+      sents.filter((x) => x.split(/\s+/).length > 35).forEach((x) => issues.push('Phrase longue : « ' + x.slice(0, 60) + '… »'));
+      const dbl = this.textOf(edRaw.body).match(/\b(\w+)\s+\1\b/i); if (dbl) issues.push('Mot répété : « ' + dbl[0] + ' »');
+      if (/  /.test(edRaw.body)) issues.push('Double espace détecté');
+      if ((edRaw.body.match(/!/g) || []).length > 2) issues.push('Beaucoup de points d’exclamation');
+      if (!edRaw.alt.trim()) issues.push('Image sans texte alternatif');
+      aiOut = (issues.length ? issues : ['Aucun problème détecté.']).map((t) => ({ t, canApply: false, apply: () => {} }));
+    } else if (s.aiOutKind === 'seo') {
+      aiOutTitle = 'Référencement';
+      const slug = norm(edRaw.title).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 70);
+      aiOut = [{ t: 'URL : /actualites/' + slug, canApply: false, apply: () => {} }, { t: 'Meta : ' + (edRaw.dek || sents[0] || '').slice(0, 155), canApply: false, apply: () => {} }, { t: 'Mots-clés : ' + kw.join(', '), canApply: false, apply: () => {} }];
+    }
+    const aiTools = [['titles', 'Titres'], ['dek', 'Chapeau'], ['proof', 'Relecture'], ['seo', 'Référencement']].map(([id, label]) => ({ label, run: () => this.setState({ aiOutKind: id }) }));
+    const staffRole = isAdmin ? 'admin' : (s.staffRole || 'redacteur');
+    const W0 = (s.wxLive || {})[s.wxCity || 'Cherbourg'] || this.wxDemo(s.wxCity || 'Cherbourg');
+    const wxText = (W0.days || []).slice(1, 4).map((d) => new Date(d.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long' }) + ' ' + d.max + '° / ' + d.min + '°, pluie ' + d.pp + ' %').join(' · ') + ' (' + (s.wxCity || 'Cherbourg') + ')';
+    const RXV = typeof CasaRedac !== 'undefined' ? CasaRedac.vals(this, { isAdmin, staffRole, clubRole: s.role === 'club', posts, ARTS, G: this.gazette(), libImgs, videos: D.videos, edRaw, upd, edLocked, checksOf: (p) => this.checksOf(p), blocksOf: (b) => this.blocksOf(b), clubById,
+      openEditById: (id) => { const p = this.posts().find((x) => x.id === id); if (p) openEdit(p, 'write'); }, go: (v, x) => this.go(v, x), table: X.tables.r2, matches: allM, wxText }) : { ed: {}, list: { rows: [] }, badges: {}, aide: {}, dlg: {}, wf: {} };
+    RXV.crumb = (studioTabs.find((t) => t[0] === s.studioTab) || ['', s.studioTab === 'edit' || s.studioTab === 'cedit' ? 'Éditeur' : 'Tableau de bord'])[1];
+    const studioNav = studioNav0.map((n, i) => { const id = studioTabs[i][0]; const b = id === 'fil' ? RXV.badges.fil : id === 'prod' ? RXV.badges.prod : 0; return b ? Object.assign({}, n, { hasBadge: true, badge: String(b) }) : n; });
+    const team = X.team.map((m) => ({ name: m.id === 'admin' ? (s.role === 'admin' && s.name.trim() ? s.name : m.name) : m.name, mail: m.mail, role: m.role === 'admin' ? 'Administrateur principal' : 'Rédacteur', c1: '✓', c2: '✓', c3: m.role === 'admin' ? '✓' : '—', c4: m.role === 'admin' ? '✓' : '—' }));
+
+    const goals = ['Visibilité', 'Sponsoring maillot', 'Contenus de marque', 'Événement'].map((g) => Object.assign(pill(s.goal === g), { label: g, pick: () => this.setState({ goal: g }) }));
+
+    // ---------- compte ----------
+    const followList = s.follows.map((id) => clubById(id)).filter(Boolean).map((c) => ({ name: c.name, open: () => this.go('club', { clubId: c.id }), remove: () => this.toggleIn('follows', c.id, '', 'Vous ne suivez plus ' + c.name) }))
+      .concat(s.followPlayers.map((id) => D.players.find((p) => p.id === id)).filter(Boolean).map((p) => ({ name: p.name, open: () => this.go('player', { playerId: p.id }), remove: () => this.toggleIn('followPlayers', p.id, '', 'Vous ne suivez plus ' + p.name) })));
+    const alerts = [['matchs', 'Scores en direct de mes clubs'], ['articles', 'Nouveaux articles'], ['videos', 'Nouvelles vidéos']].map(([id, label]) => ({ label, on: !!s.alerts[id], toggle: () => this.setState({ alerts: Object.assign({}, s.alerts, { [id]: !s.alerts[id] }) }) }));
+    const savedArticles = allA.filter((a) => s.saved.indexOf(a.id) >= 0);
+    const gazLabel = { num: 'Gazette numérique', pap: 'Gazette papier', duo: 'Gazette papier + numérique' }[s.subs.gazette];
+    const subStatus = [s.subs.casab ? 'Casa B+' : null, gazLabel || null].filter(Boolean).join(' · ') || 'Compte gratuit';
+
+    // ---------- recherche ----------
+    const sq = norm(s.sq.trim());
+    let sResults = [];
+    if (sq) {
+      const m = (t) => norm(t).includes(sq);
+      sResults = []
+        .concat(ARTS.filter((a) => m(a.title + ' ' + a.dek + ' ' + a.tag)).map((a) => ({ label: a.title, sub: a.tag + ' · ' + a.date, kind: 'Article', go: () => this.go('article', { articleId: a.id }) })))
+        .concat(X.products.filter((p) => m(p.name + ' ' + p.short + ' ' + lineName[p.line])).map((p) => ({ label: p.name, sub: lineName[p.line] + ' · ' + eur0(p.price), kind: 'Boutique', go: () => this.go('product', { productId: p.id, color: 0, size: null, qty: 1 }) })))
+        .concat(allM.filter((x) => m(x.home + ' ' + x.away)).map((x) => ({ label: x.home + ' – ' + x.away, sub: x.compLabel + ' · ' + x.dateLabel + ' · ' + x.scoreMid, kind: 'Match', go: () => this.go('live', { dSport: x.sport, dComp: x.compId, dTab: x.status === 'up' ? 'agenda' : 'results', matchId: x.id }) })))
+        .concat(D.videos.filter((v) => m(v.title + ' ' + v.dek)).map((v) => ({ label: v.title, sub: v.date, kind: 'Vidéo', go: () => this.go('video', { videoId: v.id }) })))
+        .concat(D.clubs.filter((c) => m(c.name + ' ' + c.city + ' ' + c.sport)).map((c) => ({ label: c.name, sub: c.sport + ' · ' + c.city, kind: 'Club', go: () => this.go('club', { clubId: c.id, clubTab: 'articles' }) })))
+        .concat(D.players.filter((p) => m(p.name + ' ' + p.role + ' ' + p.clubLabel)).map((p) => ({ label: p.name, sub: p.role + ' · ' + p.clubLabel, kind: 'Joueur', go: () => this.go('player', { playerId: p.id }) })))
+        .concat(D.sports.filter((x) => m(x)).map((x) => ({ label: x, sub: 'Discipline', kind: 'Discipline', go: () => this.go('discipline', { discId: x }) })))
+        .concat(m('gazette') ? [{ label: 'La Gazette du Cotentin', sub: 'Abonnement numérique, papier ou les deux', kind: 'Mag', go: () => this.go('offers', { offerTab: 'La Gazette' }) }] : [])
+        .concat(X.places.filter((p) => m(p.name + ' ' + p.desc + ' ' + p.moment)).map((p) => ({ label: p.name, sub: 'Lieu de légende · ' + p.year, kind: 'Histoire', go: () => this.setState({ searchOpen: false, placeOpen: true, placeIdx: X.places.indexOf(p) }) })))
+        .concat(X.partners.filter((p) => m(p.name + ' ' + p.sector + ' ' + p.city)).map((p) => ({ label: p.name, sub: p.sector + ' · partenaire fictif', kind: 'Partenaire', go: () => this.setState({ searchOpen: false, partnerId: p.id }) })))
+        .concat(this.culture().flat.filter((w) => m(w.title + ' ' + w.author + ' ' + w.technique)).map((w, i) => ({ label: w.title, sub: 'Exposition · salle ' + w.room, kind: 'Œuvre', go: () => this.setState({ searchOpen: false, workIdx: this.culture().flat.indexOf(w) }) })))
+        .concat(this.culture().venues.filter((v) => m(v.name + ' ' + v.city + ' ' + v.desc)).map((v) => ({ label: v.name, sub: v.kind + ' · ' + v.city, kind: 'Culture', go: () => this.go('culture', { cuTab: 'lieux' }) })))
+        .concat(this.culture().routes.filter((r) => m(r.name + ' ' + r.area + ' ' + r.sport)).map((r) => ({ label: r.name, sub: r.sport + ' · ' + r.area, kind: 'Parcours', go: () => this.go('culture', { cuTab: 'parcours' }) })))
+        .concat(this.chData().posts.filter((p) => m(p.text + ' ' + p.author)).map((p) => ({ label: p.text.slice(0, 60), sub: 'Club House · ' + p.author, kind: 'Club House', go: () => this.go('clubhouse', { chTab: 'fil' }) })))
+        .concat(this.chData().ads.filter((a) => m(a.title + ' ' + a.text + ' ' + a.where)).map((a) => ({ label: a.title, sub: 'Annonce · ' + a.where, kind: 'Annonce', go: () => this.go('clubhouse', { chTab: 'annonces' }) })))
+        .concat(this.chData().events.filter((e) => m(e.title + ' ' + e.place)).map((e) => ({ label: e.title, sub: 'Événement · ' + e.place, kind: 'Événement', go: () => this.go('clubhouse', { chTab: 'events' }) })))
+        .slice(0, 22);
+    }
+    const quick = [['Scores en direct', 'Le Terrain', () => this.go('live', { dTab: 'live' })], ['Classement Régional 2', 'Le Terrain', () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' })], ['Maillot personnalisé', 'Boutique', () => this.go('product', { productId: 'maillot-retro', color: 0, size: null, qty: 1 })], ['La Gazette du Cotentin', 'Abonnement', () => this.go('offers', { offerTab: 'La Gazette' })], ['Pointe-Hague défie Goliath', 'Article', () => this.go('article', { articleId: 'pointe-hague' })], ['Carte des clubs', 'Territoire', () => this.go('map')]].map(([label, kind, go]) => ({ label, kind, go }));
+
+    // ---------- fil d'Ariane ----------
+    const labelOf = { news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérifier un certificat' };
+    const crumbsRaw = [['Accueil', () => this.go('home')]];
+    if (labelOf[activeSec] && activeSec !== 'home') crumbsRaw.push([labelOf[activeSec], () => this.go(activeSec)]);
+    const leaf = { article: curA.tag, video: curV.title, discipline: dName, club: curC.name, player: curP.name, checkout: sp.name, product: curPr.name, order: 'Commande', live: s.dSport, cv: 'Mon CV' }[s.view];
+    if (leaf) crumbsRaw.push([leaf, null]);
+    const crumbs = crumbsRaw.map(([label, go], i) => ({ label, go: go || (() => {}), sep: i < crumbsRaw.length - 1 ? '›' : '' }));
+
+    const footCols = [
+      { title: 'Suivre', links: [['Le Terrain', 'live'], ['Actualités', 'news'], ['Vidéos', 'videos'], ['Disciplines', 'disciplines'], ['Clubs', 'clubs'], ['Joueurs', 'players'], ['Territoire', 'map']] },
+      { title: 'Boutique & mag', links: [['Boutique', 'shop'], ['Cherwood × Casa', 'shop'], ['Abonnements', 'offers'], ['La Gazette du Cotentin', 'offers']] },
+      { title: 'Casa Besports', links: [['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier un certificat', 'verifier']] }
+    ].map((c) => ({ title: c.title, links: c.links.map(([label, v]) => ({ label, go: () => this.go(v, label === 'Cherwood × Casa' ? { shopLine: 'Cherwood × Casa' } : label === 'La Gazette du Cotentin' ? { offerTab: 'La Gazette' } : {}) })) }));
+
+    const progress = { home: 8, news: 20, article: 45, video: 45, videos: 20, disciplines: 20, discipline: 40, clubs: 20, club: 45, players: 20, player: 60, map: 30, offers: 30, checkout: 30 + s.step * 17, partners: 40, about: 40, contact: 50, account: 50, live: 35, shop: 25, product: 55, order: 85, studio: 50, legal: 40, meteo: 30, private: 45, culture: 35, clubhouse: 40, olisto: 45, app: 30, cv: 60, verifier: 40 }[s.view] || 10;
+
+    // ---------- thèmes ----------
+    const THEME_DEFS = [
+      ['auto', 'Automatique', 'Auto', 'Suit votre appareil', 'Blanc le jour, noir le soir, selon les réglages de votre appareil.', { bg: '#ffffff', bar: '#000000', card: '#ffffff', line: '#e0e0e0', text: '#000000', acc: '#000000', split: '50%' }],
+      ['light', 'Clair', 'Clair', 'Noir sur blanc', 'Fond blanc, titres noirs et bandeau noir : le logo Casa Besports + sur papier.', { bg: '#ffffff', bar: '#000000', card: '#ffffff', line: '#e0e0e0', text: '#000000', acc: '#000000', split: '0%' }],
+      ['dark', 'Sombre', 'Sombre', 'Blanc sur noir', 'Fond noir et lettres blanches, comme le logo : pour lire le soir sans éblouissement.', { bg: '#0b0b0b', bar: '#000000', card: '#141414', line: '#272727', text: '#ffffff', acc: '#ffffff', split: '0%' }],
+      ['noir', 'Noir absolu', 'Noir', 'Contraste maximal', 'Noir pur et blanc pur : le contraste le plus fort, idéal sur écran OLED.', { bg: '#000000', bar: '#000000', card: '#0a0a0a', line: '#333333', text: '#ffffff', acc: '#ffffff', split: '0%' }],
+      ['paper', 'Papier journal', 'Papier', 'Encre et papier', 'Papier grisé, encre noire et texte à empattements, comme un quotidien imprimé.', { bg: '#f1eee7', bar: '#111111', card: '#f8f6f1', line: '#bdb6a7', text: '#111111', acc: '#111111', split: '0%' }]
+    ];
+    const curTheme = THEME_DEFS.find((t) => t[0] === s.theme) ? s.theme : 'auto';
+    const themes = THEME_DEFS.map(([id, name, short, desc, long, sw]) => {
+      const on = id === curTheme;
+      return Object.assign({}, sw, { id, name, short, desc, long, checked: on ? 'true' : 'false', isOn: on,
+        rowBg: on ? 'var(--surface-2)' : 'transparent', ring: on ? 'var(--acc)' : 'var(--line-2)', dotBg: on ? 'var(--acc)' : 'transparent',
+        chipBg: on ? 'var(--inv-bg)' : 'var(--surface)', chipFg: on ? 'var(--on-inv)' : 'var(--text)', chipBorder: on ? 'var(--inv-bg)' : 'var(--line-2)',
+        pick: () => this.setTheme(id) });
+    });
+    const themeName = THEME_DEFS.find((t) => t[0] === curTheme)[1];
+    const effectiveDark = curTheme === 'dark' || curTheme === 'noir' || (curTheme === 'auto' && s.sysDark);
+    const LEGAL = {
+      mentions: { title: 'Mentions légales', sections: [
+        ['Éditeur du site', 'Casa Besports, [forme juridique] au capital de [MONTANT], immatriculée sous le numéro [SIRET], dont le siège est situé [ADRESSE]. Directeur de la publication : [NOM]. Contact : [E-MAIL].'],
+        ['Hébergement', 'Le site est hébergé par [HÉBERGEUR], [ADRESSE DE L’HÉBERGEUR], [TÉLÉPHONE].'],
+        ['Propriété intellectuelle', 'Les textes, photographies, vidéos, illustrations, logos et la charte graphique de Casa Besports sont protégés. Toute reproduction sans autorisation écrite est interdite.'],
+        ['Crédits', 'Photographies : Casa Besports et contributeurs. Illustrations des lieux et des vêtements : Casa Besports. Polices : Google Fonts.']] },
+      confidentialite: { title: 'Politique de confidentialité', sections: [
+        ['Responsable du traitement', 'Casa Besports, [ADRESSE], joignable à [E-MAIL]. Délégué à la protection des données, le cas échéant : [CONTACT].'],
+        ['Données collectées', 'Données de compte (nom, e-mail), commandes et adresses de livraison, abonnements, inscription à la newsletter, préférences d’affichage et d’alertes, messages envoyés via le formulaire de contact.'],
+        ['Finalités et bases légales', 'Exécution des commandes et abonnements (contrat), envoi de la newsletter (consentement), amélioration du service (intérêt légitime), obligations comptables (obligation légale).'],
+        ['Durées de conservation', 'Données de compte : jusqu’à la suppression du compte. Données de commande : [DURÉE] conformément aux obligations comptables. Prospection : 3 ans après le dernier contact.'],
+        ['Vos droits', 'Accès, rectification, effacement, opposition, limitation et portabilité, en écrivant à [E-MAIL]. Vous pouvez introduire une réclamation auprès de la CNIL.'],
+        ['Stockage local et cookies', 'Le thème d’affichage choisi est enregistré dans votre navigateur (stockage local) pour être appliqué dès l’ouverture du site. Aucune donnée publicitaire n’est déposée sans votre consentement.']] },
+      cgv: { title: 'Conditions générales de vente', sections: [
+        ['Objet', 'Les présentes conditions régissent les ventes de la boutique Casa Besports (vêtements, collection Cherwood × Casa Besports, goodies) et les abonnements Casa B+ et La Gazette du Cotentin.'],
+        ['Prix', 'Les prix sont indiqués en euros toutes taxes comprises. Les frais de livraison sont précisés avant la validation de la commande. [GRILLE TARIFAIRE À VALIDER]'],
+        ['Livraison et retrait', 'Livraison à domicile, retrait en boutique Cherwood à Cherbourg ou au stand Casa Besports les jours de grands matchs. Délais indicatifs : [DÉLAIS].'],
+        ['Droit de rétractation', 'Vous disposez de 14 jours à compter de la réception pour vous rétracter, sauf pour les articles personnalisés (flocage, mention), exclus de ce droit.'],
+        ['Garanties', 'Les produits bénéficient de la garantie légale de conformité et de la garantie des vices cachés.'],
+        ['Abonnements', 'Les abonnements mensuels sont sans engagement et résiliables à tout moment depuis Mon espace. Les abonnements annuels courent jusqu’à leur échéance. [CONDITIONS À VALIDER]'],
+        ['Médiation', 'En cas de litige, vous pouvez recourir gratuitement au médiateur de la consommation : [NOM ET COORDONNÉES].']] },
+      cgu: { title: 'Conditions générales d’utilisation', sections: [
+        ['Accès au site', 'Le site est accessible gratuitement. Certains contenus sont réservés aux abonnés Casa B+.'],
+        ['Compte utilisateur', 'Vous êtes responsable de la confidentialité de vos accès. Vos préférences (thème, alertes, clubs suivis) sont associées à votre compte.'],
+        ['Contributions', 'Les résultats transmis, pronostics et messages doivent rester respectueux. Casa Besports peut modérer ou retirer tout contenu inapproprié.'],
+        ['Responsabilité', 'Les scores marqués « Démo » sont illustratifs. Casa Besports s’efforce de publier des informations exactes mais ne peut garantir l’absence d’erreur.'],
+        ['Droit applicable', 'Les présentes conditions sont soumises au droit français.']] }
+    };
+    const legalDoc = LEGAL[s.legalDoc] ? s.legalDoc : 'mentions';
+    const legal = { title: LEGAL[legalDoc].title, sections: LEGAL[legalDoc].sections.map(([hh, p]) => ({ h: hh, p })) };
+    const legalOrder = [['mentions', 'Mentions légales'], ['confidentialite', 'Confidentialité'], ['cgv', 'CGV'], ['cgu', 'CGU']];
+    const legalTabs = legalOrder.map(([id, label]) => Object.assign(pill(id === legalDoc), { label, sel: id === legalDoc ? 'true' : 'false', pick: () => this.setState({ legalDoc: id }) }));
+    const legalLinks = legalOrder.map(([id, label]) => ({ label, go: () => this.go('legal', { legalDoc: id }) }));
+    // ---------- date du jour ----------
+    const now0 = new Date();
+    const DOWL = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const todayLabel = DOWL[now0.getDay()] + ' ' + now0.getDate() + ' ' + MONTHS_L[now0.getMonth()].toLowerCase();
+    const hr = now0.getHours();
+    const firstName = (s.name || '').trim().split(' ')[0];
+    const greeting = (hr < 5 ? 'Bonne nuit' : hr < 18 ? 'Bonjour' : 'Bonsoir') + (firstName ? ', ' + firstName : '');
+    const fmtDay = (iso) => { const d = pd(iso); return d ? DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] : ''; };
+    const eur2 = (n) => (Math.round(n * 100) / 100).toFixed(2).replace('.', ',') + ' €';
+
+    // ---------- météo ----------
+    const wxCityNames = ['Cherbourg', 'Beaumont-Hague', 'Valognes', 'Barfleur', 'Barneville-Carteret', 'Carentan', 'Saint-Lô', 'Avranches'];
+    const wxCity = wxCityNames.indexOf(s.wxCity) >= 0 ? s.wxCity : 'Cherbourg';
+    const W = (s.wxLive || {})[wxCity] || this.wxDemo(wxCity);
+    const [nowLabel, nowIco] = this.wxIcon(W.cur.code);
+    const dayV = (d, i) => { const [label, ico] = this.wxIcon(d.code); const dd = pd(d.date); return { dow: i === 0 ? 'Aujourd’hui' : i === 1 ? 'Demain' : (dd ? DOW[dd.getDay()] + ' ' + dd.getDate() : ''), label, ico, max: d.max + '°', min: d.min + '°', p: d.pp + ' %', w: d.wind + ' km/h', rawMax: d.max, rawMin: d.min }; };
+    const days = W.days.map(dayV);
+    const tMin = Math.min.apply(null, W.days.map((d) => d.min)), tMax = Math.max.apply(null, W.days.map((d) => d.max));
+    days.forEach((d) => { d.barL = Math.round((d.rawMin - tMin) / Math.max(1, tMax - tMin) * 100) + '%'; d.barW = Math.max(6, Math.round((d.rawMax - d.rawMin) / Math.max(1, tMax - tMin) * 100)) + '%'; });
+    const d0 = W.days[0];
+    const cG = '#2e9e6b', cO = '#e8a830', cR = '#d0473e';
+    const play = [
+      { sport: 'Football / rugby', color: d0.pp > 75 || W.cur.wind > 50 ? cO : cG, verdict: d0.pp > 75 ? 'Terrain lourd possible' : W.cur.wind > 50 ? 'Vent fort' : 'Bonnes conditions' },
+      { sport: 'Course / trail', color: W.cur.wind > 40 ? cO : cG, verdict: W.cur.wind > 40 ? 'Vent fort sur le littoral' : 'Idéal' },
+      { sport: 'Vélo', color: d0.pp > 60 ? cO : cG, verdict: d0.pp > 60 ? 'Chaussée glissante' : 'Bonnes conditions' },
+      { sport: 'Voile / sports nautiques', color: W.cur.gust > 55 ? cR : W.cur.wind > 30 ? cO : cG, verdict: W.cur.gust > 55 ? 'Rafales dangereuses' : W.cur.wind > 30 ? 'Mer agitée, prudence' : 'Conditions favorables' }
+    ];
+    const adviceShort = W.cur.wind > 30 ? 'prévoir un coupe-vent' : d0.pp > 60 ? 'parapluie conseillé' : 'idéal pour sortir';
+    const wx = { city: wxCity, nowTemp: W.cur.t + '°', nowFeels: W.cur.feels + '°', nowLabel, nowIco, nowWind: W.cur.wind + ' km/h ' + W.cur.dir, nowGust: W.cur.gust + ' km/h', nowHum: W.cur.hum + ' %', nowRain: (W.cur.rain || 0).toString().replace('.', ',') + ' mm',
+      hours: W.hours.map((h) => { const [, ico] = this.wxIcon(h.code); return { h: String(h.h).padStart(2, '0') + ' h', t: h.t + '°', ico, p: h.pp + ' %' }; }),
+      days, next3: days.slice(1, 4), play, adviceShort, sunrise: W.sunrise, sunset: W.sunset, waves: W.waves, loading: !!s.wxLoading,
+      source: W.live ? 'Prévisions Open-Meteo · en direct' : 'Données de démonstration', srcColor: W.live ? 'var(--success)' : 'var(--gold-text)',
+      updated: W.live ? 'Mis à jour à ' + new Date(W.at).toTimeString().slice(0, 5) : 'Flux météo branché dans la version en ligne',
+      credit: W.live ? 'Données météo : Open-Meteo.com (CC BY 4.0). Vigilance et marées : à relier aux flux officiels Météo-France et SHOM.' : 'Démonstration : la version en ligne affiche les prévisions réelles (Open-Meteo). Vigilance et marées : flux Météo-France et SHOM à brancher.' };
+    const wxCities = wxCityNames.map((c) => Object.assign(pill(c === wxCity), { label: c, pick: () => { this.setState({ wxCity: c }); this.writeLS('cb-wx-city', c); this.fetchWeather(c); } }));
+    const weather = wxCityNames.slice(0, 4).map((c) => { const Wc = (s.wxLive || {})[c] || this.wxDemo(c); const [label, ico] = this.wxIcon(Wc.cur.code); return { city: c, label, ico, temp: Wc.cur.t + '°', wind: Wc.cur.wind + ' km/h', sun: Wc.cur.code <= 2, cloud: Wc.cur.code === 3 || Wc.cur.code === 45, rain: Wc.cur.code > 45 }; });
+
+    // ---------- accueil modulable ----------
+    const MD = this.modDefs();
+    const modsState = (s.mods && s.mods.length) ? s.mods.filter((m) => MD.some((x) => x[0] === m.id)).concat(MD.filter((x) => !s.mods.some((m) => m.id === x[0])).map(([id]) => ({ id, on: true }))) : this.defaultMods();
+    const homeMods = modsState.filter((m) => m.on).map((m) => { const def = MD.find((x) => x[0] === m.id); return { id: m.id, cls: def[2], isUne: m.id === 'une', isLive: m.id === 'live', isMeteo: m.id === 'meteo', isPrivate: m.id === 'private', isRdv: m.id === 'rdv', isActus: m.id === 'actus', isShop: m.id === 'shop', isTable: m.id === 'table', isGazette: m.id === 'gazette', isLieu: m.id === 'lieu', isVideos: m.id === 'videos', isOeuvre: m.id === 'oeuvre', isCultureMod: m.id === 'culture', isClubMod: m.id === 'clubhouse' }; });
+    const move = (i, dlt) => { const a = modsState.slice(); const j = i + dlt; if (j < 0 || j >= a.length) return; const t = a[i]; a[i] = a[j]; a[j] = t; this.setMods(a); };
+    const modRows = modsState.map((m, i) => ({ label: MD.find((x) => x[0] === m.id)[1], on: m.on, toggle: () => this.setMods(modsState.map((x, k) => k === i ? { id: x.id, on: !x.on } : x)), up: () => move(i, -1), down: () => move(i, 1) }));
+    const layouts = [['dashboard', 'Tableau de bord', 'Blocs personnalisables'], ['magazine', 'Magazine', 'Grand visuel et récits']].map(([id, label, desc]) => ({ label, desc, checked: s.homeLayout === id ? 'true' : 'false', border: s.homeLayout === id ? 'var(--acc)' : 'var(--line)', pick: () => this.setLayout(id) }));
+    const uneIds = RXD ? RXD.une.map((x) => x.id) : [];
+    const uneArts = uneIds.map((id) => allA.find((a) => a.id === id)).filter(Boolean);
+    const homeOrder = uneArts.concat(allA.filter((a) => uneArts.indexOf(a) < 0));
+    const uneA = homeOrder[0];
+    const une = Object.assign({}, uneA);
+    const dashScores = allM.filter((m) => m.status === 'live').concat(allM.filter((m) => m.status === 'done' && m.hs !== '–').sort((a, b) => (a.date > b.date ? -1 : 1))).slice(0, 5);
+    const dashNews = homeOrder.slice(0, 4);
+    const dashProducts = ['kit-runes', 'kit-nuit', 'tee-viking'].map((id) => prodV(X.products.find((p) => p.id === id)));
+    const dashTable = (X.tables.r2 || []).slice(0, 4).map((r, i) => ({ rank: String(i + 1), team: r.team, pts: String(r.pts) }));
+    const dashVideos = videos.slice(0, 2);
+    const ldj = X.places[now0.getDate() % X.places.length];
+    const lieuDuJour = Object.assign({}, ldj, { open: () => this.setState({ placeOpen: true, placeIdx: X.places.indexOf(ldj) }) });
+    const quickChips = [['Scores en direct', () => this.go('live', { dTab: 'live' }), '#e03040'], ['Météo', () => this.go('meteo'), '#6aa6c8'], ['Mon quotidien', () => this.go('private'), accent], ['Compo en AR', () => this.openAR('lineup'), '#e03040'], ['Club House', () => this.go('clubhouse'), '#2e9e6b'], ['Culture', () => this.go('culture'), '#b07acc'], ['La Gazette', () => this.setState({ readerOpen: true, page: 0 }), '#9a6410'], ['Boutique', () => this.go('shop'), '#1f3b33']].map(([label, go, dot]) => ({ label, go, dot }));
+
+    // ---------- espace privé ----------
+    const P0 = this.priv();
+    const pfm = Object.assign({ quick: '', evTitle: '', evDate: this.addDays(0), evTime: '18:00', evPlace: '', evCat: 'Sport', item: '', rideMatch: 'd6', rideFrom: '', rideSeats: '3', bLabel: '', bAmount: '', bCat: 'Équipement', dName: '', dWho: 'Moi', dDate: this.addDays(30), sSport: 'Football', sMin: '45', sFeel: 'Moyen', cName: '', cRole: '', cTel: '' }, s.pf || {});
+    pfm.goal = String(P0.goal || 150);
+    const setPf = (k) => (e) => this.setState({ pf: Object.assign({}, pfm, { [k]: e.target.value }) });
+    ['quick', 'evTitle', 'evDate', 'evTime', 'evPlace', 'item', 'rideMatch', 'rideFrom', 'rideSeats', 'bLabel', 'bAmount', 'bCat', 'dName', 'dWho', 'dDate', 'sSport', 'sMin', 'sFeel', 'cName', 'cRole', 'cTel'].forEach((k) => { pfm['on' + k[0].toUpperCase() + k.slice(1)] = setPf(k); });
+    pfm.onGoal = (e) => this.setPriv({ goal: Math.max(30, +e.target.value || 150) });
+    const nid = () => Math.random().toString(36).slice(2, 9);
+    const CATS = { Sport: '#2e9e6b', Club: '#e8a830', Santé: '#d0473e', Famille: '#6aa6c8', Culture: '#b07acc', Travail: '#8e7cc3', Match: '#e03040' };
+    const tIso = this.addDays(0);
+    const reminderEvents = s.reminders.map((id) => allM.find((m) => m.id === id)).filter((m) => m && m.date).map((m) => ({ id: 'r-' + m.id, title: m.home + ' – ' + m.away, date: m.date, time: m.time, cat: 'Match', place: '', reminder: true }));
+    const allEvents = P0.events.concat(reminderEvents).sort((a, b) => (a.date + a.time < b.date + b.time ? -1 : 1));
+    const evV = (e) => ({ title: e.title, time: e.time || '', cat: e.cat, place: e.place ? ' · ' + e.place : '', color: CATS[e.cat] || '#8f9aa8', canDelete: !e.reminder, remove: () => { this.setPriv({ events: P0.events.filter((x) => x.id !== e.id) }); this.say('Événement supprimé'); } });
+    const upcoming = allEvents.filter((e) => e.date >= tIso);
+    const byDay = {}; upcoming.forEach((e) => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+    const agendaDays = Object.keys(byDay).sort().slice(0, 14).map((d) => ({ label: d === tIso ? 'Aujourd’hui · ' + fmtDay(d) : d === this.addDays(1) ? 'Demain · ' + fmtDay(d) : fmtDay(d), items: byDay[d].map(evV) }));
+    const todayEv = allEvents.filter((e) => e.date === tIso);
+    const listKey = ['courses', 'sac', 'todo'].indexOf(s.pvList) >= 0 ? s.pvList : 'courses';
+    const LISTN = { courses: 'Courses', sac: 'Sac de sport', todo: 'À faire' };
+    const itemV = (lk) => (it) => ({ text: it.text, done: it.done, deco: it.done ? 'line-through' : 'none', color: it.done ? 'var(--muted)' : 'var(--text)',
+      toggle: () => this.setPriv({ lists: Object.assign({}, P0.lists, { [lk]: P0.lists[lk].map((x) => x.id === it.id ? Object.assign({}, x, { done: !x.done }) : x) }) }),
+      remove: () => this.setPriv({ lists: Object.assign({}, P0.lists, { [lk]: P0.lists[lk].filter((x) => x.id !== it.id) }) }) });
+    const note = P0.notes.find((n) => n.id === P0.noteId) || P0.notes[0];
+    const docV = (d) => { const days = Math.round((pd(d.date) - this.today0()) / 86400000); const st = days < 0 ? ['Expiré', 'var(--danger)', 'var(--danger-bg)'] : days <= 30 ? ['Expire dans ' + days + ' j', 'var(--note-fg)', 'var(--note-bg)'] : ['Valide', 'var(--success)', 'var(--surface-2)'];
+      return { name: d.name, who: d.who, dateLabel: fmtDay(d.date), status: st[0], color: st[1], bg: st[2], days, remove: () => this.setPriv({ docs: P0.docs.filter((x) => x.id !== d.id) }) }; };
+    const docs = P0.docs.map(docV).sort((a, b) => a.days - b.days);
+    const alertDoc = docs.find((d) => d.days <= 30);
+    const weekBars = []; let weekMin = 0;
+    for (let i = 6; i >= 0; i--) { const iso = this.addDays(-i); const v = P0.sessions.filter((x) => x.date === iso).reduce((a, x) => a + (+x.min || 0), 0); weekMin += v; const dd = pd(iso); weekBars.push({ d: DOW[dd.getDay()].slice(0, 3), v: v ? String(v) : '', raw: v }); }
+    const maxBar = Math.max(60, ...weekBars.map((b) => b.raw));
+    weekBars.forEach((b) => { b.h = Math.round(b.raw / maxBar * 110) + 'px'; b.color = b.raw ? 'var(--acc)' : 'var(--line)'; });
+    const monthPrefix = tIso.slice(0, 7), yearPrefix = tIso.slice(0, 4);
+    const monthTotal = P0.budget.filter((b) => b.date.slice(0, 7) === monthPrefix).reduce((a, b) => a + b.amount, 0);
+    const yearTotal = P0.budget.filter((b) => b.date.slice(0, 4) === yearPrefix).reduce((a, b) => a + b.amount, 0);
+    const bcats = ['Licences', 'Équipement', 'Déplacements', 'Abonnements', 'Autre'].map((c) => { const t = P0.budget.filter((b) => b.cat === c && b.date.slice(0, 4) === yearPrefix).reduce((a, b) => a + b.amount, 0); return { label: c, total: eur2(t), pct: (yearTotal ? Math.round(t / yearTotal * 100) : 0) + '%', raw: t }; }).filter((c) => c.raw > 0);
+    const upMatches = allM.filter((m) => m.status === 'up' && m.date).sort(byDate);
+    const pvTabsDef = [['jour', 'Ma journée'], ['agenda', 'Agenda'], ['listes', 'Listes'], ['notes', 'Notes'], ['covoit', 'Covoiturage'], ['budget', 'Budget sport'], ['docs', 'Documents'], ['activite', 'Activité'], ['contacts', 'Contacts']];
+    const pvTab = pvTabsDef.some((t) => t[0] === s.pvTab) ? s.pvTab : 'jour';
+    const todoLeft = P0.lists.todo.filter((x) => !x.done).length;
+    const pv = {
+      tJour: pvTab === 'jour', tAgenda: pvTab === 'agenda', tListes: pvTab === 'listes', tNotes: pvTab === 'notes', tCovoit: pvTab === 'covoit', tBudget: pvTab === 'budget', tDocs: pvTab === 'docs', tActivite: pvTab === 'activite', tContacts: pvTab === 'contacts',
+      goAgenda: () => this.setState({ pvTab: 'agenda' }), goListes: () => this.setState({ pvTab: 'listes', pvList: 'todo' }), goDocs: () => this.setState({ pvTab: 'docs' }), goActivite: () => this.setState({ pvTab: 'activite' }), goBudget: () => this.setState({ pvTab: 'budget' }),
+      today: todayEv.map(evV), noToday: todayEv.length === 0, todayCount: String(todayEv.length), nextEvent: (upcoming[0] ? (upcoming[0].date === tIso ? '' : fmtDay(upcoming[0].date) + ' · ') + upcoming[0].time + ' ' + upcoming[0].title : 'Aucun événement'),
+      todoLeft: String(todoLeft), todoTop: P0.lists.todo.slice(0, 4).map(itemV('todo')), hasAlertDoc: !!alertDoc, alertDoc: alertDoc ? alertDoc.name + ' (' + alertDoc.who + ') : ' + alertDoc.status.toLowerCase() : '',
+      addQuick: () => { if (!pfm.quick.trim()) return; this.setPriv({ lists: Object.assign({}, P0.lists, { todo: P0.lists.todo.concat([{ id: nid(), text: pfm.quick.trim(), done: false }]) }) }); this.setState({ pf: Object.assign({}, pfm, { quick: '' }) }); },
+      docsTop: docs.slice(0, 3), weekMin: String(weekMin), goal: String(P0.goal || 150), goalPct: Math.min(100, Math.round(weekMin / (P0.goal || 150) * 100)) + '%', monthLabel: MONTHS_L[now0.getMonth()].toLowerCase(), monthTotal: eur2(monthTotal),
+      agendaDays, agendaEmpty: agendaDays.length === 0,
+      cats: Object.keys(CATS).filter((c) => c !== 'Match').map((c) => ({ label: c, color: CATS[c], bg: pfm.evCat === c ? CATS[c] : 'var(--surface)', fg: pfm.evCat === c ? '#ffffff' : 'var(--text)', pick: () => this.setState({ pf: Object.assign({}, pfm, { evCat: c }) }) })),
+      addEvent: () => { if (!pfm.evTitle.trim() || !pfm.evDate) { this.say('Indiquez un titre et une date'); return; } this.setPriv({ events: P0.events.concat([{ id: nid(), title: pfm.evTitle.trim(), date: pfm.evDate, time: pfm.evTime, cat: pfm.evCat, place: pfm.evPlace.trim() }]) }); this.setState({ pf: Object.assign({}, pfm, { evTitle: '', evPlace: '' }) }); this.say('Ajouté à votre agenda'); },
+      listTabs: ['courses', 'sac', 'todo'].map((k) => Object.assign(pill(k === listKey), { label: LISTN[k], left: String(P0.lists[k].filter((x) => !x.done).length), pick: () => this.setState({ pvList: k }) })),
+      items: P0.lists[listKey].map(itemV(listKey)), itemsEmpty: P0.lists[listKey].length === 0, itemsLeft: String(P0.lists[listKey].filter((x) => !x.done).length),
+      itemPh: listKey === 'courses' ? 'Ajouter un article…' : listKey === 'sac' ? 'Ajouter au sac…' : 'Ajouter une tâche…',
+      addItem: () => { if (!pfm.item.trim()) return; this.setPriv({ lists: Object.assign({}, P0.lists, { [listKey]: P0.lists[listKey].concat([{ id: nid(), text: pfm.item.trim(), done: false }]) }) }); this.setState({ pf: Object.assign({}, pfm, { item: '' }) }); },
+      clearDone: () => this.setPriv({ lists: Object.assign({}, P0.lists, { [listKey]: P0.lists[listKey].filter((x) => !x.done) }) }),
+      notes: P0.notes.map((n) => ({ title: n.title || 'Sans titre', preview: (n.text || '').replace(/\n/g, ' ').slice(0, 50), bg: note && n.id === note.id ? 'var(--surface-2)' : 'var(--surface)', border: note && n.id === note.id ? 'var(--acc)' : 'var(--line)', pick: () => this.setPriv({ noteId: n.id }) })),
+      hasNote: !!note, noNote: !note, note: note || { title: '', text: '' },
+      newNote: () => { const n = { id: nid(), title: 'Nouvelle note', text: '' }; this.setPriv({ notes: [n].concat(P0.notes), noteId: n.id }); },
+      onNoteTitle: (e) => this.setPriv({ notes: P0.notes.map((n) => n.id === note.id ? Object.assign({}, n, { title: e.target.value }) : n) }),
+      onNoteText: (e) => this.setPriv({ notes: P0.notes.map((n) => n.id === note.id ? Object.assign({}, n, { text: e.target.value }) : n) }),
+      deleteNote: () => { const rest = P0.notes.filter((n) => n.id !== note.id); this.setPriv({ notes: rest, noteId: rest[0] ? rest[0].id : null }); this.say('Note supprimée'); },
+      rides: P0.rides.map((r) => { const m = allM.find((x) => x.id === r.matchId); return { match: m ? m.home + ' – ' + m.away : 'Match', when: m ? fmtDay(m.date) + ' · ' + m.time : '', from: r.from, driver: r.mine ? 'vous conduisez' : r.driver, seats: String(r.seats),
+        btnLabel: r.mine ? 'Retirer' : r.joined ? 'Inscrit ✓' : 'Réserver une place', btnBg: r.joined ? 'var(--inv-bg)' : 'var(--surface)', btnFg: r.joined ? 'var(--on-inv)' : 'var(--ink)',
+        act: () => { if (r.mine) { this.setPriv({ rides: P0.rides.filter((x) => x.id !== r.id) }); return; } if (!r.joined && r.seats < 1) { this.say('Plus de place disponible'); return; } this.setPriv({ rides: P0.rides.map((x) => x.id === r.id ? Object.assign({}, x, { joined: !x.joined, seats: x.seats + (x.joined ? 1 : -1) }) : x) }); this.say(r.joined ? 'Réservation annulée' : 'Place réservée'); } }; }),
+      matchOpts: upMatches.map((m) => ({ v: m.id, l: fmtDay(m.date) + ' · ' + m.home + ' – ' + m.away })),
+      addRide: () => { if (!pfm.rideFrom.trim()) { this.say('Indiquez un lieu de départ'); return; } this.setPriv({ rides: [{ id: nid(), matchId: pfm.rideMatch, from: pfm.rideFrom.trim(), driver: 'vous', seats: Math.max(1, +pfm.rideSeats || 1), mine: true, joined: false }].concat(P0.rides) }); this.setState({ pf: Object.assign({}, pfm, { rideFrom: '' }) }); this.say('Trajet publié'); },
+      budget: P0.budget.slice().sort((a, b) => (a.date > b.date ? -1 : 1)).map((b) => ({ label: b.label, cat: b.cat, amount: eur2(b.amount), date: fmtDay(b.date).replace(/^\S+ /, ''), remove: () => this.setPriv({ budget: P0.budget.filter((x) => x.id !== b.id) }) })),
+      budgetCats: bcats, yearTotal: eur2(yearTotal), yearLabel: yearPrefix,
+      addBudget: () => { const a = parseFloat(String(pfm.bAmount).replace(',', '.')); if (!pfm.bLabel.trim() || !(a > 0)) { this.say('Libellé et montant requis'); return; } this.setPriv({ budget: P0.budget.concat([{ id: nid(), label: pfm.bLabel.trim(), amount: a, cat: pfm.bCat, date: tIso }]) }); this.setState({ pf: Object.assign({}, pfm, { bLabel: '', bAmount: '' }) }); this.say('Dépense ajoutée'); },
+      docs, addDoc: () => { if (!pfm.dName.trim() || !pfm.dDate) { this.say('Nom et échéance requis'); return; } this.setPriv({ docs: P0.docs.concat([{ id: nid(), name: pfm.dName.trim(), who: pfm.dWho.trim() || 'Moi', date: pfm.dDate }]) }); this.setState({ pf: Object.assign({}, pfm, { dName: '' }) }); this.say('Document suivi'); },
+      weekBars, sessions: P0.sessions.slice().sort((a, b) => (a.date > b.date ? -1 : 1)).slice(0, 8).map((x) => ({ date: fmtDay(x.date).replace(/^\S+ /, ''), sport: x.sport, min: String(x.min), feel: x.feel })),
+      addSession: () => { const mn = +pfm.sMin; if (!(mn > 0)) { this.say('Durée invalide'); return; } this.setPriv({ sessions: P0.sessions.concat([{ id: nid(), date: tIso, sport: pfm.sSport, min: mn, feel: pfm.sFeel }]) }); this.say('Séance enregistrée'); },
+      contacts: P0.contacts.map((c) => ({ name: c.name, role: c.role, tel: 'tel:' + (c.tel || '').replace(/\s/g, ''), remove: () => this.setPriv({ contacts: P0.contacts.filter((x) => x.id !== c.id) }) })),
+      addContact: () => { if (!pfm.cName.trim()) { this.say('Nom requis'); return; } this.setPriv({ contacts: P0.contacts.concat([{ id: nid(), name: pfm.cName.trim(), role: pfm.cRole.trim(), tel: pfm.cTel.trim() }]) }); this.setState({ pf: Object.assign({}, pfm, { cName: '', cRole: '', cTel: '' }) }); this.say('Contact ajouté'); },
+      exportData: () => { try { navigator.clipboard.writeText(JSON.stringify(P0, null, 2)); this.say('Données copiées dans le presse-papiers'); } catch (e) { this.say('Copie impossible sur cet appareil'); } },
+      resetData: () => { const empty = { events: [], lists: { courses: [], sac: [], todo: [] }, notes: [], rides: [], budget: [], docs: [], sessions: [], contacts: [], goal: 150, noteId: null }; this.setPriv(empty); this.say('Espace privé vidé'); }
+    };
+    const pvTabs = pvTabsDef.map(([id, label]) => ({ label, sel: id === pvTab ? 'true' : 'false', bg: id === pvTab ? 'var(--inv-bg)' : 'var(--surface)', fg: id === pvTab ? 'var(--on-inv)' : 'var(--text)', border: id === pvTab ? 'var(--inv-bg)' : 'var(--line-2)',
+      hasBadge: (id === 'docs' && docs.filter((d) => d.days <= 30).length > 0) || (id === 'listes' && todoLeft > 0), badge: id === 'docs' ? String(docs.filter((d) => d.days <= 30).length) : String(todoLeft), pick: () => this.setState({ pvTab: id }) }));
+
+    // ---------- culture ----------
+    const CU = this.culture();
+    const cuTabsDef = [['expo', 'Exposition'], ['parcours', 'Parcours sport & patrimoine'], ['lieux', 'Lieux de culture'], ['concours', 'Concours photo']];
+    const cuTab = cuTabsDef.some((t) => t[0] === s.cuTab) ? s.cuTab : 'expo';
+    const cuTabs = cuTabsDef.map(([id, label]) => Object.assign(pill(id === cuTab), { label, sel: id === cuTab ? 'true' : 'false', pick: () => this.setState({ cuTab: id }) }));
+    let flatIdx = 0;
+    const rooms = CU.rooms.map((r) => Object.assign({}, r, { works: r.works.map((w) => { const idx = flatIdx++; return Object.assign({}, w, { open: () => this.setState({ workIdx: idx }) }); }) }));
+    const kinds = ['Tous', 'Musée', 'Patrimoine', 'Spectacle'];
+    const cuKind = kinds.indexOf(s.cuKind) >= 0 ? s.cuKind : 'Tous';
+    const votes = s.votes || {};
+    const entries = CU.entries.map((e) => { const mine = !!votes[e.id]; return Object.assign({}, e, { n: e.base + (mine ? 1 : 0) }); });
+    const topN = Math.max.apply(null, entries.map((e) => e.n));
+    const cuf = Object.assign({ title: '', author: '', rights: false }, s.cuf || {});
+    const cu = {
+      tExpo: cuTab === 'expo', tParcours: cuTab === 'parcours', tLieux: cuTab === 'lieux', tConcours: cuTab === 'concours', rooms,
+      routes: CU.routes.map((r) => Object.assign({}, r, { dist: 'distance à mesurer', steps: r.steps.map(([t, d], i) => ({ n: String(i + 1), t, d })),
+        plan: () => this.planEvent(r.name + ' · ' + r.sport, this.nextSaturday(), '09:30', 'Sport', r.area),
+        log: () => { if (!s.loggedIn) { this.setState({ loginOpen: true }); return; } const P0 = this.priv(); this.setPriv({ sessions: P0.sessions.concat([{ id: Math.random().toString(36).slice(2, 9), date: this.addDays(0), sport: r.sport.split(' ')[0] === 'Course' ? 'Course à pied' : r.sport.split(' ')[0], min: 60, feel: 'Moyen' }]) }); this.say('Sortie enregistrée dans votre activité (60 min, modifiable)'); },
+        meteo: () => { this.setState({ wxCity: r.city }); this.go('meteo'); } })),
+      kinds: kinds.map((k) => Object.assign(pill(k === cuKind), { label: k, pick: () => this.setState({ cuKind: k }) })),
+      venues: CU.venues.filter((v) => cuKind === 'Tous' || v.kind === cuKind).map((v) => Object.assign({}, v, { hasLink: !!v.placeId, storyLabel: 'Le moment d’histoire',
+        story: () => this.setState({ placeOpen: true, placeIdx: X.places.findIndex((p) => p.id === v.placeId) }),
+        map: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v.name + ' ' + v.city),
+        plan: () => this.planEvent('Visite : ' + v.name, this.nextSaturday(), '14:30', 'Culture', v.city) })),
+      entries: entries.map((e) => { const mine = !!votes[e.id]; return { title: e.title, img: e.img, author: e.author, votes: String(e.n), isTop: e.n === topN, pressed: mine ? 'true' : 'false', aria: (mine ? 'Retirer mon vote pour ' : 'Voter pour ') + e.title,
+        bg: mine ? 'var(--acc)' : 'var(--surface)', fg: mine ? 'var(--on-acc)' : 'var(--text)', border: mine ? 'var(--acc)' : 'var(--line-2)', fill: mine ? 'currentColor' : 'none',
+        vote: () => { const nv = Object.assign({}, votes, { [e.id]: !mine }); this.setState({ votes: nv }); this.writeLS('cb-votes', nv); if (!mine) this.say('Merci pour votre vote'); } }; }),
+      notSent: !s.cuSent, sent: !!s.cuSent,
+      submit: () => { if (!cuf.title.trim() || !cuf.author.trim() || !cuf.rights) { this.say('Titre, nom et attestation requis'); return; } this.setState({ cuSent: true }); }
+    };
+    cuf.onTitle = (e) => this.setState({ cuf: Object.assign({}, cuf, { title: e.target.value }) });
+    cuf.onAuthor = (e) => this.setState({ cuf: Object.assign({}, cuf, { author: e.target.value }) });
+    cuf.onRights = () => this.setState({ cuf: Object.assign({}, cuf, { rights: !cuf.rights }) });
+    const woRaw = s.workIdx != null ? CU.flat[s.workIdx] : null;
+    const woN = CU.flat.length;
+    const wo = Object.assign({}, woRaw || CU.flat[0], {
+      prev: () => this.setState({ workIdx: (s.workIdx + woN - 1) % woN }), next: () => this.setState({ workIdx: (s.workIdx + 1) % woN }),
+      hasAction: !!woRaw && ['poster', 'place', 'article', 'product'].indexOf(woRaw.kind) >= 0,
+      actionLabel: woRaw ? ({ poster: 'Acheter l’affiche d’art', place: 'Garder ce lieu en fond d’écran', article: 'Lire l’article', product: 'Voir en boutique' })[woRaw.kind] || '' : '',
+      action: () => { if (!woRaw) return; this.setState({ workIdx: null });
+        if (woRaw.kind === 'poster') this.go('product', { productId: 'affiche', color: 0, size: null, qty: 1 });
+        else if (woRaw.kind === 'place') { this.setState({ placeOverride: woRaw.placeId }); this.say(woRaw.title + ' en arrière-plan'); }
+        else if (woRaw.kind === 'article') this.go('article', { articleId: woRaw.articleId });
+        else if (woRaw.kind === 'product') this.go('product', { productId: woRaw.productId, color: 0, size: null, qty: 1 }); }
+    });
+    const oeuvre = Object.assign({}, CU.flat[now0.getDate() % woN], { open: () => this.setState({ workIdx: now0.getDate() % woN }) });
+    const routeDuJour = CU.routes[now0.getDay() % CU.routes.length];
+    const cultureHome = { route: routeDuJour.name, routeSport: routeDuJour.sport, venue: CU.venues[now0.getDate() % CU.venues.length].name, open: () => this.go('culture', { cuTab: 'parcours' }), openVenues: () => this.go('culture', { cuTab: 'lieux' }) };
+
+    // ---------- Mon quotidien : extensions ----------
+    const P1 = this.priv();
+    const members = P1.members || [];
+    const memberById = (id) => members.find((m) => m.id === id) || members[0] || { name: 'Moi', color: '#0f2236' };
+    const mFilter = s.pvMember || 'all';
+    pv.agendaDays = pv.agendaDays.map((d) => Object.assign({}, d)); // copie
+    const evWho = (e) => e.who || 'me';
+    const upcoming2 = P1.events.concat(s.reminders.map((id) => allM.find((m) => m.id === id)).filter((m) => m && m.date).map((m) => ({ id: 'r-' + m.id, title: m.home + ' – ' + m.away, date: m.date, time: m.time, cat: 'Match', reminder: true, who: 'me' })))
+      .filter((e) => e.date >= tIso && (mFilter === 'all' || evWho(e) === mFilter)).sort((a, b) => (a.date + a.time < b.date + b.time ? -1 : 1));
+    const byDay2 = {}; upcoming2.forEach((e) => { (byDay2[e.date] = byDay2[e.date] || []).push(e); });
+    pv.agendaDays = Object.keys(byDay2).sort().slice(0, 14).map((d) => ({ label: d === tIso ? 'Aujourd’hui · ' + fmtDay(d) : d === this.addDays(1) ? 'Demain · ' + fmtDay(d) : fmtDay(d),
+      items: byDay2[d].map((e) => Object.assign(evV(e), { who: members.length > 1 ? ' · ' + memberById(evWho(e)).name : '', color: memberById(evWho(e)).color })) }));
+    pv.agendaEmpty = pv.agendaDays.length === 0;
+    pv.memberFilter = [{ id: 'all', name: 'Tout le monde', color: 'var(--acc)' }].concat(members).map((m) => Object.assign(pill(m.id === mFilter), { label: m.name, dot: m.color, pick: () => this.setState({ pvMember: m.id }) }));
+    pv.memberOpts = members.map((m) => ({ v: m.id, l: m.name }));
+    pfm.evWho = (s.pf && s.pf.evWho) || 'me';
+    pfm.onEvWho = (e) => this.setState({ pf: Object.assign({}, pfm, { evWho: e.target.value }) });
+    pv.addEvent = () => { if (!pfm.evTitle.trim() || !pfm.evDate) { this.say('Indiquez un titre et une date'); return; } this.setPriv({ events: P1.events.concat([{ id: nid(), title: pfm.evTitle.trim(), date: pfm.evDate, time: pfm.evTime, cat: pfm.evCat, place: pfm.evPlace.trim(), who: pfm.evWho }]) }); this.setState({ pf: Object.assign({}, pfm, { evTitle: '', evPlace: '' }) }); this.say('Ajouté à votre agenda'); };
+    pv.members = members.map((m) => { const nx = P1.events.filter((e) => evWho(e) === m.id && e.date >= tIso).sort((a, b) => (a.date + a.time < b.date + b.time ? -1 : 1))[0];
+      return { name: m.name, role: m.role, color: m.color, initial: m.name.trim()[0].toUpperCase(), next: nx ? 'Prochain : ' + fmtDay(nx.date) + ' · ' + nx.time + ' · ' + nx.title : 'Aucun événement à venir', canRemove: m.id !== 'me',
+        agenda: () => this.setState({ pvTab: 'agenda', pvMember: m.id }), remove: () => this.setPriv({ members: members.filter((x) => x.id !== m.id) }) }; });
+    const PAL = ['#2e9e6b', '#6aa6c8', '#b07acc', '#d0473e', '#e8a830', '#3a4a78'];
+    pfm.mName = (s.pf && s.pf.mName) || ''; pfm.mRole = (s.pf && s.pf.mRole) || '';
+    pfm.onMName = setPf('mName'); pfm.onMRole = setPf('mRole');
+    pv.addMember = () => { if (!pfm.mName.trim()) { this.say('Prénom requis'); return; } this.setPriv({ members: members.concat([{ id: nid(), name: pfm.mName.trim(), role: pfm.mRole.trim(), color: PAL[members.length % PAL.length] }]) }); this.setState({ pf: Object.assign({}, pfm, { mName: '', mRole: '' }) }); this.say('Membre ajouté'); };
+    // repas
+    const meals = P1.meals || {};
+    const sportDays = new Set(P1.events.filter((e) => e.cat === 'Sport' || e.cat === 'Match').map((e) => e.date).concat(s.reminders.map((id) => (allM.find((m) => m.id === id) || {}).date)));
+    const setMeal = (iso, k, v) => this.setPriv({ meals: Object.assign({}, meals, { [iso]: Object.assign({}, meals[iso] || {}, { [k]: v }) }) });
+    pv.meals = [0, 1, 2, 3, 4, 5, 6].map((i) => { const iso = this.addDays(i); const m = meals[iso] || {}; return { day: i === 0 ? 'Aujourd’hui' : fmtDay(iso), lunch: m.lunch || '', dinner: m.dinner || '', color: i === 0 ? 'var(--gold-text)' : 'var(--text)', hasTag: sportDays.has(iso), tag: 'Jour de sport',
+      onLunch: (e) => setMeal(iso, 'lunch', e.target.value), onDinner: (e) => setMeal(iso, 'dinner', e.target.value) }; });
+    pv.todayLunch = (meals[tIso] || {}).lunch || 'Rien de prévu'; pv.todayDinner = (meals[tIso] || {}).dinner || 'Rien de prévu';
+    pv.mealIdeas = ['Pâtes complètes au poulet', 'Riz, saumon et légumes', 'Omelette et patates douces', 'Soupe de légumes et pain complet', 'Quinoa, pois chiches et feta', 'Bowl de riz, œufs et avocat'].map((label) => ({ label,
+      pick: () => { const free = [0, 1, 2, 3, 4, 5, 6].map((i) => this.addDays(i)).find((iso) => !(meals[iso] || {}).dinner); if (!free) { this.say('Tous les soirs sont déjà prévus'); return; } setMeal(free, 'dinner', label); this.say('Placé ' + (free === tIso ? 'ce soir' : 'le ' + fmtDay(free))); } }));
+    const ING = [['pâte', 'Pâtes'], ['poulet', 'Poulet'], ['riz', 'Riz'], ['saumon', 'Saumon'], ['légume', 'Légumes de saison'], ['omelette', 'Œufs'], ['œuf', 'Œufs'], ['patate', 'Patates douces'], ['soupe', 'Légumes pour la soupe'], ['pain', 'Pain complet'], ['quinoa', 'Quinoa'], ['pois chiche', 'Pois chiches'], ['feta', 'Feta'], ['avocat', 'Avocats'], ['salade', 'Salade'], ['poisson', 'Poisson'], ['fromage', 'Fromage'], ['yaourt', 'Yaourts'], ['fruit', 'Fruits']];
+    pv.mealsToList = () => { const txt = Object.keys(meals).filter((d) => d >= tIso && d <= this.addDays(6)).map((d) => ((meals[d].lunch || '') + ' ' + (meals[d].dinner || '')).toLowerCase()).join(' ');
+      const need = []; ING.forEach(([k, v]) => { if (txt.includes(k) && need.indexOf(v) < 0) need.push(v); });
+      const have = new Set(P1.lists.courses.map((x) => x.text.toLowerCase()));
+      const add = need.filter((v) => !have.has(v.toLowerCase()));
+      if (!add.length) { this.say(need.length ? 'Tout est déjà sur votre liste' : 'Aucun ingrédient reconnu'); return; }
+      this.setPriv({ lists: Object.assign({}, P1.lists, { courses: P1.lists.courses.concat(add.map((t) => ({ id: nid(), text: t, done: false }))) }) }); this.say(add.length + ' ingrédient(s) ajouté(s) aux courses'); };
+    // habitudes
+    const habits = P1.habits || [];
+    const last7 = [6, 5, 4, 3, 2, 1, 0].map((i) => this.addDays(-i));
+    pv.habitDays = last7.map((iso) => { const dd = pd(iso); return { l: DOW[dd.getDay()].slice(0, 2) + ' ' + dd.getDate(), color: iso === tIso ? 'var(--gold-text)' : 'var(--muted)' }; });
+    const toggleHabit = (h, iso) => this.setPriv({ habits: habits.map((x) => x.id === h.id ? Object.assign({}, x, { log: Object.assign({}, x.log, { [iso]: !(x.log || {})[iso] }) }) : x) });
+    const streakOf = (h) => { let n = 0; let i = (h.log || {})[tIso] ? 0 : 1; while ((h.log || {})[this.addDays(-i)]) { n++; i++; } return n; };
+    pv.habits = habits.map((h) => ({ name: h.name, streak: String(streakOf(h)), remove: () => this.setPriv({ habits: habits.filter((x) => x.id !== h.id) }),
+      cells: last7.map((iso) => { const on = !!(h.log || {})[iso]; return { mark: on ? '✓' : '', pressed: on ? 'true' : 'false', aria: h.name + ' le ' + fmtDay(iso), bg: on ? 'var(--acc)' : 'var(--surface)', border: on ? 'var(--acc)' : 'var(--line-2)', toggle: () => toggleHabit(h, iso) }; }) }));
+    pv.habitsToday = habits.slice(0, 4).map((h) => { const on = !!(h.log || {})[tIso]; return { name: h.name, mark: on ? '✓' : '', bg: on ? 'var(--acc)' : 'transparent', border: on ? 'var(--acc)' : 'var(--line-2)', toggle: () => toggleHabit(h, tIso) }; });
+    pfm.habit = (s.pf && s.pf.habit) || ''; pfm.onHabit = setPf('habit');
+    pv.addHabit = () => { if (!pfm.habit.trim()) return; this.setPriv({ habits: habits.concat([{ id: nid(), name: pfm.habit.trim(), log: {} }]) }); this.setState({ pf: Object.assign({}, pfm, { habit: '' }) }); };
+    // rappels récurrents
+    const recurs = P1.recurs || [];
+    const DOWN = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+    const recV = (r) => { const occ = this.recurNext(r, tIso); const done = !!(r.done || {})[occ]; const nextShown = done ? this.recurNext(r, this.isoOf(new Date(new Date(occ + 'T00:00:00').getTime() + 86400000))) : occ;
+      return { title: r.title, freq: r.freq === 'day' ? 'Chaque jour' : r.freq === 'week' ? 'Chaque ' + DOWN[+r.dow] : 'Le ' + r.dom + ' de chaque mois', next: nextShown === tIso ? 'aujourd’hui' : fmtDay(nextShown), isToday: occ === tIso && !done,
+        mark: done ? '✓' : '', pressed: done ? 'true' : 'false', aria: (done ? 'Annuler : ' : 'Marquer comme fait : ') + r.title, bg: done ? 'var(--acc)' : 'transparent', border: done ? 'var(--acc)' : 'var(--line-2)', deco: done ? 'line-through' : 'none', op: done ? '.65' : '1', occ,
+        toggle: () => this.setPriv({ recurs: recurs.map((x) => x.id === r.id ? Object.assign({}, x, { done: Object.assign({}, x.done, { [occ]: !done }) }) : x) }), remove: () => this.setPriv({ recurs: recurs.filter((x) => x.id !== r.id) }) }; };
+    pv.recurs = recurs.map(recV).sort((a, b) => (a.occ < b.occ ? -1 : 1));
+    pv.recursToday = pv.recurs.filter((r) => r.occ === tIso);
+    pv.noRecursToday = pv.recursToday.length === 0;
+    ['rTitle', 'rFreq', 'rDow', 'rDom'].forEach((k) => { pfm[k] = (s.pf && s.pf[k]) || ({ rTitle: '', rFreq: 'week', rDow: '1', rDom: '5' })[k]; pfm['on' + k[0].toUpperCase() + k.slice(1)] = setPf(k); });
+    pv.rIsWeek = pfm.rFreq === 'week'; pv.rIsMonth = pfm.rFreq === 'month';
+    pv.addRecur = () => { if (!pfm.rTitle.trim()) { this.say('Indiquez le rappel'); return; } this.setPriv({ recurs: recurs.concat([{ id: nid(), title: pfm.rTitle.trim(), freq: pfm.rFreq, dow: +pfm.rDow, dom: Math.min(28, Math.max(1, +pfm.rDom || 1)), done: {} }]) }); this.setState({ pf: Object.assign({}, pfm, { rTitle: '' }) }); this.say('Rappel ajouté'); };
+    pv.goRappels = () => this.setState({ pvTab: 'rappels' }); pv.goRepas = () => this.setState({ pvTab: 'repas' }); pv.goHabitudes = () => this.setState({ pvTab: 'habitudes' });
+    // minuteur
+    const fmtS = (n) => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
+    const phaseInfo = { ready: ['Prêt', 'var(--gold-on-inv)'], work: ['Effort', '#4fd1a6'], rest: ['Récupération', '#6aa6c8'], done: ['Terminé', 'var(--gold-on-inv)'] }[s.tmPhase] || ['Prêt', 'var(--gold-on-inv)'];
+    const phaseLen = s.tmPhase === 'rest' ? s.tmRest : s.tmWork;
+    const setTm = (k, min) => (e) => { const v = Math.max(min, parseInt(e.target.value, 10) || min); const patch = { [k]: v }; if (!s.tmRunning && s.tmPhase === 'ready' && k === 'tmWork') patch.tmLeft = v; this.setState(patch); };
+    const tm = { phase: phaseInfo[0], phaseColor: phaseInfo[1], display: fmtS(s.tmPhase === 'ready' ? s.tmWork : s.tmLeft), round: String(s.tmRound), rounds: String(s.tmRounds), work: String(s.tmWork), rest: String(s.tmRest),
+      pct: s.tmPhase === 'ready' ? '0%' : s.tmPhase === 'done' ? '100%' : Math.round((1 - s.tmLeft / Math.max(1, phaseLen)) * 100) + '%',
+      toggleLabel: s.tmRunning ? 'Pause' : s.tmPhase === 'ready' || s.tmPhase === 'done' ? 'Démarrer' : 'Reprendre', toggle: () => (s.tmRunning ? this.tmPause() : this.tmStart()), reset: () => this.tmReset(),
+      total: fmtS(s.tmWork * s.tmRounds + s.tmRest * Math.max(0, s.tmRounds - 1)),
+      onWork: setTm('tmWork', 5), onRest: setTm('tmRest', 0), onRounds: setTm('tmRounds', 1),
+      presets: [['30/30 × 10', 30, 30, 10], ['Tabata 20/10 × 8', 20, 10, 8], ['Côtes 60/90 × 6', 60, 90, 6]].map(([label, w, r, n]) => ({ label, pick: () => { clearInterval(this._tmI); this.setState({ tmWork: w, tmRest: r, tmRounds: n, tmRunning: false, tmPhase: 'ready', tmLeft: w, tmRound: 1 }); } })) };
+    // navigation groupée
+    const PVI = { jour: 'M12 3v2M12 19v2M5 12H3M21 12h-2M7 7l-1.4-1.4M17 7l1.4-1.4M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0', agenda: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4', rappels: 'M12 8v5l3 2 M5 3L2 6 M19 3l3 3 M12 21a8 8 0 1 0 0-16a8 8 0 0 0 0 16z', famille: 'M9 11a3 3 0 1 0 0-6a3 3 0 0 0 0 6z M17 11a2.5 2.5 0 1 0 0-5 M3 20c.8-3.5 3.2-5 6-5s5.2 1.5 6 5 M16 15c2.6 0 4.4 1.4 5 4',
+      listes: 'M9 6h11 M9 12h11 M9 18h11 M4 6h.01 M4 12h.01 M4 18h.01', repas: 'M7 3v8 M5 3v4a2 2 0 0 0 4 0V3 M7 11v10 M17 3c-2 2-2 6 0 8v10', notes: 'M5 4h14v16H5z M8 9h8 M8 13h8 M8 17h5', budget: 'M3 7h18v12H3z M3 11h18 M7 15h3', docs: 'M6 3h8l4 4v14H6z M14 3v4h4',
+      activite: 'M3 12h4l3-8 4 16 3-8h4', minuteur: 'M10 2h4 M12 14l3-3 M12 22a8 8 0 1 0 0-16a8 8 0 0 0 0 16z', habitudes: 'M4 12l5 5L20 6', covoit: 'M5 16l1.5-5h11L19 16 M4 16h16v3H4z M7 19v2 M17 19v2 M7.5 13.5h.01 M16.5 13.5h.01', contacts: 'M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z M12 11a2.5 2.5 0 1 0 0-5 M8.5 15c.6-1.8 2-2.6 3.5-2.6s2.9.8 3.5 2.6' };
+    const PVL = { jour: 'Ma journée', agenda: 'Agenda', rappels: 'Rappels', famille: 'Famille', listes: 'Listes', repas: 'Repas', notes: 'Notes', budget: 'Budget sport', docs: 'Documents', activite: 'Activité', minuteur: 'Minuteur', habitudes: 'Habitudes', contacts: 'Contacts' };
+    const pvTab2 = PVL[s.pvTab] ? s.pvTab : 'jour';
+    ['tRepas', 'tHabitudes', 'tRappels', 'tMinuteur', 'tFamille'].forEach((k) => { pv[k] = false; });
+    Object.keys(PVL).forEach((k) => { pv['t' + k[0].toUpperCase() + k.slice(1)] = pvTab2 === k; });
+    const badges = { docs: docs.filter((d) => d.days <= 30).length, listes: todoLeft, rappels: pv.recursToday.filter((r) => r.mark === '').length };
+    const pvGroups = [['Organiser', ['jour', 'agenda', 'rappels', 'famille']], ['Maison', ['listes', 'repas', 'notes', 'budget', 'docs']], ['Sport & bien-être', ['activite', 'minuteur', 'habitudes']], ['Carnet', ['contacts']]]
+      .map(([label, ids]) => ({ label, tabs: ids.map((id) => ({ label: PVL[id], ico: PVI[id], cur: id === pvTab2 ? 'page' : 'false', bg: id === pvTab2 ? 'var(--inv-bg)' : 'transparent', fg: id === pvTab2 ? 'var(--on-inv)' : 'var(--text)', hasBadge: !!badges[id], badge: String(badges[id] || 0), pick: () => this.setState({ pvTab: id }) })) }));
+    const pvTitle = PVL[pvTab2];
+    // ---------- Club House ----------
+    const CHD = this.chData();
+    const chState = CHD;
+    const saveCh = (patch) => { const v = Object.assign({}, this.chData(), patch); this._ch = v; this.writeLS('cb-clubhouse', v); this.setState({ chRev: (s.chRev || 0) + 1 }); };
+    const needLogin = () => { if (!s.loggedIn) { this.setState({ loginOpen: true, linkSent: false }); this.say('Connectez-vous pour participer au Club House'); return true; } return false; };
+    const meName = s.role === 'admin' ? (s.name.trim() || 'Administrateur principal') : s.role === 'writer' ? 'Léa Marchand' : (s.name.trim() || (s.email ? s.email.split('@')[0] : 'Vous'));
+    const myPosts = chState.posts.filter((p) => p.mine).length;
+    const myComments = chState.posts.reduce((a, p) => a + p.comments.filter((c) => c.mine).length, 0);
+    const myAds = chState.ads.filter((a) => a.mine).length;
+    const myRsvp = Object.keys(chState.rsvp || {}).filter((k) => chState.rsvp[k]).length;
+    const myCulture = Object.keys(s.votes || {}).filter((k) => s.votes[k]).length;
+    const myPronos = Object.keys(s.pronos || {}).length;
+    const P2 = this.priv();
+    const myRides = s.loggedIn ? P2.rides.filter((r) => r.mine || r.joined).length : 0;
+    const pts = s.loggedIn ? myPronos * 10 + (chState.pollVote != null ? 5 : 0) + myCulture * 2 + s.orders.length * 50 + myPosts * 5 + myComments * 2 + myRsvp * 10 + myAds * 5 + myRides * 5 + (s.subs.casab ? 100 : 0) : 0;
+    const LV = [['Supporter', 0, '#9aa6b4'], ['Fidèle', 100, '#6aa6c8'], ['Ultra', 250, '#e8a830'], ['Légende', 500, '#d0473e']];
+    const lvIdx = LV.reduce((a, l, i) => (pts >= l[1] ? i : a), 0);
+    const nextLv = LV[lvIdx + 1];
+    const hash = [...this.profileKey()].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+    const qr = [];
+    for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) { const finder = (x < 3 && y < 3) || (x > 5 && y < 3) || (x < 3 && y > 5); const on = finder ? !(x % 6 === 1 && y % 6 === 1) : ((hash >> ((x * 9 + y) % 29)) & 1) === 1; qr.push({ c: on ? (s.cardColor === 'noir' ? '#0b0b0b' : '#141a21') : 'transparent' }); }
+    const BADGES = [['Premier prono', 'Pronostiquer un match du Terrain', myPronos > 0], ['Plume', 'Publier au Club House', myPosts > 0], ['Tribune', 'Participer à un événement', myRsvp > 0], ['Œil de lynx', 'Voter au concours photo', myCulture > 0], ['Entraide', 'Annonce ou covoiturage', myAds + myRides > 0], ['Abonné', 'Être abonné Casa B+', !!s.subs.casab]];
+    const chMe = { name: s.loggedIn ? meName : 'Visiteur', points: String(pts), level: LV[lvIdx][0], number: 'CB-26-' + String(hash % 10000).padStart(4, '0'),
+      pct: nextLv ? Math.round((pts - LV[lvIdx][1]) / (nextLv[1] - LV[lvIdx][1]) * 100) + '%' : '100%',
+      toNext: !s.loggedIn ? 'Connectez-vous pour cumuler des points' : nextLv ? 'Encore ' + (nextLv[1] - pts) + ' pts pour le niveau ' + nextLv[0] : 'Niveau maximal atteint', qr,
+      badges: BADGES.map(([name, how, ok]) => ({ name, how, status: ok ? 'Obtenu' : 'À débloquer', stColor: ok ? 'var(--success)' : 'var(--muted)', border: ok ? 'var(--acc)' : 'var(--line)', op: ok ? '1' : '.7' })),
+      perks: X.partners.map((p) => { const claimed = s.claimed.indexOf(p.id) >= 0; return { name: p.name, mono: p.mono, color: p.color, perk: p.perk, status: claimed ? 'Activé' : s.subs.casab ? 'Disponible' : 'Avec Casa B+', stColor: claimed ? 'var(--success)' : 'var(--gold-text)', open: () => this.setState({ partnerId: p.id }) }; }) };
+    const chTabsDef = [['fil', 'Le fil'], ['annonces', 'Annonces & entraide'], ['events', 'Événements'], ['ligue', 'Classement'], ['carte', 'Ma carte membre']];
+    const chTab = chTabsDef.some((t) => t[0] === s.chTab) ? s.chTab : 'fil';
+    const chTabs = chTabsDef.map(([id, label]) => Object.assign(pill(id === chTab), { label, sel: id === chTab ? 'true' : 'false', pick: () => this.setState({ chTab: id }) }));
+    const ROOMS = ['Général', 'Football', 'Basket', 'Water-polo', 'Trail & course'];
+    const room = ['Tous'].concat(ROOMS).indexOf(s.chRoom) >= 0 ? s.chRoom : 'Tous';
+    const PCOL = ['#2e9e6b', '#6aa6c8', '#b07acc', '#d0473e', '#e8a830', '#3a4a78', '#8a4b2a'];
+    const chf = Object.assign({ text: '', room: 'Général', comment: '', adType: 'Propose', adCat: 'Matériel', adTitle: '', adText: '', adWhere: '' }, s.chf || {});
+    ['text', 'room', 'comment', 'adType', 'adCat', 'adTitle', 'adText', 'adWhere'].forEach((k) => { chf['on' + k[0].toUpperCase() + k.slice(1)] = (e) => this.setState({ chf: Object.assign({}, chf, { [k]: e.target.value }) }); });
+    chf.left = String(500 - chf.text.length);
+    const arts = this.allArticles();
+    const updPost = (id, fn) => saveCh({ posts: chState.posts.map((p) => (p.id === id ? fn(p) : p)) });
+    const chPosts = chState.posts.filter((p) => room === 'Tous' || p.room === room).map((p, i) => { const a = p.articleId ? arts.find((x) => x.id === p.articleId) : null; const open = !!(s.chOpen || {})[p.id];
+      return { author: p.author, initial: p.author.trim()[0].toUpperCase(), color: p.staff ? '#0f2236' : PCOL[[...p.author].reduce((x, c) => x + c.charCodeAt(0), 0) % PCOL.length], isStaff: !!p.staff, room: p.room, time: p.time, text: p.text, mine: !!p.mine,
+        hasLink: !!a, linkImg: a ? a.img : '', linkTag: a ? a.tag : '', linkTitle: a ? a.title : '', openLink: () => a && this.go('article', { articleId: a.id }),
+        likes: String(p.likes + (p.liked ? 1 : 0)), likePressed: p.liked ? 'true' : 'false', likeBg: p.liked ? 'var(--acc)' : 'var(--surface)', likeFg: p.liked ? 'var(--on-acc)' : 'var(--text)', likeBorder: p.liked ? 'var(--acc)' : 'var(--line-2)', likeFill: p.liked ? 'currentColor' : 'none',
+        like: () => { if (needLogin()) return; updPost(p.id, (q) => Object.assign({}, q, { liked: !q.liked })); },
+        commentsLabel: p.comments.length ? p.comments.length + ' commentaire' + (p.comments.length > 1 ? 's' : '') : 'Commenter', open, comments: p.comments,
+        toggleComments: () => this.setState({ chOpen: Object.assign({}, s.chOpen, { [p.id]: !open }) }),
+        comment: () => { if (needLogin() || !chf.comment.trim()) return; updPost(p.id, (q) => Object.assign({}, q, { comments: q.comments.concat([{ author: meName, text: chf.comment.trim(), mine: true }]) })); this.setState({ chf: Object.assign({}, chf, { comment: '' }) }); this.say('Commentaire publié · +2 pts'); },
+        remove: () => saveCh({ posts: chState.posts.filter((q) => q.id !== p.id) }) }; });
+    const poll = chState.poll;
+    const pollTotal = poll.opts.reduce((a, o, i) => a + o.v + (chState.pollVote === i ? 1 : 0), 0);
+    const pollV = { q: poll.q, total: String(pollTotal), opts: poll.opts.map((o, i) => { const v = o.v + (chState.pollVote === i ? 1 : 0); const pc = Math.round(v / pollTotal * 100); const mine = chState.pollVote === i;
+      return { t: o.t, pct: pc + ' %', w: pc + '%', bar: mine ? 'var(--acc)' : 'var(--line-2)', border: mine ? 'var(--acc)' : 'var(--line)', pressed: mine ? 'true' : 'false',
+        vote: () => { if (needLogin()) return; saveCh({ pollVote: mine ? null : i }); if (!mine) this.say('Vote enregistré · +5 pts'); } }; }) };
+    const evDate = (iso) => { const d = pd(iso); return { dow: DOW[d.getDay()], day: String(d.getDate()), mon: MONTHS[d.getMonth()] }; };
+    const chEvents = chState.events.slice().sort((a, b) => (a.date < b.date ? -1 : 1)).map((e) => { const going = !!(chState.rsvp || {})[e.id];
+      return Object.assign({}, e, evDate(e.date), { going: String(e.going + (going ? 1 : 0)), btnLabel: going ? 'J’y vais ✓' : 'J’y vais', btnBg: going ? 'var(--inv-bg)' : 'var(--surface)', btnFg: going ? 'var(--on-inv)' : 'var(--ink)',
+        rsvp: () => { if (needLogin()) return; saveCh({ rsvp: Object.assign({}, chState.rsvp, { [e.id]: !going }) });
+          if (!going) { const PP = this.priv(); this.setPriv({ events: PP.events.concat([{ id: 'ch-' + e.id, title: e.title, date: e.date, time: e.time, cat: 'Club', place: e.place, who: 'me' }]) }); this.say('Inscrit · ajouté à votre agenda · +10 pts'); }
+          else { const PP = this.priv(); this.setPriv({ events: PP.events.filter((x) => x.id !== 'ch-' + e.id) }); } } }); });
+    const nextEv = chEvents[0] || { title: '—', date: tIso, time: '', place: '' };
+    const AD_CATS = ['Tout', 'Matériel', 'Bénévolat', 'Joueurs', 'Stages', 'Covoiturage'];
+    const adCat = AD_CATS.indexOf(s.chAdCat) >= 0 ? s.chAdCat : 'Tout';
+    const TYPE_C = { Propose: ['var(--surface-2)', 'var(--success)'], Recherche: ['var(--note-bg)', 'var(--note-fg)'], Donne: ['var(--danger-bg)', 'var(--danger)'] };
+    const chAds = chState.ads.filter((a) => adCat === 'Tout' || a.cat === adCat).map((a) => ({ type: a.type, cat: a.cat, title: a.title, text: a.text, author: a.author, where: a.where, time: a.time, mine: !!a.mine, typeBg: TYPE_C[a.type][0], typeFg: TYPE_C[a.type][1],
+      contactLabel: a.mine ? 'Mon annonce' : 'Contacter', contact: () => { if (a.mine || needLogin()) return; this.say('Message envoyé à ' + a.author + ' (démo)'); }, remove: () => saveCh({ ads: chState.ads.filter((x) => x.id !== a.id) }) }));
+    const board = [['Marion L. (démo)', 412], ['Yanis B. (démo)', 356], ['Chloé V. (démo)', 298], ['Thomas G. (démo)', 241], ['Kevin R. (démo)', 187], ['Sarah M. (démo)', 132], ['Julien P. (démo)', 95]].map(([name, p]) => ({ name, p, me: false }));
+    if (s.loggedIn) board.push({ name: meName + ' (vous)', p: pts, me: true });
+    const boardV = board.sort((a, b) => b.p - a.p).map((b, i) => { const li = LV.reduce((a, l, k) => (b.p >= l[1] ? k : a), 0); return { rank: String(i + 1), name: b.name, points: b.p + ' pts', level: LV[li][0], weight: b.me ? '900' : '700', bg: b.me ? 'var(--surface-2)' : 'var(--surface)', rankBg: i < 3 ? 'var(--acc)' : 'var(--surface-2)', rankFg: i < 3 ? '#080f1a' : 'var(--ink)' }; });
+    const ch = { tFil: chTab === 'fil', tAnnonces: chTab === 'annonces', tEvents: chTab === 'events', tLigue: chTab === 'ligue', tCarte: chTab === 'carte',
+      posts: chPosts, rooms: ['Tous'].concat(ROOMS).map((r) => Object.assign(pill(r === room), { label: r, pick: () => this.setState({ chRoom: r }) })), roomOpts: ROOMS.map((v) => ({ v })),
+      publish: () => { if (needLogin()) return; if (chf.text.trim().length < 3) { this.say('Écrivez quelques mots'); return; } saveCh({ posts: [{ id: 'm' + Date.now(), author: meName, room: chf.room, time: 'à l’instant', text: chf.text.trim().slice(0, 500), likes: 0, liked: false, comments: [], mine: true, staff: !!s.role }].concat(chState.posts) }); this.setState({ chf: Object.assign({}, chf, { text: '' }), chRoom: 'Tous' }); this.say('Publié au Club House · +5 pts'); },
+      poll: pollV, nextEvent: { title: nextEv.title, when: fmtDay(nextEv.date) + ' · ' + nextEv.time, place: nextEv.place }, goEvents: () => this.setState({ chTab: 'events' }), goCard: () => this.setState({ chTab: 'carte' }), goPronos: () => this.go('live', { dTab: 'pronos' }),
+      adCats: AD_CATS.map((c) => Object.assign(pill(c === adCat), { label: c, pick: () => this.setState({ chAdCat: c }) })), showAds: adCat !== 'Covoiturage', showRides: adCat === 'Covoiturage', ads: chAds,
+      publishAd: () => { if (needLogin()) return; if (!chf.adTitle.trim()) { this.say('Titre requis'); return; } saveCh({ ads: [{ id: 'a' + Date.now(), type: chf.adType, cat: chf.adCat, title: chf.adTitle.trim(), text: chf.adText.trim(), author: meName, where: chf.adWhere.trim() || 'Cotentin', time: 'à l’instant', mine: true }].concat(chState.ads) }); this.setState({ chf: Object.assign({}, chf, { adTitle: '', adText: '', adWhere: '' }) }); this.say('Annonce publiée · +5 pts'); },
+      addRide: () => { if (needLogin()) return; pv.addRide(); },
+      events: chEvents, board: boardV,
+      scale: [['Un pronostic', '+10'], ['Un événement « J’y vais »', '+10'], ['Une publication', '+5'], ['Une annonce ou un covoiturage', '+5'], ['Le sondage de la semaine', '+5'], ['Un commentaire', '+2'], ['Un vote au concours photo', '+2'], ['Une commande boutique', '+50'], ['Abonnement Casa B+', '+100']].map(([what, p]) => ({ what, pts: p })) };
+    const CARDS0 = { gold: { line: '#3a2706', land: 'rgba(58,39,6,.10)' }, argent: { line: '#1d2a38', land: 'rgba(29,42,56,.08)' }, noir: { line: '#e8b64c', land: 'rgba(232,182,76,.07)' } };
+    const CARDS = { gold: { name: 'Gold', bg: 'linear-gradient(135deg, #7a561a 0%, #c8973a 22%, #f3dc9a 46%, #e2b65a 60%, #9a6c22 100%)', fg: '#23180a', sub: '#4d3712', acc: '#3a2706', qrBg: '#fff7e0', shine: '.35', logoOp: '.28', blend: 'multiply', sw: 'linear-gradient(135deg,#9a6c22,#f3dc9a,#c8973a)' },
+      argent: { name: 'Argent', bg: 'linear-gradient(135deg, #6d747c 0%, #aeb6be 24%, #f2f4f6 48%, #c4cbd2 64%, #7d858e 100%)', fg: '#141a21', sub: '#3c454f', acc: '#1d2a38', qrBg: '#ffffff', shine: '.45', logoOp: '.22', blend: 'multiply', sw: 'linear-gradient(135deg,#7d858e,#f2f4f6,#aeb6be)' },
+      noir: { name: 'Noire', bg: 'linear-gradient(135deg, #050505 0%, #171717 50%, #0c0c0c 100%)', fg: '#f6edd6', sub: '#b9ad94', acc: '#e8b64c', qrBg: '#f6edd6', shine: '.08', logoOp: '.3', blend: 'normal', sw: 'linear-gradient(135deg,#050505,#2a2a2a)' } };
+    const cardKey = CARDS[s.cardColor] ? s.cardColor : 'noir';
+    const card = Object.assign({}, CARDS[cardKey], CARDS0[cardKey]);
+    const cardColors = [['gold', 'Gold'], ['argent', 'Argent'], ['noir', 'Noire']].map(([id, label]) => ({ label, sw: CARDS[id].sw, checked: id === cardKey ? 'true' : 'false', ring: id === cardKey ? 'var(--acc)' : 'var(--line-2)', pick: () => { this.setState({ cardColor: id }); this.writeLS('cb-card-color', id); this.say('Carte ' + CARDS[id].name.toLowerCase() + ' sélectionnée'); } }));
+    const chHome = { post: chState.posts[0] ? chState.posts[0].author + ' : ' + chState.posts[0].text.slice(0, 90) + (chState.posts[0].text.length > 90 ? '…' : '') : '', event: nextEv.title + ' · ' + fmtDay(nextEv.date), points: String(pts), level: LV[lvIdx][0], go: () => this.go('clubhouse') };
+    // ---------- OlistO ----------
+    const num = (v, d) => { const x = parseFloat(String(v).replace(',', '.')); return isFinite(x) ? x : d; };
+    const oM = num(s.olM, 180000), oD = Math.max(1, Math.min(30, num(s.olD, 20))), oT = Math.max(0, num(s.olT, 3.5)), oA = Math.max(0, num(s.olA, 0.25)), oR = Math.max(0, num(s.olR, 3600)), oC = Math.max(0, num(s.olC, 150));
+    const nM = oD * 12, rM = oT / 100 / 12;
+    const base = rM > 0 ? oM * rM / (1 - Math.pow(1 + rM, -nM)) : oM / nM;
+    const insM = oM * oA / 100 / 12;
+    const monthly = base + insM;
+    const debtPct = oR > 0 ? (monthly + oC) / oR * 100 : 0;
+    const e0 = (n) => Math.round(n).toLocaleString('fr-FR') + ' €';
+    const setOl = (k) => (e) => this.setState({ [k]: e.target.value });
+    const ol = { m: String(s.olM ?? 180000), d: String(s.olD ?? 20), t: String(s.olT ?? 3.5), a: String(s.olA ?? 0.25), r: String(s.olR ?? 3600), c: String(s.olC ?? 150),
+      onM: setOl('olM'), onD: setOl('olD'), onT: setOl('olT'), onA: setOl('olA'), onR: setOl('olR'), onC: setOl('olC'),
+      monthly: e0(monthly), ins: e0(insM), interest: e0(base * nM - oM), debt: (Math.round(debtPct * 10) / 10).toString().replace('.', ',') + ' %',
+      debtW: Math.min(100, debtPct / 50 * 100) + '%', debtColor: debtPct <= 33 ? 'var(--success)' : debtPct <= 35 ? 'var(--gold-text)' : 'var(--danger)',
+      callback: () => this.go('contact', { subject: 'Projet avec OlistO — être rappelé', profile: 'Autre', contactSent: false }),
+      services: [
+        ['Projet immobilier', 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z', 'Achat de résidence principale ou secondaire, investissement locatif, immobilier neuf : le courtier met les banques en concurrence et monte votre dossier.', ['Étude de votre capacité d’emprunt', 'Négociation du taux et des garanties', 'Suivi jusqu’à la signature'], 'Parler de mon projet'],
+        ['Regroupement de crédits', 'M4 7h16M4 12h10M4 17h6 M17 14l3 3-3 3', 'Rassembler plusieurs crédits en un seul pour alléger la mensualité et simplifier son budget.', ['Analyse de vos crédits en cours', 'Une seule mensualité', 'Attention : la durée et le coût total peuvent augmenter'], 'Étudier un regroupement'],
+        ['Assurance emprunteur', 'M12 3l7 3v6c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z M9 12l2 2 4-4', 'Comparer les contrats pour protéger votre prêt au juste prix, à la souscription ou en cours de prêt.', ['Comparaison de contrats', 'Changement possible à tout moment (loi Lemoine)', 'Garanties équivalentes exigées par la banque'], 'Comparer mon assurance']
+      ].map(([title, ico, text, pts, cta]) => ({ title, ico, text, points: pts.map((t) => ({ t })), cta, go: () => this.go('contact', { subject: 'OlistO — ' + title, profile: 'Autre', contactSent: false }) })),
+      faq: [['Pourquoi passer par un courtier ?', 'Le courtier compare les offres de plusieurs banques et assureurs, négocie pour vous et vous accompagne dans le montage du dossier. Il doit être immatriculé à l’ORIAS.'],
+        ['Peut-on changer d’assurance emprunteur ?', 'Oui. Depuis la loi Lemoine de 2022, l’assurance d’un prêt immobilier peut être résiliée à tout moment, à condition de présenter des garanties équivalentes.'],
+        ['Le regroupement de crédits est-il toujours intéressant ?', 'Il réduit généralement la mensualité, mais allonge souvent la durée et peut augmenter le coût total. Une étude personnalisée est indispensable.']].map(([q, a]) => ({ q, a }))
+    };
+    // ---------- CRM ----------
+    const CR = this.crmData();
+    const crmTabsDef = [['home', 'Vue d’ensemble'], ['contacts', 'Contacts'], ['pipe', 'Pipeline'], ['tasks', 'Tâches'], ['agents', 'Agents autonomes']];
+    const crmTab = crmTabsDef.some((x) => x[0] === s.crmTab) ? s.crmTab : 'home';
+    const AGD = { qualif: ['Agent Qualification', 'Analyse chaque nouveau contact venu du site (formulaires, boutique, newsletter, OlistO, Club House), calcule un score, le classe et crée une tâche de rappel pour les plus chauds.'],
+      relance: ['Agent Relances', 'Surveille les affaires sans activité depuis 7 jours, rédige l’e-mail de relance et planifie la vérification de la réponse.'],
+      fidel: ['Agent Fidélisation', 'Repère les abonnés à fidéliser et prépare une offre personnalisée (formule annuelle, avantage partenaire).'],
+      hygiene: ['Agent Qualité des données', 'Fusionne les doublons, normalise les e-mails et signale les consentements RGPD à vérifier.'],
+      rapport: ['Agent Rapport', 'Calcule la valeur du pipeline, le taux de réussite et les tâches en retard pour le tableau de bord.'] };
+    const STAGES = ['Nouveau', 'Qualifié', 'Proposition', 'Négociation', 'Gagné', 'Perdu'];
+    const STC = { Nouveau: '#9aa6b4', Qualifié: '#6aa6c8', Proposition: '#e8a830', Négociation: '#c8881a', Gagné: '#2e9e6b', Perdu: '#d0473e' };
+    const openDeals = CR.deals.filter((d) => ['Gagné', 'Perdu'].indexOf(d.stage) < 0);
+    const lateTasks = CR.tasks.filter((k) => !k.done && k.due < tIso);
+    const eurK = (n) => Math.round(n).toLocaleString('fr-FR') + ' €';
+    const updC = (patch) => this.saveCrm(Object.assign({}, this.crmData(), patch));
+    const ago = (iso) => { const n = Math.round((this.today0() - new Date(iso + 'T00:00:00')) / 86400000); return n <= 0 ? 'aujourd’hui' : n === 1 ? 'hier' : 'il y a ' + n + ' j'; };
+    const cq = (s.crmQ || '').toLowerCase();
+    const cType = s.crmType || 'Tous';
+    const selC = CR.contacts.find((c) => c.id === s.crmSel);
+    const ownerF = s.crmOwner || 'Tous';
+    const tasksF = CR.tasks.filter((k) => ownerF === 'Tous' || (ownerF === 'Agents' ? k.owner !== 'humain' : k.owner === 'humain'));
+    const tkV = (k) => ({ title: k.title, rel: k.rel || '—', due: fmtDay(k.due), done: k.done, deco: k.done ? 'line-through' : 'none', op: k.done ? '.6' : '1', owner: k.owner === 'humain' ? 'Vous' : k.owner,
+      ownerBg: k.owner === 'humain' ? 'var(--surface-2)' : 'var(--inv-bg)', ownerFg: k.owner === 'humain' ? 'var(--text)' : 'var(--gold-on-inv)',
+      toggle: () => updC({ tasks: this.crmData().tasks.map((x) => x.id === k.id ? Object.assign({}, x, { done: !x.done }) : x) }) });
+    const agentsOn = Object.keys(CR.agents).filter((k) => CR.agents[k].on).length;
+    const crm = {
+      title: ({ home: 'Vue d’ensemble', contacts: 'Contacts', pipe: 'Pipeline commercial', tasks: 'Tâches', agents: 'Agents autonomes' })[crmTab],
+      tabs: crmTabsDef.map(([id, label]) => ({ label, sel: id === crmTab ? 'true' : 'false', color: id === crmTab ? 'var(--ink)' : 'var(--muted)', line: id === crmTab ? 'var(--acc)' : 'transparent',
+        hasBadge: (id === 'home' && CR.approvals.length > 0) || (id === 'tasks' && lateTasks.length > 0), badge: String(id === 'home' ? CR.approvals.length : lateTasks.length), pick: () => this.setState({ crmTab: id }) })),
+      tHome: crmTab === 'home', tContacts: crmTab === 'contacts', tPipe: crmTab === 'pipe', tTasks: crmTab === 'tasks', tAgents: crmTab === 'agents',
+      agentsStatus: agentsOn + ' agent(s) actif(s)' + (s.view === 'studio' && s.studioTab === 'crm' ? ' · en surveillance' : ''), agentsColor: agentsOn ? 'var(--success)' : 'var(--muted)', pulse: agentsOn ? 'pulse' : '',
+      runAll: () => { Object.keys(this.crmData().agents).forEach((k) => this.runAgent(k)); this.say('Agents lancés'); },
+      kpis: [[String(CR.contacts.length), 'Contacts', 'var(--ink)', 'contacts'], [String(CR.contacts.filter((c) => c.status === 'nouveau').length), 'Nouveaux à qualifier', 'var(--gold-text)', 'contacts'],
+        [eurK(openDeals.reduce((a, d) => a + d.amount, 0)), 'Pipeline ouvert', 'var(--ink)', 'pipe'], [String(CR.deals.filter((d) => d.stage === 'Gagné').length), 'Affaires gagnées', 'var(--success)', 'pipe'],
+        [String(lateTasks.length), 'Tâches en retard', lateTasks.length ? 'var(--danger)' : 'var(--ink)', 'tasks']].map(([v, l, color, tab]) => ({ v, l, color, go: () => this.setState({ crmTab: tab }) })),
+      stageBars: STAGES.map((st) => { const ds = CR.deals.filter((d) => d.stage === st); const tot = ds.reduce((a, d) => a + d.amount, 0); const mx = Math.max(1, ...STAGES.map((x) => CR.deals.filter((d) => d.stage === x).reduce((a, d) => a + d.amount, 0))); return { label: st + ' (' + ds.length + ')', value: eurK(tot), w: Math.round(tot / mx * 100) + '%', color: STC[st] }; }),
+      reportLine: CR.report || 'Le rapport sera calculé au prochain passage de l’Agent Rapport.',
+      approvalCount: String(CR.approvals.length), noApprovals: CR.approvals.length === 0, goAgents: () => this.setState({ crmTab: 'agents' }),
+      approvals: CR.approvals.slice(0, 4).map((a) => ({ agent: a.agent, when: a.when, title: a.title, text: a.text,
+        ok: () => { const C2 = JSON.parse(JSON.stringify(this.crmData())); C2.approvals = C2.approvals.filter((x) => x.id !== a.id);
+          if (a.kind === 'relance') { C2.deals = C2.deals.map((d) => d.id === a.dealId ? Object.assign({}, d, { last: tIso }) : d); C2.tasks.unshift({ id: 't' + Date.now(), dealId: a.dealId, title: 'Vérifier la réponse · ' + a.title.replace('Relancer ', ''), due: this.addDays(3), rel: 'Relance validée', owner: 'Agent Relances', done: false }); }
+          if (a.kind === 'fidel') C2.contacts = C2.contacts.map((c) => c.id === a.contactId ? Object.assign({}, c, { tags: c.tags.concat(['Offre annuelle proposée']) }) : c);
+          C2.log.unshift({ agent: 'vous', text: 'avez approuvé : ' + a.title + ' (envoi simulé)', when: this.crmNow(), dot: '#2e9e6b' }); this.saveCrm(C2); this.say('Action approuvée'); },
+        no: () => { const C2 = JSON.parse(JSON.stringify(this.crmData())); C2.approvals = C2.approvals.filter((x) => x.id !== a.id); C2.log.unshift({ agent: 'vous', text: 'avez refusé : ' + a.title, when: this.crmNow(), dot: '#d0473e' }); if (a.dealId) C2.deals = C2.deals.map((d) => d.id === a.dealId ? Object.assign({}, d, { last: tIso }) : d); this.saveCrm(C2); } })),
+      feed: (CR.log.length ? CR.log : [{ agent: 'système', text: 'Les agents démarrent. Lancez-les ou attendez le prochain passage.', when: '', dot: '#9aa6b4' }]).slice(0, 12).map((l) => ({ agent: (AGD[l.agent] || [l.agent === 'vous' ? 'Vous' : 'Système'])[0], text: l.text, when: l.when, dot: l.dot })),
+      q: s.crmQ || '', onQ: (e) => this.setState({ crmQ: e.target.value }),
+      typeChips: ['Tous', 'Partenaire', 'Club', 'Annonceur', 'Abonné', 'Supporter', 'Prospect'].map((x) => Object.assign(pill(x === cType), { label: x, pick: () => this.setState({ crmType: x }) })),
+      contacts: CR.contacts.filter((c) => (cType === 'Tous' || c.type === cType) && (!cq || (c.name + ' ' + c.org + ' ' + c.city + ' ' + c.email).toLowerCase().includes(cq))).map((c) => ({ name: c.name, org: c.org || '—', city: c.city || '—', type: c.type, source: c.source,
+        score: c.score == null ? 'nouveau' : String(c.score), scoreBg: c.score == null ? 'var(--note-bg)' : c.score >= 60 ? 'var(--success)' : 'var(--surface-2)', scoreFg: c.score == null ? 'var(--note-fg)' : c.score >= 60 ? '#fff' : 'var(--text)',
+        last: ago(c.last), bg: s.crmSel === c.id ? 'var(--surface-2)' : 'transparent', open: () => this.setState({ crmSel: c.id }) })),
+      hasSel: !!selC, noSel: !selC,
+      sel: selC ? { name: selC.name, org: selC.org || '—', city: selC.city || '—', type: selC.type, source: selC.source, email: selC.email || '—', phone: selC.phone || '—', consent: selC.consent === 'oui' ? 'oui' : selC.consent === 'non' ? 'non' : 'à vérifier', tags: (selC.tags || []).map((t) => ({ t })), notes: (selC.notes.length ? selC.notes : [{ when: '', by: '', text: 'Aucune note.' }]).slice(-5).reverse() } : { name: '', org: '', city: '', type: '', source: '', email: '', phone: '', consent: '', tags: [], notes: [] },
+      noteDraft: s.crmNote || '', onNote: (e) => this.setState({ crmNote: e.target.value }),
+      addNote: () => { if (!selC || !(s.crmNote || '').trim()) return; updC({ contacts: this.crmData().contacts.map((c) => c.id === selC.id ? Object.assign({}, c, { last: tIso, notes: c.notes.concat([{ when: tIso, by: 'Vous', text: s.crmNote.trim() }]) }) : c) }); this.setState({ crmNote: '' }); },
+      selTask: () => { if (!selC) return; updC({ tasks: [{ id: 't' + Date.now(), title: 'Contacter ' + selC.name, due: this.addDays(2), rel: selC.org || selC.source, owner: 'humain', done: false }].concat(this.crmData().tasks) }); this.say('Tâche créée'); },
+      selDeal: () => { if (!selC) return; updC({ deals: this.crmData().deals.concat([{ id: 'd' + Date.now(), title: 'Nouvelle opportunité', org: selC.org || selC.name, contactId: selC.id, amount: 0, stage: 'Nouveau', last: tIso, next: 'Qualifier le besoin' }]) }); this.setState({ crmTab: 'pipe' }); },
+      selErase: () => { if (!selC) return; const C2 = this.crmData(); updC({ contacts: C2.contacts.filter((c) => c.id !== selC.id), deals: C2.deals.filter((d) => d.contactId !== selC.id) }); this.setState({ crmSel: null }); this.say('Contact et données associées supprimés'); },
+      columns: STAGES.map((st, si) => { const ds = CR.deals.filter((d) => d.stage === st); return { label: st, count: String(ds.length), total: eurK(ds.reduce((a, d) => a + d.amount, 0)),
+        deals: ds.map((d) => ({ title: d.title, org: d.org, amount: d.amount ? eurK(d.amount) : 'à chiffrer', next: d.next, color: STC[st], age: ago(d.last),
+          back: () => si > 0 && updC({ deals: this.crmData().deals.map((x) => x.id === d.id ? Object.assign({}, x, { stage: STAGES[si - 1], last: tIso }) : x) }),
+          fwd: () => si < STAGES.length - 1 && updC({ deals: this.crmData().deals.map((x) => x.id === d.id ? Object.assign({}, x, { stage: STAGES[si + 1], last: tIso }) : x) }) })) }; }),
+      dTitle: s.crmDTitle || '', dOrg: s.crmDOrg || '', dAmount: s.crmDAmount || '',
+      onDTitle: (e) => this.setState({ crmDTitle: e.target.value }), onDOrg: (e) => this.setState({ crmDOrg: e.target.value }), onDAmount: (e) => this.setState({ crmDAmount: e.target.value }),
+      addDeal: () => { if (!(s.crmDTitle || '').trim()) { this.say('Titre requis'); return; } updC({ deals: this.crmData().deals.concat([{ id: 'd' + Date.now(), title: s.crmDTitle.trim(), org: (s.crmDOrg || '').trim() || '—', contactId: null, amount: Math.max(0, +s.crmDAmount || 0), stage: 'Nouveau', last: tIso, next: 'Qualifier le besoin' }]) }); this.setState({ crmDTitle: '', crmDOrg: '', crmDAmount: '' }); },
+      ownerChips: ['Tous', 'Vous', 'Agents'].map((x) => Object.assign(pill(x === ownerF), { label: x, pick: () => this.setState({ crmOwner: x }) })),
+      taskGroups: [['En retard', 'var(--danger)', (k) => !k.done && k.due < tIso], ['À faire', 'var(--ink)', (k) => !k.done && k.due >= tIso], ['Terminées', 'var(--muted)', (k) => k.done]]
+        .map(([label, color, f]) => { const it = tasksF.filter(f).sort((a, b) => (a.due < b.due ? -1 : 1)); return { label, color, count: String(it.length), items: it.slice(0, 12).map(tkV) }; }),
+      tTitle: s.crmTTitle || '', tDue: s.crmTDue || this.addDays(1), onTTitle: (e) => this.setState({ crmTTitle: e.target.value }), onTDue: (e) => this.setState({ crmTDue: e.target.value }),
+      addTask: () => { if (!(s.crmTTitle || '').trim()) return; updC({ tasks: [{ id: 't' + Date.now(), title: s.crmTTitle.trim(), due: s.crmTDue || this.addDays(1), rel: '—', owner: 'humain', done: false }].concat(this.crmData().tasks) }); this.setState({ crmTTitle: '' }); },
+      agents: Object.keys(AGD).map((id) => { const A = CR.agents[id]; return { name: AGD[id][0], desc: AGD[id][1], on: A.on, status: A.on ? (A.mode === 'auto' ? 'Actif · autonome' : 'Actif · avec validation') : 'En pause', stColor: A.on ? 'var(--success)' : 'var(--muted)', filter: A.on ? 'none' : 'grayscale(1) opacity(.6)',
+        runs: String(A.runs), actions: String(A.actions), last: A.last ? A.last.slice(0, 5) : '—',
+        toggle: () => { const C2 = JSON.parse(JSON.stringify(this.crmData())); C2.agents[id].on = !A.on; this.saveCrm(C2); },
+        modes: [['suggest', 'Validation'], ['auto', 'Autonome']].map(([m, label]) => ({ label, pressed: A.mode === m ? 'true' : 'false', bg: A.mode === m ? 'var(--inv-bg)' : 'var(--surface)', fg: A.mode === m ? 'var(--on-inv)' : 'var(--text)', border: A.mode === m ? 'var(--inv-bg)' : 'var(--line-2)', pick: () => { const C2 = JSON.parse(JSON.stringify(this.crmData())); C2.agents[id].mode = m; this.saveCrm(C2); } })),
+        run: () => { this.runAgent(id); this.say(AGD[id][0] + ' lancé'); } }; })
+    };
+    // ---------- application & immersion ----------
+    const appUrl = (typeof window !== 'undefined' && window.CASA_APP_URL) || 'https://claude.ai/artifact/3Z1QbNeNwNDmCizUsTPHJ6';
+    const inApp = typeof window !== 'undefined' && !!window.CASA_APP;
+    const arModes = [['lineup', 'Réalité augmentée', 'Ma compo en AR', 'Choisissez le système, nommez vos onze, posez le terrain sur votre table et proposez la compo au Club House.'],
+      ['score', 'Réalité augmentée', 'Tableau d’affichage', 'Le score du direct flotte dans votre salon, à prendre en photo.'],
+      ['phare', '3D', 'Phare de Gatteville', 'Le géant de granit de la pointe de Barfleur et son faisceau.'],
+      ['photo', 'Caméra', 'Photo supporter', 'Un selfie avec l’écharpe Casa Besports, prêt pour vos réseaux.']].map(([id, tag, title, text]) => ({ tag, title, text, open: () => this.openAR(id) }));
+    const installSteps = [['Sur Android', 'Ouvrez l’application dans Chrome, puis touchez « Installer l’application » (ou menu ⋮ → « Ajouter à l’écran d’accueil »).'],
+      ['Sur iPhone', 'Ouvrez l’application dans Safari, touchez le bouton Partager puis « Sur l’écran d’accueil ».'],
+      ['Sur ordinateur', 'Dans Chrome ou Edge, cliquez sur l’icône d’installation dans la barre d’adresse.']].map(([title, text]) => ({ title, text }));
+    // ---------- barre d'onglets mobile ----------
+    const TAB_ICONS = { clubhouse: 'M3 21V10l9-6 9 6v11 M9 21v-6h6v6 M7 11h.01 M17 11h.01', home: 'M4 11l8-7 8 7v9h-5v-6H9v6H4z', live: 'M4 20V10M10 20V4M16 20v-7M22 20H2', news: 'M5 4h12v16H5z M17 8h2v10a2 2 0 0 1-2 2 M8 8h6 M8 12h6 M8 16h4', meteo: 'M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z', private: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4 M8 13h3 M8 16h6' };
+    const tabBar = [['home', 'Accueil'], ['live', 'Terrain'], ['news', 'Actus'], ['clubhouse', 'Club'], ['private', 'Quotidien']].map(([id, label]) => { const on = activeSec === id || (id === 'home' && s.view === 'home'); return { label, ico: TAB_ICONS[id], sym: id === 'home', pic: id !== 'home', color: on ? 'var(--ink)' : 'var(--muted)', bar: on ? 'var(--acc)' : 'transparent', cur: on ? 'page' : 'false', go: () => this.go(id) }; });
+    const V = s.view;
+    const n = newsArticles.length;
+    // ---------- réseau local (carte, commerces, espace club, administration) et profil membre (photo, CV, certification) ----------
+    const rsCtx = { D, V, me, isAdmin, staffRole: s.role ? staffRole : '', role: s.role, posts, clubRoleId: s.role === 'club' ? s.clubRoleId : '', canReseau, clubId: s.clubId,
+      setPost: (id, patch, line) => this.setPost(id, patch, line), blocksOf: (b) => this.blocksOf(b), go: (v, x) => this.go(v, x) };
+    const CVV = typeof CasaCV !== 'undefined' ? CasaCV.vals(this, rsCtx) : { prof: {}, cv: {}, verif: {}, adm: {}, avatar: '' };
+    rsCtx.cvPending = typeof CasaCV !== 'undefined' && canReseau && s.studioTab === 'reseau' ? CasaCV.pending(this) : 0;
+    const RS = typeof CasaReseau !== 'undefined' ? CasaReseau.vals(this, rsCtx) : { carte: {}, com: {}, club: {}, adm: {}, fiche: { has: false, lignes: [] } };
+    return {
+      rs: RS, cvv: CVV, isCv: V === 'cv', isVerifier: V === 'verifier', goCv: () => this.go('cv'), goVerifier: () => this.go('verifier', { verifId: '' }),
+      hasAvatar: !!CVV.avatar, avatar: CVV.avatar, showInitial: s.loggedIn && !CVV.avatar,
+      isClubRole, notClubRole: !isClubRole, canReseau, stReseau: s.studioTab === 'reseau' && canReseau, stClubAny: isClubRole && ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0,
+      newPostLabel: isClubRole ? 'Nouveau contenu' : 'Nouvel article',
+      loginClub: () => { this.setState({ loggedIn: true, loginOpen: false, role: 'club', clubRoleId: 'esph' }); this.applyProfileTheme('role-club'); this.go('studio', { studioTab: 'club' }); this.say('Connecté en correspondant de club (démonstration)'); },
+      accent, heroOpacity: showBg ? Math.min(1, k * 2.2) : 0, sectionOpacity: showBg ? k * 0.45 : 0, progressW: progress + '%',
+      nav, moreNav, menuOpen: s.menuOpen, toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
+      moreOpen: s.moreOpen, moreExp: s.moreOpen ? 'true' : 'false', toggleMore: () => this.setState({ moreOpen: !s.moreOpen }),
+      gateways,
+      isHome: V === 'home', isNews: V === 'news', isArticle: V === 'article', isVideos: V === 'videos', isVideo: V === 'video',
+      isDisciplines: V === 'disciplines', isDiscipline: V === 'discipline', isClubs: V === 'clubs', isClub: V === 'club',
+      isPlayers: V === 'players', isPlayer: V === 'player', isMap: V === 'map', isOffers: V === 'offers', isCheckout: V === 'checkout',
+      isPartners: V === 'partners', isAbout: V === 'about', isContact: V === 'contact', isAccount: V === 'account',
+      isLive: V === 'live', isShop: V === 'shop', isProduct: V === 'product', isOrder: V === 'order',
+      showCrumbs: V !== 'home', crumbs, back: () => this.back(),
+      goHome: () => this.go('home'), goNews: () => this.go('news'), goVideos: () => this.go('videos'), goClubs: () => this.go('clubs'),
+      goPlayers: () => this.go('players'), goMap: () => this.go('map'), goOffers: () => this.go('offers'), goPartners: () => this.go('partners'),
+      goLive: () => this.go('live'), goShop: () => this.go('shop'), goGazette: () => this.go('offers', { offerTab: 'La Gazette' }),
+      goContact: () => this.go('contact', { contactSent: false }), goAccount: () => (s.loggedIn ? this.go('account') : this.setState({ loginOpen: true, linkSent: false })),
+      goCheckout: () => this.go('checkout', { subPlan: 'casab', step: 1 }),
+      openFeatured: () => this.go('article', { articleId: 'pointe-hague' }),
+      openESPH: () => this.go('club', { clubId: 'esph', clubTab: 'matchs' }), openAvranches: () => this.go('club', { clubId: 'us-avranches', clubTab: 'matchs' }),
+      openCupMatch: () => this.setState({ matchId: 'm-cfa-avranches' }),
+      toggleRemind: () => { this.toggleIn('reminders', 'm-cfa-avranches', 'Rappel activé : on vous prévient avant le coup d’envoi', 'Rappel retiré'); },
+      remindLabel: s.reminders.indexOf('m-cfa-avranches') >= 0 ? 'Rappel activé ✓' : 'Me le rappeler', remindBg: s.reminders.indexOf('m-cfa-avranches') >= 0 ? 'var(--inv-bg)' : 'var(--surface)', remindFg: s.reminders.indexOf('m-cfa-avranches') >= 0 ? 'var(--on-inv)' : 'var(--ink)',
+      hasFeed: feed.length > 0, feed,
+      homeArticles: homeOrder.slice(0, 3), homeProducts, videos, cityDots,
+      q: s.q, onQ: (e) => this.setState({ q: e.target.value }), chips, newsArticles, newsEmpty: n === 0, countLabel: n + (n > 1 ? ' articles' : ' article'),
+      resetNews: () => this.setState({ q: '', cat: 'Tous', premiumOnly: false, savedOnly: false }),
+      togglePremiumOnly: () => this.setState({ premiumOnly: !s.premiumOnly }), premiumPressed: s.premiumOnly ? 'true' : 'false', premBg: s.premiumOnly ? 'var(--inv-bg)' : 'var(--surface)', premFg: s.premiumOnly ? 'var(--on-inv)' : 'var(--ink)',
+      toggleSavedOnly: () => this.setState({ savedOnly: !s.savedOnly }), savedPressed: s.savedOnly ? 'true' : 'false', savBg: s.savedOnly ? 'var(--inv-bg)' : 'var(--surface)', savFg: s.savedOnly ? 'var(--on-inv)' : 'var(--ink)', savedCount: String(s.saved.length),
+      proposeTopic: () => this.go('contact', { subject: 'Proposition de sujet', profile: 'Autre', contactSent: false }),
+      proposePlayer: () => this.go('contact', { subject: 'Faire briller un talent', profile: 'Joueur', contactSent: false }),
+      submitResult: () => this.go('contact', { subject: 'Transmettre un résultat — ' + s.dSport, profile: 'Club', contactSent: false }),
+      orderRecap: () => this.go('contact', { subject: 'Devis résumé de match (290 €)' + (s.view === 'club' ? ' — ' + curC.name : ''), profile: 'Club', contactSent: false }),
+      art: artObj, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
+      fontUp: () => this.setState({ fontStep: Math.min(3, s.fontStep + 1) }), fontDown: () => this.setState({ fontStep: Math.max(0, s.fontStep - 1) }),
+      toggleSummary: () => this.setState({ summary: !s.summary }), summaryOpen: s.summary, summaryPressed: s.summary ? 'true' : 'false', sumBg: s.summary ? 'var(--inv-bg)' : 'var(--surface)', sumFg: s.summary ? 'var(--on-inv)' : 'var(--ink)',
+      toggleListen: () => this.setState({ listening: !s.listening }), listening: s.listening, listenPressed: s.listening ? 'true' : 'false', lisBg: s.listening ? 'var(--inv-bg)' : 'var(--surface)', lisFg: s.listening ? 'var(--on-inv)' : 'var(--ink)', listenLabel: s.listening ? 'En écoute' : 'Écouter',
+      reactions,
+      share: () => { try { navigator.clipboard.writeText('https://casabesports.fr/'); } catch (e) {} this.say('Lien copié'); },
+      vid: curV, otherVideos: videos.filter((v) => v.id !== curV.id), playing: s.playing, notPlaying: !s.playing, togglePlay: () => this.setState({ playing: !s.playing }),
+      playLabel: s.playing ? 'Pause' : 'Lire la vidéo', playState: s.playing ? 'Lecture en cours' : 'Prêt à lire', vidDim: s.playing ? 0.9 : 0.75,
+      disciplines, disc, clubChips, clubList, club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs',
+      roleChips, playerList, pl, cityName: s.city, cityClubs,
+      // terrain
+      dSports, dComps, hasComps: dComps.length > 0, dSportName: s.dSport, dTabs, sportEmpty: !sportHasData, sportHasData,
+      isDemo: sportHasData, srcLabel: 'Flux officiels à connecter · démo', srcColor: 'var(--gold-text)', updatedAgo: (s.tick % 4) * 15 + 5 + ' s',
+      tabLive: s.dTab === 'live', tabResults: s.dTab === 'results', tabAgenda: s.dTab === 'agenda', tabCal: s.dTab === 'cal', tabTable: s.dTab === 'table', tabPronos: s.dTab === 'pronos',
+      liveCards, noLive: liveM.length === 0, resultRows, noResults: resultRows.length === 0, agendaRows, noAgenda: agendaRows.length === 0,
+      hasTable: !!tbl, noTable: !tbl, tableRows,
+      calHead: ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((l) => ({ l })), calCells, calTitle: MONTHS_L[month] + ' ' + year,
+      calPrev: () => this.setState({ calMonth: Math.max(8, month - 1), calDay: 1 }), calNext: () => this.setState({ calMonth: Math.min(11, month + 1), calDay: 1 }),
+      calDayLabel: s.calDay + ' ' + MONTHS_L[month].toLowerCase(), calDayMatches, calDayEmpty: calDayMatches.length === 0,
+      pronoRows, pronoCount,
+      matchOpen: !!mxRaw, mx, closeMatch: () => this.setState({ matchId: null }),
+      // boutique
+      shopPosters, showTrailer, trailer, crea, creaBanner,
+      introOn: !!s.introOn, skipIntro: () => { clearTimeout(this._introT); this.setState({ introOn: false }); },
+      goShopVikings: () => this.go('shop', { shopLine: 'Collection Vikings' }),
+      freeShip: FREE + ' €', shopLines, shopSort: s.shopSort, onShopSort: (e) => this.setState({ shopSort: e.target.value }), showCherwoodBanner: s.shopLine === 'Cherwood × Casa' || s.shopLine === 'Tout',
+      shopProducts, prod, crossSell, sizeGuide: s.sizeGuide, toggleSizeGuide: () => this.setState({ sizeGuide: !s.sizeGuide }),
+      persoName: s.persoName, persoNum: s.persoNum, onPersoName: (e) => this.setState({ persoName: e.target.value }), onPersoNum: (e) => this.setState({ persoNum: e.target.value.replace(/\D/g, '').slice(0, 2) }), persoPrice: '8 €',
+      qty: String(s.qty), qtyUp: () => this.setState({ qty: s.qty + 1 }), qtyDown: () => this.setState({ qty: Math.max(1, s.qty - 1) }),
+      lineTotal: eur((unit + persoFee) * s.qty), prodError: s.prodError,
+      addToCart: () => {
+        if (curPr.sizes && !s.size) { this.setState({ prodError: 'Choisissez une ' + (curPr.priceBySize ? 'valeur' : 'taille') + '.' }); return; }
+        const perso = curPr.perso && s.persoName.trim() ? (s.persoName.toUpperCase() + (s.persoNum ? ' ' + s.persoNum : '')) : '';
+        this.addLine(curPr, ci, s.size, s.qty, perso, unit + persoFee);
+      },
+      cartOpen: s.cartOpen, openCart: () => this.setState({ cartOpen: true, menuOpen: false }), closeCart: () => this.setState({ cartOpen: false }),
+      cartLines, cartCount: String(cartCount), hasCart: cartCount > 0, cartEmpty: cartCount === 0, cartAria: 'Panier, ' + cartCount + ' article(s)',
+      cartSub: eur(sub), hasDiscount: disc10 > 0, discount: eur(disc10), cartNet: eur(net),
+      shipMsg: net >= FREE ? 'Livraison offerte ✓' : 'Plus que ' + eur(FREE - net) + ' pour la livraison offerte', shipPct: Math.min(100, Math.round(net / FREE * 100)) + '%',
+      goOrder: () => this.go('order', { orderDone: false }), shipOpts, shipCost: shipPrice ? eur(shipPrice) : 'Offerte', needAddress: s.ship === 'home',
+      giftWrap: s.giftWrap, toggleGift: () => this.setState({ giftWrap: !s.giftWrap }), orderTotal: eur(total), orderOpen: !s.orderDone, orderDone: s.orderDone, orderNo: s.orderNo,
+      orderNote: s.ship === 'cherwood' ? 'Votre commande vous attend chez Cherwood, à Cherbourg, sous 24 h.' : s.ship === 'stade' ? 'Retrait au stand Casa Besports lors du prochain grand match.' : 'Livraison prévue sous 2 à 4 jours ouvrés.',
+      placeOrder: () => {
+        if (!s.name.trim() || !validEmail || (s.ship === 'home' && !s.address.trim())) { this.setState({ formError: 'Nom, e-mail valide' + (s.ship === 'home' ? ' et adresse' : '') + ' requis.' }); return; }
+        if (!s.cart.length) { this.setState({ formError: 'Votre panier est vide.' }); return; }
+        const no = 'CB-' + String(Date.now()).slice(-6);
+        this.crmCapture({ name: s.name.trim(), email: s.email, city: s.city || '', source: 'Boutique', type: 'Supporter', consent: '?', note: 'Commande ' + no + ' · ' + eur(total) });
+        this.setState({ orderDone: true, orderNo: no, cart: [], formError: '', loggedIn: true, orders: s.orders.concat([{ label: 'Commande ' + no, detail: cartCount + ' article(s) · ' + eur(total), status: 'En préparation' }]) });
+        try { window.scrollTo(0, 0); } catch (e) {}
+      },
+      // abonnements
+      offerTabs, periods, offerCards, offerTabGazette: s.offerTab === 'La Gazette' || s.offerTab === 'Tout',
+      subName: sp.name, subPrice: eur(priceOf(s.subPlan)) + ' ' + perLabel, subNote: period === 'an' ? '2 mois offerts · paiement annuel' : 'Sans engagement · résiliable à tout moment',
+      subNeedsAddress, isGift: s.isGift, toggleIsGift: () => this.setState({ isGift: !s.isGift }),
+      nameLabel: s.isGift ? 'Prénom du bénéficiaire' : 'Prénom', emailLabel: s.isGift ? 'E-mail du bénéficiaire' : 'E-mail',
+      steps, step1: s.step === 1, step2: s.step === 2, step3: s.step === 3, step4: s.step === 4,
+      nextStep: () => { if (s.step === 2 && (!s.name.trim() || !validEmail || (sp.paper && !s.address.trim()))) { this.setState({ formError: 'Prénom, e-mail valide' + (sp.paper ? ' et adresse postale' : '') + ' requis.' }); return; } this.setState({ step: s.step + 1, formError: '' }); },
+      prevStep: () => this.setState({ step: Math.max(1, s.step - 1), formError: '' }),
+      confirmSub: () => {
+        const subs = s.isGift ? s.subs : { casab: s.subs.casab || sp.casab, gazette: sp.gazette ? (s.subs.gazette && s.subs.gazette !== sp.gazette ? 'duo' : sp.gazette) : s.subs.gazette };
+        this.crmCapture({ name: s.name.trim(), email: s.email, source: 'Abonnement', type: s.isGift ? 'Supporter' : 'Abonné', consent: '?', note: sp.name + (s.isGift ? ' (cadeau)' : '') });
+        this.setState({ step: 4, subs, loggedIn: true, orders: s.orders.concat([{ label: sp.name + (s.isGift ? ' (cadeau)' : ''), detail: eur(priceOf(s.subPlan)) + ' ' + perLabel, status: 'Actif' }]) });
+        this.say(s.isGift ? 'Abonnement offert envoyé' : sp.name + ' activé');
+      },
+      doneTitle: s.isGift ? 'Cadeau envoyé à ' + (s.name || 'votre proche') : 'Bienvenue, ' + (s.name || 'supporter'),
+      doneText: s.isGift ? 'Un e-mail avec la carte cadeau vient de partir.' : sp.gazette ? (sp.paper ? 'Votre premier numéro papier part au prochain bouclage. La liseuse est déjà ouverte.' : 'Le dernier numéro est disponible dans la liseuse.') : 'Tous les contenus Premium sont débloqués.',
+      doneCta: () => (sp.gazette && !s.isGift ? this.setState({ readerOpen: true, page: 0 }) : this.go('article', { articleId: 'pointe-hague' })), doneCtaLabel: sp.gazette && !s.isGift ? 'Ouvrir la Gazette' : 'Lire un article Premium',
+      cancelSub: () => { this.setState({ subs: { casab: false, gazette: null } }); this.say('Abonnements résiliés'); },
+      // liseuse
+      readerOpen: s.readerOpen, openReader: () => this.setState({ readerOpen: true, page: 0, menuOpen: false }), closeReader: () => this.setState({ readerOpen: false }),
+      pageNo: String(pIdx + 1), pageTotal: String(NP), pg, tocSecs, gzStrip, thumbs, quiz, gzOlisto: () => this.go('olisto'), adPartners: partners.filter((p) => !p.real), quizScore, quizTotal: String(G.quiz.length),
+      pagePrev: () => this.gzGo(pIdx - 1), pageNext: () => this.gzGo(pIdx + 1), noPrev: pIdx === 0, noNext: pIdx >= NP - 1,
+      prevLabel: pIdx > 0 ? 'Page précédente : ' + G.pages[pIdx - 1].title : 'Première page', nextLabel: pIdx < NP - 1 ? 'Page suivante : ' + G.pages[pIdx + 1].title : 'Dernière page',
+      gotoToc: () => this.gzGo(G.idx('toc')), gotoChoc: () => this.gzGo(chocI), chocPage: chocP.n, gzProg: Math.round((pIdx + 1) / NP * 100) + '%', gzVote, gzCount: String(NP),
+      readerSize: readerSizes[s.readerFont], readerFontLabel: ['A', 'A+', 'A++'][s.readerFont], readerFont: () => this.setState({ readerFont: (s.readerFont + 1) % 3 }),
+      goGazetteFromReader: () => this.go('offers', { offerTab: 'La Gazette' }),
+      // formulaires
+      name: s.name, email: s.email, address: s.address, subject: s.subject, profile: s.profile, message: s.message, formError: s.formError,
+      onName: (e) => this.setState({ name: e.target.value }), onEmail: (e) => this.setState({ email: e.target.value }), onAddress: (e) => this.setState({ address: e.target.value }), onSubject: (e) => this.setState({ subject: e.target.value }),
+      onProfile: (e) => this.setState({ profile: e.target.value }), onMessage: (e) => this.setState({ message: e.target.value }),
+      contactOpen: !s.contactSent, contactSent: s.contactSent,
+      sendContact: () => { if (!s.name.trim() || !validEmail || !s.message.trim()) { this.setState({ formError: 'Nom, e-mail valide et message sont requis.' }); return; } this.setState({ contactSent: true, formError: '' }); this.crmCapture({ name: s.name.trim(), email: s.email, source: /olisto/i.test(s.subject || '') ? 'Formulaire OlistO' : 'Formulaire contact', type: ({ Club: 'Club', Annonceur: 'Annonceur', Partenaire: 'Partenaire' })[s.profile] || 'Supporter', consent: '?', note: (s.subject ? s.subject + ' — ' : '') + s.message.trim().slice(0, 200) }); },
+      newMessage: () => this.setState({ contactSent: false, message: '', subject: '' }),
+      goals, partnerContact: () => this.go('contact', { subject: 'Partenariat — ' + s.goal, profile: 'Entreprise', contactSent: false }),
+      nlOpen: !s.nlDone, nlDone: s.nlDone, nlEmail: s.nlEmail, onNl: (e) => this.setState({ nlEmail: e.target.value }),
+      subscribeNl: () => { if (/.+@.+\..+/.test(s.nlEmail)) { this.setState({ nlDone: true }); this.crmCapture({ email: s.nlEmail, name: s.nlEmail.split('@')[0], source: 'Newsletter', consent: 'oui', note: 'Inscription au récap du lundi' }); } else this.say('Saisissez un e-mail valide'); },
+      // compte
+      loggedIn: s.loggedIn, loggedOut: !s.loggedIn, initial: (s.name || s.email || 'C')[0].toUpperCase(),
+      accountLabel: s.loggedIn ? 'Mon espace' : 'Connexion', accountBg: s.loggedIn ? 'var(--inv-bg)' : 'var(--surface)', accountFg: s.loggedIn ? 'var(--on-inv)' : 'var(--text)',
+      accountClick: () => (s.loggedIn ? this.go('account') : this.setState({ loginOpen: true, linkSent: false, formError: '' })),
+      subscribed, notSubscribed: !subscribed, subStatus,
+      displayName: s.name || s.email.split('@')[0] || 'supporter',
+      alerts, followList, noFollows: followList.length === 0, savedArticles, noSaved: savedArticles.length === 0,
+      orders: s.orders, noOrders: s.orders.length === 0,
+      logout: () => { this.setState({ loggedIn: false, subs: { casab: false, gazette: null } }); this.go('home'); this.say('Vous êtes déconnecté'); },
+      loginOpen: s.loginOpen, openLogin: () => this.setState({ loginOpen: true, linkSent: false, formError: '' }), closeLogin: () => this.setState({ loginOpen: false }),
+      linkSent: s.linkSent, linkNotSent: !s.linkSent,
+      sendLink: () => (validEmail ? this.setState({ linkSent: true, formError: '' }) : this.setState({ formError: 'Saisissez un e-mail valide.' })),
+      doLogin: () => { this.setState({ loggedIn: true, loginOpen: false }); this.applyProfileTheme(s.email.trim().toLowerCase() || 'compte'); this.say('Connecté. Bienvenue !'); },
+      searchOpen: s.searchOpen, openSearch: () => this.setState({ searchOpen: true, sq: '', menuOpen: false, moreOpen: false }), closeSearch: () => this.setState({ searchOpen: false }),
+      sq: s.sq, onSq: (e) => this.setState({ sq: e.target.value }), noSq: !sq, sResults, sEmpty: !!sq && sResults.length === 0, quick,
+      footCols, hasToast: !!s.toast, toast: s.toast,
+      themeAttr: curTheme, themingClass: s.themeAnim ? 'cb-theming' : '', themes, themeName, themeMenuOpen: s.themeMenuOpen, themeMenuExp: s.themeMenuOpen ? 'true' : 'false',
+      toggleThemeMenu: () => this.setState({ themeMenuOpen: !s.themeMenuOpen, moreOpen: false }),
+      openThemeFromFooter: () => { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} this.setState({ themeMenuOpen: true, hdrY: '0' }); },
+      themeStatus: curTheme === 'auto' ? 'Automatique (actuellement ' + (s.sysDark ? 'sombre' : 'clair') + ')' : themeName,
+      themeIconSun: curTheme === 'light', themeIconMoon: curTheme === 'dark' || curTheme === 'noir', themeIconPaper: curTheme === 'paper', themeIconAuto: curTheme === 'auto',
+      themeSavedNote: s.loggedIn ? 'Enregistré sur cet appareil et dans votre profil.' : 'Enregistré sur cet appareil. Connectez-vous pour le retrouver partout.',
+      weather, showWeather: s.dSport === 'Football' || s.dSport === 'Rugby' || s.dSport === 'Trail',
+      isLegal: V === 'legal', legal, legalTabs, legalLinks,
+      weather, wx, wxCities, isMeteo: V === 'meteo', goMeteo: () => this.go('meteo'), goPrivate: () => this.go('private'), goTable: () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' }),
+      isHomeDash: V === 'home' && s.homeLayout !== 'magazine', isHomeMag: V === 'home' && s.homeLayout === 'magazine', toMagazine: () => this.setLayout('magazine'), toDashboard: () => this.setLayout('dashboard'),
+      homeMods, noModules: homeMods.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
+      une, dashScores, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
+      isPrivate: V === 'private', pv, pf: pfm, pvTabs, tabBar,
+      isApp: V === 'app', appUrl, arModes, installSteps, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: inApp ? 'Vous êtes dans l’application.' : 'Lien privé tant que vous ne l’avez pas partagé. Fonctionne sur téléphone, tablette et ordinateur.',
+      isOlisto: V === 'olisto', ol, goOlisto: () => this.go('olisto'),
+      isClubhouse: V === 'clubhouse', card, cardColors, chTabs, ch, chf, chMe, chLevelColor: LV[lvIdx][2], chHome, goClubhouse: () => this.go('clubhouse'),
+      pvGroups, pvTitle, tm, isCulture: V === 'culture', cuTabs, cu, cuf, workOpen: !!woRaw, wo, closeWork: () => this.setState({ workIdx: null }), oeuvre, cultureHome, goCulture: () => this.go('culture'),
+      hdrY: s.hdrY, showToTop: s.scrolled, toTop: () => { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} },
+      bg, bgModes, place, places, placeOpacity, placeOpen: s.placeOpen, pp, togglePlace: () => this.setState({ placeOpen: !s.placeOpen, placeIdx: X.places.indexOf(placeRaw) }), closePlace: () => this.setState({ placeOpen: false }),
+      partners, partnerTiers, partnerOpen: !!ptRaw, pt, closePartner: () => this.setState({ partnerId: null }),
+      aiOpen: s.aiOpen, aiClosed: !s.aiOpen, aiAria: s.aiOpen ? 'Fermer Casa IA' : 'Ouvrir Casa IA, l’assistant', toggleAi: () => this.setState({ aiOpen: !s.aiOpen }),
+      aiMode: (typeof window !== 'undefined' && window.CASA_API) ? 'Connecté au modèle de langage · actions sur le site' : 'Moteur intégré · répond et agit sur le site',
+      aiMsgs: s.aiMsgs.map((m) => ({ isBot: m.role !== 'user', text: m.text, actions: m.actions || [], align: m.role === 'user' ? 'flex-end' : 'flex-start', bg: m.role === 'user' ? 'var(--inv-bg)' : 'var(--surface)', fg: m.role === 'user' ? 'var(--on-inv)' : 'var(--text)', border: m.role === 'user' ? 'var(--ink)' : 'var(--line)' })),
+      aiTyping: s.aiTyping, aiInput: s.aiInput, onAiInput: (e) => this.setState({ aiInput: e.target.value }), aiSend: () => this.aiAsk(s.aiInput),
+      aiReset: () => this.setState({ aiMsgs: [{ role: 'bot', text: 'Nouvelle conversation. Que puis-je faire pour vous ?', actions: [] }] }),
+      aiSuggest: ['Météo à Cherbourg', 'Ajoute du pain à ma liste de courses', 'Scores en direct', 'Classement R2', 'Tenue chill à moins de 60 €', 'Histoire du phare de Gatteville', 'Ouvre la Gazette page 5', 'Prochain match de Pointe-Hague'].map((l) => ({ label: l, run: () => this.aiAsk(l) })),
+      isStaff: !!s.role, isAdmin, notAdmin: !isAdmin, hasPending: pending.length > 0, pendingCount: String(pending.length),
+      goStudio: () => (s.role ? this.go('studio', { studioTab: s.role === 'club' ? 'club' : isAdmin && pending.length ? 'queue' : 'dash' }) : this.setState({ loginOpen: true, linkSent: false })),
+      loginAdmin: () => { this.setState({ loggedIn: true, loginOpen: false, role: 'admin' }); this.applyProfileTheme('role-admin'); this.go('studio', { studioTab: 'dash' }); this.say('Connecté en administrateur principal'); },
+      loginWriter: () => { this.setState({ loggedIn: true, loginOpen: false, role: 'writer' }); this.applyProfileTheme('role-writer'); this.go('studio', { studioTab: 'dash' }); this.say('Connectée en rédactrice : Léa Marchand'); },
+      isStudio: V === 'studio' && !!s.role, me, studioNav, roleSwitch, showRoleSwitch: !window.CB_SERVER, kpis, dashList, dashListEmpty: dashList.length === 0, dashListTitle: isAdmin ? 'À relire en priorité' : 'Mes articles en cours', activity, notClubTabs: !isClubRole,
+      stCrm: s.studioTab === 'crm' && s.role === 'admin', crm,
+      stDash: s.studioTab === 'dash' && !isClubRole, stList: s.studioTab === 'list' && !isClubRole, stQueue: s.studioTab === 'queue' && !isClubRole, stEdit: s.studioTab === 'edit' && !isClubRole, stMedia: s.studioTab === 'media' && !isClubRole, stTeam: s.studioTab === 'team' && !isClubRole,
+      rx: RXV, stRowsEmpty: (RXV.list && RXV.list.rows || []).length === 0,
+      stRows: (RXV.list && RXV.list.rows ? RXV.list.rows : []).map((r) => { const p = posts.find((x) => x.id === r.id); return Object.assign({}, r, stV(p), { canReview: isAdmin && p.status === 'review', edit: () => openEdit(p, 'write'), review: () => openEdit(p, 'preview') }); }),
+      stFilters, stQ: s.stQ, onStQ: (e) => this.setState({ stQ: e.target.value }), goStudioList: () => this.setState({ studioTab: 'list' }),
+      queue, queueEmpty: queue.length === 0, queueHint: isAdmin ? 'En tant qu’administrateur principal, vous seul pouvez approuver et publier.' : 'Vos articles soumis attendent la validation de l’administrateur principal.',
+      newPost: () => { if (isClubRole) { this.setState({ studioTab: 'club' }); return; } const id = 'n' + Date.now(); const at = new Date().toISOString(); const p = { id, author: me.name, status: 'draft', updated: 'à l’instant', updatedAt: at, type: 'article', sport: 'Football', tag: '', clubs: [], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '', title: 'Nouvel article', dek: '', body: '', log: [{ who: me.name, when: 'à l’instant', at, what: 'Brouillon créé.' }] }; if (typeof CasaRedac !== 'undefined') p.versions = CasaRedac.addVersion(p, me.name, 'Brouillon créé'); this.setState({ posts: [p].concat(posts), studioTab: 'edit', editId: id, edMode: 'write', aiOutKind: null }); },
+      ed, edLocked, edLockMsg: edRaw.status === 'review' ? 'En attente de validation par l’administrateur principal.' : edRaw.status === 'published' ? 'Article publié.' : edRaw.status === 'scheduled' ? 'Publication programmée.' : 'Lecture seule : article d’un autre membre.',
+      edWrite: s.edMode === 'write', edPreview: s.edMode === 'preview', edModes, sportOpts, edClubs, edImgs, toolbar,
+      edTitle: (e) => upd({ title: e.target.value }), edDek: (e) => upd({ dek: e.target.value }), edSport: (e) => upd({ sport: e.target.value }), edTag: (e) => upd({ tag: e.target.value }),
+      edSchedule: (e) => upd({ schedule: e.target.value }), edAlt: (e) => upd({ alt: e.target.value }), edBody: (e) => upd({ body: e.target.value }), edPremium: () => upd({ premium: !edRaw.premium }),
+      edCanSave: !edLocked, edCanSubmit: !isAdmin && !edLocked && ['draft', 'corrections'].indexOf(edRaw.status) >= 0, edCanPublishDirect: isAdmin && edRaw.author === me.name && ['draft', 'corrections'].indexOf(edRaw.status) >= 0,
+      edSave: () => { this.setPost(edRaw.id, {}, 'Brouillon enregistré.'); this.say('Brouillon enregistré'); },
+      edSubmit: () => this.rxGuard('soumettre', edRaw, (lev) => { this.setPost(edRaw.id, { status: 'review' }, 'Article soumis à la relecture.' + (lev ? ' Contraintes levées : ' + lev + '.' : '')); this.say('Soumis à l’administrateur principal'); }),
+      edPublish: () => this.rxGuard('publier', edRaw, () => { this.setPost(edRaw.id, { status: 'published' }, 'Publié par l’administrateur principal.'); this.say('Article publié dans Actualités'); }),
+      showDecision: isAdmin && edRaw.status === 'review', reviewNote: s.reviewNote, onReviewNote: (e) => this.setState({ reviewNote: e.target.value }),
+      approvePublish: () => this.rxGuard('publier', edRaw, () => { this.setPost(edRaw.id, { status: 'published' }, 'Approuvé et publié.' + (s.reviewNote.trim() ? ' Note : ' + s.reviewNote.trim() : '')); this.setState({ reviewNote: '', formError: '' }); this.say('Publié : visible dans Actualités'); }),
+      approveSchedule: () => this.rxGuard('publier', edRaw, () => { const when = edRaw.schedule || '2026-10-09T18:00'; this.setPost(edRaw.id, { status: 'scheduled', schedule: when }, 'Approuvé, publication programmée le ' + when.replace('T', ' à ') + '.'); this.setState({ reviewNote: '' }); this.say('Publication programmée'); }),
+      requestChanges: () => { if (!s.reviewNote.trim()) { this.setState({ formError: 'Ajoutez une note pour expliquer les corrections attendues.' }); return; } this.setPost(edRaw.id, { status: 'corrections', note: s.reviewNote.trim() }, 'Corrections demandées : ' + s.reviewNote.trim()); this.setState({ reviewNote: '', formError: '' }); this.say('Corrections demandées au rédacteur'); },
+      rejectPost: () => { this.setPost(edRaw.id, { status: 'rejected' }, 'Article refusé.' + (s.reviewNote.trim() ? ' Motif : ' + s.reviewNote.trim() : '')); this.setState({ reviewNote: '' }); this.say('Article refusé'); },
+      commentDraft: s.commentDraft, onCommentDraft: (e) => this.setState({ commentDraft: e.target.value }),
+      addComment: () => { if (!s.commentDraft.trim()) return; this.setPost(edRaw.id, {}, 'Commentaire : ' + s.commentDraft.trim()); this.setState({ commentDraft: '' }); },
+      aiTools, aiOut, aiOutTitle, hasAiOut: aiOut.length > 0, mediaLib: libImgs, team,
+      inviteEmail: s.inviteEmail, onInvite: (e) => this.setState({ inviteEmail: e.target.value }), sendInvite: () => { if (!/.+@.+\..+/.test(s.inviteEmail)) { this.say('E-mail invalide'); return; } this.setState({ inviteEmail: '' }); this.say('Invitation envoyée'); }
+    };
+  }
+
+  // ---------- Créations de l’Atelier (Studio Boutique) : la collection « Créations Casa » ----------
+  // Sur la plateforme, le serveur fournit les articles publiés (cb-bridge.js) ; ailleurs (aperçu, application seule),
+  // les packs exportés par l’Atelier s’importent ici et restent sur l’appareil.
+  creaDb() {
+    if (this._creaP) return this._creaP;
+    this._creaP = new Promise((res) => { try { const r = window.indexedDB.open('casa-boutique-atelier', 1); r.onupgradeneeded = () => r.result.createObjectStore('produits'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); } catch (e) { res(null); } });
+    return this._creaP;
+  }
+  creaDo(mode, fn) { return this.creaDb().then((db) => new Promise((res) => { if (!db) return res(null); try { const rq = fn(db.transaction('produits', mode).objectStore('produits')); rq.onsuccess = () => res(rq.result); rq.onerror = () => res(null); } catch (e) { res(null); } })); }
+  creaInit() { if (window.CB_SERVER) return; this.creaDo('readonly', (st) => st.getAll()).then((list) => { if (list && list.length) this.setCreated(list); }); }
+  creaNorm(p) {
+    const s = (v, n) => String(v == null ? '' : v).slice(0, n); const ok = (u) => (typeof u === 'string' && /^(data:image\/(jpeg|png|webp);base64,|\/media\/boutique\/|https:\/\/)/.test(u) ? u : '');
+    const rows = (Array.isArray(p.imgsByColor) && p.imgsByColor.length ? p.imgsByColor : [Array.isArray(p.gallery) && p.gallery.length ? p.gallery : [p.img]]).map((r) => (Array.isArray(r) ? r : [r]).map(ok).filter(Boolean)).filter((r) => r.length);
+    const colors = (Array.isArray(p.colors) ? p.colors : []).map((c) => ({ name: s(c && c.name, 40) || 'Coloris', hex: /^#[0-9a-fA-F]{6}$/.test(String(c && c.hex)) ? c.hex : '#ffffff' })); while (colors.length < rows.length) colors.push({ name: 'Coloris', hex: '#ffffff' });
+    return { id: s(p.id, 80), line: 'atelier', name: s(p.name, 80) || 'Création Casa', short: s(p.short, 80), desc: s(p.desc, 700), price: Math.max(1, Math.round((+p.price || 0) * 100) / 100), type: s(p.type, 12) || 'tee', supportName: s(p.supportName, 40), technique: s(p.technique, 120),
+      colors: colors.length ? colors.slice(0, Math.max(1, rows.length)) : [{ name: 'Unique', hex: '#ffffff' }], sizes: Array.isArray(p.sizes) && p.sizes.length ? p.sizes.map((z) => s(z, 12)) : null, perso: p.perso === 'num' || p.perso === 'text' ? p.perso : null,
+      flag: s(p.flag, 30), mark: '', pop: 40, isNew: !!p.isNew, img: rows.length ? rows[0][0] : null, gallery: rows.length ? rows[0] : [], imgsByColor: rows, views: Array.isArray(p.views) ? p.views.map((v) => s(v, 30)) : [], status: p.status || 'publie' };
+  }
+  // les créations publiées rejoignent le catalogue ; un panier ne garde que des articles encore en vente
+  setCreated(list) {
+    const X = this.more(); const all = (list || []).map((p) => this.creaNorm(p)).filter((p) => p.id && p.img);
+    this._crea = all; X.products = X.products.filter((p) => p.line !== 'atelier').concat(all.filter((p) => p.status === 'publie'));
+    this.setState({ creaN: (this.state.creaN || 0) + 1, cart: this.state.cart.filter((l) => X.products.some((p) => p.id === l.id)) });
+  }
+  creaSrv() { return !!(window.CB_SERVER && window.CB && window.CB.boutique); }
+  creaTeamLoad() { if (!this.creaSrv()) return; window.CB.boutique.team().then((r) => this.setState({ creaTeam: r.produits || [] })).catch((e) => this.setState({ creaMsg: e.message })); }
+  creaImport(file) {
+    if (!file) return; if (file.size > 90e6) { this.setState({ creaMsg: 'Fichier trop lourd.' }); return; }
+    const fr = new FileReader();
+    fr.onload = () => {
+      let j = null; try { j = JSON.parse(fr.result); } catch (e) { j = null; }
+      const arts = j && j.format === 'casa-boutique' && Array.isArray(j.articles) ? j.articles.slice(0, 60) : null;
+      if (!arts || !arts.length) { this.setState({ creaMsg: 'Ce fichier n’est pas un pack de l’Atelier (.casa-boutique.json).' }); return; }
+      if (this.creaSrv()) {
+        const CB = window.CB; const chief = CB.user && ['admin', 'collaborateur'].indexOf(CB.user.role) >= 0; let n = 0; const errs = [];
+        const next = (i) => { if (i >= arts.length) { this.setState({ creaMsg: n + ' article(s) ajouté(s)' + (chief ? ', publié(s)' : ' en brouillon') + (errs.length ? ' · ' + errs.join(' ; ') : '') + '.' }); this.creaTeamLoad(); CB.boutique.reload(); return; }
+          const a = arts[i]; CB.boutique.put(a.id, { product: a, status: chief ? 'publie' : 'brouillon' }).then(() => { n++; next(i + 1); }).catch((e) => { errs.push((a.name || a.id) + ' : ' + e.message); next(i + 1); }); };
+        this.setState({ creaMsg: 'Envoi de ' + arts.length + ' article(s)…' }); next(0); return;
+      }
+      const now = new Date().toISOString();
+      Promise.all(arts.map((a) => { const p = Object.assign({}, a); delete p.design; delete p.cost; delete p.costNote; p.status = 'publie'; p.importedAt = now; return this.creaDo('readwrite', (st) => st.put(p, String(p.id || ('art-' + Date.now())).slice(0, 80))); }))
+        .then(() => this.creaDo('readonly', (st) => st.getAll())).then((list) => { this.setCreated(list || []); this.setState({ creaMsg: arts.length + ' article(s) ajouté(s) à la collection Créations Casa.', creaOpen: true, shopLine: 'Créations Casa' }); });
+    };
+    fr.onerror = () => this.setState({ creaMsg: 'Lecture du fichier impossible.' }); fr.readAsText(file);
+  }
+  creaSet(id, status) {
+    if (this.creaSrv()) { window.CB.boutique.statut(id, status).then(() => { this.creaTeamLoad(); window.CB.boutique.reload(); this.say(status === 'publie' ? 'Article publié dans la boutique' : 'Article retiré de la boutique'); }).catch((e) => this.say(e.message)); return; }
+    this.creaDo('readonly', (st) => st.get(id)).then((p) => (p ? this.creaDo('readwrite', (st) => st.put(Object.assign(p, { status }), id)) : null)).then(() => this.creaDo('readonly', (st) => st.getAll())).then((list) => { this.setCreated(list || []); this.say(status === 'publie' ? 'Article remis en boutique' : 'Article retiré de la boutique'); });
+  }
+  creaDel(id) {
+    if (this.state.creaSure !== id) { this.setState({ creaSure: id }); clearTimeout(this._creaT); this._creaT = setTimeout(() => this.setState({ creaSure: '' }), 4000); return; }
+    this.setState({ creaSure: '' });
+    if (this.creaSrv()) { window.CB.boutique.del(id).then(() => { this.creaTeamLoad(); window.CB.boutique.reload(); this.say('Article supprimé'); }).catch((e) => this.say(e.message)); return; }
+    this.creaDo('readwrite', (st) => st.delete(id)).then(() => this.creaDo('readonly', (st) => st.getAll())).then((list) => { this.setCreated(list || []); this.say('Article supprimé de cet appareil'); });
+  }
+  addLine(p, color, size, qty, perso, unit) {
+    const u = unit ?? (p.priceBySize ? p.priceBySize[Math.max(0, p.sizes.indexOf(size))] : p.price);
+    const cart = this.state.cart.slice();
+    const i = cart.findIndex((l) => l.id === p.id && l.color === color && l.size === size && l.perso === perso);
+    if (i >= 0) cart[i] = Object.assign({}, cart[i], { qty: cart[i].qty + qty });
+    else cart.push({ id: p.id, color, size, qty, perso, unit: u });
+    this.setState({ cart, prodError: '' });
+    this.say(p.name + ' ajouté au panier');
+  }
+}
+window.Component = Component;
+

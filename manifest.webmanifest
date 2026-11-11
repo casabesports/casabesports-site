@@ -1,0 +1,11 @@
+{
+  "name": "Casa Besports",
+  "short_name": "Casa Besports",
+  "description": "Le média du sport dans la Manche : scores, actus, vidéos, clubs et boutique.",
+  "lang": "fr",
+  "start_url": "/?app=1",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

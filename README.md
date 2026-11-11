@@ -1,0 +1,42 @@
+# Casa Besports — site web
+
+Site statique : aucun serveur à maintenir, aucune base de données, hébergement gratuit.
+
+## Ce que contient le dossier
+
+| Fichier / dossier | Rôle |
+|---|---|
+| `index.html` | La page : structure, textes des écrans, styles, thèmes (couleurs dans le premier bloc `<style>`) |
+| `js/app.js` | La logique et **les contenus** : articles, scores, clubs, joueurs, vidéos, produits de la boutique |
+| `js/reseau.js`, `js/profil.js`, `js/redaction.js`, `js/aide.js` | Modules : réseau local, profil membre, rédaction, aide |
+| `js/three.min.js`, `js/leaflet.js`, `js/carte-normandie.js` | Bibliothèques (3D, cartes) : n'y touchez pas |
+| `assets/` | Toutes les images (photos, produits, logo) |
+| `manifest.webmanifest`, `icon.svg` | Installation sur téléphone (« Ajouter à l'écran d'accueil ») |
+
+## Modifier le site
+
+- **Changer un texte ou un article** : ouvrez `js/app.js`, cherchez le texte actuel (Ctrl+F), remplacez-le.
+- **Changer une photo** : déposez la nouvelle image dans `assets/` **sous le même nom** que l'ancienne (même format .jpg/.svg).
+- **Ajouter une photo** : déposez-la dans `assets/`, puis utilisez `assets/nom-du-fichier.jpg` dans le contenu.
+- **Couleurs** : variables `--bg`, `--ink`, `--acc`… dans le premier `<style>` de `index.html`.
+
+Avec GitHub + Netlify (voir ci-dessous), chaque modification enregistrée sur github.com est en ligne en ~30 secondes.
+Pour une modification plus large, demandez à Claude : il travaille directement sur le dépôt GitHub.
+
+## Tester sur votre ordinateur
+
+Double-cliquer sur `index.html` fonctionne en partie ; pour un test fidèle :
+`python3 -m http.server` dans ce dossier, puis ouvrir http://localhost:8000
+
+## Mise en ligne (une seule fois)
+
+1. **GitHub** (gratuit) : créer un compte sur github.com, puis un dépôt `casabesports-site`. « Add file › Upload files » : glisser tout le contenu de ce dossier.
+2. **Netlify** (gratuit) : créer un compte sur netlify.com avec « Sign up with GitHub », puis « Add new site › Import an existing project › GitHub › casabesports-site ». Laisser les réglages par défaut, « Deploy ». Le site est en ligne sur une adresse `xxx.netlify.app`.
+3. **Nom de domaine** : dans Netlify, « Domain management › Add a domain » → `casabesports.fr`. Si le domaine est chez OVH, Gandi, IONOS…, Netlify indique les 2 enregistrements DNS à copier chez eux. Le HTTPS est activé automatiquement.
+
+## Limites actuelles (version statique)
+
+Tout ce qui demande un serveur fonctionne en mode « sur cet appareil » : comptes, CRM, boutique (commandes), espace rédaction, assistant IA (moteur intégré).
+Les données saisies restent dans le navigateur de la personne. Étape suivante possible : brancher un service en ligne (ex. Supabase, Stripe pour la boutique) pour les comptes, les commandes et la publication d'articles depuis un téléphone.
+
+La météo (Open-Meteo, en direct) et la carte (OpenStreetMap/IGN) fonctionnent sans configuration. Les scores et articles sont des contenus de départ, à mettre à jour dans `js/app.js`.
