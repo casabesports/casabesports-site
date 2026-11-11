@@ -11,7 +11,9 @@ Site statique : aucun serveur à maintenir, aucune base de données, hébergemen
 | `js/reseau.js`, `js/profil.js`, `js/redaction.js`, `js/aide.js` | Modules : réseau local, profil membre, rédaction, aide |
 | `js/three.min.js`, `js/leaflet.js`, `js/carte-normandie.js` | Bibliothèques (3D, cartes) : n'y touchez pas |
 | `assets/` | Toutes les images (photos, produits, logo) |
-| `js/config.js`, `js/comptes.js` | Comptes abonnés (e-mail et mobile) : voir `docs/COMPTES-ABONNES.md` |
+| `js/config.js`, `js/comptes.js` | Comptes abonnés (e-mail, mobile, mot de passe) : voir `docs/COMPTES-ABONNES.md` |
+| `contenus/` | **Vos contenus** : articles, résultats, boutique, vidéos, culture, lieux, fonds de page, équipe |
+| `supabase/membres.sql` | Cartes membres et QR code : voir `docs/CARTE-MEMBRE.md` |
 | `manifest.webmanifest`, `icon.svg` | Installation sur téléphone (« Ajouter à l'écran d'accueil ») |
 
 ## Modifier le site

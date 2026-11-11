@@ -4915,6 +4915,17 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <!-- ================= VÉRIFIER UN CERTIFICAT ================= -->
 <sc-if value="{{isVerifier}}" hint-placeholder-val="{{ false }}">
   <section class="wrap vf-wrap">
+    <div class="eb" style="margin-bottom: .5rem">Partenaires Casa Besports</div>
+    <h1 class="h1 tr-title"><span class="bn-bh"><span class="bn-bandeau">Vérifier</span></span> une carte membre</h1>
+    <p class="tr-dek">Scannez le QR code de la carte avec l’appareil photo du téléphone, ou saisissez le numéro (CB-XXXX-XXXX-X).</p>
+    <div class="vf-form"><input class="field" value="{{mb.q}}" onChange="{{mb.onQ}}" placeholder="CB-…" aria-label="Numéro de membre" autocapitalize="characters"><button type="button" class="btn btn-dark" onClick="{{mb.check}}">Vérifier</button></div>
+    <sc-if value="{{mb.busy}}" hint-placeholder-val="{{ false }}"><p class="pulse" style="color: var(--muted)">Vérification…</p></sc-if>
+    <sc-if value="{{mb.ok}}" hint-placeholder-val="{{ false }}"><div class="vf-res is-ok" role="status"><span class="bn-etiq">Membre valide</span><div class="vf-nom">{{mb.prenom}}</div><div class="vf-titre">{{mb.q}}</div><p class="tr-p">{{mb.depuis}}</p></div></sc-if>
+    <sc-if value="{{mb.off}}" hint-placeholder-val="{{ false }}"><div class="vf-res is-ko" role="status"><span class="bn-etiq">Carte suspendue</span><p class="tr-p">Cette carte n’ouvre pas droit aux avantages partenaires pour le moment.</p></div></sc-if>
+    <sc-if value="{{mb.none}}" hint-placeholder-val="{{ false }}"><div class="vf-res is-ko" role="status"><span class="bn-etiq">Introuvable</span><p class="tr-p">Aucun membre ne porte ce numéro.</p></div></sc-if>
+    <sc-if value="{{mb.bad}}" hint-placeholder-val="{{ false }}"><div class="vf-res is-ko" role="status"><span class="bn-etiq">Numéro invalide</span><p class="tr-p">Ce numéro n’est pas un numéro de membre Casa Besports. Vérifiez la saisie.</p></div></sc-if>
+    <sc-if value="{{mb.format}}" hint-placeholder-val="{{ false }}"><div class="vf-res is-ok" role="status"><span class="bn-etiq">Numéro authentique</span><div class="vf-titre">{{mb.q}}</div><p class="tr-p">Le numéro est valide. Le contrôle en ligne sera disponible prochainement.</p></div></sc-if>
+    <div style="height: 3rem"></div>
     <div class="eb" style="margin-bottom: .5rem">Certification Casa Besports</div>
     <h1 class="h1 tr-title"><span class="bn-bh"><span class="bn-bandeau">Vérifier</span></span> un certificat</h1>
     <p class="tr-dek">Chaque CV certifié porte un numéro (CB-2026-XXXXXX) et un QR code. Saisissez le numéro pour vérifier qu’il a bien été délivré par l’équipe Casa Besports.</p>
@@ -5650,8 +5661,16 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
             <div class="cond" style="font-size: 11px; letter-spacing: .18em; color: {{card.sub}}; position: relative">49°38′ N · 1°37′ O · Côte du Cotentin</div>
             <div style="position: absolute; left: 1.3rem; bottom: 1.1rem"><div class="cond" style="font-size: 11px; color: {{card.sub}}">Niveau</div><div class="cond" style="font-size: 18px; color: {{card.acc}}">{{chMe.level}}</div></div>
             <div style="position: absolute; left: 45%; bottom: 1.1rem"><div class="cond" style="font-size: 11px; color: {{card.sub}}">N° de membre</div><div class="num" style="font-size: 16px">{{chMe.number}}</div></div>
-            <div style="position: absolute; right: 1.1rem; top: 3.4rem; width: 70px; height: 70px; background: {{card.qrBg}}; padding: 5px; border-radius: 0; display: grid; grid-template-columns: repeat(9, 1fr)" aria-label="Code membre (démonstration)" role="img"><sc-for list="{{chMe.qr}}" as="qc2" hint-placeholder-count="81"><span style="background: {{qc2.c}}"></span></sc-for></div>
+            <sc-if value="{{chMe.hasQr}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{chMe.openQr}}" aria-label="Afficher le QR code de ma carte en grand" style="position: absolute; right: 1.1rem; top: 3.2rem; width: 84px; height: 84px; background: #fff; padding: 0; border: 0; cursor: zoom-in"><svg viewBox="{{chMe.qrVb}}" width="84" height="84" role="img" aria-label="QR code de ma carte membre" shape-rendering="crispEdges"><rect x="-2" y="-2" width="400" height="400" fill="#fff"></rect><path d="{{chMe.qrD}}" fill="#000"></path></svg></button></sc-if>
           </div>
+          <sc-if value="{{chMe.hasQr}}" hint-placeholder-val="{{ false }}"><p style="font-size: 13.5px; color: var(--text-2); margin: .8rem 0 0">Présentez ce QR code chez nos partenaires : il prouve que vous êtes membre Casa Besports. Il est permanent et propre à votre compte. <button type="button" class="lnk" onClick="{{chMe.openQr}}" style="font-size: 13.5px">Afficher en grand</button></p></sc-if>
+          <sc-if value="{{chMe.qrBig}}" hint-placeholder-val="{{ false }}"><div role="dialog" aria-label="Ma carte membre" style="position: fixed; inset: 0; z-index: 70; background: #fff; color: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 1.5rem; text-align: center">
+            <div class="ttl" style="font-size: 28px; color: #000">{{chMe.name}}</div>
+            <svg viewBox="{{chMe.qrVb}}" style="width: min(80vw, 60vh, 420px); height: auto" role="img" aria-label="QR code membre" shape-rendering="crispEdges"><path d="{{chMe.qrD}}" fill="#000"></path></svg>
+            <div class="num" style="font-size: 26px; letter-spacing: .06em; color: #000">{{chMe.number}}</div>
+            <div style="font-size: 14px; color: #444">Membre Casa Besports · {{chMe.level}}</div>
+            <button type="button" class="btn btn-dark" onClick="{{chMe.closeQr}}">Fermer</button>
+          </div></sc-if>
           <div style="margin-top: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: 1rem 1.1rem">
             <div style="display: flex; justify-content: space-between; align-items: baseline"><span class="eb" style="font-size: 13px">Progression</span><span class="num" style="font-size: 22px; color: var(--ink)">{{chMe.points}} pts</span></div>
             <div style="height: 10px; background: var(--surface-2); border-radius: 0; overflow: hidden; margin: .6rem 0 .4rem"><div style="height: 10px; width: {{chMe.pct}}; background: var(--acc)"></div></div>

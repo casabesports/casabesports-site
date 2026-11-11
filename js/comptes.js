@@ -59,9 +59,18 @@
       return use(function (c) { return c.auth.resetPasswordForEmail(String(email).trim().toLowerCase(), { redirectTo: location.origin + location.pathname }); });
     },
     recovery: false,
+    // Carte membre : enregistre le numéro dans la table « membres » (voir docs/CARTE-MEMBRE.md)
+    registerMember: function (numero, prenom) {
+      return use(function (c) { return c.from('membres').upsert({ id: A.user.id, numero: numero, prenom: prenom || null }, { onConflict: 'id' }); });
+    },
+    // Vérification par un partenaire (sans compte) : renvoie { prenom, depuis, statut } ou null
+    verifyMember: function (numero) {
+      return use(function (c) { return c.rpc('verifier_membre', { num: numero }); }).then(function (d) { return Array.isArray(d) ? (d[0] || null) : (d || null); });
+    },
     signOut: function () { return use(function (c) { return c.auth.signOut(); }); }
   };
   if (!A.on) return;
+  A.memberLive = true;
 
   function emit(u) { A.user = u; listeners.forEach(function (cb) { try { cb(u); } catch (e) {} }); }
   function toUser(session) {

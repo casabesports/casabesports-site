@@ -5,6 +5,34 @@
  * La classe Component est montée par js/dc-runtime.js ; renderVals() fournit les valeurs du gabarit.
  */
 const BLOB_FILES = {"0855c8136dcdda770cb476333ba7ad46": "hero.jpg", "5cd343902a0b6d6a654108dee90d6fc3": "img_51314cdd.jpg", "66c390103494d9a28a5f34e10524881c": "img_fe51d409.jpg", "2b8b1c873d91f86dbbe51fe32be05f69": "img_2fb41bb1.jpg", "d75f806f46d28a0e206a30c27b8e58ad": "img_4994dc60.jpg", "904540d957c239c0ab657cce252abfb1": "img_11c2b62b.jpg", "38c25d93ed37833c9d08d0a1d75de3f1": "img_d9e43f35.jpg", "8d45daef1b083349dec7666774fc55ff": "img_b0f4c33c.jpg", "c6e9c6ecc949a47ccf67d70d758f0fe5": "img_4606c0a1.jpg", "2010d82cc508d4cb5ef99cb551c26649": "img_a1612881.jpg", "e6132a6993a0d040085ac66b6f46cf6e": "a_photographe.jpg", "183faa9bf4b22beda6d2cb41e6b91225": "a_benevoles.jpg", "33cc6fbd406b8554971d61a0887d4a76": "a_buteurs.jpg", "824fb1ca8687d16522c2ba8f05d66086": "a_fceh.jpg", "4f81a4491eb301c8894c5d5d2ab04ff6": "a_bluesquad.jpg", "f2d41cc7df08eba8f5272bd4fddfac50": "a_feminines.jpg", "020b8966d676cf17abcd5d5bc3a0367d": "v_digosville.jpg", "5841e4625d308992d931ba37f1195ce3": "v_arbitre.jpg", "c83c4c88d71f1d3daf3a3aab27ebcfcf": "p_rouleau.jpg", "100430acc5d688e72f589b6ca475b01d": "p_letan.jpg", "eea5f2cb98593d0a8baa19b10e57a843": "p_piedagnel.jpg", "fe4b5960100016bbbb4080d69cfbb67d": "p_mariette.jpg", "b94216cd40407eb3e572ce66447bac81": "p_cgosselin.jpg", "a2337077993c11e33ea45478e8c0355d": "p_edubois.jpg", "47cc1f566d64d7869adcd6c21cdf47bf": "lieu_gare.svg", "f46b43bf0cb05c3fde4cba8ae7d9c8d5": "lieu_gatteville.svg", "68220997b900b01cc4ef65a2529b0ff1": "lieu_jobourg.svg", "56c5699f8f042372def6ef4a6c5ca373": "lieu_mont.svg", "37f0accd200070c08850e6289a7929b2": "lieu_rade.svg", "66637b2212fc497ace187dc8cf592255": "lieu_sme.svg", "0de7edf37ab180831b6bc0716d103174": "vt_bob.svg", "fd1211c3ff3542889b121013ad1870ef": "vt_casquette.svg", "f42d1f454d139e25a1ac0ee024729688": "vt_crew_vestiaire.svg", "d9a1db651fe41d5fd589c366bef1324f": "vt_hoodie_csc.svg", "deb3fbf78d39b9e4c4113f074d7c9aca": "vt_hoodie_signature.svg", "5b6c3a1ff464e0f2d225ba053daaad40": "vt_jogger.svg", "9b36fe1ef00b3ec975a9172298a6454c": "vt_maillot_retro.svg", "c9a63220440c307d4cb0d4ede91458db": "vt_pull_marin.svg", "5b1edd96ba3ffdebc3e7aa064e7b33aa": "vt_short_isles.svg", "97e778b2f0df4c4eb062d01e0da991b4": "vt_tee_identitaire.svg", "32a264a8dac6d54d7c4f1f0be13729ef": "vt_tee_phare.svg", "826b023bd7ad50930b096cfa62539fbe": "vt_tee_rade.svg", "e4e307f2a97987e98f438ae8fb818be7": "vt_tote.svg", "e2b6c5370ceaeee61a7cce40f0298965": "vt_track_jacket.svg", "abec48f4e69f287e10674c11a8468bec": "livre_impact.svg", "91855c40cd47f028874202e72a33d389": "gz_cover.jpg", "bae1d2ac6cb6529aa1e99e023df405ff": "gz_scarf.jpg", "25fc361529644e7b5978722ef83683b6": "gz_benevole.jpg", "981e82bbbb0f7a9367c97e4c848c2fc6": "ph_hoodie_roule.jpg", "b248d9f3a2edcd1758c3805be91a57a2": "ph_crew_presquile.jpg", "3da9816218acfc421e4732cb9d2f5b52": "ph_hoodie_signature.jpg", "c00d8ac59262a5549ee606cc8fb2de8c": "ph_crew_vestiaire.jpg", "b75f47de93c1cb54bec627f5067d8110": "ph_hoodie_csc.jpg", "2c48f7132b968b70be1c7d701dc4a9d6": "ph_tee_identitaire.jpg", "7ee74118a425ec7af743cd47cb36fdc4": "ph_pull_marin.jpg", "a81051d440f01667a54fa15c341bc54f": "ph_tote.jpg", "f06f2d89c41fd9b8126e1c5385bb9dcc": "ph_tee_phare.jpg", "ca6ba71144c430d01edfdbf1e2a9af0c": "ph_tee_rade.jpg", "a48eb676f77a86afa6b51ee515273bef": "ph_maillot_retro.jpg", "131e295ddb6c101579cef305062b367b": "ph_track_jacket.jpg", "16e026e698fae2bef37b1f79d0419272": "ph_jogger.jpg", "5cf5a581ded4f4eb23159f4cd0e9c5c6": "ph_short_isles.jpg", "ca573d60402844d34a66033b90eefbf5": "ph_bob.jpg", "92b8ad3992858d32669bcfea753c86ca": "ph_casquette.jpg", "c28fddabc16efa8e58e4c93afee5990d": "dt_hoodie_roule.jpg", "1a81347b7337a4d848621af0fb067688": "dt_crew_presquile.jpg", "a7f3ab74b38b934ee0063eba2975cdd6": "dt_hoodie_signature.jpg", "c385b1324c6ffa4e23d8af37ea839381": "gz_foule.jpg", "56cc472c6c2fbb4d9666f881a2e56edf": "gz_duel.jpg", "9807b5c5369f06c7aaf95b75312f046d": "ph_kit_runes.jpg", "0db18dd911c14da925f4e895f71e4e1c": "ph_kit_runes_dos.jpg", "e615fde32424915e839a12659097f676": "dt_kit_runes.jpg", "f1953e481ef07e95680164a46c2d9f41": "ph_kit_runes_ml.jpg", "7622c7f11f14ef0c49d572d2decbbae5": "ph_short_runes.jpg", "4406cb951b6112ead68dac1d86a30e53": "ph_kit_ancre.jpg", "65c33e4e715ef5dd1201de7343556d4b": "ph_short_ancre.jpg", "89cc02d697fec04f522599802bf187d8": "ph_kit_ciel.jpg", "b04e3dcc6da7234630c60ea939f854eb": "ph_kit_nuit.jpg", "aea7ea50082d523bc83f3f6017ba816f": "ph_kit_diagonale.jpg", "6f95460a58f5dc0c53a254df010b7963": "ph_tee_viking.jpg", "aa0d7bea1efc166a337ab714b04b33e1": "ph_cap_viking.jpg", "c4379d1401d63672573652d5be3b7e4e": "ph_patch_cb.jpg", "a1ac42a493284740e4e43b170065bafb": "ia_viking.jpg", "3ffb17091f7c840777e15fe18bb3fbac": "ia_logo.jpg", "1dd9d448ba429149f6f1cde6ac32d694": "logo-casabesports.svg"};
+
+// ---------- numéro de membre : permanent, unique, avec lettre de contrôle ----------
+const CB_B32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+function cbMemberNo(uid) {
+  const hex = String(uid || '').replace(/[^0-9a-f]/gi, '').slice(0, 10).padEnd(10, '0');
+  let n = parseInt(hex, 16), body = '';
+  for (let i = 0; i < 8; i++) { body = CB_B32[n % 32] + body; n = Math.floor(n / 32); }
+  let sum = 0; for (let i = 0; i < 8; i++) sum += (i + 1) * CB_B32.indexOf(body[i]);
+  return 'CB-' + body.slice(0, 4) + '-' + body.slice(4) + '-' + CB_B32[sum % 32];
+}
+function cbMemberCheck(raw) {
+  const m = String(raw || '').toUpperCase().replace(/[\s.]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1').match(/^CB-?([0-9A-Z]{4})-?([0-9A-Z]{4})-?([0-9A-Z])$/);
+  if (!m) return '';
+  const body = m[1] + m[2]; let sum = 0;
+  for (let i = 0; i < 8; i++) { const v = CB_B32.indexOf(body[i]); if (v < 0) return ''; sum += (i + 1) * v; }
+  return CB_B32[sum % 32] === m[3] ? 'CB-' + m[1] + '-' + m[2] + '-' + m[3] : '';
+}
+function cbQr(text) {
+  if (!window.qrcode || !text) return null;
+  try {
+    const q = window.qrcode(0, 'M'); q.addData(text); q.make();
+    const n = q.getModuleCount(); let d = '';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += 'M' + c + ' ' + r + 'h1v1h-1z';
+    return { d, vb: '-2 -2 ' + (n + 4) + ' ' + (n + 4) };
+  } catch (e) { return null; }
+}
+function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(location.protocol) ? location.origin + location.pathname : 'https://casabesports.fr/')).replace(/index\.html$/, ''); }
+
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -38,6 +66,7 @@ class Component extends DCLogic {
           const staff = ((window.CASA_EQUIPE) || []).find((m) => m.email && u.email && m.email.trim().toLowerCase() === u.email.trim().toLowerCase());
           this.setState({ loggedIn: true, loginOpen: false, linkSent: false, codeSent: false, smsCode: '', email: u.email || this.state.email, phone: u.phone || this.state.phone, name: u.name || (staff && staff.name) || this.state.name, role: staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null });
           if (!u.name && this.state.name.trim()) window.CasaAuth.updateName(this.state.name.trim()).catch(() => {});
+          if (window.CasaAuth.registerMember) window.CasaAuth.registerMember(cbMemberNo(u.id), String(u.name || this.state.name || '').trim().split(/\s+/)[0] || null).catch(() => {});
           this.applyProfileTheme((u.email || u.phone || u.id).toLowerCase());
           const needPw = !u.hasPassword || window.CasaAuth.recovery;
           this.setState({ hasPassword: !!u.hasPassword, pwOpen: needPw && !this.readLS('cb-pw-later-' + u.id, false) || window.CasaAuth.recovery, pw: '', pw2: '', pwDone: false });
@@ -66,6 +95,7 @@ class Component extends DCLogic {
     try { window.addEventListener('keydown', this._onGzKey); } catch (e) {}
     try { this._mq = window.matchMedia('(prefers-color-scheme: dark)'); this._onMq = (e) => this.setState({ sysDark: e.matches }); if (this._mq.addEventListener) this._mq.addEventListener('change', this._onMq); else this._mq.addListener(this._onMq); } catch (e) {}
     try { document.documentElement.setAttribute('data-cb-theme', this.state.theme); } catch (e) {}
+    try { const mq = new URLSearchParams(location.search).get('membre'); if (mq) setTimeout(() => { this.go('verifier', { mbQ: mq.slice(0, 20) }); this.checkMember(mq); }, 0); } catch (e) {}
     try { const vq = new URLSearchParams(location.search).get('verifier'); if (vq) setTimeout(() => this.go('verifier', { verifId: vq.slice(0, 20) }), 0); } catch (e) {}
     this.creaInit();
     this.fetchWeather(this.state.wxCity); this._wxIv = setInterval(() => { const c = this.state.wxCity; const w = (this.state.wxLive || {})[c]; if (w) { this.setState({ wxLive: Object.assign({}, this.state.wxLive, { [c]: Object.assign({}, w, { at: 0 }) }) }); } this.fetchWeather(c); }, 30 * 60 * 1000);
@@ -1047,6 +1077,16 @@ class Component extends DCLogic {
     }
     this.go('app'); this.say('Expérience disponible dans l’application Casa Besports');
   }
+  // Vérification d'une carte membre (partenaires) : format + contrôle en ligne si la table « membres » existe
+  checkMember(raw) {
+    const num = cbMemberCheck(raw);
+    if (!num) { this.setState({ mbRes: 'bad', mbInfo: null }); return; }
+    const A = window.CasaAuth;
+    if (!A || !A.memberLive || !A.verifyMember) { this.setState({ mbRes: 'format', mbInfo: null, mbQ: num }); return; }
+    this.setState({ mbRes: 'busy', mbQ: num });
+    A.verifyMember(num).then((r) => this.setState({ mbRes: r ? (r.statut === 'suspendu' ? 'off' : 'ok') : 'none', mbInfo: r }), () => this.setState({ mbRes: 'format', mbInfo: null }));
+  }
+
   go(view, extra) {
     try { const r = document.documentElement; r.classList.remove('cb-nav'); void r.offsetWidth; r.classList.add('cb-nav'); } catch (e) {}
     const s = this.state;
@@ -1661,7 +1701,7 @@ class Component extends DCLogic {
     const quick = [['Scores en direct', 'Le Terrain', () => this.go('live', { dTab: 'live' })], ['Classement Régional 2', 'Le Terrain', () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' })], ['Maillot personnalisé', 'Boutique', () => this.go('product', { productId: 'maillot-retro', color: 0, size: null, qty: 1 })], ['La Gazette du Cotentin', 'Abonnement', () => this.go('offers', { offerTab: 'La Gazette' })], ['Pointe-Hague défie Goliath', 'Article', () => this.go('article', { articleId: 'pointe-hague' })], ['Carte des clubs', 'Territoire', () => this.go('map')]].map(([label, kind, go]) => ({ label, kind, go }));
 
     // ---------- fil d'Ariane ----------
-    const labelOf = { news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérifier un certificat' };
+    const labelOf = { news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
     const crumbsRaw = [['Accueil', () => this.go('home')]];
     if (labelOf[activeSec] && activeSec !== 'home') crumbsRaw.push([labelOf[activeSec], () => this.go(activeSec)]);
     const leaf = { article: curA.tag, video: curV.title, discipline: dName, club: curC.name, player: curP.name, checkout: sp.name, product: curPr.name, order: 'Commande', live: s.dSport, cv: 'Mon CV' }[s.view];
@@ -1671,7 +1711,7 @@ class Component extends DCLogic {
     const footCols = [
       { title: 'Suivre', links: [['Le Terrain', 'live'], ['Actualités', 'news'], ['Vidéos', 'videos'], ['Disciplines', 'disciplines'], ['Clubs', 'clubs'], ['Joueurs', 'players'], ['Territoire', 'map']] },
       { title: 'Boutique & mag', links: [['Boutique', 'shop'], ['Cherwood × Casa', 'shop'], ['Abonnements', 'offers'], ['La Gazette du Cotentin', 'offers']] },
-      { title: 'Casa Besports', links: [['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier un certificat', 'verifier']] }
+      { title: 'Casa Besports', links: [['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']] }
     ].map((c) => ({ title: c.title, links: c.links.map(([label, v]) => ({ label, go: () => this.go(v, label === 'Cherwood × Casa' ? { shopLine: 'Cherwood × Casa' } : label === 'La Gazette du Cotentin' ? { offerTab: 'La Gazette' } : {}) })) }));
 
     const progress = { home: 8, news: 20, article: 45, video: 45, videos: 20, disciplines: 20, discipline: 40, clubs: 20, club: 45, players: 20, player: 60, map: 30, offers: 30, checkout: 30 + s.step * 17, partners: 40, about: 40, contact: 50, account: 50, live: 35, shop: 25, product: 55, order: 85, studio: 50, legal: 40, meteo: 30, private: 45, culture: 35, clubhouse: 40, olisto: 45, app: 30, cv: 60, verifier: 40 }[s.view] || 10;
@@ -2024,7 +2064,12 @@ class Component extends DCLogic {
     const qr = [];
     for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) { const finder = (x < 3 && y < 3) || (x > 5 && y < 3) || (x < 3 && y > 5); const on = finder ? !(x % 6 === 1 && y % 6 === 1) : ((hash >> ((x * 9 + y) % 29)) & 1) === 1; qr.push({ c: on ? (s.cardColor === 'noir' ? '#0b0b0b' : '#141a21') : 'transparent' }); }
     const BADGES = [['Premier prono', 'Pronostiquer un match du Terrain', myPronos > 0], ['Plume', 'Publier au Club House', myPosts > 0], ['Tribune', 'Participer à un événement', myRsvp > 0], ['Œil de lynx', 'Voter au concours photo', myCulture > 0], ['Entraide', 'Annonce ou covoiturage', myAds + myRides > 0], ['Abonné', 'Être abonné Casa B+', !!s.subs.casab]];
-    const chMe = { name: s.loggedIn ? meName : 'Visiteur', points: String(pts), level: LV[lvIdx][0], number: 'CB-26-' + String(hash % 10000).padStart(4, '0'),
+    const authU = window.CasaAuth && window.CasaAuth.user;
+    const memberNo = s.loggedIn ? cbMemberNo(authU ? authU.id : hash.toString(16).padStart(10, '0')) : '';
+    const memberQr = memberNo ? cbQr(cbSiteUrl() + '?membre=' + memberNo) : null;
+    const chMe = { name: s.loggedIn ? meName : 'Visiteur', points: String(pts), level: LV[lvIdx][0], number: memberNo || 'Connectez-vous',
+      hasQr: !!memberQr, noQr: !memberQr, qrD: memberQr ? memberQr.d : '', qrVb: memberQr ? memberQr.vb : '0 0 1 1',
+      qrBig: !!s.qrBig && !!memberQr, openQr: () => this.setState({ qrBig: true }), closeQr: () => this.setState({ qrBig: false }),
       pct: nextLv ? Math.round((pts - LV[lvIdx][1]) / (nextLv[1] - LV[lvIdx][1]) * 100) + '%' : '100%',
       toNext: !s.loggedIn ? 'Connectez-vous pour cumuler des points' : nextLv ? 'Encore ' + (nextLv[1] - pts) + ' pts pour le niveau ' + nextLv[0] : 'Niveau maximal atteint', qr,
       badges: BADGES.map(([name, how, ok]) => ({ name, how, status: ok ? 'Obtenu' : 'À débloquer', stColor: ok ? 'var(--success)' : 'var(--muted)', border: ok ? 'var(--acc)' : 'var(--line)', op: ok ? '1' : '.7' })),
@@ -2207,6 +2252,9 @@ class Component extends DCLogic {
     rsCtx.cvPending = typeof CasaCV !== 'undefined' && canReseau && s.studioTab === 'reseau' ? CasaCV.pending(this) : 0;
     const RS = typeof CasaReseau !== 'undefined' ? CasaReseau.vals(this, rsCtx) : { carte: {}, com: {}, club: {}, adm: {}, fiche: { has: false, lignes: [] } };
     return {
+      mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
+        ok: s.mbRes === 'ok', off: s.mbRes === 'off', none: s.mbRes === 'none', bad: s.mbRes === 'bad', format: s.mbRes === 'format',
+        prenom: (s.mbInfo && s.mbInfo.prenom) || 'Membre', depuis: s.mbInfo && s.mbInfo.depuis ? 'Membre depuis ' + new Date(s.mbInfo.depuis).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '' },
       rs: RS, cvv: CVV, isCv: V === 'cv', isVerifier: V === 'verifier', goCv: () => this.go('cv'), goVerifier: () => this.go('verifier', { verifId: '' }),
       hasAvatar: !!CVV.avatar, avatar: CVV.avatar, showInitial: s.loggedIn && !CVV.avatar,
       isClubRole, notClubRole: !isClubRole, canReseau, stReseau: s.studioTab === 'reseau' && canReseau, stClubAny: isClubRole && ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0,
