@@ -4942,11 +4942,22 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <sc-if value="{{isMeteo}}" hint-placeholder-val="{{ false }}">
   <section class="wrap" style="padding-top: 1.5rem; padding-bottom: 5rem">
     <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1rem">
-      <div><div class="eb" style="margin-bottom: .4rem">Météo</div><h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4rem)">Le ciel du Cotentin</h1></div>
+      <div><div class="eb" style="margin-bottom: .4rem">Météo</div><h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4rem)">Météo · {{wx.city}}</h1></div>
       <div style="text-align: right; font-size: 13px; color: var(--muted)"><span class="cond" style="font-size: 12px; color: {{wx.srcColor}}">{{wx.source}}</span><br>{{wx.updated}}</div>
     </div>
     <div role="tablist" aria-label="Ville" style="display: flex; gap: .4rem; overflow-x: auto; padding-bottom: .4rem; margin-bottom: 1.25rem">
       <sc-for list="{{wxCities}}" as="wc" hint-placeholder-count="8"><button type="button" role="tab" aria-selected="{{wc.pressed}}" class="chip" onClick="{{wc.pick}}" style="flex: none; background: {{wc.bg}}; color: {{wc.fg}}; border: 1.5px solid {{wc.border}}">{{wc.label}}</button></sc-for>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: .75rem">
+      <sc-for list="{{wxFind.mine}}" as="wm" hint-placeholder-count="0"><span style="display: inline-flex; align-items: stretch"><button type="button" class="chip" onClick="{{wm.pick}}" title="{{wm.region}}" style="background: {{wm.bg}}; color: {{wm.fg}}; border: 1.5px solid {{wm.border}}">{{wm.label}}</button><button type="button" onClick="{{wm.remove}}" aria-label="Retirer {{wm.label}}" style="border: 1.5px solid var(--line-2); border-left: 0; background: var(--surface); color: var(--muted); cursor: pointer; padding: 0 .55rem">×</button></span></sc-for>
+    </div>
+    <div style="position: relative; max-width: 520px; margin-bottom: 1.25rem">
+      <label class="lbl" style="margin: 0">Une autre ville, en France ou dans le monde<input class="field" type="search" value="{{wxFind.q}}" onChange="{{wxFind.onQ}}" placeholder="Paris, Lisbonne, Montréal, Dakar…" autocomplete="off"></label>
+      <sc-if value="{{wxFind.busy}}" hint-placeholder-val="{{ false }}"><p style="color: var(--muted); font-size: 13px; margin: .4rem 0 0">Recherche…</p></sc-if>
+      <sc-if value="{{wxFind.none}}" hint-placeholder-val="{{ false }}"><p style="color: var(--muted); font-size: 13px; margin: .4rem 0 0">Aucune ville trouvée.</p></sc-if>
+      <sc-if value="{{wxFind.hasRes}}" hint-placeholder-val="{{ false }}"><div role="listbox" aria-label="Villes trouvées" style="position: absolute; z-index: 5; left: 0; right: 0; background: var(--surface); border: 1px solid var(--line-2); box-shadow: 0 16px 40px rgba(0,0,0,.18)">
+        <sc-for list="{{wxFind.res}}" as="wr" hint-placeholder-count="0"><button type="button" role="option" onClick="{{wr.add}}" style="display: flex; justify-content: space-between; gap: 1rem; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: .7rem .9rem; cursor: pointer; color: var(--text)"><strong>{{wr.name}}</strong><span style="color: var(--muted); font-size: 13px">{{wr.region}}</span></button></sc-for>
+      </div></sc-if>
     </div>
     <sc-if value="{{wx.loading}}" hint-placeholder-val="{{ false }}"><p class="pulse" style="color: var(--muted)">Chargement des prévisions…</p></sc-if>
 
@@ -4974,9 +4985,9 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
         </div>
         <div style="border-top: 1px solid var(--line); margin-top: 1rem; padding-top: .8rem; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; font-size: 13.5px; color: var(--text-2)">
           <span>Lever : <strong style="color: var(--text)">{{wx.sunrise}}</strong></span><span>Coucher : <strong style="color: var(--text)">{{wx.sunset}}</strong></span>
-          <span>Mer : <strong style="color: var(--text)">{{wx.waves}}</strong></span><span>Marées : <strong style="color: var(--text)">[flux SHOM]</strong></span>
+          <span>Mer : <strong style="color: var(--text)">{{wx.waves}}</strong></span><span>Marées : <a href="https://maree.shom.fr/" target="_blank" rel="noopener" style="color: var(--text); font-weight: 700">horaires SHOM</a></span>
         </div>
-        <div style="margin-top: .8rem; background: var(--note-bg); color: var(--note-fg); border: 1px solid var(--note-line); border-radius: 0; padding: .55rem .75rem; font-size: 13px">Vigilance Météo-France : [flux à brancher]</div>
+        <div style="margin-top: .8rem; background: var(--note-bg); color: var(--note-fg); border: 1px solid var(--note-line); border-radius: 0; padding: .55rem .75rem; font-size: 13px">Vigilance Météo-France : <a href="https://vigilance.meteofrance.fr/fr" target="_blank" rel="noopener" style="color: inherit; font-weight: 700">voir la carte officielle</a></div>
       </div>
     </div>
 
