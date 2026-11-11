@@ -1264,6 +1264,11 @@ class Component extends DCLogic {
       });
     };
     const allM = X.matches.map(matchV);
+    // Le rendez-vous de l'accueil : le prochain match à venir (contenus/sport.js), sinon le bloc est masqué
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const rdvM = allM.filter((m) => m.status === 'up' && (!m.date || m.date >= todayIso)).sort((a, b) => ((a.date || '') + (a.time || '') > (b.date || '') + (b.time || '') ? 1 : -1))[0];
+    const rdv = rdvM ? { has: true, home: rdvM.home, away: rdvM.away, comp: rdvM.compLabel || '', when: [rdvM.dateLabel, rdvM.time, rdvM.venue].filter(Boolean).join(' · '),
+      open: () => this.setState({ matchId: rdvM.id }) } : { has: false, home: '', away: '', comp: '', when: '', open: () => {} };
     const byDate = (a, b) => (a.date || '9999') < (b.date || '9999') ? -1 : 1;
 
     // ---------- navigation ----------
@@ -1856,7 +1861,7 @@ class Component extends DCLogic {
     // ---------- accueil modulable ----------
     const MD = this.modDefs();
     const modsState = (s.mods && s.mods.length) ? s.mods.filter((m) => MD.some((x) => x[0] === m.id)).concat(MD.filter((x) => !s.mods.some((m) => m.id === x[0])).map(([id]) => ({ id, on: true }))) : this.defaultMods();
-    const homeMods = modsState.filter((m) => m.on).map((m) => { const def = MD.find((x) => x[0] === m.id); return { id: m.id, cls: def[2], isUne: m.id === 'une', isLive: m.id === 'live', isMeteo: m.id === 'meteo', isPrivate: m.id === 'private', isRdv: m.id === 'rdv', isActus: m.id === 'actus', isShop: m.id === 'shop', isTable: m.id === 'table', isGazette: m.id === 'gazette', isLieu: m.id === 'lieu', isVideos: m.id === 'videos', isOeuvre: m.id === 'oeuvre', isCultureMod: m.id === 'culture', isClubMod: m.id === 'clubhouse' }; });
+    const homeMods = modsState.filter((m) => m.on).map((m) => { const def = MD.find((x) => x[0] === m.id); return { id: m.id, cls: def[2], isUne: m.id === 'une', isLive: m.id === 'live', isMeteo: m.id === 'meteo', isPrivate: m.id === 'private', isRdv: m.id === 'rdv' && rdv.has, isActus: m.id === 'actus', isShop: m.id === 'shop', isTable: m.id === 'table', isGazette: m.id === 'gazette', isLieu: m.id === 'lieu', isVideos: m.id === 'videos', isOeuvre: m.id === 'oeuvre', isCultureMod: m.id === 'culture', isClubMod: m.id === 'clubhouse' }; });
     const move = (i, dlt) => { const a = modsState.slice(); const j = i + dlt; if (j < 0 || j >= a.length) return; const t = a[i]; a[i] = a[j]; a[j] = t; this.setMods(a); };
     const modRows = modsState.map((m, i) => ({ label: MD.find((x) => x[0] === m.id)[1], on: m.on, toggle: () => this.setMods(modsState.map((x, k) => k === i ? { id: x.id, on: !x.on } : x)), up: () => move(i, -1), down: () => move(i, 1) }));
     const layouts = [['dashboard', 'Tableau de bord', 'Blocs personnalisables'], ['magazine', 'Magazine', 'Grand visuel et récits']].map(([id, label, desc]) => ({ label, desc, checked: s.homeLayout === id ? 'true' : 'false', border: s.homeLayout === id ? 'var(--acc)' : 'var(--line)', pick: () => this.setLayout(id) }));
@@ -2326,7 +2331,7 @@ class Component extends DCLogic {
       goCheckout: () => this.go('checkout', { subPlan: 'casab', step: 1 }),
       openFeatured: () => this.go('article', { articleId: 'pointe-hague' }),
       openESPH: () => this.go('club', { clubId: 'esph', clubTab: 'matchs' }), openAvranches: () => this.go('club', { clubId: 'us-avranches', clubTab: 'matchs' }),
-      openCupMatch: () => this.setState({ matchId: 'm-cfa-avranches' }),
+      rdv, openCupMatch: () => rdv.open(),
       toggleRemind: () => { this.toggleIn('reminders', 'm-cfa-avranches', 'Rappel activé : on vous prévient avant le coup d’envoi', 'Rappel retiré'); },
       remindLabel: s.reminders.indexOf('m-cfa-avranches') >= 0 ? 'Rappel activé ✓' : 'Me le rappeler', remindBg: s.reminders.indexOf('m-cfa-avranches') >= 0 ? 'var(--inv-bg)' : 'var(--surface)', remindFg: s.reminders.indexOf('m-cfa-avranches') >= 0 ? 'var(--on-inv)' : 'var(--ink)',
       hasFeed: feed.length > 0, feed,

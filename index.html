@@ -2301,10 +2301,10 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
             <div class="b-card bn-scope bn-noir bn-rdv">
               <div class="bn-rdv-in">
                 <span class="bn-etiq">Le rendez-vous</span>
-                <button type="button" onClick="{{openCupMatch}}" class="bn-teams" aria-label="Fiche du match ES Pointe-Hague contre US Avranches">
-                  <span class="bn-team">ES Pointe-Hague</span><span class="bn-vs">vs</span><span class="bn-team">US Avranches</span>
+                <button type="button" onClick="{{openCupMatch}}" class="bn-teams" aria-label="Fiche du match">
+                  <span class="bn-team">{{rdv.home}}</span><span class="bn-vs">vs</span><span class="bn-team">{{rdv.away}}</span>
                 </button>
-                <span class="bn-credits">Coupe de France · 4e tour · au stade de Pointe-Hague · [DATE]</span>
+                <span class="bn-credits">{{rdv.comp}} · {{rdv.when}}</span>
                 <button type="button" class="btn btn-gold" onClick="{{toggleRemind}}">{{remindLabel}}</button>
               </div>
             </div>
@@ -2422,26 +2422,26 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
   </section>
 
   <!-- Prochain grand rendez-vous -->
-  <section class="wrap" style="padding-top: 2.5rem">
+  <sc-if value="{{rdv.has}}" hint-placeholder-val="{{ false }}"><section class="wrap" style="padding-top: 2.5rem">
     <div class="bn-scope bn-noir bn-match">
       <div class="bn-match-in">
-        <span class="bn-etiq">Le rendez-vous · Coupe de France · 4e tour</span>
+        <span class="bn-etiq">Le rendez-vous · {{rdv.comp}}</span>
         <div class="bn-teams2">
-          <button type="button" onClick="{{openESPH}}" class="bn-tbtn"><span class="bn-team">ES Pointe-Hague</span></button>
+          <button type="button" onClick="{{openCupMatch}}" class="bn-tbtn"><span class="bn-team">{{rdv.home}}</span></button>
           <span class="bn-vs">vs</span>
-          <button type="button" onClick="{{openAvranches}}" class="bn-tbtn"><span class="bn-team">US Avranches</span></button>
+          <button type="button" onClick="{{openCupMatch}}" class="bn-tbtn"><span class="bn-team">{{rdv.away}}</span></button>
         </div>
-        <p class="bn-match-p">L’année de ses trente ans, l’ES Pointe-Hague reçoit l’invaincu du championnat.</p>
+        
       </div>
       <div class="bn-match-pied">
-        <span class="bn-credits">Au stade de Pointe-Hague · [DATE ET HEURE]</span>
+        <span class="bn-credits">{{rdv.when}}</span>
         <div style="display: flex; gap: .5rem; flex-wrap: wrap">
           <button type="button" class="btn btn-ghost" onClick="{{toggleRemind}}">{{remindLabel}}</button>
           <button type="button" class="btn btn-gold" onClick="{{openCupMatch}}">Pronostiquer</button>
         </div>
       </div>
     </div>
-  </section>
+  </section></sc-if>
 
   <!-- Mon fil -->
   <sc-if value="{{hasFeed}}" hint-placeholder-val="{{ false }}">
