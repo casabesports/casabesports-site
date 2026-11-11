@@ -22,7 +22,7 @@ class Component extends DCLogic {
       offerTab: 'Tout', readerOpen: false, page: 0, nlEmail: '', nlDone: false, tick: 0,
       hdrY: '0', scrolled: false, placeOverride: null, placeOpen: false, placeIdx: 0, partnerId: null, claimed: [],
       aiOpen: false, aiInput: '', aiTyping: false, aiMsgs: [{ role: 'bot', text: 'Bonjour, je suis Casa IA. Posez-moi une question sur les scores, la boutique, la Gazette, les clubs ou l’histoire du Cotentin.', actions: [] }],
-      readerFont: 1, quizAns: {}, gzVote: this.readLS('cb-gz-vote', null), theme: this.loadTheme(), homeLayout: this.readLS('cb-home-layout', 'dashboard'), mods: this.readLS('cb-home-mods', null), customizeOpen: false, wxCity: this.readLS('cb-wx-city', 'Cherbourg'), wxLive: {}, wxLoading: false, priv: null, privFor: null, pvTab: 'jour', pvList: 'courses', pf: {}, pvMember: 'all', chTab: 'fil', bgMode: this.readLS('cb-bg-mode', 'aucun'), crmTab: 'home', crmSel: null, crmType: 'Tous', crmOwner: 'Tous', crmRev: 0, prodImg: 0, cardColor: this.readLS('cb-card-color', 'noir'), chRoom: 'Tous', chAdCat: 'Tout', chOpen: {}, chf: {}, chRev: 0, cuTab: 'expo', cuKind: 'Tous', workIdx: null, votes: this.readLS('cb-votes', {}), cuf: {}, cuSent: false, tmWork: 40, tmRest: 20, tmRounds: 8, tmRunning: false, tmPhase: 'ready', tmLeft: 40, tmRound: 1, sysDark: this.sysDark(), themeMenuOpen: false, themeAnim: false, legalDoc: 'mentions', role: null, studioTab: 'dash', posts: null, editId: 'p1', edMode: 'write', reviewNote: '', commentDraft: '', aiOutKind: null, stQ: '', stFilter: 'all', inviteEmail: '',
+      readerFont: 1, quizAns: {}, gzVote: this.readLS('cb-gz-vote', null), theme: this.loadTheme(), homeLayout: this.readLS('cb-home-layout', 'dashboard'), mods: this.readLS('cb-home-mods', null), customizeOpen: false, wxCity: this.readLS('cb-wx-city', 'Cherbourg'), wxLive: {}, wxLoading: false, priv: null, privFor: null, pvTab: 'jour', pvList: 'courses', pf: {}, pvMember: 'all', chTab: 'fil', bgMode: this.readLS('cb-bg-mode', null), crmTab: 'home', crmSel: null, crmType: 'Tous', crmOwner: 'Tous', crmRev: 0, prodImg: 0, cardColor: this.readLS('cb-card-color', 'noir'), chRoom: 'Tous', chAdCat: 'Tout', chOpen: {}, chf: {}, chRev: 0, cuTab: 'expo', cuKind: 'Tous', workIdx: null, votes: this.readLS('cb-votes', {}), cuf: {}, cuSent: false, tmWork: 40, tmRest: 20, tmRounds: 8, tmRunning: false, tmPhase: 'ready', tmLeft: 40, tmRound: 1, sysDark: this.sysDark(), themeMenuOpen: false, themeAnim: false, legalDoc: 'mentions', role: null, studioTab: 'dash', posts: null, editId: 'p1', edMode: 'write', reviewNote: '', commentDraft: '', aiOutKind: null, stQ: '', stFilter: 'all', inviteEmail: '',
       rx: null, rxu: {}, rxServer: null, staffRole: 'redacteur',
       rsu: {}, cvu: {}, clubRoleId: 'esph', clubEditId: null, verifId: '',
       creaN: 0, creaOpen: false, creaMsg: '', creaTeam: null, creaSure: ''
@@ -1457,14 +1457,15 @@ class Component extends DCLogic {
       pinLabel: pinned ? 'Revenir au fond automatique' : 'Garder ce lieu en fond', pin: () => { this.setState({ placeOverride: pinned ? null : ppRaw.id }); this.say(pinned ? 'Fond automatique selon la page' : ppRaw.short + ' en arrière-plan'); }
     });
     // ---------- fond photo : vraies images du sport du Cotentin ----------
-    const PH = { pointe: ['assets/img_51314cdd.jpg', 'center 35%'], beaumont: ['assets/img_11c2b62b.jpg', 'center 40%'], asc: ['assets/a_photographe.jpg', 'center 30%'], rcmn: ['assets/img_fe51d409.jpg', 'center 40%'],
-      basket: ['assets/a_bluesquad.jpg', 'center 30%'], feminines: ['assets/a_feminines.jpg', 'center 40%'], fceh: ['assets/a_fceh.jpg', 'center 45%'], digos: ['assets/v_digosville.jpg', 'center 35%'],
-      marine: ['assets/img_4994dc60.jpg', 'center 50%'], benevoles: ['assets/a_benevoles.jpg', 'center 40%'], tableau: ['assets/hero.jpg', 'center 30%'] };
-    const photoByView = { home: 'pointe', news: 'beaumont', article: 'beaumont', live: 'asc', videos: 'rcmn', video: 'rcmn', disciplines: 'basket', discipline: 'basket', clubs: 'feminines', club: 'feminines', players: 'fceh', player: 'fceh',
-      shop: 'digos', product: 'digos', order: 'digos', checkout: 'digos', offers: 'marine', account: 'marine', private: 'fceh', clubhouse: 'benevoles', culture: 'tableau', meteo: 'pointe', partners: 'beaumont', olisto: 'marine',
-      about: 'beaumont', contact: 'asc', legal: 'marine', app: 'rcmn', studio: 'asc' };
-    const bgMode = ['photo', 'lieux', 'aucun'].indexOf(s.bgMode) >= 0 ? s.bgMode : 'aucun';
-    const phKey = photoByView[s.view];
+    // fonds photo : réglés dans contenus/fonds.js (une image par page)
+    const FD = window.CASA_FONDS || {}; const FP = FD.pages || {};
+    const pageOfView = { home: 'accueil', news: 'actualites', article: 'actualites', live: 'direct', videos: 'videos', video: 'videos', disciplines: 'disciplines', discipline: 'disciplines', clubs: 'clubs', club: 'clubs', map: 'clubs', players: 'joueurs', player: 'joueurs',
+      shop: 'boutique', product: 'boutique', order: 'boutique', checkout: 'boutique', offers: 'abonnements', account: 'compte', cv: 'compte', private: 'quotidien', clubhouse: 'clubhouse', culture: 'culture', meteo: 'meteo', partners: 'partenaires', olisto: 'partenaires',
+      about: 'apropos', contact: 'contact', legal: 'mentions', app: 'application', studio: 'redaction' };
+    const phEntry = FP[pageOfView[s.view]];
+    const PH = { cur: Array.isArray(phEntry) ? phEntry : (typeof phEntry === 'string' ? [phEntry, 'center'] : null) };
+    const bgMode = ['photo', 'lieux', 'aucun'].indexOf(s.bgMode) >= 0 ? s.bgMode : (['photo', 'lieux'].indexOf(FD.modeParDefaut) >= 0 ? FD.modeParDefaut : 'aucun');
+    const phKey = PH.cur ? 'cur' : null;
     const usePhoto = bgMode === 'photo' && !s.placeOverride && !!phKey && showPlaces;
     const bg = { isPhoto: usePhoto, isIllu: !usePhoto && bgMode !== 'aucun', img: usePhoto ? PH[phKey][0] : '', pos: usePhoto ? PH[phKey][1] : 'center', op: s.view === 'studio' ? '.35' : '1' };
     const bgModes = [['aucun', 'Fond uni', 'Blanc ou noir, comme le logo'], ['photo', 'Photos du terrain', 'Vraies images des clubs, en noir et blanc'], ['lieux', 'Lieux de légende', 'Illustrations du patrimoine']].map(([id, label, sub]) => ({ label, sub, checked: id === bgMode ? 'true' : 'false', border: id === bgMode ? 'var(--acc)' : 'var(--line)', pick: () => { this.setState({ bgMode: id, placeOverride: null }); this.writeLS('cb-bg-mode', id); } }));
