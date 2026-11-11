@@ -110,7 +110,7 @@ class Component extends DCLogic {
     try { document.documentElement.setAttribute('data-cb-theme', this.state.theme); } catch (e) {}
     try {
       const r0 = cbParseRoute(location.hash); if (r0 && r0.view !== 'home' && r0.view !== 'admin' && r0.view !== 'studio') setTimeout(() => this.go(r0.view, r0), 0);
-      this._onPop = () => { const r = cbParseRoute(location.hash) || { view: 'home' }; if (r.view === 'admin') return; if (r.view === 'studio' && !this.state.role) r.view = 'home'; this.setState(Object.assign({ menuOpen: false, moreOpen: false, searchOpen: false }, r)); try { window.scrollTo(0, 0); } catch (e) {} };
+      this._onPop = () => { const r = cbParseRoute(location.hash) || { view: 'home' }; if (r.view === 'admin') return; if (r.view === 'studio' && !this.state.role) r.view = 'home'; this.setState(Object.assign({ menuOpen: false, moreOpen: false, searchOpen: false }, r)); this.setTitle(Object.assign({}, this.state, r)); try { window.scrollTo(0, 0); } catch (e) {} };
       window.addEventListener('popstate', this._onPop);
     } catch (e) {}
     try { const mq = new URLSearchParams(location.search).get('membre'); if (mq) setTimeout(() => { this.go('verifier', { mbQ: mq.slice(0, 20) }); this.checkMember(mq); }, 0); } catch (e) {}
@@ -1171,6 +1171,12 @@ class Component extends DCLogic {
     try {
       const h = st.view === 'home' ? '#/' : cbRouteOf(st);
       if (location.hash !== h && !(h === '#/' && !location.hash)) history[replace ? 'replaceState' : 'pushState'](null, '', h);
+    } catch (e) {}
+    this.setTitle(st);
+  }
+  // Titre de l'onglet du navigateur selon la page affichée
+  setTitle(st) {
+    try {
       let t = CB_TITLES[st.view];
       try {
         const D = this.data();

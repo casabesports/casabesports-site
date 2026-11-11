@@ -42,8 +42,10 @@
     k.split(/(\{\{[^}]+\}\})/).forEach(function (part) {
       if (/^\{\{[^}]+\}\}$/.test(part)) { names.push(part); re += '(.+?)'; } else re += esc(part);
     });
-    pats.push({ re: new RegExp('^' + re + '$'), names: names, en: en });
+    pats.push({ re: new RegExp('^' + re + '$'), names: names, en: en, lit: k.replace(/\{\{[^}]+\}\}/g, '').length });
   });
+  // Le modèle le plus précis passe en premier (« Voir l’œuvre : {{x}} » avant « Voir {{x}} »)
+  pats.sort(function (a, b) { return b.lit - a.lit; });
   // Dates : jours et mois français vers l'anglais (ex. « mercredi 11 novembre », « ven. 13 »)
   var DAYS = { lundi: 'Monday', mardi: 'Tuesday', mercredi: 'Wednesday', jeudi: 'Thursday', vendredi: 'Friday', samedi: 'Saturday', dimanche: 'Sunday' };
   var DAB = { 'lun.': 'Mon', 'mar.': 'Tue', 'mer.': 'Wed', 'jeu.': 'Thu', 'ven.': 'Fri', 'sam.': 'Sat', 'dim.': 'Sun' };
@@ -56,15 +58,25 @@
       .replace(/(\d{1,2}) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|janv\.|févr\.|avr\.|juil\.|sept\.|oct\.|nov\.|déc\.)/gi, function (all, d, m) { return d + ' ' + MONTHS[m.toLowerCase()]; });
     return o === k ? null : o;
   }
-  function tr(raw) {
-    var k = norm(raw); if (!k) return null;
+  function match(k, depth) {
     if (exact[k] != null) return exact[k];
-    if (/\d/.test(k)) { var dd = dates(k); if (dd) return dd; }
     for (var i = 0; i < pats.length; i++) {
       var m = pats[i].re.exec(k); if (!m) continue;
       var out = pats[i].en;
-      pats[i].names.forEach(function (n, j) { out = out.split(n).join(m[j + 1]); });
+      // les valeurs variables sont traduites elles aussi (ex. « À la une · Bientôt »)
+      pats[i].names.forEach(function (n, j) { var v = m[j + 1], t = depth < 2 ? tr(v, depth + 1) : null; out = out.split(n).join(t == null ? v : t); });
       return out;
+    }
+    return null;
+  }
+  function tr(raw, depth) {
+    var k = norm(raw); if (!k) return null;
+    depth = depth || 0;
+    var r = match(k, depth); if (r != null) return r;
+    if (/\d/.test(k)) {
+      var dd = dates(k); if (!dd) return null;
+      // une phrase qui contient une date : on traduit la phrase, puis la date
+      var rd = match(dd, depth); return rd != null ? rd : dd;
     }
     return null;
   }
@@ -81,7 +93,7 @@
   }
   function doEl(el) {
     if (el.nodeType !== 1) return;
-    var tag = el.tagName; if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA') return;
+    var tag = el.tagName; if (tag === 'SCRIPT' || tag === 'STYLE') return;
     for (var i = 0; i < ATTRS.length; i++) {
       var a = el.getAttribute(ATTRS[i]); if (!a) continue;
       var r = tr(a); if (r != null && r !== a) el.setAttribute(ATTRS[i], r);
@@ -95,7 +107,7 @@
     if (root.nodeType !== 1) return;
     doEl(root);
     var w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
-      acceptNode: function (n) { var p = n.nodeType === 1 ? n : n.parentNode; return p && /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+      acceptNode: function (n) { var p = n.nodeType === 1 ? n : n.parentNode; if (n.nodeType === 1 && p.tagName === 'TEXTAREA') return NodeFilter.FILTER_ACCEPT; return p && /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
     });
     var n; while ((n = w.nextNode())) { if (n.nodeType === 3) doText(n); else doEl(n); }
   }
