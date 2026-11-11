@@ -10,11 +10,17 @@
  * clubs   : [{ id, name, sport, city }]                            clubs supplémentaires
  */
 window.CASA_SPORT = {
-  maj: null,
-  sources: [],
-  comps: {},
+  maj: '2026-11-11T22:55:00+01:00',
+  sources: [
+    'https://us-avranches.fr/calendrier-resultats-2026-2027/'
+  ],
+  comps: {
+    Football: [{ id: 'national-1', label: 'National 1' }]
+  },
   tables: {},
-  matches: [],
-  teamClub: {},
+  matches: [
+    { id: 'national-1-2026-11-21-vendee-poire-football-us-avranches-msm', sport: 'Football', comp: 'national-1', date: '2026-11-21', time: '', home: 'Vendée Poiré Football', away: 'US Avranches MSM', hs: null, as: null, status: 'up', venue: 'Stade de l’Idonnière, Le Poiré-sur-Vie', source: 'https://us-avranches.fr/calendrier-resultats-2026-2027/' }
+  ],
+  teamClub: { 'US Avranches MSM': 'us-avranches' },
   clubs: []
 };
