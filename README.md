@@ -46,4 +46,4 @@ La météo (Open-Meteo, en direct) et la carte (OpenStreetMap/IGN) fonctionnent 
 Si vous modifiez l'application dans l'artifact sur claude.ai puis la téléchargez (fichier `.html`) :
 
 - **Avec Claude** : envoyez le fichier dans le projet et demandez « mets à jour le site ».
-- **Seul** (Python installé) : `python3 outils/extraire-artifact.py "chemin/vers/le-fichier.html" dossier-temporaire`, puis renommez les fichiers `js/app-N.js` comme dans `index.html` actuel (ou remplacez simplement `index.html`, `js/` et `assets/` par ceux du dossier temporaire en gardant les noms générés), et envoyez le tout sur GitHub (« Add file › Upload files »).
+- **Seul** (Python installé) : `python3 outils/extraire-artifact.py "chemin/vers/le-fichier.html" nouveau`, puis remplacez `index.html`, `js/` et `assets/` par ceux du dossier `nouveau` et envoyez-les sur GitHub (« Add file › Upload files »).

@@ -1,4 +1,6 @@
 import sys, json, base64, re, os, urllib.parse
+# Usage : python3 outils/extraire-artifact.py artifact.html dossier-de-sortie
+# Transforme le fichier HTML téléchargé depuis claude.ai en site : index.html + js/ + assets/
 src, out = sys.argv[1], sys.argv[2]
 lines = open(src, encoding='utf-8').read().split('\n')
 # strip artifact wrapper: line 1 is wrapper head; inner doc starts at line 2
@@ -32,17 +34,20 @@ def repl(m):
     code = m.group(1)
     if len(code) < 40000: return m.group(0)
     first = code.strip()[:200]
-    if 'THREE' in first: name = 'three.min.js'
-    elif 'leaflet' in first: name = 'leaflet.js'
-    elif 'CASA_NORMANDIE' in first: name = 'carte-normandie.js'
-    elif 'topojson' in first: name = 'topojson.js'
-    else:
-        n_js += 1; name = f'app-{n_js}.js'
+    known = [('Casa Besports — aide en ligne', 'aide.js'), ('Casa Besports — rédaction avancée', 'redaction.js'),
+             ('carte de Normandie embarquée', 'carte-normandie.js'), ('Casa Besports — le réseau local', 'reseau.js'),
+             ('Casa Besports — profil membre', 'profil.js'), ('Casa Besports — logique de l’application', 'app.js'),
+             ('Three.js Authors', 'three.min.js'), ('Leaflet 1.', 'leaflet.js')]
+    name = next((f for k, f in known if k in first), None)
+    if not name:
+        n_js += 1; name = f'module-{n_js}.js'
     open(f'{out}/js/{name}', 'w', encoding='utf-8').write(code)
     print('js', name, len(code), first[:80].replace('\n',' '))
     return f'<script src="js/{name}"></script>'
 html = re.sub(r'<script>(.*?)</script>', repl, html, flags=re.S)
 html = html.replace('window.CASA_ARTIFACT = true; window.CASA_TUILES = false;', 'window.CASA_ARTIFACT = false; window.CASA_WEATHER = true;')
 html = html.replace('window.CASA_APP_URL = "https://claude.ai/artifact/3Z1QbNeNwNDmCizUsTPHJ6";', 'window.CASA_APP_URL = location.origin + "/?app=1";')
+if 'manifest.webmanifest' not in html:
+    html = html.replace('<meta name="apple-mobile-web-app-capable" content="yes">', '<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="icon.svg">\n<meta name="apple-mobile-web-app-capable" content="yes">', 1)
 open(out + '/index.html', 'w', encoding='utf-8').write(html)
 print('index.html', len(html))
