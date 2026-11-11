@@ -2342,10 +2342,10 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
           <!-- Gazette -->
           <sc-if value="{{hm.isGazette}}" hint-placeholder-val="{{ false }}">
             <button type="button" onClick="{{openReader}}" class="b-card b-img cb-deep gz-pc" aria-label="Feuilleter La Gazette du Cotentin, numéro d’essai">
-              <img src="assets/gz_cover.jpg" alt="" class="gz-pc-img">
+              <img src="{{gzCover.image}}" alt="" class="gz-pc-img">
               <span class="gz-pc-veil"></span>
-              <span class="gz-pc-top"><span class="gz-pc-k">Le mag · N°0</span><span class="gz-pc-m"><span>La Gazette</span><br><span>du Cotentin</span></span></span>
-              <span class="gz-pc-bas"><span class="gz-pc-choc">🔥 Le détail choc · p. {{chocPage}}</span><span class="gz-pc-cta">Feuilleter les {{gzCount}} pages →</span></span>
+              <span class="gz-pc-top"><span class="gz-pc-k">Le mag · {{gzCover.numero}}</span><span class="gz-pc-m"><span>La Gazette</span><br><span>du Cotentin</span></span></span>
+              <span class="gz-pc-bas"><span class="gz-pc-choc">{{gzCover.titre}}</span><span class="gz-pc-cta">Feuilleter les {{gzCount}} pages →</span></span>
             </button>
           </sc-if>
           <!-- Lieu du jour -->
@@ -2520,16 +2520,16 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
   <section class="wrap gz-promo">
     <button type="button" onClick="{{openReader}}" aria-label="Feuilleter le dernier numéro de La Gazette du Cotentin" class="gz-mini">
       <span class="gz-mini-mast"><span>La Gazette</span><br><span>du Cotentin</span></span>
-      <span class="gz-mini-folio">N°0 · numéro d’essai · octobre 2026</span>
-      <span class="gz-mini-im"><img src="assets/gz_cover.jpg" alt=""><span class="gz-mini-choc">🔥 Le détail choc</span></span>
-      <span class="gz-mini-t"><span>Pointe-Hague</span> face à Avranches</span>
+      <span class="gz-mini-folio">{{gzCover.numDate}}</span>
+      <span class="gz-mini-im"><img src="{{gzCover.image}}" alt=""></span>
+      <span class="gz-mini-t"><span>{{gzCover.titre}}</span></span>
     </button>
     <div class="gz-promo-txt">
       <div class="eb" style="margin-bottom: .4rem">Le mag</div>
       <h2 class="h2 bn-bh" style="margin-bottom: 1rem"><span class="bn-bandeau">La Gazette</span> du Cotentin</h2>
       <p style="color: var(--text-2); line-height: 1.65; margin: 0 0 1rem; max-width: 32rem">{{gzCount}} pages en cinq cahiers : à la une, le terrain, les gens, le territoire et la pause. Des récits, des portraits, une question qui divise, une page qui ne sert à rien. Et dans chaque numéro, le détail choc : un fait vérifié qui change le regard sur une histoire.</p>
       <p style="color: var(--text-2); line-height: 1.65; margin: 0 0 1.5rem; max-width: 32rem">En numérique, en papier dans votre boîte aux lettres, ou les deux.</p>
-      <div style="display: flex; gap: .6rem; flex-wrap: wrap"><button type="button" class="btn btn-dark" onClick="{{goGazette}}">S’abonner à la Gazette</button><button type="button" class="btn btn-ghost" onClick="{{openReader}}">Feuilleter le numéro d’essai</button></div>
+      <div style="display: flex; gap: .6rem; flex-wrap: wrap"><button type="button" class="btn btn-dark" onClick="{{goGazette}}">S’abonner à la Gazette</button><button type="button" class="btn btn-ghost" onClick="{{openReader}}">Feuilleter le numéro</button></div>
     </div>
   </section>
 </sc-if>
@@ -3312,13 +3312,13 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
   <section class="bn-scope bn-shop-hero" aria-label="Boutique officielle Casa Besports">
     <div class="wrap bn-shop-hero-in">
       <div>
-        <span class="bn-etiq">Casa Besports · la boutique officielle</span>
-        <h1 class="bn-titre">Portez le sport du Cotentin</h1>
-        <p class="sh-tag">Collection Casa Besports et capsule Cherwood × Casa Besports, dessinée, floquée et brodée à Cherbourg.</p>
-        <div class="sh-perks"><span>Livraison offerte dès {{freeShip}}</span><span>Retrait gratuit chez Cherwood, Cherbourg</span><span>Abonnés Casa B+ : −10 %</span></div>
-        <p class="sh-note">Dessinés dans le Cotentin, floqués et brodés à Cherbourg par l’atelier Cherwood.</p>
+        <span class="bn-etiq">{{shopPres.surtitre}}</span>
+        <h1 class="bn-titre">{{shopPres.titre}}</h1>
+        <p class="sh-tag">{{shopPres.texte}}</p>
+        <div class="sh-perks"><sc-for list="{{shopPres.avantages}}" as="av" hint-placeholder-count="3"><span>{{av.t}}</span></sc-for></div>
+        <p class="sh-note">{{shopPres.note}}</p>
       </div>
-      <figure class="bn-cadre"><img src="assets/ph_kit_runes.jpg" alt="Le maillot Runes de la collection Vikings : blanc, lettrage CASA et runes noires" width="1000" height="1000"></figure>
+      <figure class="bn-cadre"><img src="{{shopPres.image}}" alt="{{shopPres.imageAlt}}" width="1000" height="1000"></figure>
     </div>
   </section>
   <section class="wrap" style="padding-top: 2.25rem; padding-bottom: 5rem">
@@ -6387,10 +6387,10 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
   <div role="dialog" aria-modal="true" aria-label="La Gazette du Cotentin, numéro d’essai" class="cb-scope-light gz-desk">
     <div class="gz-bar">
       <span class="gz-mast">La Gazette <span>du Cotentin</span></span>
-      <span class="gz-folio">N°0 · page {{pageNo}} / {{pageTotal}}</span>
+      <span class="gz-folio">{{gzCover.numero}} · page {{pageNo}} / {{pageTotal}}</span>
       <span class="gz-sp"></span>
       <button type="button" onClick="{{gotoToc}}" class="gz-tool">Sommaire</button>
-      <button type="button" onClick="{{gotoChoc}}" class="gz-tool gz-tool-choc" aria-label="Le détail choc, page {{chocPage}}"><span aria-hidden="true">🔥</span><span class="gz-tool-l"> Détail choc</span></button>
+      <sc-if value="{{hasChoc}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{gotoChoc}}" class="gz-tool gz-tool-choc" aria-label="Le détail choc, page {{chocPage}}"><span aria-hidden="true">🔥</span><span class="gz-tool-l"> Détail choc</span></button></sc-if>
       <button type="button" onClick="{{readerFont}}" class="gz-tool gz-tool-aa" aria-label="Taille du texte">Aa {{readerFontLabel}}</button>
       <button type="button" onClick="{{closeReader}}" aria-label="Fermer la liseuse" class="gz-tool gz-x">×</button>
     </div>
@@ -6401,7 +6401,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 
         <!-- en-tête courant : le titre du journal, le numéro, la rubrique et le titre de la page sur son bandeau -->
         <sc-if value="{{pg.hasRunning}}" hint-placeholder-val="{{ false }}">
-          <header class="gz-run"><span>La Gazette du Cotentin</span><span>N°0 · Octobre 2026</span></header>
+          <header class="gz-run"><span>La Gazette du Cotentin</span><span>{{gzCover.numDate}}</span></header>
           <div class="gz-rubline"><span class="gz-etiq">{{pg.rubric}}</span><sc-if value="{{pg.hasScript}}" hint-placeholder-val="{{ true }}"><span class="gz-sub">{{pg.script}}</span></sc-if></div>
           <sc-if value="{{pg.showH}}" hint-placeholder-val="{{ true }}"><h2 class="gz-h"><span class="gz-band">{{pg.tA}}</span><sc-if value="{{pg.hasTB}}" hint-placeholder-val="{{ true }}">{{pg.tB}}</sc-if></h2></sc-if>
         </sc-if>
@@ -6412,14 +6412,14 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
             <h1 class="gz-cv-mast"><span class="gz-band">La Gazette</span><br><span class="gz-band">du Cotentin</span></h1>
             <div class="gz-cv-side">Le sport <br>selon <br>Casa Besports +</div>
           </header>
-          <div class="gz-cv-folio"><span>N°0 · numéro d’essai</span><span>Octobre 2026</span><span>Matchs · histoires · gens d’ici</span></div>
-          <div class="gz-cv-kick"><span class="gz-etiq">Coupe de France · 4e tour</span></div>
-          <div class="gz-cv-t"><span class="gz-band">Pointe-Hague</span> face à Avranches</div>
-          <p class="gz-cv-s">Trente ans d’histoire, un soir de coupe et tout un village en tribune.</p>
+          <div class="gz-cv-folio"><span>{{gzCover.numero}}</span><span>{{gzCover.date}}</span><span>{{gzCover.mention}}</span></div>
+          <div class="gz-cv-kick"><span class="gz-etiq">{{gzCover.surtitre}}</span></div>
+          <div class="gz-cv-t"><span class="gz-band">{{gzCover.titre}}</span></div>
+          <p class="gz-cv-s">{{gzCover.accroche}}</p>
           <figure class="gz-fig gz-cv-fig">
-            <img src="assets/gz_cover.jpg" alt="Photo-illustration : un match de football de nuit devant les supporters">
-            <figcaption>Photo-illustration</figcaption>
-            <button type="button" onClick="{{gotoChoc}}" class="gz-sticker"><span class="gz-sticker-l"><span aria-hidden="true">🔥</span> Le détail choc</span><span class="gz-sticker-t">Le club normand de 3e division qui a joué la finale</span><span class="gz-sticker-p">Page {{chocPage}} →</span></button>
+            <img src="{{gzCover.image}}" alt="">
+            <sc-if value="{{gzCover.hasLegende}}" hint-placeholder-val="{{ false }}"><figcaption>{{gzCover.legende}}</figcaption></sc-if>
+            <sc-if value="{{hasChoc}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{gotoChoc}}" class="gz-sticker"><span class="gz-sticker-l"><span aria-hidden="true">🔥</span> Le détail choc</span><span class="gz-sticker-t">Le club normand de 3e division qui a joué la finale</span><span class="gz-sticker-p">Page {{chocPage}} →</span></button></sc-if>
           </figure>
           <div class="gz-strip">
             <sc-for list="{{gzStrip}}" as="sx" hint-placeholder-count="6"><button type="button" onClick="{{sx.go}}" class="gz-strip-it {{sx.cls}}"><span class="gz-strip-r">{{sx.h}}</span><span class="gz-strip-t">{{sx.t}}</span><span class="gz-strip-p">{{sx.p}}</span></button></sc-for>
@@ -7522,6 +7522,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/fonds.js"></script>
 <script src="contenus/legal.js"></script>
 <script src="contenus/apropos.js"></script>
+<script src="contenus/gazette.js"></script>
 <script src="contenus/anglais.js"></script>
 <script src="js/langue.js"></script>
 <script src="js/comptes.js"></script>

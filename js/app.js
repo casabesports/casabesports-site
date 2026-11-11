@@ -258,7 +258,7 @@ class Component extends DCLogic {
       pack: { name: 'Pack Supporter', mois: 11.9, an: 119, perks: ['Casa B+ complet', 'La Gazette papier + numérique', '−10 % sur la boutique', 'Une écharpe offerte avec l’annuel'], casab: true, gazette: 'duo', paper: true }
     };
     // Lieux (arrière-plans « Lieux de légende », lieu du jour) : contenus/lieux.js
-    const places = (typeof window !== 'undefined' && Array.isArray(window.CASA_LIEUX) && window.CASA_LIEUX.length) ? window.CASA_LIEUX : [{ id: 'rade', name: 'Casa Besports', short: 'Casa Besports', where: 'Cotentin', year: '', img: 'assets/hero.jpg', hook: '', desc: '', moment: '' }];
+    const places = (typeof window !== 'undefined' && Array.isArray(window.CASA_LIEUX) && window.CASA_LIEUX.length) ? window.CASA_LIEUX.filter((p) => p && p.id).map((p) => Object.assign({}, p, { img: p.photo || p.img, isPhoto: !!p.photo })) : [{ id: 'rade', name: 'Casa Besports', short: 'Casa Besports', where: 'Cotentin', year: '', img: 'assets/hero.jpg', hook: '', desc: '', moment: '' }];
     const partners = [
       { id: 'olisto', name: 'OlistO', mono: 'O', sector: 'Crédit immobilier · regroupement de crédits · assurance emprunteur', city: 'Réseau de courtage', tier: 'Platinum', color: '#163a5f', since: 2026, perk: 'Étude de votre projet offerte (à confirmer)', desc: 'Réseau de courtage en crédit immobilier, regroupement de crédits, assurance emprunteur, prêt professionnel et immobilier neuf. Partenaire Casa Besports.', real: true },
     ];
@@ -285,7 +285,7 @@ class Component extends DCLogic {
     const T = (arr) => (arr || []).map((t) => ({ t }));
     // sec : cahier du sommaire · band : début du titre posé sur le bandeau noir · choc : encadré « Le détail choc 🔥 » (fait vérifié, avec sa source)
     const P = (o) => Object.assign({ id: '', sec: '', band: '', kind: 'article', img: null, imgCap: '', script: '', kicker: '', paras: [], quote: '', quoteBy: '', aside: null, score: null, scores: [], rows: null, head: null, cols3: [], drop: true, tilt: false, choc: null, glyph: '' }, o);
-    const pages = [
+    const demoPages = [
       P({ id: 'cover', kind: 'cover', rubric: 'Couverture', title: 'La Gazette du Cotentin' }),
       P({ id: 'toc', kind: 'toc', rubric: 'Sommaire', title: 'Dans ce numéro', script: 'cinq cahiers, trente pages' }),
       // ---------- À la une ----------
@@ -458,6 +458,9 @@ class Component extends DCLogic {
         solutions: 'Solutions du quiz : 1. 75 mètres · 2. 1120 · 3. Le Titanic · 4. 708 · 5. 8-0 · 6. 30 ans · 7. 2017 · 8. Jacques Prévert · 9. 2012 · 10. Peter Sagan.',
         ours: 'La Gazette du Cotentin est éditée par Casa Besports, média indépendant du sport local fondé en 2024. Numéro d’essai : contenus de démonstration, annonceurs fictifs, photo-illustrations signalées comme telles. Les détails chocs sont vérifiés et sourcés.' })
     ];
+    // Le numéro en cours : couverture + sommaire + pages de contenus/gazette.js (ou de l'espace administrateur)
+    const custom = (Array.isArray(window.CASA_GAZETTE) ? window.CASA_GAZETTE : []).filter((p) => p && p.title).map((p, i) => P(Object.assign({ id: 'p' + (i + 1), kind: 'article', sec: 'À la une' }, p, { paras: (p.paras || []).map((x) => (typeof x === 'string' ? { t: x } : x)) })));
+    const pages = [demoPages[0], Object.assign({}, demoPages[1], { script: custom.length ? custom.length + (custom.length > 1 ? ' pages' : ' page') + ' à lire' : 'les pages arrivent bientôt' })].concat(custom);
     // Typographie française : espace insécable avant ? ! : ; » et après « (pas de ponctuation orpheline en début de ligne)
     const fr = (v) => typeof v === 'string' ? (/^(assets\/|data:|\/_blob\/)/.test(v) ? v : v.replace(/ ([?!:;»])/g, '\u00a0$1').replace(/« /g, '«\u00a0').replace(/(\d) (\d{3})(?!\d)/g, '$1\u00a0$2')) : Array.isArray(v) ? v.map(fr) : v && typeof v === 'object' ? Object.keys(v).reduce((o, k) => { o[k] = fr(v[k]); return o; }, {}) : v;
     pages.forEach((p, i) => { Object.keys(p).forEach((k) => { p[k] = fr(p[k]); }); p.n = String(i + 1).padStart(2, '0'); p.i = i; });
@@ -476,7 +479,7 @@ class Component extends DCLogic {
       ['Qui a pris le maillot jaune à Cherbourg-en-Cotentin en 2016 ?', ['Mark Cavendish', 'Peter Sagan', 'Julian Alaphilippe'], 1]
     ];
     quiz.forEach((q) => { q[0] = fr(q[0]); q[1] = fr(q[1]); });
-    const strip = ['weekend', 'choc', 'vestiaire', 'debat', 'retro', 'humeur'].map(idx);
+    const strip = pages.slice(2, 8).map((p) => p.i);
     const secs = ['À la une', 'Le terrain', 'Les gens', 'Le territoire', 'La pause'];
     this._g = { pages, quiz, strip, quizImgs, secs, idx };
     return this._g;
@@ -698,7 +701,7 @@ class Component extends DCLogic {
     const pl = D.players.find((p) => { const parts = n(p.name).split(' '); return parts.some((w) => w.length >= 5 && new RegExp('\\b' + w + '\\b').test(q)); });
     if (pl) return { text: pl.name + ' — n° ' + pl.num + ', ' + pl.role + ' · ' + pl.clubLabel + '.', actions: [act('Voir le profil', () => this.go('player', { playerId: pl.id }))] };
     // lieux et histoire
-    const placeKeys = [['\\brade\\b|\\broule\\b|louis xvi|digue|liberation de cherbourg', 'rade'], ['gatteville|phare|blanche|barfleur|1120', 'gatteville'], ['\\bmont\\b|michel|aubert|cent ans', 'mont'], ['jobourg|hague|prevert|falaise', 'jobourg'], ['sainte|mere|1944|parachut|steele|debarquement', 'sme'], ['titanic|gare maritime|cite de la mer|paquebot', 'gare']];
+    const placeKeys = [['\\brade\\b|\\broule\\b|louis xvi|digue|liberation de cherbourg', 'rade'], ['gatteville|phare|blanche|barfleur|1120', 'gatteville'], ['jobourg|hague|prevert|falaise', 'jobourg'], ['sainte|mere|1944|parachut|steele|debarquement', 'sme'], ['titanic|gare maritime|cite de la mer|paquebot', 'gare']];
     const pk = placeKeys.find(([re]) => new RegExp(re).test(q));
     if (pk && !has(/club|joueur/)) {
       const p = X.places.find((x) => x.id === pk[1]);
@@ -932,8 +935,8 @@ class Component extends DCLogic {
       ['Maison natale de Jean-François Millet', 'Patrimoine', 'Gréville-Hague', 'Au hameau de Gruchy, la maison où naquit en 1814 le peintre de L’Angélus et des Glaneuses.', 'jobourg'],
       ['Airborne Museum', 'Musée', 'Sainte-Mère-Église', 'Consacré aux parachutistes américains largués sur le Cotentin dans la nuit du 5 au 6 juin 1944.', 'sme'],
       ['Phare de Gatteville', 'Patrimoine', 'Gatteville-le-Phare', 'Le deuxième plus haut phare de France, 75 mètres face au raz de Barfleur.', 'gatteville'],
-      ['Abbaye du Mont-Saint-Michel', 'Patrimoine', 'Le Mont-Saint-Michel', 'Chef-d’œuvre de l’architecture médiévale, inscrit au patrimoine mondial de l’Unesco depuis 1979.', 'mont'],
-      ['Scriptorial d’Avranches', 'Musée', 'Avranches', 'Il présente les manuscrits médiévaux de l’abbaye du Mont-Saint-Michel.', 'mont']
+      ['Abbaye du Mont-Saint-Michel', 'Patrimoine', 'Le Mont-Saint-Michel', 'Chef-d’œuvre de l’architecture médiévale, inscrit au patrimoine mondial de l’Unesco depuis 1979.', null],
+      ['Scriptorial d’Avranches', 'Musée', 'Avranches', 'Il présente les manuscrits médiévaux de l’abbaye du Mont-Saint-Michel.', null]
     ].map(([name, kind, city, desc, placeId]) => ({ name, kind, city, desc, placeId }));
     const entries = [
     ].map(([title, id, author, base], i) => ({ id: 'e' + i, title, img: B(id), author, base }));
@@ -1428,6 +1431,7 @@ class Component extends DCLogic {
 
     // ---------- BOUTIQUE ----------
     const lineName = { casa: 'Casa Besports', cherwood: 'Cherwood × Casa', goodies: 'Goodies', vikings: 'Collection Vikings', atelier: 'Créations Casa' };
+    ((window.CASA_BOUTIQUE || {}).collections || []).forEach((c) => { if (c && c.ligne) lineName[c.ligne] = c.nom; });
     const tints = { casa: '#f4f1ea', cherwood: '#eef1ec', goodies: '#f7f0e2', vikings: '#efeeea', atelier: '#efeeea' };
     const prodV = (p) => {
       const c = p.colors[0];
@@ -1454,11 +1458,10 @@ class Component extends DCLogic {
     const AS = (id) => (typeof BLOB_FILES !== 'undefined' ? (window.ASSET_DATA[BLOB_FILES[id]] || ('assets/' + (BLOB_FILES[id] || id))) : '/_blob/' + id);
     const imgOf = (id) => (X.products.find((p) => p.id === id) || {}).img;
     const lineStat = (k) => { const ps = X.products.filter((p) => p.line === k); return ps.length ? ps.length + ' pièces · dès ' + eur0(Math.min.apply(null, ps.map((p) => p.price))) : 'Bientôt disponible'; };
+    const BQ = window.CASA_BOUTIQUE || {};
+    const shopPres = { surtitre: BQ.surtitre || '', titre: BQ.titre || '', texte: BQ.texte || '', avantages: (BQ.avantages || []).map((t) => ({ t })), note: BQ.note || '', image: BQ.image || 'assets/ph_kit_runes.jpg', imageAlt: BQ.imageAlt || '' };
     const shopPosters = [
-      { line: 'Collection Vikings', kick: 'Collection', title: 'La Saga des Vikings', tag: 'Maillots Runes, Ancre, Nuit et Rayé Ciel, floqués à votre nom', img: imgOf('kit-runes'), credits: lineStat('vikings') },
-      { line: 'Casa Besports', kick: 'Les essentiels', title: 'La Légende Casa', tag: 'Hoodie Signature, Le Phare, Rade Club, veste Tribune…', img: imgOf('hoodie-signature'), credits: lineStat('casa') },
-      { line: 'Cherwood × Casa', kick: 'Capsule Cherwood', title: 'Fait à Cherbourg', tag: 'Le Roule, La Presqu’île, le pull marin : la capsule Cherwood × Casa', img: imgOf('crew-presquile'), credits: lineStat('cherwood') },
-      { line: 'Goodies', kick: 'Pour le stade', title: 'Le Butin des Supporters', tag: 'Écharpe, mug, gourde, affiche, stickers et carte cadeau', img: AS('bae1d2ac6cb6529aa1e99e023df405ff'), credits: lineStat('goodies') }
+      ...(BQ.collections || []).map((c) => ({ line: c.nom, kick: c.accroche || '', title: c.titre || c.nom, tag: c.texte || '', img: c.image || (X.products.find((p) => p.line === c.ligne) || {}).img || 'assets/hero.jpg', credits: lineStat(c.ligne) }))
     ].map((d) => Object.assign({ pressed: s.shopLine === d.line ? 'true' : 'false', aria: d.title + ' : afficher la collection ' + d.line, cta: s.shopLine === d.line ? 'Collection affichée' : 'Voir la collection', pick: () => this.setState({ shopLine: s.shopLine === d.line ? 'Tout' : d.line }) }, d));
     const nuitP = X.products.find((p) => p.id === 'kit-nuit');
     const trailer = nuitP ? { name: nuitP.name, title: 'Nuit', sub: 'Le maillot third des Vikings du Cotentin : noir profond à fines rayures, médaillon et écusson pentagone dorés.', img: nuitP.img, price: eur0(nuitP.price), open: () => this.go('product', { productId: 'kit-nuit', color: 0, size: null, qty: 1, persoName: '', persoNum: '', sizeGuide: false, prodImg: 0 }) } : {};
@@ -1560,7 +1563,7 @@ class Component extends DCLogic {
 
     // ---------- Gazette liseuse ----------
     // ---------- lieux ----------
-    const placeByView = { home: 'rade', news: 'gatteville', article: 'gatteville', live: 'mont', videos: 'gare', video: 'gare', disciplines: 'sme', discipline: 'sme', clubs: 'jobourg', club: 'jobourg', map: 'jobourg', players: 'sme', player: 'sme', shop: 'rade', product: 'rade', order: 'rade', offers: 'gatteville', checkout: 'gatteville', partners: 'gare', about: 'mont', contact: 'jobourg', account: 'jobourg', studio: 'rade', legal: 'mont', meteo: 'gatteville', private: 'rade', culture: 'mont', clubhouse: 'jobourg', olisto: 'rade', app: 'gatteville' };
+    const placeByView = { home: 'rade', news: 'gatteville', article: 'gatteville', live: 'gare', videos: 'gare', video: 'gare', disciplines: 'sme', discipline: 'sme', clubs: 'jobourg', club: 'jobourg', map: 'jobourg', players: 'sme', player: 'sme', shop: 'rade', product: 'rade', order: 'rade', offers: 'gatteville', checkout: 'gatteville', partners: 'gare', about: 'rade', contact: 'jobourg', account: 'jobourg', studio: 'rade', legal: 'jobourg', meteo: 'gatteville', private: 'rade', culture: 'gare', clubhouse: 'jobourg', olisto: 'rade', app: 'gatteville' };
     const placeId = s.placeOverride || placeByView[s.view] || 'rade';
     const placeRaw = X.places.find((p) => p.id === placeId) || X.places[0];
     const place = placeRaw;
@@ -1629,7 +1632,7 @@ class Component extends DCLogic {
       hasKicker: !!pgRaw.kicker, hasImg: !!pgRaw.img, hasQuote: !!pgRaw.quote, hasQuoteBy: !!pgRaw.quoteBy, hasAside: !!pgRaw.aside, hasCols3: (pgRaw.cols3 || []).length > 0, hasScore: !!pgRaw.score, hasParas: (pgRaw.paras || []).length > 0,
       score: pgRaw.score ? Object.assign({}, pgRaw.score, { hi: initials2(pgRaw.score.home), ai: initials2(pgRaw.score.away) }) : { home: '', away: '', hs: '', as: '', cap: '', hi: '', ai: '' },
       aside: pgRaw.aside || { h: '', t: '' }, figClass: pgRaw.tilt ? 'gz-cadre' : '', dropClass: pgRaw.drop ? 'gz-drop' : '', imgFit: pgRaw.imgLight ? 'contain' : 'cover', hasStrip: !!(pgRaw.strip || []).length, strip: pgRaw.strip || [],
-      hasChoc: !!gzCh, choc: gzCh ? { t: gzCh.t, src: gzCh.src || '', hasSrc: !!gzCh.src, hasGo: !!gzCh.go, goLabel: 'Lire le détail choc · p. ' + chocP.n } : { t: '', src: '', hasSrc: false, hasGo: false, goLabel: '' },
+      hasChoc: !!gzCh, choc: gzCh ? { t: gzCh.t, src: gzCh.src || '', hasSrc: !!gzCh.src, hasGo: !!gzCh.go, goLabel: 'Lire le détail choc · p. ' + (chocP ? chocP.n : '') } : { t: '', src: '', hasSrc: false, hasGo: false, goLabel: '' },
       // nouvelles rubriques
       stats: pgRaw.stats || [], why: pgRaw.why || '', src: pgRaw.src || '', bigA: pgRaw.bigA || '', bigB: pgRaw.bigB || '', who: pgRaw.who || '',
       pourH: (pgRaw.pour || {}).h || '', pourPts: (pgRaw.pour || {}).pts || [], contreH: (pgRaw.contre || {}).h || '', contrePts: (pgRaw.contre || {}).pts || [], note: pgRaw.note || '',
@@ -1639,7 +1642,7 @@ class Component extends DCLogic {
       classement: (pgRaw.classement || []).map((x, i) => ({ n: String(i + 1), t: x.t })), clT: pgRaw.clT || '', clSub: pgRaw.clSub || ''
     });
     const tocItem = (p) => ({ p: p.n, rubric: p.rubric, title: p.title, thumb: p.img || p.thumb || '', hasThumb: !!(p.img || p.thumb), noThumb: !(p.img || p.thumb), glyph: p.glyph || '·', cls: p.id === 'choc' ? 'is-choc' : '', go: () => gzGo(p.i) });
-    const tocSecs = G.secs.map((label) => ({ label, items: G.pages.filter((p) => p.sec === label).map(tocItem) }));
+    const tocSecs = G.secs.map((label) => ({ label, items: G.pages.filter((p) => p.sec === label).map(tocItem) })).filter((x) => x.items.length);
     const gzStrip = G.strip.map((i) => { const p = G.pages[i]; return { h: p.rubric, t: p.title, p: 'P. ' + p.n, cls: p.id === 'choc' ? 'is-choc' : '', go: () => gzGo(i) }; });
     const thumbs = G.pages.map((p, i) => ({ n: p.id === 'choc' ? '🔥' : p.n, cur: i === pIdx ? 'page' : 'false', cls: p.id === 'choc' ? 'is-choc' : '', label: 'Page ' + p.n + ' : ' + p.title, go: () => gzGo(i) }));
     const quiz = G.quiz.map(([qq, opts, good], qi) => ({ n: String(qi + 1), q: qq, img: G.quizImgs[qi], opts: opts.map((t, oi) => {
@@ -2366,7 +2369,7 @@ class Component extends DCLogic {
       pronoRows, pronoCount,
       matchOpen: !!mxRaw, mx, closeMatch: () => this.setState({ matchId: null }),
       // boutique
-      shopPosters, showTrailer, trailer, crea, creaBanner,
+      shopPosters, shopPres, showTrailer, trailer, crea, creaBanner,
       introOn: !!s.introOn, skipIntro: () => { clearTimeout(this._introT); this.setState({ introOn: false }); },
       goShopVikings: () => this.go('shop', { shopLine: 'Collection Vikings' }),
       freeShip: FREE + ' €', shopLines, shopSort: s.shopSort, onShopSort: (e) => this.setState({ shopSort: e.target.value }), showCherwoodBanner: s.shopLine === 'Cherwood × Casa' || s.shopLine === 'Tout',
@@ -2417,7 +2420,8 @@ class Component extends DCLogic {
       pageNo: String(pIdx + 1), pageTotal: String(NP), pg, tocSecs, gzStrip, thumbs, quiz, gzOlisto: () => this.go('olisto'), adPartners: partners.filter((p) => !p.real), quizScore, quizTotal: String(G.quiz.length),
       pagePrev: () => this.gzGo(pIdx - 1), pageNext: () => this.gzGo(pIdx + 1), noPrev: pIdx === 0, noNext: pIdx >= NP - 1,
       prevLabel: pIdx > 0 ? 'Page précédente : ' + G.pages[pIdx - 1].title : 'Première page', nextLabel: pIdx < NP - 1 ? 'Page suivante : ' + G.pages[pIdx + 1].title : 'Dernière page',
-      gotoToc: () => this.gzGo(G.idx('toc')), gotoChoc: () => this.gzGo(chocI), chocPage: chocP.n, gzProg: Math.round((pIdx + 1) / NP * 100) + '%', gzVote, gzCount: String(NP),
+      gotoToc: () => this.gzGo(G.idx('toc')), gotoChoc: () => this.gzGo(chocI), chocPage: chocP ? chocP.n : 0, hasChoc: G.pages.some((p) => p.kind === 'choc'),
+      gzCover: (() => { const N = window.CASA_GAZETTE_NUMERO || {}; return { numero: 'N°' + (N.numero || '1'), date: N.date || '', mention: N.mention || '', surtitre: N.surtitre || '', titre: N.titre || 'La Gazette du Cotentin', accroche: N.accroche || '', image: N.image || 'assets/gz_cover.jpg', legende: N.legende || '', hasLegende: !!N.legende, numDate: 'N°' + (N.numero || '1') + (N.date ? ' · ' + N.date : '') }; })(), gzProg: Math.round((pIdx + 1) / NP * 100) + '%', gzVote, gzCount: String(NP),
       readerSize: readerSizes[s.readerFont], readerFontLabel: ['A', 'A+', 'A++'][s.readerFont], readerFont: () => this.setState({ readerFont: (s.readerFont + 1) % 3 }),
       goGazetteFromReader: () => this.go('offers', { offerTab: 'La Gazette' }),
       // formulaires

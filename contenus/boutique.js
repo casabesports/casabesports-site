@@ -19,3 +19,24 @@
  */
 window.CASA_PRODUITS = [
 ];
+
+/* ---------- Présentation de la boutique (bandeau et affiches des collections) ----------
+ * Modifiable ici ou dans l'espace administrateur (Boutique › Présentation).
+ * Les images : déposez-les dans assets/boutique/ (ou envoyez-les depuis l'espace administrateur).
+ * collections[].ligne : clé des produits de cette collection (champ « line » des produits).
+ */
+window.CASA_BOUTIQUE = {
+  surtitre: 'Casa Besports · la boutique officielle',
+  titre: 'Portez le sport du Cotentin',
+  texte: 'Collection Casa Besports et capsule Cherwood × Casa Besports, dessinée, floquée et brodée à Cherbourg.',
+  avantages: ['Livraison offerte dès 60 €', 'Retrait gratuit chez Cherwood, Cherbourg', 'Abonnés Casa B+ : −10 %'],
+  note: 'Dessinés dans le Cotentin, floqués et brodés à Cherbourg par l’atelier Cherwood.',
+  image: 'assets/ph_kit_runes.jpg',
+  imageAlt: 'Maillot Casa Besports',
+  collections: [
+    { ligne: 'vikings', nom: 'Collection Vikings', accroche: 'Collection', titre: 'La Saga des Vikings', texte: 'Maillots floqués à votre nom', image: '' },
+    { ligne: 'casa', nom: 'Casa Besports', accroche: 'Les essentiels', titre: 'La Légende Casa', texte: 'Hoodies, tee-shirts et vestes Casa Besports', image: '' },
+    { ligne: 'cherwood', nom: 'Cherwood × Casa', accroche: 'Capsule Cherwood', titre: 'Fait à Cherbourg', texte: 'La capsule Cherwood × Casa', image: '' },
+    { ligne: 'goodies', nom: 'Goodies', accroche: 'Pour le stade', titre: 'Le Butin des Supporters', texte: 'Écharpe, mug, gourde, affiche, stickers et carte cadeau', image: '' }
+  ]
+};
