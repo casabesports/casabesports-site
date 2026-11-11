@@ -40,3 +40,10 @@ Tout ce qui demande un serveur fonctionne en mode « sur cet appareil » : compt
 Les données saisies restent dans le navigateur de la personne. Étape suivante possible : brancher un service en ligne (ex. Supabase, Stripe pour la boutique) pour les comptes, les commandes et la publication d'articles depuis un téléphone.
 
 La météo (Open-Meteo, en direct) et la carte (OpenStreetMap/IGN) fonctionnent sans configuration. Les scores et articles sont des contenus de départ, à mettre à jour dans `js/app.js`.
+
+## Reprendre une nouvelle version de l'artifact claude.ai
+
+Si vous modifiez l'application dans l'artifact sur claude.ai puis la téléchargez (fichier `.html`) :
+
+- **Avec Claude** : envoyez le fichier dans le projet et demandez « mets à jour le site ».
+- **Seul** (Python installé) : `python3 outils/extraire-artifact.py "chemin/vers/le-fichier.html" dossier-temporaire`, puis renommez les fichiers `js/app-N.js` comme dans `index.html` actuel (ou remplacez simplement `index.html`, `js/` et `assets/` par ceux du dossier temporaire en gardant les noms générés), et envoyez le tout sur GitHub (« Add file › Upload files »).
