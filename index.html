@@ -2134,7 +2134,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     </nav>
     <div style="display: flex; align-items: center; gap: .4rem">
       <sc-if value="{{isStaff}}" hint-placeholder-val="{{ false }}">
-        <sc-if value="{{isAdmin}}" hint-placeholder-val="{{ false }}"><button type="button" class="cond" onClick="{{openAdmin}}" style="min-height: 40px; padding: 0 .8rem; border-radius: 0; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg); cursor: pointer; font-size: 13px">Admin</button></sc-if>
+        <sc-if value="{{isAdmin}}" hint-placeholder-val="{{ false }}"><button type="button" class="cond hidesm" onClick="{{openAdmin}}" style="min-height: 40px; padding: 0 .8rem; border-radius: 0; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg); cursor: pointer; font-size: 13px">Admin</button></sc-if>
         <button type="button" class="cond hidesm" onClick="{{goStudio}}" style="min-height: 40px; padding: 0 .8rem; border-radius: 0; border: 1.5px solid var(--ink); background: var(--surface); cursor: pointer; font-size: 13px; color: var(--ink); display: inline-flex; align-items: center; gap: .4rem">Rédaction<sc-if value="{{hasPending}}" hint-placeholder-val="{{ false }}"><span class="num" style="min-width: 20px; height: 20px; border-radius: 0; background: var(--danger); color: var(--on-inv); font-size: 12px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px">{{pendingCount}}</span></sc-if></button>
       </sc-if>
         <button type="button" class="hdr-ico cond" onClick="{{toggleLang}}" aria-label="{{langAria}}" title="{{langAria}}" style="width: 44px; height: 44px; border: 1px solid var(--line-2); border-radius: 50%; background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); font-size: 13px; font-weight: 800">{{langLabel}}</button>
@@ -4745,7 +4745,9 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <sc-if value="{{isAccount}}" hint-placeholder-val="{{ false }}">
   <section class="wrap" style="padding-top: 2rem; padding-bottom: 5rem">
     <div class="eb" style="margin-bottom: .5rem">Mon espace</div>
-    <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4rem); margin-bottom: 1.5rem">Bonjour {{displayName}}</h1>
+    <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4rem); margin-bottom: 1rem">Bonjour {{displayName}}</h1>
+    <p style="margin: 0 0 1.2rem; color: var(--text-2); font-size: 14px">Connecté avec : <strong>{{acctId}}</strong> · {{acctRole}}</p>
+    <sc-if value="{{isAdmin}}" hint-placeholder-val="{{ false }}"><div style="margin: 0 0 1.5rem; background: var(--inv-bg); color: var(--on-inv); padding: 1.1rem 1.4rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between"><span><strong>Espace administrateur</strong> · contenus du site, images, messagerie, équipe et demandes d’accès</span><button type="button" class="btn btn-gold" onClick="{{openAdmin}}">Ouvrir l’espace administrateur</button></div></sc-if>
     <div class="pf-head">
       <div class="pf-ava-col">
         <div class="pf-ava"><sc-if value="{{cvv.prof.hasPhoto}}" hint-placeholder-val="{{ false }}"><img src="{{cvv.prof.photo}}" alt="Votre photo de profil"></sc-if><sc-if value="{{cvv.prof.noPhoto}}" hint-placeholder-val="{{ true }}"><span aria-hidden="true">{{initial}}</span></sc-if></div>
@@ -4848,7 +4850,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
         <button type="button" class="btn btn-gold" onClick="{{accSend}}" style="margin-top: .8rem">{{accBtn}}</button>
       </sc-if>
     </div></sc-if>
-    <sc-if value="{{isAdmin}}" hint-placeholder-val="{{ false }}"><div style="margin-top: 1.5rem; border: 1.5px solid var(--ink); padding: 1.1rem 1.4rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between"><span><strong>Espace administrateur</strong> · contenus du site, images, messagerie, équipe et demandes d’accès</span><button type="button" class="btn btn-gold" onClick="{{openAdmin}}">Ouvrir</button></div></sc-if>
+    
     <h2 class="h2" style="font-size: 2rem; margin: 3rem 0 1rem">Sécurité</h2>
     <p style="color: var(--text-2); margin: 0 0 1rem">Connectez-vous avec votre e-mail ou votre mobile et votre mot de passe.</p>
     <button type="button" class="btn btn-ghost" onClick="{{openPw}}">{{pwBtnLabel}}</button>

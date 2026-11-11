@@ -76,7 +76,7 @@ class Component extends DCLogic {
           const staff = ((window.CASA_EQUIPE) || []).find((m) => m.email && u.email && m.email.trim().toLowerCase() === u.email.trim().toLowerCase());
           this.setState({ loggedIn: true, loginOpen: false, linkSent: false, codeSent: false, smsCode: '', email: u.email || this.state.email, phone: u.phone || this.state.phone, name: u.name || (staff && staff.name) || this.state.name, role: staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null });
           const firstFor = this._authFor !== u.id; this._authFor = u.id;
-          if (firstFor && window.CasaAuth.myRole) window.CasaAuth.myRole().then((r) => { if (r === undefined || !this.state.loggedIn) return; const fileRole = staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null; const role = r === 'admin' ? 'admin' : r === 'redacteur' ? 'writer' : (fileRole === 'admin' ? 'admin' : null); if (role !== this.state.role) this.setState({ role }); }, () => {});
+          if (firstFor && window.CasaAuth.myRole) window.CasaAuth.myRole().then((r) => { this.setState({ srvRole: r || null }); if (r === undefined || !this.state.loggedIn) return; const fileRole = staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null; const role = r === 'admin' ? 'admin' : r === 'redacteur' ? 'writer' : (fileRole === 'admin' ? 'admin' : null); if (role !== this.state.role) this.setState({ role }); }, () => this.setState({ srvRole: 'erreur' }));
           if (firstFor && window.CasaAuth.myAccessRequest) window.CasaAuth.myAccessRequest().then((d) => this.setState({ accReq: d || null }), () => {});
           if (!u.name && this.state.name.trim()) window.CasaAuth.updateName(this.state.name.trim()).catch(() => {});
           if (firstFor && window.CasaAuth.registerMember) window.CasaAuth.registerMember(cbMemberNo(u.id), String(u.name || this.state.name || '').trim().split(/\s+/)[0] || null).catch(() => {});
@@ -2563,6 +2563,7 @@ class Component extends DCLogic {
       aiReset: () => this.setState({ aiMsgs: [{ role: 'bot', text: 'Nouvelle conversation. Que puis-je faire pour vous ?', actions: [] }] }),
       aiSuggest: ['Météo à Cherbourg', 'Ajoute du pain à ma liste de courses', 'Scores en direct', 'Classement R2', 'Tenue chill à moins de 60 €', 'Histoire du phare de Gatteville', 'Ouvre la Gazette page 5', 'Prochain match de Pointe-Hague'].map((l) => ({ label: l, run: () => this.aiAsk(l) })),
       openAdmin: () => this.go('admin'),
+      acctId: s.email || s.phone || '—', acctRole: s.role === 'admin' ? 'administrateur' : s.role === 'writer' ? 'rédaction' : 'abonné' + (s.srvRole === 'erreur' ? ' (rôle non vérifié par le serveur)' : ''),
       accShow: s.loggedIn && !s.role, accNone: !s.accReq || s.accReq.statut === 'refusee', accPending: !!s.accReq && s.accReq.statut === 'en_attente', accRefused: !!s.accReq && s.accReq.statut === 'refusee',
       accMotif: s.accMotif, onAccMotif: (e) => this.setState({ accMotif: e.target.value }), accSend: () => this.requestAccess(), accBtn: s.accBusy ? 'Envoi…' : 'Demander l’accès',
       accDate: s.accReq && s.accReq.cree_le ? new Date(s.accReq.cree_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '',
