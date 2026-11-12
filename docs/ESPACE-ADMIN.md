@@ -28,7 +28,18 @@ Personne d'autre ne voit ce bouton. Et même si quelqu'un trouvait l'adresse, Su
 **Contenus du site** › choisissez la section › **Modifier**.
 
 - Chaque élément (un article, un lieu, un produit…) se déplie en cliquant sur son titre. Boutons ↑ ↓ pour l'ordre, **Dupliquer**, **Supprimer**, **+ Ajouter**.
-- Les champs image ont **Envoyer une photo** (depuis votre ordinateur ou téléphone) et **Bibliothèque** (vos photos déjà envoyées).
+- Les champs image ont **Envoyer une photo** (depuis votre ordinateur ou téléphone), **Rogner** et **Bibliothèque** (vos photos déjà envoyées).
+- **Rognage** : choisissez un format (16:9 pour les articles, 4:3, 3:2, carré, 4:5, 3:4, 9:16 ou format d'origine), faites glisser la photo, zoomez, pivotez si besoin. La photo rognée est enregistrée comme une nouvelle image : l'originale n'est jamais abîmée. Le rognage est proposé à chaque envoi de photo, et dans l'onglet **Images** (bouton « Rogner » sous chaque photo).
+
+### Écrire un article
+
+**Contenus du site › Articles › Modifier › + Rédiger un article**, puis choisissez un format : Article, Brève, Compte rendu de match, Portrait, Interview, Tribune / édito, Annonce / agenda ou Page blanche. Chaque format pré-remplit un plan à compléter. Vous pouvez aussi **reprendre un article de l'espace Rédaction**.
+
+- **Publication** : *Brouillon* (invisible), *En ligne* dès l'enregistrement, ou *Programmer* une date et une heure de mise en ligne.
+- **Texte** : boutons Intertitre, Citation, Liste, Paragraphe, **Photo dans le texte** (envoyée et rognée). Sélectionnez des mots puis cliquez un bouton pour les transformer. Le collage depuis Word ou une page web garde intertitres, citations et listes. Le temps de lecture se calcule tout seul.
+- **Assistant** : proposer un chapeau, des titres, les points clés depuis le texte, relire.
+- **Aperçu** : l'article tel qu'il apparaîtra. Version anglaise facultative en bas.
+- Rien n'est en ligne avant **Enregistrer et publier**.
 - **Enregistrer et publier** : c'est en ligne immédiatement, pour tous les visiteurs.
 - **Version d'origine** : efface vos changements de cette section et rétablit le fichier du dépôt (`contenus/…`).
 

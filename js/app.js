@@ -185,7 +185,8 @@ class Component extends DCLogic {
     const sports = ['Football', 'Basketball', 'Rugby', 'Water-polo', 'Trail', 'Natation', 'Pétanque', 'Roller', 'Équitation', 'Ping-pong', 'Kitesurf', 'Karting', 'Judo', 'Volley-ball', 'Tennis', 'Golf', 'Wing foil', 'Hockey', 'Boxe'];
     // Articles ajoutés par la rédaction ou l'automatisation : contenus/articles.js (les plus récents en premier)
     const extra = (typeof window !== 'undefined' && Array.isArray(window.CASA_ARTICLES) ? window.CASA_ARTICLES : [])
-      .filter((a) => a && a.id && a.title && !articles.some((b) => b.id === a.id))
+      // brouillon : jamais affiché ; publierLe (date ISO) : affiché à partir de cette date
+      .filter((a) => a && a.id && a.title && !a.brouillon && !(a.publierLe && new Date(a.publierLe) > new Date()) && !articles.some((b) => b.id === a.id))
       .map((a) => Object.assign({ sport: 'Multisport', tag: '', date: '', read: '2 min', premium: false, img: 'assets/hero.jpg', alt: a.title, dek: '', clubs: [], points: [], author: 'la rédaction' }, a,
         // version anglaise de l'article si elle existe (titleEn, dekEn, bodyEn, tagEn)
         (window.CasaLang && window.CasaLang.lang === 'en') ? Object.assign({}, a.titleEn ? { title: a.titleEn } : {}, a.dekEn ? { dek: a.dekEn } : {}, a.bodyEn ? { body: a.bodyEn } : {}, a.tagEn ? { tag: a.tagEn } : {}) : {}));
