@@ -15,6 +15,7 @@ Site statique : aucun serveur à maintenir, aucune base de données, hébergemen
 | `contenus/` | **Vos contenus** : articles, résultats, boutique, vidéos, culture, lieux, fonds de page, équipe |
 | `supabase/membres.sql` | Cartes membres et QR code : voir `docs/CARTE-MEMBRE.md` |
 | `js/admin.js`, `supabase/administration.sql` | **Espace administrateur** (contenus, images, messagerie, accès rédaction) : voir `docs/ESPACE-ADMIN.md` |
+| `js/paiement.js`, `supabase/paiements.sql`, `supabase/functions/paiement`, `stripe-webhook`, `portail-abonne` | **Paiements en ligne** (abonnements et boutique, Stripe) : voir `docs/PAIEMENTS.md` |
 | `manifest.webmanifest`, `icon.svg` | Installation sur téléphone (« Ajouter à l'écran d'accueil ») |
 
 ## Modifier le site

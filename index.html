@@ -3669,9 +3669,9 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
         </div>
         <sc-if value="{{needAddress}}" hint-placeholder-val="{{ true }}"><label class="lbl" style="margin-bottom: 1rem">Adresse de livraison<input class="field" value="{{address}}" onChange="{{onAddress}}" placeholder="N°, rue, code postal, ville"></label></sc-if>
         <label class="lbl" style="margin-bottom: 1rem; flex-direction: row; align-items: center; gap: .6rem; cursor: pointer"><input type="checkbox" checked="{{giftWrap}}" onChange="{{toggleGift}}" style="width: 22px; height: 22px; accent-color: var(--ink)">Emballage cadeau avec carte manuscrite (+ 3 €)</label>
-        <div style="border: 1.5px dashed var(--line-2); border-radius: 0; padding: 1.25rem; text-align: center; color: var(--text-2); margin-bottom: 1rem">[Module de paiement sécurisé — prestataire à brancher]</div>
+        <div style="border: 1.5px solid var(--line-2); border-radius: 0; padding: 1.1rem 1.25rem; color: var(--text-2); margin-bottom: 1rem; display: flex; gap: .8rem; align-items: flex-start; text-align: left"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: .1rem"><rect x="4" y="10" width="16" height="11" rx="1"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span>Paiement sécurisé par Stripe : carte bancaire, Apple Pay ou Google Pay. Vous passez sur la page de paiement Stripe, puis vous revenez ici. Casa Besports ne voit jamais votre numéro de carte.</span></div>
         <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
-        <button type="button" class="btn btn-gold" onClick="{{placeOrder}}" style="width: 100%; min-height: 56px">Payer {{orderTotal}}</button>
+        <button type="button" class="btn btn-gold" onClick="{{placeOrder}}" disabled="{{payBusy}}" style="width: 100%; min-height: 56px">{{payLabel}}</button>
       </div>
       <aside style="flex: 1 1 320px; background: var(--surface-3); border: 1px solid var(--line); border-radius: 0; padding: 1.5rem">
         <div class="eb" style="margin-bottom: 1rem">Récapitulatif</div>
@@ -3770,9 +3770,10 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     </sc-if>
     <sc-if value="{{step3}}" hint-placeholder-val="{{ false }}">
       <h1 class="h2" style="margin-bottom: 1.5rem">Paiement</h1>
-      <div style="border: 1.5px dashed var(--line-2); border-radius: 0; padding: 2rem; text-align: center; color: var(--text-2); margin-bottom: 1.5rem">[Module de paiement sécurisé — prestataire à brancher]</div>
+      <div style="border: 1.5px solid var(--line-2); border-radius: 0; padding: 1.25rem 1.4rem; color: var(--text-2); margin-bottom: 1.5rem; display: flex; gap: .8rem; align-items: flex-start; text-align: left"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: .1rem"><rect x="4" y="10" width="16" height="11" rx="1"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span>Paiement sécurisé par Stripe : carte bancaire, Apple Pay ou Google Pay. Vous passez sur la page de paiement Stripe, puis vous revenez ici. Casa Besports ne voit jamais votre numéro de carte. Les abonnements mensuels se résilient à tout moment depuis Mon espace.</span></div>
+      <sc-if value="{{payError}}" hint-placeholder-val="{{ false }}"><div style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{payError}}</div></sc-if>
       <div style="display: flex; justify-content: space-between; padding: 1rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 1.5rem"><span>{{subName}}</span><strong class="num" style="font-size: 20px">{{subPrice}}</strong></div>
-      <div style="display: flex; gap: .6rem"><button type="button" class="btn btn-ghost" onClick="{{prevStep}}">Retour</button><button type="button" class="btn btn-gold" onClick="{{confirmSub}}">Confirmer</button></div>
+      <div style="display: flex; gap: .6rem"><button type="button" class="btn btn-ghost" onClick="{{prevStep}}">Retour</button><button type="button" class="btn btn-gold" onClick="{{confirmSub}}" disabled="{{payBusy}}">{{subPayLabel}}</button></div>
     </sc-if>
     <sc-if value="{{step4}}" hint-placeholder-val="{{ false }}">
       <div style="text-align: center; padding: 2rem 0">
@@ -4972,7 +4973,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
         <div class="eb" style="margin-bottom: .75rem">Abonnement</div>
         <div class="ttl" style="font-size: 28px; margin-bottom: .75rem">{{subStatus}}</div>
         <sc-if value="{{notSubscribed}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-gold" onClick="{{goCheckout}}">Passer à Casa B+</button></sc-if>
-        <sc-if value="{{subscribed}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{cancelSub}}">Résilier</button></sc-if>
+        <sc-if value="{{subscribed}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{cancelSub}}">{{cancelLabel}}</button></sc-if>
       </div>
       <div style="border: 1px solid var(--line); border-radius: 0; padding: 1.5rem">
         <div class="eb" style="margin-bottom: .75rem">Alertes</div>
@@ -7160,6 +7161,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/anglais.js?v=__VERSION__"></script>
 <script src="js/langue.js?v=__VERSION__"></script>
 <script src="js/comptes.js?v=__VERSION__"></script>
+<script src="js/paiement.js?v=__VERSION__"></script>
 <script src="js/app.js?v=__VERSION__"></script>
 <script src="js/admin.js?v=__VERSION__"></script>
 <script src="js/retouches.js?v=__VERSION__"></script>
