@@ -37,7 +37,7 @@
   // Modèle d'un nouvel élément quand la liste est vide
   var TEMPLATES = {
     CASA_ARTICLES: { id: '', sport: 'Football', tag: '', date: '', read: '3 min', premium: false, img: '', alt: '', title: '', dek: '', clubs: [], points: ['', ''], author: 'La rédaction', body: '', titleEn: '', dekEn: '', bodyEn: '', tagEn: '' },
-    CASA_GAZETTE: { id: '', sec: 'À la une', kind: 'article', rubric: '', title: '', script: '', kicker: '', paras: [{ t: '' }], img: '', imgCap: '', quote: '', quoteBy: '' },
+    CASA_GAZETTE: { id: '', sec: 'À la une', kind: 'article', rubric: '', title: '', script: '', kicker: '', img: '', imgCap: '', imgFormat: 'auto', mise: 'auto', paras: [{ t: '' }], colonnes: 'auto', quote: '', quoteBy: '' },
     CASA_LIEUX: { id: '', name: '', short: '', where: '', year: '', img: '', photo: '', hook: '', desc: '', moment: '', sport: '' },
     CASA_PRODUITS: { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: '', gallery: [], colors: ['marine'], sizes: ['S', 'M', 'L', 'XL'], flag: '', isNew: false, desc: '' },
     CASA_VIDEOS: { id: '', tag: '', date: '', img: '', alt: '', title: '', dek: '', url: '', dur: '' },
@@ -48,7 +48,32 @@
     CASA_CULTURE: { salle: '3', title: '', author: '', year: '', technique: '', img: '', alt: '', text: '' }
   };
   // Modèle d'un élément ajouté dans une sous-liste vide
-  var NESTED = { textes: { avant: '', apres: '', apresEn: '', page: '' }, images: { avant: '', apres: '', page: '' }, dates: { annee: '', titre: '', texte: '', titreEn: '', texteEn: '' }, etapes: { annee: '', titre: '', photo: '', alt: '', paragraphes: [] }, etapesEn: { annee: '', titre: '', alt: '', paragraphes: [] }, piliers: { titre: '', texte: '' }, piliersEn: { titre: '', texte: '' }, paras: { t: '' }, sections: ['', ''], collections: { ligne: '', nom: '', accroche: '', titre: '', texte: '', image: '' } };
+  var NESTED = { cols3: { h: '', t: '' }, stats: { k: '', l: '' }, enbref: { h: '', t: '' }, card: { k: '', v: '' }, qs: { n: '', q: '', a: '' }, pts: { t: '' }, entries: { w: '', s: '', d: '' }, baro: { dir: 'up', h: '', t: '' }, classement: { t: '' }, blocks: { img: '', sport: '', title: '', text: '' }, retenir: { n: '', h: '', t: '' }, textes: { avant: '', apres: '', apresEn: '', page: '' }, images: { avant: '', apres: '', page: '' }, dates: { annee: '', titre: '', texte: '', titreEn: '', texteEn: '' }, etapes: { annee: '', titre: '', photo: '', alt: '', paragraphes: [] }, etapesEn: { annee: '', titre: '', alt: '', paragraphes: [] }, piliers: { titre: '', texte: '' }, piliersEn: { titre: '', texte: '' }, paras: { t: '' }, sections: ['', ''], collections: { ligne: '', nom: '', accroche: '', titre: '', texte: '', image: '' } };
+  // ---------- La Gazette : 31 pages (la Une, le sommaire, puis 29 pages intérieures) et ses cartons ----------
+  var GZ_PAGES = 31, GZ_INNER = 29;
+  var GZ_MODELS = [
+    ['article', 'Article', 'Titre, chapeau, photo et texte en colonnes. La mise en page la plus souple.', { sec: 'À la une', kind: 'article', rubric: '', title: '', script: '', kicker: '', img: '', imgCap: '', imgFormat: 'auto', mise: 'auto', paras: [{ t: '' }], colonnes: 'auto', quote: '', quoteBy: '' }],
+    ['portrait', 'Le visage', 'Le portrait d’une personne : nom, discipline, texte, phrase forte, photo verticale.', { sec: 'Les gens', kind: 'portrait', rubric: 'Le visage du Cotentin', title: '', script: '', name: '', sport: '', text: '', tagline: '', img: '', imgFormat: 'portrait', mise: 'droite', cols3: [{ h: '', t: '' }] }],
+    ['qa', 'L’entretien', 'Trois questions, une photo, une citation et une carte d’identité.', { sec: 'Les gens', kind: 'qa', rubric: 'Dans le vestiaire', title: '', script: '', img: '', imgCap: '', imgFormat: 'paysage', who: '', whoSub: '', quote: '', card: [{ k: '', v: '' }], qs: [{ n: '1', q: '', a: '' }] }],
+    ['number', 'Le chiffre', 'Un grand chiffre, ce qu’il veut dire, une photo et trois repères.', { sec: 'Le terrain', kind: 'number', rubric: 'Le chiffre', title: '', script: '', big: '', label: '', lead: '', text: '', img: '', imgCap: '', imgFormat: 'classique', mise: 'gauche', cols3: [{ h: '', t: '' }] }],
+    ['story', 'L’histoire', 'Une grande photo panoramique, un récit et un encadré « En bref ».', { sec: 'Le territoire', kind: 'story', rubric: 'L’histoire', title: '', script: '', img: '', imgCap: '', imgFormat: 'panoramique', lead: '', paras: [{ t: '' }], colonnes: 'auto', quote: '', enbref: [{ h: '', t: '' }] }],
+    ['brief', 'Le week-end en 60 secondes', 'Plusieurs résultats courts avec vignette, et un encadré « À retenir ».', { sec: 'Le terrain', kind: 'brief', rubric: 'Le week-end en 60 secondes', title: '', script: '', blocks: [{ img: '', sport: '', title: '', text: '' }], retenir: [{ n: '1', h: '', t: '' }] }],
+    ['choc', 'Le détail choc', 'La page noire : un fait vérifié et sourcé, des chiffres, un encadré.', { sec: 'À la une', kind: 'choc', rubric: 'Le détail choc', title: '', bigA: '', bigB: '', who: '', stats: [{ k: '', l: '' }], paras: [{ t: '' }], colonnes: 'auto', aside: { h: '', t: '' }, why: '', src: '' }],
+    ['debat', 'La question qui divise', 'Pour ou contre, avec le vote des lecteurs.', { sec: 'La pause', kind: 'debat', rubric: 'La question qui divise', title: '', script: '', lead: '', pour: { h: '', pts: [{ t: '' }] }, contre: { h: '', pts: [{ t: '' }] }, note: '' }],
+    ['lexique', 'Le lexique', 'Des mots du sport ou du Cotentin, expliqués.', { sec: 'La pause', kind: 'lexique', rubric: 'Le lexique', title: '', script: '', lead: '', entries: [{ w: '', s: '', d: '' }] }],
+    ['humeur', 'L’humeur', 'Le baromètre (en hausse, stable, en baisse) et un classement pour sourire.', { sec: 'La pause', kind: 'humeur', rubric: 'L’humeur', title: '', script: '', baro: [{ dir: 'up', h: '', t: '' }], clT: '', clSub: '', classement: [{ t: '' }] }],
+    ['ads', 'Les partenaires', 'Les avantages des partenaires (repris de la section Partenaires).', { sec: 'La pause', kind: 'ads', rubric: 'Partenaires', title: 'Ils soutiennent le sport d’ici', script: '', kicker: '' }],
+    ['back', 'La dernière page', 'Grande photo, l’ours (qui fait la Gazette) et l’appel à s’abonner.', { sec: 'La pause', kind: 'back', rubric: 'Dernière page', title: 'Make it happen', script: 'ici, le sport a une histoire', img: '', imgFormat: 'paysage', solutions: '', ours: '' }]
+  ];
+  function gzModel(kind) { for (var i = 0; i < GZ_MODELS.length; i++) if (GZ_MODELS[i][0] === kind) return GZ_MODELS[i]; return GZ_MODELS[0]; }
+  var SELECTS = {
+    kind: GZ_MODELS.map(function (m) { return [m[0], m[1]]; }),
+    imgFormat: [['auto', 'Format conseillé par le carton'], ['paysage', 'Paysage 16:9'], ['classique', 'Classique 4:3'], ['carre', 'Carré 1:1'], ['portrait', 'Portrait 3:4'], ['panoramique', 'Panoramique 21:9'], ['libre', 'Image entière, sans recadrage']],
+    mise: [['auto', 'Automatique'], ['haut', 'Image en haut, texte dessous'], ['milieu', 'Chapeau, puis image, puis texte'], ['droite', 'Texte à gauche, image à droite'], ['gauche', 'Image à gauche, texte à droite'], ['bas', 'Texte d’abord, image en bas']],
+    colonnes: [['auto', 'Automatique'], ['1', '1 colonne'], ['2', '2 colonnes'], ['3', '3 colonnes']],
+    dir: [['up', '↑ En hausse'], ['flat', '→ Stable'], ['down', '↓ En baisse']],
+    sec: [['À la une', 'À la une'], ['Le terrain', 'Le terrain'], ['Les gens', 'Les gens'], ['Le territoire', 'Le territoire'], ['La pause', 'La pause']]
+  };
   var LABELS = {
     id: 'Identifiant (unique, sans espace ni accent)', title: 'Titre', titre: 'Titre', titleEn: 'Titre (anglais)', titreEn: 'Titre (anglais)', dek: 'Chapeau', dekEn: 'Chapeau (anglais)',
     body: 'Texte de l’article (## intertitre, > citation, ![légende](image))', bodyEn: 'Texte (anglais)', tag: 'Rubrique', tagEn: 'Rubrique (anglais)', sport: 'Discipline', date: 'Date affichée', read: 'Temps de lecture',
@@ -56,15 +81,15 @@
     author: 'Auteur', name: 'Nom', nom: 'Nom', short: 'Nom court / sous-titre', where: 'Lieu', year: 'Année', hook: 'Accroche', desc: 'Description', moment: 'Moment d’histoire', price: 'Prix (€)', type: 'Type',
     line: 'Collection (clé)', ligne: 'Collection (clé)', gallery: 'Galerie de photos', colors: 'Couleurs', sizes: 'Tailles', flag: 'Pastille', isNew: 'Nouveauté', url: 'Adresse de la vidéo', dur: 'Durée',
     salle: 'Salle (1 tableau, 2 lieux, 3 photo, 4 textile)', technique: 'Technique', text: 'Texte', texte: 'Texte', surtitre: 'Surtitre', accroche: 'Accroche', avantages: 'Avantages', note: 'Note', collections: 'Collections',
-    numero: 'Numéro', mention: 'Mention', legende: 'Légende', sec: 'Cahier', kind: 'Modèle de page', rubric: 'Rubrique', script: 'Sous-titre', kicker: 'Chapeau', paras: 'Paragraphes', t: 'Paragraphe',
+    numero: 'Numéro', mention: 'Mention', legende: 'Légende', sec: 'Cahier', kind: 'Carton (modèle de page)', rubric: 'Rubrique', script: 'Sous-titre', kicker: 'Chapeau', paras: 'Paragraphes', t: 'Paragraphe',
     imgCap: 'Légende de l’image', quote: 'Citation', quoteBy: 'Auteur de la citation', modeParDefaut: 'Fond par défaut (aucun, photo, lieux)', pages: 'Pages', paragraphes: 'Paragraphes', paragraphesEn: 'Paragraphes (anglais)',
     city: 'Ville', num: 'Numéro de maillot', role: 'Poste ou fonction', club: 'Club (identifiant, voir la section Clubs)', clubLabel: 'Nom du club affiché (facultatif)', sector: 'Secteur d’activité', tier: 'Niveau de partenariat', site: 'Site internet du partenaire (lien, marqué « vient de Casa Besports »)', app: 'Application du partenaire (lien, facultatif)',
     color: 'Couleur du logo (#xxxxxx)', since: 'Partenaire depuis (année)', perk: 'Avantage offert', real: 'Vrai partenaire (affiché)', mois: 'Prix par mois (€)', an: 'Prix par an (€)', perks: 'Avantages', casab: 'Donne accès à Casa B+',
     gazette: 'Gazette incluse (num, pap, duo ou vide)', paper: 'Envoi papier', bienvenue: 'Message de bienvenue (épinglé)', sondage: 'Sondage de la semaine', question: 'Question (vide = pas de sondage)', options: 'Réponses possibles',
     intro: 'Introduction', cles: 'Chiffres clés', source: 'Source', lien: 'Texte du lien', lieux: 'Communes', equipes: 'Équipes', exacts: 'Stades précis', lat: 'Latitude', lon: 'Longitude', cherche: 'Mot du nom du stade',
-    citation: 'Citation', citationEn: 'Citation (anglais)', dates: 'Frise des dates', textes: 'Textes retouchés', images: 'Images remplacées', avant: 'D’origine (texte ou image)', apres: 'Remplacé par', apresEn: 'Remplacé par (anglais)', page: 'Page (vide = toutes les pages)', annee: 'Année', etapes: 'Étapes de l’histoire', etapesEn: 'Étapes (anglais)', piliers: 'Piliers', piliersEn: 'Piliers (anglais)', manifeste: 'Manifeste (paragraphes)', manifesteEn: 'Manifeste (anglais)', manifesteFin: 'Phrase après la citation', soustitre: 'Sous-titre', intro: 'Phrase d’introduction', photoAlt: 'Description de la photo', alt: 'Description de la photo', raisonSurtitre: 'Surtitre des piliers', raisonTitre: 'Titre des piliers', signature: 'Phrase de conviction', signatureSurtitre: 'Surtitre de la conviction', signatureSuite: 'Suite de la conviction', appel: 'Appel final (paragraphes)', appelTitre: 'Titre de l’appel final', appelFin: 'Dernière phrase', sections: 'Sections', src: 'Source', why: 'Pourquoi ça compte', big: 'Chiffre', l: 'Unité'
+    citation: 'Citation', citationEn: 'Citation (anglais)', dates: 'Frise des dates', imgFormat: 'Format de l’image', mise: 'Position de l’image et du texte', colonnes: 'Colonnes du texte', tagline: 'Phrase forte', lead: 'Chapeau', label: 'Ce que mesure le chiffre', cols3: 'Trois repères', h: 'Titre', bigA: 'Grand titre (début)', bigB: 'Grand titre (fin, sur bandeau)', who: 'Qui', whoSub: 'Sa fonction', stats: 'Chiffres', k: 'Chiffre ou clé', why: 'Pourquoi on vous le raconte', aside: 'Encadré', enbref: 'En bref', card: 'Carte d’identité', v: 'Valeur', qs: 'Questions', q: 'Question', a: 'Réponse', pour: 'Pour', contre: 'Contre', pts: 'Arguments', note: 'Note', entries: 'Mots', w: 'Mot', s: 'Prononciation ou catégorie', d: 'Définition', baro: 'Baromètre', dir: 'Tendance', clT: 'Titre du classement', clSub: 'Sous-titre du classement', classement: 'Classement', blocks: 'Résultats', retenir: 'À retenir', solutions: 'Solutions du quiz', ours: 'L’ours (qui fait la Gazette)', n: 'Numéro', textes: 'Textes retouchés', images: 'Images remplacées', avant: 'D’origine (texte ou image)', apres: 'Remplacé par', apresEn: 'Remplacé par (anglais)', page: 'Page (vide = toutes les pages)', annee: 'Année', etapes: 'Étapes de l’histoire', etapesEn: 'Étapes (anglais)', piliers: 'Piliers', piliersEn: 'Piliers (anglais)', manifeste: 'Manifeste (paragraphes)', manifesteEn: 'Manifeste (anglais)', manifesteFin: 'Phrase après la citation', soustitre: 'Sous-titre', intro: 'Phrase d’introduction', photoAlt: 'Description de la photo', alt: 'Description de la photo', raisonSurtitre: 'Surtitre des piliers', raisonTitre: 'Titre des piliers', signature: 'Phrase de conviction', signatureSurtitre: 'Surtitre de la conviction', signatureSuite: 'Suite de la conviction', appel: 'Appel final (paragraphes)', appelTitre: 'Titre de l’appel final', appelFin: 'Dernière phrase', sections: 'Sections', src: 'Source', why: 'Pourquoi ça compte', big: 'Chiffre', l: 'Unité'
   };
-  var LONG = /^(body|bodyEn|desc|texte|text|dek|dekEn|hook|moment|t|kicker|accroche|motif|message|why|citation|citationEn|note)$/;
+  var LONG = /^(body|bodyEn|desc|texte|text|dek|dekEn|hook|moment|t|kicker|accroche|motif|message|why|citation|citationEn|note|lead|a|d|ours|solutions)$/;
 
   // ---------- état ----------
   var S = { open: false, tab: 'msg', setup: null, msgs: [], mf: 'tous', q: '', sel: null, compose: null, contacts: [], team: [], reqs: [], key: null, work: null, dirty: false, openCards: {}, images: [], busy: false, loaded: {} };
@@ -174,6 +199,7 @@
     '.cba-pvbar{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483002;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:center;background:#0b0b0b;color:#fff;padding:.6rem .8rem;border:2px solid #fff;box-shadow:0 18px 50px -12px rgba(0,0,0,.6);font-family:var(--font-body,system-ui,sans-serif);font-size:14px;width:max-content;max-width:calc(100vw - 24px)}' +
     '.cba-pvbar .cba-btn{border-color:#fff;background:transparent;color:#fff}.cba-pvbar .cba-btn.pri{background:#fff;color:#0b0b0b}' +
     '.cba-tag.dr{background:#2f5d8a}' +
+    '.cba-gzplan{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:.4rem}.cba-gzt{display:flex;flex-direction:column;gap:.15rem;text-align:left;border:1.5px solid var(--line,#ccc);background:var(--surface,#fff);color:inherit;padding:.45rem .5rem;min-height:74px;cursor:pointer;font:inherit}.cba-gzt .n{font-weight:900;font-size:12px;color:var(--muted,#666)}.cba-gzt .t{font-weight:800;font-size:13px;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.cba-gzt .m{font-size:11.5px;color:var(--muted,#666)}.cba-gzt.on{border-color:var(--ink,#111);box-shadow:inset 0 0 0 2px var(--ink,#111)}.cba-gzt.free{border-style:dashed;opacity:.75}.cba-gzt.fix{background:var(--surface-2,#f3f3f3);cursor:default}button.cba-gzt.fix{cursor:pointer}.cba-gzt.warn{border-color:#b26a00}' +
     '.cba-tbl{width:100%;border-collapse:collapse;font-size:14px}.cba-tbl td,.cba-tbl th{border-bottom:1px solid var(--line,#ddd);padding:.5rem .4rem;text-align:left;vertical-align:top}';
 
   // ---------- ouverture ----------
@@ -385,13 +411,13 @@
         return E('div', { class: 'cba-card', style: 'margin:0;display:flex;flex-direction:column;gap:.4rem' },
           E('strong', { style: 'font-size:1.05rem' }, sec.label, edited.indexOf(sec.key) >= 0 ? E('span', { class: 'cba-tag' }, 'modifié en ligne') : null, draftGet(sec.key) ? E('span', { class: 'cba-tag dr' }, 'brouillon') : null),
           E('span', { style: 'color:var(--text-2);font-size:14px;flex:1' }, sec.desc), n ? E('span', { style: 'color:var(--muted);font-size:13px' }, n) : null,
-          E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.key = sec.key; S.work = withFields(sec.key, clone(window[sec.key])); S.dirty = false; S.openCards = {}; S.art = null; render(); body.scrollTop = 0; } }, 'Modifier'));
+          E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.key = sec.key; S.work = withFields(sec.key, clone(window[sec.key])); S.dirty = false; S.openCards = {}; S.art = null; S.gzSel = null; render(); body.scrollTop = 0; } }, 'Modifier'));
       }))];
   }
   // Affiche aussi les champs prévus par le modèle (ex. « Photo » des lieux) même s'ils sont encore vides
   function withFields(k, v) {
     var T = TEMPLATES[k]; if (!T || !Array.isArray(v)) return v;
-    return v.map(function (x) { if (!x || typeof x !== 'object' || Array.isArray(x)) return x; var o = Object.assign({}, x); Object.keys(T).forEach(function (f) { if (!(f in o)) o[f] = clone(T[f]); }); return o; });
+    return v.map(function (x) { if (!x || typeof x !== 'object' || Array.isArray(x)) return x; var o = Object.assign({}, x), TT = k === 'CASA_GAZETTE' ? Object.assign({ id: '' }, gzModel(o.kind || 'article')[3]) : T; Object.keys(TT).forEach(function (f) { if (!(f in o)) o[f] = clone(TT[f]); }); return o; });
   }
   function secOf(k) { return SECTIONS.find(function (s) { return s.key === k; }) || { label: k }; }
   function mark() { draftLater(); if (!S.dirty) { S.dirty = true; var b = root && root.querySelector('.cba-save'); if (b) b.disabled = false; } }
@@ -406,6 +432,51 @@
     S.busy = true; render();
     A.saveContent(k, v).then(function () { draftDel(k); S.busy = false; S.dirty = false; S.work = withFields(k, clone(window[k])); render(); toast('Publié : visible par tous les visiteurs'); }, function (e) { S.busy = false; render(); err(e); });
   }
+  // ---------- Éditeur de la Gazette : chemin de fer de 31 pages, cartons, page choisie ----------
+  function viewGazette() {
+    var arr = S.work, sel = S.gzSel != null && arr[S.gzSel] ? S.gzSel : null, full = arr.length >= GZ_INNER;
+    var pick = function (i) { S.gzSel = i; render(); var b = root && root.querySelector('#cba-gzpage'); if (b) b.scrollIntoView({ block: 'start' }); };
+    var addModel = function (m) {
+      if (arr.length >= GZ_INNER && !confirm('La Gazette compte déjà ' + GZ_PAGES + ' pages. Ajouter quand même une page en plus ?')) return;
+      arr.push(clone(Object.assign({ id: '' }, m[3]))); S.gzSel = arr.length - 1; mark(); render();
+      var b = root && root.querySelector('#cba-gzpage'); if (b) b.scrollIntoView({ block: 'start' });
+    };
+    var filled = arr.filter(function (p) { return p && p.title; }).length;
+    var tiles = [E('button', { type: 'button', class: 'cba-gzt fix', onclick: function () { editSection('CASA_GAZETTE_NUMERO', null); } }, E('span', { class: 'n' }, '1'), E('span', { class: 't' }, 'La Une'), E('span', { class: 'm' }, 'modifier')),
+      E('div', { class: 'cba-gzt fix' }, E('span', { class: 'n' }, '2'), E('span', { class: 't' }, 'Sommaire'), E('span', { class: 'm' }, 'automatique'))];
+    for (var i = 0; i < Math.max(GZ_INNER, arr.length); i++) (function (i) {
+      var p = arr[i], over = i >= GZ_INNER;
+      if (!p) { tiles.push(E('button', { type: 'button', class: 'cba-gzt free', onclick: function () { var c = root && root.querySelector('#cba-cartons'); if (c) c.scrollIntoView({ block: 'start' }); } }, E('span', { class: 'n' }, String(i + 3)), E('span', { class: 't' }, 'Page libre'), E('span', { class: 'm' }, '+ choisir un carton'))); return; }
+      tiles.push(E('button', { type: 'button', class: 'cba-gzt' + (i === sel ? ' on' : '') + (!p.title || over ? ' warn' : ''), title: !p.title ? 'Sans titre : la page n’apparaît pas dans la Gazette' : over ? 'Au-delà des ' + GZ_PAGES + ' pages' : '', onclick: function () { pick(i); } },
+        E('span', { class: 'n' }, String(i + 3)), E('span', { class: 't' }, p.title || '(sans titre)'), E('span', { class: 'm' }, gzModel(p.kind)[1])));
+    })(i);
+    var out = [E('div', { class: 'cba-card' },
+      E('strong', {}, 'Chemin de fer · ' + GZ_PAGES + ' pages'),
+      E('p', { class: 'cba-sub', style: 'margin:.3rem 0 .7rem;font-size:14px' }, 'La Gazette compte toujours ' + GZ_PAGES + ' pages : la Une, le sommaire, puis ' + GZ_INNER + ' pages intérieures. ' + filled + ' / ' + GZ_INNER + ' pages intérieures écrites' + (filled < GZ_INNER ? ' : il en manque ' + (GZ_INNER - filled) + ' pour un numéro complet.' : '.') + ' Cliquez sur une page pour la modifier.'),
+      E('div', { class: 'cba-gzplan' }, tiles))];
+    if (sel != null) {
+      var p = arr[sel], path = 'CASA_GAZETTE[' + sel + ']';
+      var mv = function (d) { var j = sel + d; if (j < 0 || j >= arr.length) return; var t = arr[sel]; arr[sel] = arr[j]; arr[j] = t; S.gzSel = j; mark(); render(); };
+      out.push(E('div', { class: 'cba-card', id: 'cba-gzpage' },
+        E('div', { class: 'cba-row', style: 'margin-bottom:.4rem' }, E('strong', { style: 'font-size:1.1rem;margin-right:auto' }, 'Page ' + (sel + 3) + ' · ' + (p.title || '(sans titre)')),
+          E('button', { type: 'button', class: 'cba-btn sm', title: 'Page précédente', onclick: function () { mv(-1); } }, '← Déplacer avant'),
+          E('button', { type: 'button', class: 'cba-btn sm', title: 'Page suivante', onclick: function () { mv(1); } }, 'Déplacer après →'),
+          E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { startPreview('CASA_GAZETTE', S.work); } }, 'Aperçu de la page'),
+          E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { var c = clone(p); c.id = ''; c.title = (c.title || '') + ' (copie)'; arr.splice(sel + 1, 0, c); S.gzSel = sel + 1; mark(); render(); } }, 'Dupliquer'),
+          E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Supprimer la page « ' + (p.title || 'sans titre') + ' » ?')) return; arr.splice(sel, 1); S.gzSel = null; mark(); render(); } }, 'Supprimer'),
+          E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { S.gzSel = null; render(); } }, 'Fermer')),
+        E('p', { class: 'cba-sub', style: 'font-size:14px;margin:.2rem 0 .4rem' }, gzModel(p.kind)[2] + ' Le « Titre » est obligatoire pour que la page apparaisse.'),
+        field(arr, sel, '', path, true)));
+    }
+    out.push(E('div', { class: 'cba-card', id: 'cba-cartons' }, E('strong', {}, 'Les cartons'),
+      E('p', { class: 'cba-sub', style: 'margin:.3rem 0 .7rem;font-size:14px' }, full ? 'Les ' + GZ_INNER + ' pages intérieures sont prises : pour changer de carton, ouvrez une page et changez son « Modèle de page ».' : 'Choisissez un modèle : la page est ajoutée à la suite (page ' + (arr.length + 3) + '), vous la remplissez puis la déplacez si besoin.'),
+      E('div', { class: 'cba-secs' }, GZ_MODELS.map(function (m) {
+        return E('div', { class: 'cba-card', style: 'margin:0;display:flex;flex-direction:column;gap:.35rem' }, E('strong', {}, m[1]), E('span', { style: 'font-size:13.5px;color:var(--text-2,#555);flex:1' }, m[2]),
+          E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { addModel(m); } }, 'Ajouter cette page'));
+      }))));
+    return out;
+  }
+
   // ---------- Brouillons (gardés sur cet appareil jusqu'à la publication) ----------
   var DKEY = 'cba-brouillon:', dTimer = null;
   function draftGet(k) { try { var d = JSON.parse(localStorage.getItem(DKEY + k) || 'null'); return d && d.v !== undefined ? d : null; } catch (e) { return null; } }
@@ -438,6 +509,7 @@
     if (S.tab !== 'content') { S.tab = 'content'; }
     S.key = k; S.work = withFields(k, clone(window[k])); S.dirty = false; S.openCards = {}; S.art = null;
     if (idx != null) S.openCards[k + '[' + idx + ']'] = true;
+    S.gzSel = k === 'CASA_GAZETTE' ? idx : null;
     render(); var b = root && root.querySelector('.cba-body'); if (b) b.scrollTop = 0;
   }
   // Depuis la liseuse : page 1-2 → la Une, page 3+ → la page intérieure correspondante
@@ -454,7 +526,7 @@
   // ---------- Aperçu sur le site, avant publication ----------
   var PV = null, pvBar = null;
   var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home' };
-  function openCardIdx(k) { var m = null; Object.keys(S.openCards || {}).forEach(function (p) { var r = p.match(new RegExp('^' + k + '\\[(\\d+)\\]$')); if (r && S.openCards[p]) m = Number(r[1]); }); return m; }
+  function openCardIdx(k) { if (k === 'CASA_GAZETTE' && S.gzSel != null) return S.gzSel; var m = null; Object.keys(S.openCards || {}).forEach(function (p) { var r = p.match(new RegExp('^' + k + '\\[(\\d+)\\]$')); if (r && S.openCards[p]) m = Number(r[1]); }); return m; }
   function startPreview(k, value) {
     var site = window.CasaSite; if (!site || PV) return;
     var v = clone(value), view = VIEW_OF[k] || 'home', extra = {};
@@ -494,6 +566,7 @@
     var ed = E('div', { class: 'cba-ed' });
     var v = S.work;
     if (S.key === 'CASA_ARTICLES' && Array.isArray(v)) add(ed, S.art != null ? viewArticleEditor() : viewArticleList());
+    else if (S.key === 'CASA_GAZETTE' && Array.isArray(v)) add(ed, viewGazette());
     else if (Array.isArray(v) || (v && typeof v === 'object')) add(ed, field({ v: v }, 'v', S.key, S.key, true));
     else add(ed, field(S, 'work', S.key, S.key, true));
     return [E('div', { class: 'cba-bar' },
@@ -530,6 +603,14 @@
     if (typeof v === 'boolean') return E('label', { style: 'display:flex;gap:.5rem;align-items:center;margin:.7rem 0;font-weight:700' }, E('input', { type: 'checkbox', checked: v || null, onchange: function (e) { parent[k] = e.target.checked; mark(); } }), label);
     if (typeof v === 'number') return [lab, E('input', { class: 'cba-in', type: 'number', step: 'any', value: String(v), oninput: function (e) { parent[k] = e.target.value === '' ? 0 : Number(e.target.value); mark(); } })];
     var str = v == null ? '' : String(v);
+    if (S.key === 'CASA_GAZETTE' && SELECTS[k]) {
+      var opts = SELECTS[k].slice(); if (str && !opts.some(function (o) { return o[0] === str; })) opts.unshift([str, str]);
+      var sel = E('select', { class: 'cba-in', onchange: function (e) {
+        parent[k] = e.target.value; mark();
+        if (k === 'kind') { var tpl = gzModel(e.target.value)[3]; Object.keys(tpl).forEach(function (f) { if (!(f in parent) || (f === 'rubric' && !parent[f])) parent[f] = clone(tpl[f]); }); render(); }
+      } }, opts.map(function (o) { return E('option', { value: o[0], selected: o[0] === str || null }, o[1]); }));
+      return [lab, sel];
+    }
     if (isImg(k, str)) return [lab, imgField(parent, k)];
     var long = LONG.test(String(k)) || str.length > 70 || str.indexOf('\n') >= 0;
     var inp = long ? E('textarea', { class: 'cba-in', value: str, rows: String(Math.min(18, Math.max(3, Math.ceil(str.length / 90) + (str.match(/\n/g) || []).length))) }) : E('input', { class: 'cba-in', value: str });

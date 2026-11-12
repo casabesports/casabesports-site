@@ -10,6 +10,10 @@
      'choc'     : le détail choc (fait vérifié) : title, kicker, paras, src
      'humeur'   : la page qui ne sert à rien : title, paras
    sec : cahier du sommaire ('À la une', 'Le terrain', 'Les gens', 'Le territoire', 'La pause')
+   Mise en page (facultatif) : imgFormat ('paysage', 'classique', 'carre', 'portrait', 'panoramique', 'libre'),
+     mise ('haut', 'milieu', 'droite', 'gauche', 'bas'), colonnes ('1', '2', '3').
+   La Gazette compte toujours 31 pages (une par jour du mois) : la Une, le sommaire, puis 29 pages.
+   Le plus simple : Espace admin › Gazette : pages intérieures (chemin de fer et cartons).
    ================================================================ */
 window.CASA_GAZETTE_NUMERO = {
   numero: '1',

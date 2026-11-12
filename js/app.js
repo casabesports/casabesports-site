@@ -1626,10 +1626,23 @@ class Component extends DCLogic {
       pageCls: K === 'choc' ? 'is-noir' : K === 'cover' ? 'is-une' : '',
       hasRunning: ['cover', 'back'].indexOf(K) < 0, showH: K !== 'choc', tA: tt.a, tB: tt.b, hasTB: !!tt.b, hasScript: !!pgRaw.script,
       // article : chapô court (ou absent) et pas de score → photo en pleine largeur sous le chapô ; sinon chapô et photo côte à côte
-      artCls: K === 'article' && !pgRaw.score && String(pgRaw.kicker || '').length < 160 ? 'is-wide' : '',
+      artCls: (() => {
+        const M = pgRaw.mise || 'auto';
+        if (K !== 'article') return '';
+        if (M === 'haut') return 'is-wide gz-imgfirst';
+        if (M === 'milieu' || M === 'bas') return 'is-wide';
+        if (M === 'gauche') return 'gz-imgfirst';
+        if (M === 'droite') return '';
+        return !pgRaw.score && String(pgRaw.kicker || '').length < 160 ? 'is-wide' : '';
+      })(),
+      // format de l'image choisi dans l'espace admin (sinon celui du modèle de page)
+      imgRatio: ({ paysage: '16 / 9', classique: '4 / 3', carre: '1 / 1', portrait: '3 / 4', panoramique: '21 / 9', libre: 'auto' })[pgRaw.imgFormat] || ({ qa: '16 / 9', story: '21 / 9', portrait: '3 / 4', back: '16 / 9', number: '4 / 3' })[K] || (K === 'article' && ((pgRaw.mise === 'haut' || pgRaw.mise === 'milieu' || pgRaw.mise === 'bas') || (!pgRaw.mise || pgRaw.mise === 'auto') && !pgRaw.score && String(pgRaw.kicker || '').length < 160) ? '16 / 9' : '4 / 3'),
+      revCls: K === 'portrait' && pgRaw.mise === 'gauche' ? 'gz-imgfirst' : K === 'number' && pgRaw.mise === 'droite' ? 'gz-imglast' : '',
+      colCls: ({ '1': 'gz-c1', '2': 'gz-c2', '3': 'gz-c3' })[String(pgRaw.colonnes || '')] || '',
+      hasImgGrid: !!pgRaw.img && !(K === 'article' && pgRaw.mise === 'bas'), hasImgBas: !!pgRaw.img && K === 'article' && pgRaw.mise === 'bas',
       hasKicker: !!pgRaw.kicker, hasImg: !!pgRaw.img, hasQuote: !!pgRaw.quote, hasQuoteBy: !!pgRaw.quoteBy, hasAside: !!pgRaw.aside, hasCols3: (pgRaw.cols3 || []).length > 0, hasScore: !!pgRaw.score, hasParas: (pgRaw.paras || []).length > 0,
       score: pgRaw.score ? Object.assign({}, pgRaw.score, { hi: initials2(pgRaw.score.home), ai: initials2(pgRaw.score.away) }) : { home: '', away: '', hs: '', as: '', cap: '', hi: '', ai: '' },
-      aside: pgRaw.aside || { h: '', t: '' }, figClass: pgRaw.tilt ? 'gz-cadre' : '', dropClass: pgRaw.drop ? 'gz-drop' : '', imgFit: pgRaw.imgLight ? 'contain' : 'cover', hasStrip: !!(pgRaw.strip || []).length, strip: pgRaw.strip || [],
+      aside: pgRaw.aside || { h: '', t: '' }, figClass: pgRaw.tilt ? 'gz-cadre' : '', dropClass: pgRaw.drop ? 'gz-drop' : '', imgFit: pgRaw.imgLight || pgRaw.imgFormat === 'libre' ? 'contain' : 'cover', hasStrip: !!(pgRaw.strip || []).length, strip: pgRaw.strip || [],
       hasChoc: !!gzCh, choc: gzCh ? { t: gzCh.t, src: gzCh.src || '', hasSrc: !!gzCh.src, hasGo: !!gzCh.go, goLabel: 'Lire le détail choc · p. ' + (chocP ? chocP.n : '') } : { t: '', src: '', hasSrc: false, hasGo: false, goLabel: '' },
       // nouvelles rubriques
       stats: pgRaw.stats || [], why: pgRaw.why || '', src: pgRaw.src || '', bigA: pgRaw.bigA || '', bigB: pgRaw.bigB || '', who: pgRaw.who || '',

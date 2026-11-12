@@ -267,6 +267,8 @@ button.b-card:hover{transform:translateY(-3px);box-shadow:0 20px 40px -26px var(
 .gz-grid.is-wide .gz-lead{font-size:1.28em;max-width:36em}
 .gz-grid.is-wide .gz-fig img{aspect-ratio:16/9}
 .gz-fig{margin:0;min-width:0}
+.gz-imgfirst>.gz-fig{order:-1}.gz-imglast>.gz-fig{order:2}.gz-fig-bas{margin:.4em 0 1.2em}
+.gz-c1{column-count:1;column-width:auto}@media (min-width:700px){.gz-c2{column-count:2;column-width:auto}.gz-c3{column-count:3;column-width:auto}}
 .gz-fig img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#e9e9e9}
 .gz-fig figcaption{display:flex;gap:.5em;align-items:center;font-family:var(--bn-font);font-weight:600;font-size:.6em;letter-spacing:.12em;text-transform:uppercase;color:var(--gz-mut);padding-top:.6em;line-height:1.3}
 .gz-fig figcaption::before{content:'';width:.75em;height:.75em;background:var(--gz-ink);flex:none}
@@ -6642,9 +6644,10 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
                 <div class="gz-cap">{{pg.score.cap}}</div>
               </sc-if>
             </div>
-            <sc-if value="{{pg.hasImg}}" hint-placeholder-val="{{ true }}"><figure class="gz-fig {{pg.figClass}}"><img src="{{pg.img}}" alt="{{pg.imgCap}}" style="object-fit: {{pg.imgFit}}"><figcaption>{{pg.imgCap}}</figcaption></figure></sc-if>
+            <sc-if value="{{pg.hasImgGrid}}" hint-placeholder-val="{{ true }}"><figure class="gz-fig {{pg.figClass}}"><img src="{{pg.img}}" alt="{{pg.imgCap}}" style="object-fit: {{pg.imgFit}}; aspect-ratio: {{pg.imgRatio}}"><figcaption>{{pg.imgCap}}</figcaption></figure></sc-if>
           </div>
-          <div class="gz-cols {{pg.dropClass}}"><sc-for list="{{pg.paras}}" as="pa" hint-placeholder-count="3"><p>{{pa.t}}</p></sc-for></div>
+          <div class="gz-cols {{pg.dropClass}} {{pg.colCls}}"><sc-for list="{{pg.paras}}" as="pa" hint-placeholder-count="3"><p>{{pa.t}}</p></sc-for></div>
+          <sc-if value="{{pg.hasImgBas}}" hint-placeholder-val="{{ false }}"><figure class="gz-fig gz-fig-bas"><img src="{{pg.img}}" alt="{{pg.imgCap}}" style="object-fit: {{pg.imgFit}}; aspect-ratio: {{pg.imgRatio}}"><figcaption>{{pg.imgCap}}</figcaption></figure></sc-if>
           <sc-if value="{{pg.hasQuote}}" hint-placeholder-val="{{ false }}"><blockquote class="gz-quote"><span class="gz-band">{{pg.quote}}</span><sc-if value="{{pg.hasQuoteBy}}" hint-placeholder-val="{{ false }}"><cite>{{pg.quoteBy}}</cite></sc-if></blockquote></sc-if>
           <sc-if value="{{pg.hasAside}}" hint-placeholder-val="{{ false }}"><aside class="gz-card"><span class="gz-k">{{pg.aside.h}}</span><span>{{pg.aside.t}}</span></aside></sc-if>
           <sc-if value="{{pg.hasStrip}}" hint-placeholder-val="{{ false }}"><div class="gz-trio"><sc-for list="{{pg.strip}}" as="sx2" hint-placeholder-count="3"><figure class="gz-fig"><img src="{{sx2.src}}" alt="{{sx2.cap}}" style="aspect-ratio: 1 / 1"><figcaption>{{sx2.cap}}</figcaption></figure></sc-for></div></sc-if>
@@ -6682,7 +6685,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
           <div class="gz-ch-who">{{pg.who}}</div>
           <div class="gz-ch-stats"><sc-for list="{{pg.stats}}" as="st" hint-placeholder-count="4"><div class="gz-ch-st"><span class="gz-ch-k">{{st.k}}</span><span class="gz-ch-l">{{st.l}}</span></div></sc-for></div>
           <div class="gz-ch-grid">
-            <div class="gz-cols gz-drop"><sc-for list="{{pg.paras}}" as="pa" hint-placeholder-count="3"><p>{{pa.t}}</p></sc-for></div>
+            <div class="gz-cols gz-drop {{pg.colCls}}"><sc-for list="{{pg.paras}}" as="pa" hint-placeholder-count="3"><p>{{pa.t}}</p></sc-for></div>
             <aside class="gz-ch-aside">
               <span class="gz-etiq">{{pg.aside.h}}</span><p>{{pg.aside.t}}</p>
               <span class="gz-etiq">Pourquoi on vous le raconte</span><p>{{pg.why}}</p>
@@ -6695,7 +6698,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
         <sc-if value="{{pg.isQa}}" hint-placeholder-val="{{ false }}">
           <div class="gz-grid gz-g-114">
             <div>
-              <figure class="gz-fig"><img src="{{pg.img}}" alt="Photo-illustration : supporters en tribune" style="aspect-ratio: 16 / 9"><figcaption>{{pg.imgCap}}</figcaption></figure>
+              <figure class="gz-fig"><img src="{{pg.img}}" alt="{{pg.imgCap}}" style="aspect-ratio: {{pg.imgRatio}}; object-fit: {{pg.imgFit}}"><figcaption>{{pg.imgCap}}</figcaption></figure>
               <div class="gz-kick">Entretien avec</div>
               <div class="gz-who">{{pg.who}}</div>
               <div class="gz-kick">{{pg.whoSub}}</div>
@@ -6717,8 +6720,8 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
         <sc-if value="{{pg.isNumber}}" hint-placeholder-val="{{ false }}">
           <div class="gz-bignum">{{pg.big}}</div>
           <div class="gz-bignum-l"><span class="gz-band">{{pg.label}}</span></div>
-          <div class="gz-grid">
-            <figure class="gz-fig"><img src="{{pg.img}}" alt="{{pg.imgCap}}"><figcaption>{{pg.imgCap}}</figcaption></figure>
+          <div class="gz-grid {{pg.revCls}}">
+            <figure class="gz-fig"><img src="{{pg.img}}" alt="{{pg.imgCap}}" style="aspect-ratio: {{pg.imgRatio}}; object-fit: {{pg.imgFit}}"><figcaption>{{pg.imgCap}}</figcaption></figure>
             <div><p class="gz-lead">{{pg.lead}}</p><p class="gz-txt">{{pg.text}}</p></div>
           </div>
           <div class="gz-three"><sc-for list="{{pg.cols3}}" as="c3" hint-placeholder-count="3"><div><span class="gz-k">{{c3.h}}</span><span>{{c3.t}}</span></div></sc-for></div>
@@ -6726,24 +6729,24 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 
         <!-- L'HISTOIRE -->
         <sc-if value="{{pg.isStory}}" hint-placeholder-val="{{ false }}">
-          <figure class="gz-fig gz-wide"><img src="{{pg.img}}" alt="{{pg.imgCap}}" style="aspect-ratio: 21 / 9"><figcaption>{{pg.imgCap}}</figcaption></figure>
+          <figure class="gz-fig gz-wide"><img src="{{pg.img}}" alt="{{pg.imgCap}}" style="aspect-ratio: {{pg.imgRatio}}; object-fit: {{pg.imgFit}}"><figcaption>{{pg.imgCap}}</figcaption></figure>
           <p class="gz-lead">{{pg.lead}}</p>
           <div class="gz-grid gz-g-24">
-            <div><div class="gz-cols gz-drop"><sc-for list="{{pg.paras}}" as="pa" hint-placeholder-count="3"><p>{{pa.t}}</p></sc-for></div><blockquote class="gz-quote"><span class="gz-band">{{pg.quote}}</span></blockquote></div>
+            <div><div class="gz-cols gz-drop {{pg.colCls}}"><sc-for list="{{pg.paras}}" as="pa" hint-placeholder-count="3"><p>{{pa.t}}</p></sc-for></div><sc-if value="{{pg.hasQuote}}" hint-placeholder-val="{{ true }}"><blockquote class="gz-quote"><span class="gz-band">{{pg.quote}}</span></blockquote></sc-if></div>
             <aside class="gz-enbref"><div class="gz-k gz-enbref-h">En bref</div><sc-for list="{{pg.enbref}}" as="eb" hint-placeholder-count="3"><div class="gz-enbref-it"><span class="gz-k">{{eb.h}}</span><span>{{eb.t}}</span></div></sc-for></aside>
           </div>
         </sc-if>
 
         <!-- LE VISAGE DU COTENTIN -->
         <sc-if value="{{pg.isPortrait}}" hint-placeholder-val="{{ false }}">
-          <div class="gz-grid gz-g-1115">
+          <div class="gz-grid gz-g-1115 {{pg.revCls}}">
             <div>
               <div class="gz-name"><span class="gz-band">{{pg.name}}</span></div>
               <div class="gz-kick">{{pg.sport}}</div>
               <p class="gz-txt">{{pg.text}}</p>
-              <blockquote class="gz-quote"><span class="gz-band">{{pg.tagline}}</span></blockquote>
+              <sc-if value="{{pg.tagline}}" hint-placeholder-val="{{ true }}"><blockquote class="gz-quote"><span class="gz-band">{{pg.tagline}}</span></blockquote></sc-if>
             </div>
-            <figure class="gz-fig gz-cadre"><img src="{{pg.img}}" alt="{{pg.name}}" style="aspect-ratio: 3 / 4"><figcaption>{{pg.name}}</figcaption></figure>
+            <figure class="gz-fig gz-cadre"><img src="{{pg.img}}" alt="{{pg.name}}" style="aspect-ratio: {{pg.imgRatio}}; object-fit: {{pg.imgFit}}"><figcaption>{{pg.name}}</figcaption></figure>
           </div>
           <div class="gz-three"><sc-for list="{{pg.cols3}}" as="c3" hint-placeholder-count="3"><div><span class="gz-k">{{c3.h}}</span><span>{{c3.t}}</span></div></sc-for></div>
         </sc-if>
@@ -6893,7 +6896,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
             <div class="gz-back-t"><span class="gz-band">Make it</span><br><span class="gz-band">happen</span></div>
             <div class="gz-sub gz-back-s">ici, le sport a une histoire</div>
           </div>
-          <figure class="gz-fig"><img src="{{pg.img}}" alt="Photo-illustration : une écharpe de supporter sur la pelouse, un soir de match" style="aspect-ratio: 16 / 9"><figcaption>Photo-illustration</figcaption></figure>
+          <figure class="gz-fig"><img src="{{pg.img}}" alt="{{pg.imgCap}}" style="aspect-ratio: {{pg.imgRatio}}; object-fit: {{pg.imgFit}}"><sc-if value="{{pg.imgCap}}" hint-placeholder-val="{{ true }}"><figcaption>{{pg.imgCap}}</figcaption></sc-if></figure>
           <div class="gz-three gz-three-w">
             <div><span class="gz-k">Solutions du quiz</span><span>{{pg.solutions}}</span></div>
             <div><span class="gz-k">L’ours</span><span>{{pg.ours}}</span></div>
