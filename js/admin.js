@@ -212,8 +212,10 @@
     render();
   }
   function setTab(t) {
-    if (S.dirty && S.tab === 'content' && t !== 'content' && !confirm('Des modifications ne sont pas enregistrées. Changer d’onglet quand même ?')) return;
-    if (t !== 'content') { S.dirty = false; S.key = null; S.work = null; }
+    if (S.dirty && (S.tab === 'content' || S.tab === 'sport') && t !== S.tab && !confirm('Des modifications ne sont pas enregistrées. Changer d’onglet quand même ?')) return;
+    if (t !== 'content') { S.key = null; S.work = null; }
+    if (t !== S.tab) S.dirty = false;
+    if (t === 'sport') spLoad();
     S.tab = t; loadTab(t);
   }
 
@@ -224,7 +226,7 @@
     if (!root) return;
     var y = body ? body.scrollTop : 0;
     root.textContent = '';
-    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['img', 'Images', 0], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
+    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
     add(root, E('div', { class: 'cba-top' },
       E('span', { class: 'cba-brand' }, E('span', { class: 'long' }, 'Casa Besports · '), 'Administration'),
       E('div', { class: 'cba-tabs', role: 'tablist' }, tabs.map(function (t) {
@@ -235,7 +237,7 @@
     var w = E('div', { class: 'cba-wrap' });
     if (S.setup === 'sql') add(w, E('div', { class: 'cba-note' }, E('strong', {}, 'Une étape à faire une seule fois. '), 'La base de l’espace administrateur n’est pas encore installée : ouvrez Supabase › SQL Editor › New query, collez le contenu du fichier supabase/administration.sql du dépôt, puis cliquez « Run ». Rechargez ensuite cette page. (Guide : docs/ESPACE-ADMIN.md)'));
     else if (S.setup === 'norole') add(w, E('div', { class: 'cba-note' }, 'Votre compte n’est pas reconnu comme administrateur par Supabase : vérifiez que votre adresse e-mail est confirmée et qu’elle figure dans la table « equipe » avec le rôle admin.'));
-    add(w, ({ msg: viewMsg, content: viewContent, img: viewImages, team: viewTeam, help: viewHelp })[S.tab]());
+    add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, team: viewTeam, help: viewHelp })[S.tab]());
     add(body, w); add(root, body);
     body.scrollTop = y;
   }
@@ -877,12 +879,138 @@
   }
 
   // ================= AIDE =================
+  // ---------- Résultats et classements (saisie à la main) ----------
+  var SP_SPORTS = ['Football', 'Basketball', 'Rugby', 'Water-polo', 'Natation', 'Judo', 'Tennis', 'Trail'];
+  function spBlank() { return { maj: null, sources: [], comps: {}, tables: {}, matches: [], teamClub: {}, clubs: [] }; }
+  function spLoad() {
+    var v = clone(window.CASA_SPORT) || {}; var b = spBlank();
+    Object.keys(b).forEach(function (k) { if (v[k] == null) v[k] = b[k]; });
+    S.sp = v; S.dirty = false;
+    if (!S.spComp || !spCompOf(S.spComp)) { var f = spAllComps()[0]; S.spComp = f ? f.id : null; }
+  }
+  function spAllComps() { var out = []; Object.keys(S.sp.comps || {}).forEach(function (sp) { (S.sp.comps[sp] || []).forEach(function (c) { out.push({ id: c.id, label: c.label, sport: sp }); }); }); return out; }
+  function spCompOf(id) { return spAllComps().find(function (c) { return c.id === id; }) || null; }
+  function spNum(v) { var n = parseInt(v, 10); return isNaN(n) ? 0 : n; }
+  function spClubs() { try { return (window.CasaSite && window.CasaSite.data && window.CasaSite.data().clubs) || []; } catch (e) { return []; } }
+  function spTeams(onlyUsed) {
+    var t = {}; Object.keys(S.sp.tables || {}).forEach(function (k) { (S.sp.tables[k] || []).forEach(function (r) { if (r.team) t[r.team] = 1; }); });
+    (S.sp.matches || []).forEach(function (m) { if (m.home) t[m.home] = 1; if (m.away) t[m.away] = 1; });
+    if (!onlyUsed) spClubs().forEach(function (c) { t[c.name] = 1; });
+    return Object.keys(t).sort(function (a, b) { return a.localeCompare(b, 'fr'); });
+  }
+  function spSave() {
+    var v = S.sp, clubs = spClubs(), bad = null;
+    (v.matches || []).forEach(function (m) {
+      if (!m.date || !m.home || !m.away) bad = bad || 'Un match n’a pas de date ou d’équipe';
+      var done = m.hs !== null && m.hs !== '' && m.hs != null && m.as !== null && m.as !== '' && m.as != null;
+      m.hs = done ? spNum(m.hs) : null; m.as = done ? spNum(m.as) : null; m.status = done ? 'done' : 'up';
+      m.id = slug(m.comp) + '-' + m.date + '-' + slug(m.home) + '-' + slug(m.away);
+    });
+    if (bad) { toast(bad, true); return; }
+    var ids = {}, dup = null; v.matches.forEach(function (m) { if (ids[m.id]) dup = m.home + ' – ' + m.away + ' (' + m.date + ')'; ids[m.id] = 1; });
+    if (dup) { toast('Match en double : ' + dup, true); return; }
+    Object.keys(v.tables).forEach(function (k) {
+      v.tables[k] = (v.tables[k] || []).filter(function (r) { return r.team && String(r.team).trim(); }).map(function (r) {
+        return { team: String(r.team).trim(), j: spNum(r.j), g: spNum(r.g), n: spNum(r.n), p: spNum(r.p), diff: spNum(r.diff), pts: spNum(r.pts), form: String(r.form || '').toUpperCase().replace(/[^VNDP]/g, '').replace(/P/g, 'D').slice(-5) };
+      }).sort(function (a, b) { return b.pts - a.pts || b.diff - a.diff; });
+    });
+    spTeams(true).forEach(function (t) { var c = clubs.find(function (x) { return x.name === t; }); if (c && !v.teamClub[t]) v.teamClub[t] = c.id; });
+    if (v.sources.indexOf('Saisie de la rédaction (espace administrateur)') < 0) v.sources.push('Saisie de la rédaction (espace administrateur)');
+    v.maj = new Date().toISOString();
+    S.busy = true; render();
+    A.saveContent('CASA_SPORT', v).then(function () { S.busy = false; spLoad(); render(); toast('Publié : visible par tous les visiteurs'); }, function (e) { S.busy = false; render(); err(e); });
+  }
+  function spMark() { if (!S.dirty) { S.dirty = true; var b = root && root.querySelector('.cba-save'); if (b) b.disabled = false; } }
+  function spIn(obj, k, opts) {
+    opts = opts || {};
+    return E('input', { class: 'cba-in', type: opts.type || 'text', value: obj[k] == null ? '' : String(obj[k]), placeholder: opts.ph || null, list: opts.list || null, style: opts.style || null,
+      inputmode: opts.type === 'number' ? 'numeric' : null, 'aria-label': opts.label || k,
+      oninput: function (e) { obj[k] = e.target.value; spMark(); } });
+  }
+  function viewSport() {
+    if (!S.sp) spLoad();
+    var v = S.sp, comps = spAllComps(), cur = spCompOf(S.spComp), edited = (A.editedKeys ? A.editedKeys() : []).indexOf('CASA_SPORT') >= 0;
+    var nc = { sport: 'Football', label: '' };
+    var out = [E('div', { class: 'cba-bar' }, E('div', { class: 'cba-row' },
+        E('strong', { style: 'font-size:1.2rem;margin-right:auto' }, 'Résultats et classements'),
+        E('button', { type: 'button', class: 'cba-btn pri cba-save', disabled: (!S.dirty || S.busy) || null, onclick: spSave }, S.busy ? 'Publication…' : 'Enregistrer et publier'),
+        E('button', { type: 'button', class: 'cba-btn', onclick: function () { if (S.dirty && !confirm('Abandonner les modifications non enregistrées ?')) return; spLoad(); render(); } }, 'Annuler les modifications'),
+        edited ? E('button', { type: 'button', class: 'cba-btn dan', onclick: function () { if (!confirm('Effacer tout ce qui a été saisi ici et revenir au fichier contenus/sport.js du dépôt ?')) return; S.busy = true; render(); A.resetContent('CASA_SPORT').then(function () { S.busy = false; spLoad(); render(); toast('Version d’origine rétablie'); }, function (e) { S.busy = false; render(); err(e); }); } }, 'Version d’origine') : null)),
+      E('p', { class: 'cba-sub' }, 'Saisissez vous-même les classements, les scores et les prochains matchs. Ils s’affichent dans « Le Terrain » dès que vous publiez. Une case de score vide = match à venir.'),
+      v.maj ? E('p', { class: 'cba-sub', style: 'margin-top:-.6rem' }, 'Dernière publication : ' + fmtDate(v.maj)) : null,
+      E('datalist', { id: 'cba-teams' }, spTeams().map(function (t) { return E('option', { value: t }); }))];
+
+    // compétitions
+    out.push(E('div', { class: 'cba-card' }, E('strong', {}, '1. Compétitions'),
+      comps.length ? E('div', { class: 'cba-row', style: 'margin:.6rem 0' }, comps.map(function (c) {
+        return E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String(c.id === S.spComp), onclick: function () { S.spComp = c.id; render(); } }, c.label, E('span', { class: 'cba-chip-sub' }, c.sport));
+      })) : E('p', { class: 'cba-sub', style: 'margin:.5rem 0' }, 'Aucune compétition pour l’instant : ajoutez la première ci-dessous (par exemple « Régional 2 · groupe B »).'),
+      E('div', { class: 'cba-row', style: 'margin-top:.4rem' },
+        E('select', { class: 'cba-in', style: 'flex:0 1 170px', 'aria-label': 'Discipline', onchange: function (e) { nc.sport = e.target.value; } }, SP_SPORTS.map(function (s) { return E('option', { value: s }, s); })),
+        E('input', { class: 'cba-in', style: 'flex:1 1 220px', placeholder: 'Nom de la compétition', 'aria-label': 'Nom de la compétition', oninput: function (e) { nc.label = e.target.value; } }),
+        E('button', { type: 'button', class: 'cba-btn', onclick: function () {
+          var label = nc.label.trim(); if (!label) { toast('Donnez un nom à la compétition', true); return; }
+          var id = slug(label), i = 2; while (spCompOf(id)) id = slug(label) + '-' + (i++);
+          (v.comps[nc.sport] = v.comps[nc.sport] || []).push({ id: id, label: label }); v.tables[id] = v.tables[id] || [];
+          S.spComp = id; spMark(); render();
+        } }, 'Ajouter la compétition'))));
+
+    if (cur) {
+      var rows = v.tables[cur.id] = v.tables[cur.id] || [];
+      out.push(E('div', { class: 'cba-card' },
+        E('div', { class: 'cba-row' }, E('strong', { style: 'margin-right:auto' }, cur.label + ' · ' + cur.sport),
+          E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { var n = prompt('Nouveau nom de la compétition', cur.label); if (!n || !n.trim()) return; (v.comps[cur.sport] || []).forEach(function (c) { if (c.id === cur.id) c.label = n.trim(); }); spMark(); render(); } }, 'Renommer'),
+          E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () {
+            if (!confirm('Supprimer « ' + cur.label + ' », son classement et ses matchs ?')) return;
+            v.comps[cur.sport] = (v.comps[cur.sport] || []).filter(function (c) { return c.id !== cur.id; }); if (!v.comps[cur.sport].length) delete v.comps[cur.sport];
+            delete v.tables[cur.id]; v.matches = v.matches.filter(function (m) { return m.comp !== cur.id; }); S.spComp = null; spLoadKeep(); spMark(); render();
+          } }, 'Supprimer la compétition'))));
+
+      // classement
+      var num = function (r, k, l) { return E('td', {}, spIn(r, k, { type: 'number', label: l, style: 'min-width:52px;padding:.4rem' })); };
+      out.push(E('div', { class: 'cba-card' }, E('strong', {}, '2. Classement'),
+        E('p', { class: 'cba-sub', style: 'margin:.3rem 0 .6rem;font-size:14px' }, 'Une ligne par équipe. L’ordre se fait tout seul par points à la publication. Forme : les 5 derniers matchs, V (victoire), N (nul), D (défaite), ex. VVNDV.'),
+        E('div', { style: 'overflow-x:auto' }, E('table', { class: 'cba-tbl' },
+          E('thead', {}, E('tr', {}, ['Équipe', 'J', 'G', 'N', 'P', 'Diff.', 'Pts', 'Forme', ''].map(function (h) { return E('th', {}, h); }))),
+          E('tbody', {}, rows.map(function (r, i) {
+            return E('tr', {}, E('td', {}, spIn(r, 'team', { list: 'cba-teams', label: 'Équipe', style: 'min-width:170px;padding:.4rem' })),
+              num(r, 'j', 'Joués'), num(r, 'g', 'Gagnés'), num(r, 'n', 'Nuls'), num(r, 'p', 'Perdus'), num(r, 'diff', 'Différence'), num(r, 'pts', 'Points'),
+              E('td', {}, spIn(r, 'form', { label: 'Forme', ph: 'VVNDV', style: 'min-width:80px;padding:.4rem' })),
+              E('td', {}, E('button', { type: 'button', class: 'cba-btn sm dan', 'aria-label': 'Retirer cette équipe', onclick: function () { rows.splice(i, 1); spMark(); render(); } }, '✕')));
+          })))),
+        E('button', { type: 'button', class: 'cba-btn', style: 'margin-top:.6rem', onclick: function () { rows.push({ team: '', j: 0, g: 0, n: 0, p: 0, diff: 0, pts: 0, form: '' }); spMark(); render(); } }, '+ Ajouter une équipe')));
+
+      // matchs
+      var ms = v.matches.filter(function (m) { return m.comp === cur.id; }).sort(function (a, b) { return (b.date || '') > (a.date || '') ? 1 : -1; });
+      out.push(E('div', { class: 'cba-card' }, E('strong', {}, '3. Matchs (résultats et à venir)'),
+        E('p', { class: 'cba-sub', style: 'margin:.3rem 0 .6rem;font-size:14px' }, 'Laissez les scores vides pour un match à venir, remplissez-les quand le match est joué. Pensez à retirer les matchs reportés.'),
+        ms.length ? ms.map(function (m) {
+          return E('fieldset', { style: 'border:1px dashed var(--line,#ccc);padding:.4rem .8rem .8rem;margin:.6rem 0' },
+            E('div', { class: 'cba-grid2' },
+              E('div', {}, E('label', { class: 'cba-lbl' }, 'Date'), spIn(m, 'date', { type: 'date', label: 'Date' })),
+              E('div', {}, E('label', { class: 'cba-lbl' }, 'Heure'), spIn(m, 'time', { type: 'time', label: 'Heure' })),
+              E('div', {}, E('label', { class: 'cba-lbl' }, 'Domicile'), spIn(m, 'home', { list: 'cba-teams', label: 'Équipe à domicile' })),
+              E('div', {}, E('label', { class: 'cba-lbl' }, 'Extérieur'), spIn(m, 'away', { list: 'cba-teams', label: 'Équipe à l’extérieur' })),
+              E('div', {}, E('label', { class: 'cba-lbl' }, 'Score domicile'), spIn(m, 'hs', { type: 'number', label: 'Score domicile', ph: 'à venir' })),
+              E('div', {}, E('label', { class: 'cba-lbl' }, 'Score extérieur'), spIn(m, 'as', { type: 'number', label: 'Score extérieur', ph: 'à venir' })),
+              E('div', {}, E('label', { class: 'cba-lbl' }, 'Lieu (facultatif)'), spIn(m, 'venue', { label: 'Lieu' })),
+              E('div', {}, E('label', { class: 'cba-lbl' }, 'Source (facultatif)'), spIn(m, 'source', { label: 'Source', ph: 'adresse de la feuille de match' }))),
+            E('button', { type: 'button', class: 'cba-btn sm dan', style: 'margin-top:.6rem', onclick: function () { v.matches = v.matches.filter(function (x) { return x !== m; }); spMark(); render(); } }, 'Retirer ce match'));
+        }) : E('p', { class: 'cba-sub', style: 'font-size:14px' }, 'Aucun match pour cette compétition.'),
+        E('button', { type: 'button', class: 'cba-btn', onclick: function () { v.matches.push({ id: '', sport: cur.sport, comp: cur.id, date: new Date().toISOString().slice(0, 10), time: '15:00', home: '', away: '', hs: null, as: null, status: 'up', venue: '', source: '' }); spMark(); render(); } }, '+ Ajouter un match')));
+    }
+    return out;
+  }
+  function spLoadKeep() { var f = spAllComps()[0]; S.spComp = f ? f.id : null; }
+
   function viewHelp() {
     var P = function (t) { return E('p', { style: 'line-height:1.6' }, t); };
     return [E('h1', { class: 'cba-h' }, 'Aide'),
       E('div', { class: 'cba-card' }, E('strong', {}, 'Modifier le site'),
         P('Contenus du site › choisissez la section › modifiez › « Enregistrer et publier ». La modification est en ligne tout de suite, pour tous les visiteurs. « Version d’origine » efface vos changements et rétablit le fichier du dépôt GitHub.'),
         P('Les articles déposés par la Rédaction quotidienne continuent d’apparaître en plus de ceux que vous modifiez ici.')),
+      E('div', { class: 'cba-card' }, E('strong', {}, 'Résultats et classements'),
+        P('Onglet Résultats : ajoutez une compétition, remplissez son classement et ses matchs, puis « Enregistrer et publier ». Ce que vous publiez ici remplace le fichier contenus/sport.js tant que vous ne cliquez pas sur « Version d’origine ».')),
       E('div', { class: 'cba-card' }, E('strong', {}, 'Images'),
         P('Envoyez une photo depuis n’importe quel champ image, ou depuis l’onglet Images. Elle est réduite automatiquement puis stockée en ligne ; son adresse est remplie à votre place.')),
       E('div', { class: 'cba-card' }, E('strong', {}, 'Messagerie'),

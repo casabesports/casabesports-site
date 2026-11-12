@@ -94,3 +94,14 @@ Claude peut faire ces étapes avec vous le moment venu.
 - **« Une étape à faire une seule fois »** en haut de l'espace : le fichier `supabase/administration.sql` n'a pas été lancé.
 - **« Votre compte n'est pas reconnu comme administrateur »** : votre adresse e-mail n'est pas confirmée, ou ce n'est pas celle déclarée dans `supabase/administration.sql`.
 - Une modification ne s'affiche pas : rechargez la page (le site garde une copie pour s'afficher vite, puis se met à jour).
+
+## Résultats et classements (onglet « Résultats »)
+
+Les sites des fédérations (FFF, FFBB…) refusent la lecture automatique : la mise à jour automatique des scores ne peut donc presque rien récupérer. L'onglet **Résultats** de l'espace administrateur permet de tout saisir à la main :
+
+1. **Compétitions** : choisissez la discipline, tapez le nom (ex. « Régional 2 · groupe B »), « Ajouter la compétition ».
+2. **Classement** : une ligne par équipe (J, G, N, P, différence, points, forme sur 5 matchs : V, N, D). L'ordre se fait tout seul par points.
+3. **Matchs** : date, heure, équipes, scores. Scores vides = match à venir ; remplis = résultat.
+4. « Enregistrer et publier » : visible tout de suite dans « Le Terrain ».
+
+Ce qui est publié ici remplace le fichier `contenus/sport.js` du dépôt (y compris ce que l'automatisation y écrit) tant que vous ne cliquez pas sur « Version d'origine ». Les équipes dont le nom correspond exactement à une fiche club sont reliées automatiquement à leur club.
