@@ -19,6 +19,8 @@ C'est tout. Votre adresse `kader.allou.pro@outlook.fr` y est déclarée administ
 
 Connectez-vous sur le site avec cette adresse. Le bouton noir **Admin** apparaît dans l'en-tête (et « Plus › Espace administrateur », et un bloc dans Mon espace). L'adresse directe est `…/#/admin`.
 
+Sur téléphone, le bouton de l'en-tête est masqué : passez par l'onglet **Mon espace** (bloc noir « Ouvrir l'espace administrateur ») ou par **Plus › Espace administrateur**. Ces accès n'apparaissent **que si vous êtes connecté avec l'adresse administrateur**. Sous « Bonjour … », Mon espace affiche « Connecté avec : … » : si l'adresse n'est pas la bonne, déconnectez-vous et reconnectez-vous avec la bonne. Si vous ouvrez `…/#/admin` sans être connecté, le site ouvre la fenêtre de connexion, puis l'espace administrateur s'ouvre tout seul une fois connecté.
+
 Personne d'autre ne voit ce bouton. Et même si quelqu'un trouvait l'adresse, Supabase refuse toute lecture ou modification qui ne vient pas de votre compte (adresse e-mail confirmée).
 
 ## 3. Modifier le site

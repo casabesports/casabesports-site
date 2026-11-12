@@ -179,8 +179,23 @@
   window.addEventListener('popstate', function () { if (S.open && location.hash !== '#/admin') close(true); });
   window.addEventListener('keydown', function (e) { if (S.open && e.key === 'Escape' && !document.querySelector('.cba-modal')) close(); });
   window.addEventListener('beforeunload', function (e) { if (S.open && S.dirty) { e.preventDefault(); e.returnValue = ''; } });
-  // Adresse directe #/admin : ouverture dès que le rôle administrateur est confirmé
-  (function wait(n) { if (location.hash !== '#/admin' || n > 40) return; if (isAdmin()) { open(); return; } setTimeout(function () { wait(n + 1); }, 250); })(0);
+  // Adresse directe #/admin (au chargement ou tapée ensuite) : ouverture dès que le rôle administrateur est confirmé.
+  // Sans rôle admin après quelques secondes, le site explique quoi faire (se connecter, ou changer de compte),
+  // puis l'espace s'ouvre tout seul dès que la connexion administrateur aboutit (pendant 10 minutes).
+  var want = 0;
+  function wantOpen() { want = Date.now() + 600000; }
+  setInterval(function () { if (want && !S.open && isAdmin()) { want = 0; open(); } else if (want && Date.now() > want) want = 0; }, 500);
+  function fromHash() {
+    if (location.hash !== '#/admin' || S.open) return;
+    (function wait(n) {
+      if (S.open || location.hash !== '#/admin') return;
+      if (isAdmin()) { open(); return; }
+      if (n > 24) { if (window.CasaSite) window.CasaSite.go('admin'); return; }
+      setTimeout(function () { wait(n + 1); }, 250);
+    })(0);
+  }
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
 
   function loadTab(t) {
     if (t === 'msg') { loadMsgs(); loadContacts(); }
@@ -580,5 +595,5 @@
         P('Seules les personnes listées dans Équipe et accès voient l’espace rédaction. Un abonné peut vous envoyer une demande depuis Mon espace ; vous l’acceptez ou la refusez en un clic.'))];
   }
 
-  window.CasaAdmin = { open: open, close: close, isOpen: function () { return S.open; } };
+  window.CasaAdmin = { open: open, close: close, wantOpen: wantOpen, isOpen: function () { return S.open; } };
 })();

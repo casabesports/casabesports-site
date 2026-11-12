@@ -1145,7 +1145,13 @@ class Component extends DCLogic {
   }
 
   go(view, extra) {
-    if (view === 'admin') { if (this.state.role === 'admin' && window.CasaAdmin) window.CasaAdmin.open(); else this.say('Espace réservé à l’administrateur du site.'); return; }
+    if (view === 'admin') {
+      if (this.state.role === 'admin' && window.CasaAdmin) { window.CasaAdmin.open(); return; }
+      if (window.CasaAdmin && window.CasaAdmin.wantOpen) window.CasaAdmin.wantOpen();
+      if (!this.state.loggedIn) { this.setState({ loginOpen: true, linkSent: false }); this.say('Connectez-vous avec l’adresse e-mail de l’administrateur : l’espace administrateur s’ouvrira ensuite.'); return; }
+      this.say('Vous êtes connecté avec ' + (this.state.email || 'un autre compte') + ', qui n’est pas le compte administrateur. Déconnectez-vous (Mon espace, en bas) puis reconnectez-vous avec l’adresse de l’administrateur.');
+      return;
+    }
     if (view === 'studio' && !this.state.role) { if (this.state.loggedIn) { this.say('L’espace rédaction est réservé aux personnes habilitées. Demandez l’accès depuis Mon espace.'); view = 'account'; extra = {}; } else { this.setState({ loginOpen: true, linkSent: false }); return; } }
     try { const r = document.documentElement; r.classList.remove('cb-nav'); void r.offsetWidth; r.classList.add('cb-nav'); } catch (e) {}
     const s = this.state;
