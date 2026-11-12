@@ -21,8 +21,8 @@
     { key: 'CASA_CLUBHOUSE', label: 'Club House', desc: 'Le message de bienvenue et le sondage de la semaine (question vide = pas de sondage).' },
     { key: 'CASA_REGLEMENTS', label: 'Règlements des sports', desc: 'Les règles expliquées de chaque discipline (réalité augmentée et pages sport).' },
     { key: 'CASA_STADES', label: 'Stades (réalité augmentée)', desc: 'Les communes et stades utilisés par « Ma compo en AR ».' },
-    { key: 'CASA_GAZETTE_NUMERO', label: 'Gazette : la Une (page 1)', desc: 'La première page de La Gazette : numéro, date, surtitre, grand titre, accroche, photo et légende. Le sommaire (page 2) se remplit tout seul.' },
-    { key: 'CASA_GAZETTE', label: 'Gazette : pages intérieures (page 3 et suivantes)', desc: 'Les pages du magazine après la Une et le sommaire, dans l’ordre (modèles : article, portrait, number, choc, humeur).', item: 'title' },
+    { key: 'CASA_GAZETTE_NUMERO', hide: true, label: 'La Gazette · page 1, la Une', desc: 'La première page de La Gazette : numéro, date, surtitre, grand titre, accroche, photo et légende. Le sommaire (page 2) se remplit tout seul.' },
+    { key: 'CASA_GAZETTE', label: 'La Gazette du Cotentin', desc: 'Les 31 pages du numéro au même endroit : la Une, le sommaire automatique et les pages intérieures, avec les cartons, formats d’image et positions du texte.', item: 'title' },
     { key: 'CASA_LIEUX', label: 'Lieux', desc: 'Les lieux du territoire : textes et vraies photos (champ « Photo »).', item: 'name' },
     { key: 'CASA_BOUTIQUE', label: 'Boutique : présentation', desc: 'Bandeau de la boutique et affiches des collections (images de présentation).' },
     { key: 'CASA_PRODUITS', label: 'Boutique : produits', desc: 'Fiches produits : nom, prix, photos, tailles, couleurs.', item: 'name' },
@@ -32,7 +32,7 @@
     { key: 'CASA_APROPOS', label: 'À propos', desc: 'L’histoire de Casa Besports : ouverture, manifeste, étapes, piliers, conviction et appel final.' },
     { key: 'CASA_LEGAL', label: 'Pages légales', desc: 'Mentions légales, confidentialité, CGV, CGU.' },
     { key: 'CASA_RETOUCHES', label: 'Retouches des pages', desc: 'Textes et images changés directement sur le site (bouton « ✎ Retoucher » en bas à gauche du site). Ici : les revoir, les corriger ou les supprimer.' },
-    { key: 'CASA_LEGAL_MAJ', label: 'Pages légales : date', desc: 'Date de dernière mise à jour affichée.' }
+    { key: 'CASA_LEGAL_MAJ', hide: true, label: 'Pages légales · date de mise à jour', desc: 'Date de dernière mise à jour affichée.' }
   ];
   // Modèle d'un nouvel élément quand la liste est vide
   var TEMPLATES = {
@@ -407,7 +407,7 @@
     var edited = A.editedKeys ? A.editedKeys() : [];
     return [E('h1', { class: 'cba-h' }, 'Contenus du site'),
       E('p', { class: 'cba-sub' }, 'Choisissez une section et modifiez-la. « Aperçu sur le site » montre le résultat sans rien publier ; vos changements sont gardés en brouillon sur cet appareil jusqu’à « Enregistrer et publier ».'),
-      E('div', { class: 'cba-secs' }, SECTIONS.map(function (sec) {
+      E('div', { class: 'cba-secs' }, SECTIONS.filter(function (sec) { return !sec.hide; }).map(function (sec) {
         var v = window[sec.key]; var n = Array.isArray(v) ? v.length + ' élément' + (v.length > 1 ? 's' : '') : '';
         return E('div', { class: 'cba-card', style: 'margin:0;display:flex;flex-direction:column;gap:.4rem' },
           E('strong', { style: 'font-size:1.05rem' }, sec.label, edited.indexOf(sec.key) >= 0 ? E('span', { class: 'cba-tag' }, 'modifié en ligne') : null, draftGet(sec.key) ? E('span', { class: 'cba-tag dr' }, 'brouillon') : null),
@@ -500,10 +500,14 @@
   }
   // Les deux sections de la Gazette se répondent
   function gazetteLinks(k) {
-    if (k !== 'CASA_GAZETTE' && k !== 'CASA_GAZETTE_NUMERO') return null;
-    var other = k === 'CASA_GAZETTE' ? 'CASA_GAZETTE_NUMERO' : 'CASA_GAZETTE';
-    return E('div', { class: 'cba-row', style: 'margin:-.4rem 0 1rem' }, E('span', { style: 'color:var(--muted,#666);font-size:14px' }, k === 'CASA_GAZETTE' ? 'La page 1 (la Une) se modifie à part :' : 'Les pages 3 et suivantes se modifient à part :'),
-      E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { editSection(other, null); } }, k === 'CASA_GAZETTE' ? 'Modifier la Une' : 'Modifier les pages intérieures'));
+    if (k === 'CASA_GAZETTE_NUMERO') return E('div', { class: 'cba-row', style: 'margin:-.4rem 0 1rem' },
+      E('button', { type: 'button', class: 'cba-btn', onclick: function () { editSection('CASA_GAZETTE', null); } }, '← Les 31 pages de la Gazette'),
+      E('span', { style: 'color:var(--muted,#666);font-size:14px' }, 'Vous modifiez la page 1. Pensez à « Enregistrer et publier » avant de revenir aux autres pages.'));
+    if (k === 'CASA_LEGAL') return E('div', { class: 'cba-row', style: 'margin:-.4rem 0 1rem' },
+      E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { editSection('CASA_LEGAL_MAJ', null); } }, 'Changer la date de mise à jour'));
+    if (k === 'CASA_LEGAL_MAJ') return E('div', { class: 'cba-row', style: 'margin:-.4rem 0 1rem' },
+      E('button', { type: 'button', class: 'cba-btn', onclick: function () { editSection('CASA_LEGAL', null); } }, '← Pages légales'));
+    return null;
   }
   function editSection(k, idx) {
     if (S.dirty && S.key !== k && !confirm('Des modifications ne sont pas enregistrées (elles restent en brouillon). Changer de section ?')) return;
@@ -647,18 +651,26 @@
     inp.addEventListener('input', function (e) { parent[k] = (v === null && e.target.value === '') ? null : e.target.value; mark(); });
     return [lab, inp];
   }
+  // Photo d'origine d'une photo rognée : gardée à côté du champ (ou sur cet appareil pour les listes simples)
+  function origMap() { try { return JSON.parse(localStorage.getItem('cba-orig-photos') || '{}') || {}; } catch (e) { return {}; } }
+  function origGet(parent, k) { var o = !Array.isArray(parent) && parent['__orig_' + k]; return o || origMap()[parent[k]] || ''; }
+  function origSet(parent, k, cropped, original) {
+    if (!Array.isArray(parent)) { if (original) parent['__orig_' + k] = original; else delete parent['__orig_' + k]; }
+    if (cropped && original) { try { var m = origMap(); m[cropped] = original; localStorage.setItem('cba-orig-photos', JSON.stringify(m)); } catch (e) {} }
+  }
   function imgField(parent, k, ratio, onSet) {
     ratio = ratio || (S.key === 'CASA_ARTICLES' ? '16:9' : null);
     var prev = E('img', { alt: '', src: parent[k] || null });
     var inp = E('input', { class: 'cba-in', value: parent[k] || '', placeholder: 'assets/… ou adresse d’une image envoyée', oninput: function (e) { parent[k] = e.target.value; prev.src = e.target.value; cropBtn.style.display = e.target.value ? '' : 'none'; mark(); } });
-    var set = function (url) { parent[k] = url; inp.value = url; prev.src = url; cropBtn.style.display = url ? '' : 'none'; mark(); if (onSet) onSet(url); };
+    var set = function (url, orig) { parent[k] = url; inp.value = url; prev.src = url; cropBtn.style.display = url ? '' : 'none'; origSet(parent, k, url, orig || ''); backBtn.style.display = origGet(parent, k) ? '' : 'none'; mark(); if (onSet) onSet(url); };
     var busy = function (on, b, label) { b.disabled = on || null; b.textContent = on ? 'Envoi…' : label; };
-    var send = function (f, b, label) { busy(true, b, label); return uploadFile(f).then(function (u) { set(u); busy(false, b, label); toast('Photo enregistrée : pensez à « Enregistrer et publier »'); }, function (er) { busy(false, b, label); err(er); }); };
+    var send = function (f, b, label, orig) { busy(true, b, label); return uploadFile(f).then(function (u) { set(u, orig); busy(false, b, label); toast('Photo enregistrée : pensez à « Enregistrer et publier »'); }, function (er) { busy(false, b, label); err(er); }); };
     var file = E('input', { type: 'file', accept: 'image/*', style: 'display:none', onchange: function (e) { var f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return; cropImage(f, { file: f, ratio: ratio }).then(function (x) { if (x) send(x, upBtn, 'Envoyer une photo'); }); } });
     var upBtn = E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { file.click(); } }, 'Envoyer une photo');
-    var cropBtn = E('button', { type: 'button', class: 'cba-btn sm', style: parent[k] ? '' : 'display:none', onclick: function () { cropImage(parent[k], { ratio: ratio }).then(function (x) { if (x) send(x, cropBtn, 'Rogner'); }); } }, 'Rogner');
+    var cropBtn = E('button', { type: 'button', class: 'cba-btn sm', style: parent[k] ? '' : 'display:none', onclick: function () { var base = origGet(parent, k) || parent[k]; cropImage(base, { ratio: ratio }).then(function (x) { if (x) send(x, cropBtn, 'Rogner', base); }); } }, 'Rogner');
+    var backBtn = E('button', { type: 'button', class: 'cba-btn sm', style: origGet(parent, k) ? '' : 'display:none', title: 'Remet la photo telle qu’elle était avant le rognage', onclick: function () { var o = origGet(parent, k); if (o) { set(o); toast('Photo d’origine remise : pensez à « Enregistrer et publier »'); } } }, 'Revenir à l’original');
     return E('div', { class: 'cba-img' }, prev, E('div', { class: 'grow' }, inp,
-      E('div', { class: 'cba-row', style: 'margin-top:.35rem' }, upBtn, file, cropBtn,
+      E('div', { class: 'cba-row', style: 'margin-top:.35rem' }, upBtn, file, cropBtn, backBtn,
         E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { pickImage(set); } }, 'Bibliothèque'),
         parent[k] ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { set(''); } }, 'Retirer') : null)));
   }

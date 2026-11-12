@@ -27,7 +27,7 @@ var CasaCV = (function () {
     IDENT.forEach(function (f) { o[f.k] = str(cv[f.k], f.k === 'titre' ? 140 : 120); });
     o.accroche = str(cv.accroche, 700); o.competences = str(cv.competences, 600); o.interets = str(cv.interets, 300);
     LISTES.forEach(function (l) { o[l.id] = (Array.isArray(cv[l.id]) ? cv[l.id] : []).slice(0, 12).map(function (it) { var r = {}; LIST_KEYS[l.id].forEach(function (k) { r[k] = str(it && it[k], k === 'detail' ? 600 : 140); }); return r; }); });
-    var op = cv.options || {}; o.options = { photo: op.photo !== false, contact: op.contact !== false, nb: op.nb !== false };
+    var op = cv.options || {}; o.options = { photo: op.photo !== false, contact: op.contact !== false, nb: op.nb !== false, theme: op.theme === 'or' ? 'or' : 'classique' };
     return o;
   }
   /* forme canonique : ce que la certification atteste (le contenu, pas l’affichage ni les coordonnées) */
@@ -189,6 +189,7 @@ var CasaCV = (function () {
   }
   R.dlProbe = dlProbe; R.saveBlob = saveBlob;
 
+  function showId(id) { return String(id || '').replace(/^DEMO-/, 'CB-'); }
   /* ---------- rendu PNG (A4, 150 ppp) : même mise en page que l’aperçu ---------- */
   function toPng(self, v) {
     var W = 1240, H = 1754, M = 96;
@@ -199,24 +200,29 @@ var CasaCV = (function () {
       for (var i = 0; i < words.length; i++) { var t = line ? line + ' ' + words[i] : words[i]; if (g.measureText(t).width > maxW && line) { g.fillText(line, x, y); y += lh; n++; line = words[i]; if (maxLines && n >= maxLines) return y; } else line = t; }
       if (line) { g.fillText(line, x, y); y += lh; } return y;
     };
-    var band = function (txt, x, y, size) { g.font = '800 ' + size + 'px ' + SP; var w = g.measureText(txt).width; g.fillStyle = '#000'; g.fillRect(x, y - size * 0.92, w + size * 0.5, size * 1.12); g.fillStyle = '#fff'; g.fillText(txt, x + size * 0.25, y); return y + size * 1.2; };
+    var GOLD = '#c9a24a', BK = v.or ? '#0b0b0b' : '#000', FG = v.or ? GOLD : '#fff', INK = v.or ? '#a8822c' : '#1a1a1a';
+    var band = function (txt, x, y, size) { g.font = '800 ' + size + 'px ' + SP; var w = g.measureText(txt).width; g.fillStyle = BK; g.fillRect(x, y - size * 0.92, w + size * 0.5, size * 1.12); g.fillStyle = FG; g.fillText(txt, x + size * 0.25, y); return y + size * 1.2; };
     var draw = function (photo, logo) {
       g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
-      g.fillStyle = '#000'; g.fillRect(0, 0, W, 120);
-      if (logo) g.drawImage(logo, M, 30, 60 * 1044 / 179, 60); else { g.font = '800 40px ' + SP; g.fillStyle = '#fff'; g.fillText('CASA BESPORTS +', M, 76); }
-      g.font = '700 22px ' + SP; g.fillStyle = '#fff'; g.textAlign = 'right'; g.fillText('CURRICULUM VITÆ', W - M, 70); g.textAlign = 'left';
+      g.fillStyle = BK; g.fillRect(0, 0, W, 120); if (v.or) { g.fillStyle = GOLD; g.fillRect(0, 120, W, 8); }
+      if (logo && !v.or) g.drawImage(logo, M, 30, 60 * 1044 / 179, 60); else { g.font = '800 40px ' + SP; g.fillStyle = FG; g.fillText('CASA BESPORTS +', M, 76); }
+      g.font = '700 22px ' + SP; g.fillStyle = FG; g.textAlign = 'right'; g.fillText('CURRICULUM VITÆ', W - M, 70); g.textAlign = 'left';
       var y = 210, x0 = M;
       if (photo) { var ps = 250; g.drawImage(photo, M, 170, ps, ps); x0 = M + ps + 44; }
       y = band(String(v.prenom || '').toUpperCase(), x0, y + 30, 64); y = band(String(v.nom || '').toUpperCase(), x0, y + 4, 64);
       y = wrap(v.titre, x0, y + 34, W - x0 - M - (v.certOk ? 220 : 0), 38, '700 30px ' + SP, '#000', 2);
-      y = wrap(v.contact, x0, y + 6, W - x0 - M, 28, '600 21px ' + BODY, '#444', 2);
-      if (v.certOk) { var sx = W - M - 190, sy = 160; g.fillStyle = '#000'; g.fillRect(sx, sy, 190, 190); g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = '800 26px ' + SP; g.fillText('CERTIFIÉ', sx + 95, sy + 70); g.font = '700 17px ' + SP; g.fillText('CASA BESPORTS +', sx + 95, sy + 100); g.font = '600 15px ' + BODY; g.fillText(v.cert.id, sx + 95, sy + 140); g.textAlign = 'left'; }
+      y += 6; String(v.contact || '').split('\n').filter(Boolean).forEach(function (line) { y = wrap(line, x0, y, W - x0 - M - (v.certOk ? 230 : 0), 28, '600 21px ' + BODY, '#444', 1); });
+      if (v.certOk) { /* tampon rond, légèrement penché */
+        var cx = W - M - 105, cy = 265, R0 = 100; g.save(); g.translate(cx, cy); g.rotate(-12 * Math.PI / 180); g.globalAlpha = .9; g.strokeStyle = INK; g.fillStyle = INK;
+        g.lineWidth = 6; g.beginPath(); g.arc(0, 0, R0, 0, 2 * Math.PI); g.stroke(); g.lineWidth = 2; g.beginPath(); g.arc(0, 0, R0 - 12, 0, 2 * Math.PI); g.stroke();
+        g.textAlign = 'center'; g.font = '800 15px ' + SP; g.fillText('CASA BESPORTS +', 0, -38); g.fillRect(-72, -24, 144, 3); g.font = '800 30px ' + SP; g.fillText('CERTIFIÉ', 0, 10); g.fillRect(-72, 20, 144, 3);
+        g.font = '700 13px ' + SP; g.fillText(String(v.sceauSub || '').toUpperCase(), 0, 44); g.font = '700 13px ' + SP; g.fillText(v.cert.id, 0, 64); g.restore(); g.textAlign = 'left'; }
       y = Math.max(y, photo ? 460 : y) + 26;
       if (v.accroche) { y = wrap(v.accroche, M, y, W - 2 * M, 32, '600 23px ' + BODY, '#222') + 18; }
       var colW = 720, sideX = M + colW + 50, sideW = W - sideX - M, ys = y;
       v.sections.forEach(function (sec) {
         if (y > H - 300) return;
-        g.font = '800 22px ' + SP; var tw = g.measureText(sec.title.toUpperCase()).width; g.fillStyle = '#000'; g.fillRect(M, y, tw + 24, 36); g.fillStyle = '#fff'; g.fillText(sec.title.toUpperCase(), M + 12, y + 26); y += 58;
+        g.font = '800 22px ' + SP; var tw = g.measureText(sec.title.toUpperCase()).width; g.fillStyle = BK; g.fillRect(M, y, tw + 24, 36); g.fillStyle = FG; g.fillText(sec.title.toUpperCase(), M + 12, y + 26); y += 58;
         sec.items.forEach(function (it) {
           if (y > H - 260) return;
           g.font = '800 22px ' + SP; g.fillStyle = '#000'; g.fillText(it.t, M, y); if (it.per) { g.font = '600 18px ' + BODY; g.fillStyle = '#555'; g.textAlign = 'right'; g.fillText(it.per, M + colW, y); g.textAlign = 'left'; }
@@ -226,13 +232,13 @@ var CasaCV = (function () {
         y += 10;
       });
       var yy = ys;
-      var sideTitle = function (t) { g.font = '800 20px ' + SP; var tw2 = g.measureText(t).width; g.fillStyle = '#000'; g.fillRect(sideX, yy, tw2 + 20, 32); g.fillStyle = '#fff'; g.fillText(t, sideX + 10, yy + 23); yy += 50; };
+      var sideTitle = function (t) { g.font = '800 20px ' + SP; var tw2 = g.measureText(t).width; g.fillStyle = BK; g.fillRect(sideX, yy, tw2 + 20, 32); g.fillStyle = FG; g.fillText(t, sideX + 10, yy + 23); yy += 50; };
       if (v.competences.length) { sideTitle('COMPÉTENCES'); v.competences.forEach(function (c) { yy = wrap('— ' + c.t, sideX, yy, sideW, 26, '600 18px ' + BODY, '#222', 2); }); yy += 18; }
       if (v.langues.length) { sideTitle('LANGUES'); v.langues.forEach(function (l) { yy = wrap(l.t + (l.n ? ' · ' + l.n : ''), sideX, yy, sideW, 26, '600 18px ' + BODY, '#222', 2); }); yy += 18; }
       if (v.interets) { sideTitle('CENTRES D’INTÉRÊT'); yy = wrap(v.interets, sideX, yy, sideW, 26, '600 18px ' + BODY, '#222', 5); }
-      g.fillStyle = '#000'; g.fillRect(0, H - 150, W, 150);
+      g.fillStyle = BK; g.fillRect(0, H - 150, W, 150); if (v.or) { g.fillStyle = GOLD; g.fillRect(0, H - 158, W, 8); }
       if (v.qr && v.qr.q) { var n = v.qr.n, cell = Math.floor(110 / (n + 2)), qx = W - M - cell * (n + 2), qy = H - 135; g.fillStyle = '#fff'; g.fillRect(qx, qy, cell * (n + 2), cell * (n + 2)); g.fillStyle = '#000'; for (var r = 0; r < n; r++) for (var c2 = 0; c2 < n; c2++) if (v.qr.q.isDark(r, c2)) g.fillRect(qx + (c2 + 1) * cell, qy + (r + 1) * cell, cell, cell); }
-      wrap(v.pied, M, H - 92, W - 2 * M - 150, 28, '600 19px ' + BODY, '#fff', 3);
+      wrap(v.pied, M, H - 92, W - 2 * M - 150, 28, '600 19px ' + BODY, FG, 3);
       return cv;
     };
     var load = function (src) { return new Promise(function (ok) { if (!src) return ok(null); var im = new Image(); im.onload = function () { ok(im); }; im.onerror = function () { ok(null); }; im.src = src; }); };
@@ -269,7 +275,7 @@ var CasaCV = (function () {
           setProf(self, patch, true);
         }).catch(function () {}).then(function () { setTimeout(function () { self._cvPoll = false; }, 30000); });
       }
-      var statutTxt = certState === 'valide' ? 'Certifié Casa Besports · n° ' + cert.id : certState === 'modifie' ? 'Modifié depuis la certification n° ' + cert.id + ' : à renouveler' : certState === 'revoque' ? 'Certificat révoqué par Casa Besports' :
+      var statutTxt = certState === 'valide' ? 'Certifié Casa Besports · n° ' + showId(cert.id) : certState === 'modifie' ? 'Modifié depuis la certification n° ' + showId(cert.id) + ' : à renouveler' : certState === 'revoque' ? 'Certificat révoqué par Casa Besports' :
         dem && dem.statut === 'en attente' ? 'Certification demandée le ' + fmtDate(dem.at) + ' : en cours de vérification' : dem && dem.statut === 'complement' ? 'Complément demandé par l’équipe' + (dem.note ? ' : ' + dem.note : '') : dem && dem.statut === 'refusee' ? 'Certification non accordée' + (dem.note ? ' : ' + dem.note : '') : (cv.prenom || cv.titre ? 'Brouillon : non certifié' : 'À remplir');
       var stCls = certState === 'valide' ? 'cvst-ok' : certState === 'modifie' || certState === 'revoque' || (dem && ['complement', 'refusee'].indexOf(dem.statut) >= 0) ? 'cvst-warn' : dem && dem.statut === 'en attente' ? 'cvst-wait' : 'cvst-draft';
 
@@ -327,6 +333,7 @@ var CasaCV = (function () {
           accroche: cv.accroche, onAccroche: on('accroche'), competences: cv.competences, onCompetences: on('competences'), interets: cv.interets, onInterets: on('interets'),
           lists: lists,
           optPhoto: cv.options.photo, optContact: cv.options.contact, optNb: cv.options.nb,
+          themes: [['classique', 'Noir et blanc'], ['or', 'Or et noir']].map(function (x) { return Object.assign(pill((cv.options.theme || 'classique') === x[0]), { label: x[1], pick: function () { setCv({ options: Object.assign({}, cv.options, { theme: x[0] }) }); } }); }),
           onOptPhoto: function (e) { setCv({ options: Object.assign({}, cv.options, { photo: !!ev(e) }) }); }, onOptContact: function (e) { setCv({ options: Object.assign({}, cv.options, { contact: !!ev(e) }) }); }, onOptNb: function (e) { setCv({ options: Object.assign({}, cv.options, { nb: !!ev(e) }) }); },
           r: r, statut: statutTxt, stCls: stCls,
           segs: [['form', 'Formulaire'], ['apercu', 'Aperçu']].map(function (x) { return Object.assign(pill(seg === x[0]), { label: x[1], pick: function () { ui(self, { seg: x[0] }); } }); }),
@@ -380,7 +387,7 @@ var CasaCV = (function () {
         var lancer = function () {
           var id = String(U(self).vq != null ? U(self).vq : (self.state.verifId || '')).trim().toUpperCase(); if (!id) return;
           if (srvPublic()) call('GET', '/cv/verifier/' + encodeURIComponent(id)).then(function (r2) { ui(self, { vres: Object.assign({ id: id }, r2) }); }).catch(function () { ui(self, { vres: { id: id, introuvable: true } }); });
-          else { var l2 = readLS('cb-certs-demo-v1', {}); var x = l2[id]; ui(self, { vres: x ? Object.assign({ id: id, valide: !x.revoque, statut: x.revoque ? 'révoqué' : 'valide', demo: true }, x) : { id: id, introuvable: true } }); }
+          else { var l2 = readLS('cb-certs-demo-v1', {}); var x = l2[id] || l2[id.replace(/^CB-/, 'DEMO-')]; ui(self, { vres: x ? Object.assign({ id: id, valide: !x.revoque, statut: x.revoque ? 'révoqué' : 'valide', demo: true }, x) : { id: id, introuvable: true } }); }
         };
         if (vid && !res && !self._vAuto) { self._vAuto = vid; setTimeout(lancer, 0); }
         out.verif = { q: vid, onQ: function (e) { ui(self, { vq: ev(e), vres: null }); self._vAuto = null; }, go: lancer, has: !!res, ok: !!(res && res.valide), ko: !!(res && !res.valide && !res.introuvable), absent: !!(res && res.introuvable),
@@ -409,13 +416,15 @@ var CasaCV = (function () {
     var demo = !!(cert && cert.demo);
     return {
       prenom: cv.prenom || 'Prénom', nom: cv.nom || 'Nom', fullname: ((cv.prenom || '') + ' ' + (cv.nom || '')).trim() || 'Prénom Nom', titre: cv.titre || 'Titre du CV : poste, spécialité, objectif',
-      contact: o.contact !== false ? [cv.ville, cv.email, cv.tel, cv.mobilite].filter(Boolean).join(' · ') : [cv.ville, cv.mobilite].filter(Boolean).join(' · '),
+      contact: (o.contact !== false ? [cv.ville, cv.email, cv.tel, cv.mobilite] : [cv.ville, cv.mobilite]).filter(Boolean).join('\n'),
+      contacts: (o.contact !== false ? [cv.ville, cv.email, cv.tel, cv.mobilite] : [cv.ville, cv.mobilite]).filter(Boolean).map(function (t) { return { t: t }; }),
+      themeCls: o.theme === 'or' ? 'cv-or' : '', or: o.theme === 'or',
       hasPhoto: !!(P.photo && o.photo !== false), photo: P.photo || '', nb: o.nb !== false, photoCls: o.nb !== false ? 'is-nb' : '',
       accroche: cv.accroche || '', hasAccroche: !!cv.accroche, sections: sections, noSections: !sections.length,
       competences: comp, hasComp: comp.length > 0, langues: lang, hasLang: lang.length > 0, interets: cv.interets || '', hasInterets: !!cv.interets, hasSide: comp.length > 0 || lang.length > 0 || !!cv.interets,
-      certOk: ok, cert: cert ? { id: cert.id, emis: fmtDate(cert.emisLe), par: cert.par || 'l’équipe Casa Besports' } : {}, hasQr: !!qr, qr: qr || {}, qrD: qr ? qr.d : '', qrVb: qr ? qr.vb : '0 0 1 1',
-      demo: demo, sceauSub: demo ? 'Spécimen de démonstration' : 'Parcours vérifié',
-      pied: ok ? 'Certifié Casa Besports · n° ' + cert.id + ' · émis le ' + fmtDate(cert.emisLe) + (url ? ' · vérification : ' + url.replace(/^https?:\/\//, '') : ' · vérification sur le site Casa Besports, rubrique « Vérifier un certificat »') + (demo ? ' · spécimen sans valeur' : '')
+      certOk: ok, cert: cert ? { id: showId(cert.id), emis: fmtDate(cert.emisLe), par: cert.par || 'l’équipe Casa Besports' } : {}, hasQr: !!qr, qr: qr || {}, qrD: qr ? qr.d : '', qrVb: qr ? qr.vb : '0 0 1 1',
+      demo: demo, sceauSub: 'Parcours vérifié',
+      pied: ok ? 'Certifié Casa Besports · n° ' + showId(cert.id) + ' · émis le ' + fmtDate(cert.emisLe) + (url ? ' · vérification : ' + url.replace(/^https?:\/\//, '') : ' · vérification sur le site Casa Besports, rubrique « Vérifier un certificat »')
         : certState === 'modifie' ? 'CV modifié depuis sa certification n° ' + cert.id + ' : la certification doit être renouvelée.' : 'CV établi sur Casa Besports +, le média du sport dans la Manche. Non certifié.',
       logo: (window.ASSET_DATA && window.ASSET_DATA['logo-casabesports.svg']) || 'assets/logo-casabesports.svg'
     };
@@ -454,7 +463,7 @@ var CasaCV = (function () {
         };
         if (dec !== 'certifier') { finish(null); return; }
         var bytes = []; for (var i = 0; i < 6; i++) bytes.push(Math.floor(Math.random() * 256));
-        var id = R.certIdFrom(bytes, new Date().getFullYear()).replace('CB-', 'DEMO-');
+        var id = R.certIdFrom(bytes, new Date().getFullYear());
         Promise.all([hash(R.canon(cvx)), sel.photo ? hash(sel.photo) : Promise.resolve('')]).then(function (hs) {
           var certObj = { id: id, h: hs[0], ph: hs[1], nom: (cvx.prenom + ' ' + cvx.nom).trim(), titre: cvx.titre, emisLe: at, par: c.me.name, demo: true };
           var certs = readLS('cb-certs-demo-v1', {}); certs[id] = certObj; writeLS('cb-certs-demo-v1', certs);
@@ -469,11 +478,17 @@ var CasaCV = (function () {
     return {
       loading: !!data.loading, rows: data.list.map(function (d) { var lab = { 'en attente': 'À vérifier', certifie: 'Certifié', complement: 'Complément demandé', refusee: 'Refusé', retiree: 'Retirée' }[d.statut] || d.statut; return { ref: d.ref, nom: d.nom, email: d.email, at: fmtDate(d.at), statut: lab, stCls: d.statut === 'certifie' ? 'cvst-ok' : d.statut === 'en attente' ? 'cvst-wait' : 'cvst-warn', cur: d.ref === u.cvSel ? 'true' : 'false', pick: function () { set({ cvSel: d.ref, cvChk: null }); } }; }),
       noRows: data.list.length === 0, pending: pend.length, hasDetail: !!detail, detail: detail || { r: {}, checks: [] },
-      certs: (data.certs || []).map(function (k) { return { id: k.id, nom: k.nom, titre: k.titre || '', emis: fmtDate(k.emisLe), statut: k.revoque ? 'Révoqué' : 'Valide', stCls: k.revoque ? 'cvst-warn' : 'cvst-ok', canRevoke: !k.revoque,
+      certs: (data.certs || []).filter(function (k) { return readLS('cb-certs-masques', []).indexOf(k.id) < 0; }).map(function (k) { return { id: showId(k.id), canRemove: !!k.revoque,
+        retirer: function () {
+          if (!confirm('Retirer le certificat révoqué ' + showId(k.id) + ' de la liste ?')) return;
+          if (data.srv) { var m = readLS('cb-certs-masques', []); m.push(k.id); writeLS('cb-certs-masques', m); }
+          else { var cs2 = readLS('cb-certs-demo-v1', {}); delete cs2[k.id]; writeLS('cb-certs-demo-v1', cs2); }
+          reload(); self.say('Certificat retiré de la liste');
+        }, nom: k.nom, titre: k.titre || '', emis: fmtDate(k.emisLe), statut: k.revoque ? 'Révoqué' : 'Valide', stCls: k.revoque ? 'cvst-warn' : 'cvst-ok', canRevoke: !k.revoque,
         revoquer: function () {
           if (data.srv) call('POST', '/cv/certificats/' + encodeURIComponent(k.id) + '/revoquer', {}).then(function () { reload(); self.say('Certificat révoqué'); }).catch(function (e) { self.say(e.message); });
-          else { var cs = readLS('cb-certs-demo-v1', {}); if (cs[k.id]) { cs[k.id].revoque = true; writeLS('cb-certs-demo-v1', cs); } reload(); self.say('Spécimen révoqué (démonstration)'); }
-        } }; }), hasCerts: (data.certs || []).length > 0
+          else { var cs = readLS('cb-certs-demo-v1', {}); if (cs[k.id]) { cs[k.id].revoque = true; writeLS('cb-certs-demo-v1', cs); } reload(); self.say('Certificat révoqué'); }
+        } }; }), hasCerts: (data.certs || []).filter(function (k) { return readLS('cb-certs-masques', []).indexOf(k.id) < 0; }).length > 0
     };
   }
   R.pending = function (self) { var d = self.state.cvAdm; if (d) return d.list.filter(function (x) { return x.statut === 'en attente'; }).length; if (!srvStaff()) return readLS('cb-cvdem-v1', []).filter(function (x) { return x.statut === 'en attente'; }).length; return 0; };

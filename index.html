@@ -1961,11 +1961,23 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 .cv-band { background: #000; color: #fff; padding: .08em .22em .0em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .cv-titre { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 700; font-size: 1.35em; line-height: 1.25; letter-spacing: -.01em; color: #000; margin-bottom: .45em; }
 .cv-contact { font-size: .92em; color: #444; font-weight: 600; overflow-wrap: anywhere; }
-.cv-sceau { flex: none; width: 8.4em; height: 8.4em; background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: .15em; outline: .22em solid #000; outline-offset: .22em; margin: .25em .25em 0 0; }
-.cv-sceau-k { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 800; font-size: 1.25em; letter-spacing: .02em; text-transform: uppercase; }
-.cv-sceau-m { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 700; font-size: .78em; letter-spacing: .04em; text-transform: uppercase; }
-.cv-sceau-s { font-size: .62em; opacity: .8; }
-.cv-sceau-n { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 700; font-size: .7em; letter-spacing: .04em; margin-top: .35em; border-top: 1px solid rgba(255,255,255,.5); padding-top: .35em; }
+.cv-sceau { --ink: #1a1a1a; flex: none; width: 9em; height: 9em; border-radius: 50%; color: var(--ink); border: .3em double var(--ink); box-shadow: inset 0 0 0 .32em #fff, inset 0 0 0 .42em var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: .1em; transform: rotate(-12deg); margin: .2em .6em 0 0; opacity: .88; mix-blend-mode: multiply; background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.0) 60%, rgba(0,0,0,.04) 100%); }
+.cv-sceau-k { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 800; font-size: 1.35em; letter-spacing: .06em; text-transform: uppercase; border-top: .1em solid var(--ink); border-bottom: .1em solid var(--ink); padding: .12em .3em 0; line-height: 1.1; }
+.cv-sceau-m { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 800; font-size: .6em; letter-spacing: .08em; text-transform: uppercase; }
+.cv-sceau-s { font-size: .58em; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.cv-sceau-n { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 700; font-size: .58em; letter-spacing: .06em; }
+.cv-contact { list-style: none; padding: 0; margin: .2em 0 0; }
+.cv-contact li { margin: 0 0 .15em; }
+/* variante or et noir */
+.cv-or { --gold: #c9a24a; }
+.cv-or .cv-top, .cv-or .cv-foot { background: #0b0b0b; color: var(--gold); border-bottom: .25em solid var(--gold); }
+.cv-or .cv-foot { border-bottom: 0; border-top: .25em solid var(--gold); }
+.cv-or .cv-kind { color: var(--gold); }
+.cv-or .cv-band, .cv-or .cv-h span { background: #0b0b0b; color: var(--gold); }
+.cv-or .cv-titre { color: #8a6a1f; }
+.cv-or .cv-per { color: #8a6a1f; }
+.cv-or .cv-sceau { --ink: #a8822c; }
+.cv-or .cv-logo { filter: brightness(.6) sepia(1) saturate(2.6) hue-rotate(-14deg); }
 .cv-accroche { margin: 0 3.6em 1.2em; font-size: 1.08em; font-weight: 600; color: #222; border-left: .35em solid #000; padding-left: .9em; }
 .cv-cols { display: grid; grid-template-columns: minmax(0, 1fr) 15em; gap: 2.4em; padding: .6em 3.6em 2em; flex: 1; }
 .cv-cols:has(> .cv-main:only-child) { grid-template-columns: minmax(0, 1fr); }
@@ -3984,9 +3996,9 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     <div class="cv-who">
       <h2 class="cv-name"><span class="cv-band">{{cvv.adm.detail.r.prenom}}</span><br><span class="cv-band">{{cvv.adm.detail.r.nom}}</span></h2>
       <div class="cv-titre">{{cvv.adm.detail.r.titre}}</div>
-      <sc-if value="{{cvv.adm.detail.r.contact}}" hint-placeholder-val="{{ true }}"><div class="cv-contact">{{cvv.adm.detail.r.contact}}</div></sc-if>
+      <sc-if value="{{cvv.adm.detail.r.contact}}" hint-placeholder-val="{{ true }}"><ul class="cv-contact"><sc-for list="{{cvv.adm.detail.r.contacts}}" as="ct" hint-placeholder-count="3"><li>{{ct.t}}</li></sc-for></ul></sc-if>
     </div>
-    <sc-if value="{{cvv.adm.detail.r.certOk}}" hint-placeholder-val="{{ false }}"><div class="cv-sceau" role="img" aria-label="Certifié Casa Besports, numéro {{cvv.adm.detail.r.cert.id}}"><span class="cv-sceau-k">Certifié</span><span class="cv-sceau-m">Casa Besports +</span><span class="cv-sceau-s">{{cvv.adm.detail.r.sceauSub}}</span><span class="cv-sceau-n">{{cvv.adm.detail.r.cert.id}}</span></div></sc-if>
+    <sc-if value="{{cvv.adm.detail.r.certOk}}" hint-placeholder-val="{{ false }}"><div class="cv-sceau" role="img" aria-label="Certifié Casa Besports, numéro {{cvv.adm.detail.r.cert.id}}"><span class="cv-sceau-m">Casa Besports +</span><span class="cv-sceau-k">Certifié</span><span class="cv-sceau-s">{{cvv.adm.detail.r.sceauSub}}</span><span class="cv-sceau-n">{{cvv.adm.detail.r.cert.id}}</span></div></sc-if>
   </div>
   <sc-if value="{{cvv.adm.detail.r.hasAccroche}}" hint-placeholder-val="{{ true }}"><p class="cv-accroche">{{cvv.adm.detail.r.accroche}}</p></sc-if>
   <div class="cv-cols">
@@ -4014,13 +4026,13 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
                       <sc-for list="{{cvv.adm.detail.checks}}" as="k" hint-placeholder-count="4"><label class="tr-check"><input type="checkbox" checked="{{k.on}}" onChange="{{k.toggle}}"><span>{{k.label}}</span></label></sc-for>
                       <label class="lbl" style="margin-top: .6rem">Message au membre (requis pour un complément ou un refus)<textarea class="field" rows="3" value="{{cvv.adm.detail.note}}" onChange="{{cvv.adm.detail.onNote}}"></textarea></label>
                       <div class="tr-row"><button type="button" class="btn btn-dark" onClick="{{cvv.adm.detail.certifier}}">Certifier</button><button type="button" class="btn btn-ghost" onClick="{{cvv.adm.detail.complement}}">Demander un complément</button><button type="button" class="btn btn-ghost" onClick="{{cvv.adm.detail.refuser}}">Refuser</button></div>
-                      <sc-if value="{{cvv.adm.detail.demo}}" hint-placeholder-val="{{ false }}"><p class="tr-muted">Démonstration : le certificat émis ici est un spécimen (DEMO-…), sans valeur.</p></sc-if>
+                      <sc-if value="{{cvv.adm.detail.demo}}" hint-placeholder-val="{{ false }}"><p class="tr-muted">Mode local : tant que le serveur de certification n’est pas branché, le certificat est enregistré sur cet appareil seulement et ne peut pas être vérifié ailleurs.</p></sc-if>
                     </sc-if>
                   </div>
                 </sc-if>
               </div>
               <sc-if value="{{cvv.adm.hasCerts}}" hint-placeholder-val="{{ false }}"><div class="eb" style="margin: 1.2rem 0 .5rem">Certificats délivrés</div>
-                <div class="rs-certs"><sc-for list="{{cvv.adm.certs}}" as="k" hint-placeholder-count="2"><div class="rs-cert"><span class="bn-etiq">{{k.id}}</span><strong>{{k.nom}}</strong><span class="tr-muted">{{k.titre}} · {{k.emis}}</span><span class="cv-badge {{k.stCls}}">{{k.statut}}</span><sc-if value="{{k.canRevoke}}" hint-placeholder-val="{{ true }}"><button type="button" class="lnk" onClick="{{k.revoquer}}">Révoquer</button></sc-if></div></sc-for></div></sc-if>
+                <div class="rs-certs"><sc-for list="{{cvv.adm.certs}}" as="k" hint-placeholder-count="2"><div class="rs-cert"><span class="bn-etiq">{{k.id}}</span><strong>{{k.nom}}</strong><span class="tr-muted">{{k.titre}} · {{k.emis}}</span><span class="cv-badge {{k.stCls}}">{{k.statut}}</span><sc-if value="{{k.canRevoke}}" hint-placeholder-val="{{ true }}"><button type="button" class="lnk" onClick="{{k.revoquer}}">Révoquer</button></sc-if><sc-if value="{{k.canRemove}}" hint-placeholder-val="{{ false }}"><button type="button" class="lnk" onClick="{{k.retirer}}">Supprimer de la liste</button></sc-if></div></sc-for></div></sc-if>
             </sc-if>
 
             <sc-if value="{{rs.adm.isFiches}}" hint-placeholder-val="{{ false }}">
@@ -5058,6 +5070,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
           <div class="cv-opts">
             <label class="tr-check"><input type="checkbox" checked="{{cvv.cv.optPhoto}}" onChange="{{cvv.cv.onOptPhoto}}"><span>Afficher ma photo</span></label>
             <label class="tr-check"><input type="checkbox" checked="{{cvv.cv.optNb}}" onChange="{{cvv.cv.onOptNb}}"><span>Photo en noir et blanc</span></label>
+            <div class="cv-seg" role="group" aria-label="Couleurs du CV" style="margin-top: .6rem"><span style="font-weight: 700; margin-right: .5rem">Couleurs :</span><sc-for list="{{cvv.cv.themes}}" as="th" hint-placeholder-count="2"><button type="button" class="tr-chip" aria-pressed="{{th.pressed}}" onClick="{{th.pick}}" style="background: {{th.bg}}; color: {{th.fg}}; border-color: {{th.border}}">{{th.label}}</button></sc-for></div>
             <label class="tr-check"><input type="checkbox" checked="{{cvv.cv.optContact}}" onChange="{{cvv.cv.onOptContact}}"><span>Afficher l’e-mail et le téléphone</span></label>
           </div>
           <p class="tr-muted">La photo est celle de votre profil. <button type="button" class="lnk" onClick="{{goAccount}}">La changer dans Mon espace</button></p>
@@ -5086,16 +5099,16 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
         </section>
       </div>
       <div class="cv-prev {{cvv.cv.segApercu}}">
-<div class="cv-page" id="cv-page">
+<div class="cv-page {{cvv.cv.r.themeCls}}" id="cv-page">
   <header class="cv-top"><img class="cv-logo" src="assets/logo-casabesports.svg" alt="Casa Besports +" width="234" height="40"><span class="cv-kind">Curriculum vitæ</span></header>
   <div class="cv-id">
     <sc-if value="{{cvv.cv.r.hasPhoto}}" hint-placeholder-val="{{ false }}"><div class="cv-photo {{cvv.cv.r.photoCls}}"><img src="{{cvv.cv.r.photo}}" alt="Photo de {{cvv.cv.r.fullname}}"></div></sc-if>
     <div class="cv-who">
       <h2 class="cv-name"><span class="cv-band">{{cvv.cv.r.prenom}}</span><br><span class="cv-band">{{cvv.cv.r.nom}}</span></h2>
       <div class="cv-titre">{{cvv.cv.r.titre}}</div>
-      <sc-if value="{{cvv.cv.r.contact}}" hint-placeholder-val="{{ true }}"><div class="cv-contact">{{cvv.cv.r.contact}}</div></sc-if>
+      <sc-if value="{{cvv.cv.r.contact}}" hint-placeholder-val="{{ true }}"><ul class="cv-contact"><sc-for list="{{cvv.cv.r.contacts}}" as="ct" hint-placeholder-count="3"><li>{{ct.t}}</li></sc-for></ul></sc-if>
     </div>
-    <sc-if value="{{cvv.cv.r.certOk}}" hint-placeholder-val="{{ false }}"><div class="cv-sceau" role="img" aria-label="Certifié Casa Besports, numéro {{cvv.cv.r.cert.id}}"><span class="cv-sceau-k">Certifié</span><span class="cv-sceau-m">Casa Besports +</span><span class="cv-sceau-s">{{cvv.cv.r.sceauSub}}</span><span class="cv-sceau-n">{{cvv.cv.r.cert.id}}</span></div></sc-if>
+    <sc-if value="{{cvv.cv.r.certOk}}" hint-placeholder-val="{{ false }}"><div class="cv-sceau" role="img" aria-label="Certifié Casa Besports, numéro {{cvv.cv.r.cert.id}}"><span class="cv-sceau-m">Casa Besports +</span><span class="cv-sceau-k">Certifié</span><span class="cv-sceau-s">{{cvv.cv.r.sceauSub}}</span><span class="cv-sceau-n">{{cvv.cv.r.cert.id}}</span></div></sc-if>
   </div>
   <sc-if value="{{cvv.cv.r.hasAccroche}}" hint-placeholder-val="{{ true }}"><p class="cv-accroche">{{cvv.cv.r.accroche}}</p></sc-if>
   <div class="cv-cols">

@@ -33,11 +33,11 @@
     });
     R.images.forEach(function (r) {
       if (!r || !normSrc(r.avant)) return;
-      var hasFrame = r.x != null || r.y != null || (Number(r.z) || 1) !== 1;
+      var hasFrame = r.x != null || r.y != null || (Number(r.z) || 1) !== 1 || r.taille === 'plein' || r.taille === 'entiere';
       if (!normSrc(r.apres) && !hasFrame) return;
       var p = pg(r.page); IM[p] = IM[p] || {};
       var ks = normSrc(r.avant);
-      (IM[p][ks] = IM[p][ks] || []).push({ src: normSrc(r.apres) ? String(r.apres).trim() : null, x: r.x == null ? 50 : Number(r.x), y: r.y == null ? 50 : Number(r.y), z: Number(r.z) || 1, frame: hasFrame, n: r.n == null || r.n === '' ? null : Number(r.n) });
+      (IM[p][ks] = IM[p][ks] || []).push({ src: normSrc(r.apres) ? String(r.apres).trim() : null, x: r.x == null ? 50 : Number(r.x), y: r.y == null ? 50 : Number(r.y), z: Number(r.z) || 1, taille: r.taille || '', frame: hasFrame, n: r.n == null || r.n === '' ? null : Number(r.n) });
     });
   }
   // Une retouche vaut pour un emplacement précis (n = rang de ce texte ou de cette image parmi les identiques de la page),
@@ -71,13 +71,19 @@
   }
   // Cadrage sans toucher au fichier : point de cadrage (x, y en %) et zoom, appliqués à l'emplacement de l'image
   function frame(el, f) {
-    if (!el.__rtSt) el.__rtSt = { op: el.style.objectPosition, tf: el.style.transform, to: el.style.transformOrigin, po: el.parentElement ? el.parentElement.style.overflow : '' };
-    var pos = f ? f.x + '% ' + f.y + '%' : el.__rtSt.op, z = f ? f.z : 1;
-    var tf = z > 1 ? 'scale(' + z + ')' : el.__rtSt.tf, to = z > 1 ? pos : el.__rtSt.to;
-    if (el.style.objectPosition !== pos) el.style.objectPosition = pos;
-    if (el.style.transform !== tf) el.style.transform = tf;
-    if (el.style.transformOrigin !== to) el.style.transformOrigin = to;
-    var par = el.parentElement, po = z > 1 ? 'hidden' : el.__rtSt.po;
+    var par = el.parentElement;
+    if (!el.__rtSt) el.__rtSt = { op: el.style.objectPosition, tf: el.style.transform, to: el.style.transformOrigin, po: par ? par.style.overflow : '', of: el.style.objectFit, l: el.style.left, r: el.style.right, w: el.style.width, mw: el.style.maxWidth };
+    var O = el.__rtSt, t = f ? f.taille || '' : '';
+    var pos = f ? f.x + '% ' + f.y + '%' : O.op, z = f ? f.z : 1;
+    var tf = z > 1 ? 'scale(' + z + ')' : O.tf, to = z > 1 ? pos : O.to;
+    var set = function (k, v) { if (el.style[k] !== v) el.style[k] = v; };
+    set('objectPosition', pos); set('transform', tf); set('transformOrigin', to);
+    // Taille : « plein » = toute la largeur de son bloc (ex. la grande image de l'accueil) ; « entiere » = image entière, sans la couper
+    var abs = (el.style.position || getComputedStyle(el).position) === 'absolute';
+    set('objectFit', t === 'entiere' ? 'contain' : O.of);
+    set('left', t === 'plein' && abs ? '0px' : O.l); set('right', t === 'plein' && abs ? '0px' : O.r);
+    set('width', t === 'plein' ? '100%' : O.w); set('maxWidth', t === 'plein' ? '100%' : O.mw);
+    var po = z > 1 ? 'hidden' : O.po;
     if (par && par.style.overflow !== po) par.style.overflow = po;
   }
   function unframe(el) { if (!el.__rtSt) return; frame(el, null); el.__rtSt = null; }
@@ -291,7 +297,8 @@
     imgs.forEach(function (im) {
       var orig = origSrc(im), idx = imgIdx(im);
       var i = findE(W.images, orig, idx), r = i >= 0 ? W.images[i] : null;
-      var F = { x: r && r.x != null ? Number(r.x) : 50, y: r && r.y != null ? Number(r.y) : 50, z: r && r.z ? Number(r.z) : 1 };
+      var F = { x: r && r.x != null ? Number(r.x) : 50, y: r && r.y != null ? Number(r.y) : 50, z: r && r.z ? Number(r.z) : 1, taille: (r && r.taille) || '' };
+      var source = (r && r.source) || '';
       // format de l'emplacement sur la page → format de rognage le plus proche
       var bx = im.getBoundingClientRect(), ar = bx.height ? bx.width / bx.height : 16 / 9;
       var RT = [['16:9', 16 / 9], ['4:3', 4 / 3], ['3:2', 1.5], ['1:1', 1], ['4:5', 0.8], ['3:4', 0.75], ['9:16', 9 / 16]];
@@ -311,9 +318,9 @@
       scope.addEventListener('change', function () { save(true); });
       var save = function (quiet) {
         var k = findE(W.images, orig, idx);
-        var changed = normSrc(url.value) && normSrc(url.value) !== orig, framed = F.x !== 50 || F.y !== 50 || F.z !== 1;
-        putE(W.images, k, orig, scopeVal(scope, v, idx), (changed || framed) ? { apres: changed ? url.value.trim() : '', x: Math.round(F.x), y: Math.round(F.y), z: Math.round(F.z * 100) / 100 } : null);
-        thumb.src = cur(); live(); paint(); if (!quiet) say('Aperçu mis à jour');
+        var changed = normSrc(url.value) && normSrc(url.value) !== orig, framed = F.x !== 50 || F.y !== 50 || F.z !== 1 || !!F.taille;
+        putE(W.images, k, orig, scopeVal(scope, v, idx), (changed || framed) ? Object.assign({ apres: changed ? url.value.trim() : '', x: Math.round(F.x), y: Math.round(F.y), z: Math.round(F.z * 100) / 100 }, F.taille ? { taille: F.taille } : {}, source && changed ? { source: source } : {}) : null);
+        thumb.src = cur(); live(); paint(); srcBtn.style.display = source && normSrc(source) !== normSrc(cur()) ? '' : 'none'; if (!quiet) say('Aperçu mis à jour');
       };
       var apply = function () { save(false); };
       var setFrom = function (ev) { var b = thumb.getBoundingClientRect(); if (!b.width) return; F.x = Math.max(0, Math.min(100, (ev.clientX - b.left) / b.width * 100)); F.y = Math.max(0, Math.min(100, (ev.clientY - b.top) / b.height * 100)); paint(); };
@@ -333,21 +340,24 @@
       };
       var file = E('input', { type: 'file', accept: 'image/*', style: 'display:none', onchange: function (ev) {
         var f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!f) return;
-        var c = CA(); var crop = c.cropImage ? c.cropImage(f, { file: f, ratio: ratio }) : Promise.resolve(f);
-        crop.then(function (x) { if (x) return upload(x, up, 'Envoyer une photo'); });
+        // la photo arrive telle quelle dans son emplacement : on la cadre ensuite en glissant, sans rognage obligatoire
+        source = ''; upload(f, up, 'Envoyer une photo');
       } });
       var up = E('button', { type: 'button', class: 'rt-b pri', onclick: function () { file.click(); } }, ['Envoyer une photo']);
       var cropBtn = E('button', { type: 'button', class: 'rt-b', title: 'Recadre le fichier au format de cet emplacement (' + ratio + ')', onclick: function () {
         var c = CA(); if (!c.cropImage) { say('Rognage indisponible'); return; }
-        c.cropImage(cur(), { ratio: ratio }).then(function (x) { if (x) return upload(x, cropBtn, 'Rogner le fichier (' + ratio + ')'); });
+        var before = source || cur(); c.cropImage(before, { ratio: ratio }).then(function (x) { if (x) { source = before; return upload(x, cropBtn, 'Rogner le fichier (' + ratio + ')'); } });
       } }, ['Rogner le fichier (' + ratio + ')']);
       var grid = E('div', { class: 'rt-grid' });
+      var taille = E('select', { class: 'rt-in', onchange: function () { F.taille = taille.value; save(false); } },
+        [['', 'Comme prévu par la page'], ['plein', 'Pleine largeur (sur toute la largeur du bloc)'], ['entiere', 'Image entière, sans la couper']].map(function (o) { return E('option', { value: o[0], selected: o[0] === F.taille ? 'selected' : null }, [o[1]]); }));
+      var srcBtn = E('button', { type: 'button', class: 'rt-b', style: source && normSrc(source) !== normSrc(cur()) ? '' : 'display:none', title: 'Remet la photo telle qu’elle était avant le rognage', onclick: function () { url.value = source; source = ''; F.x = 50; F.y = 50; F.z = 1; zoom.value = '1'; save(false); } }, ['Revenir à la photo non rognée']);
       var lib = E('button', { type: 'button', class: 'rt-b', onclick: function () {
         var A = window.CasaAuth || {}; if (!A.listImages) { say('Bibliothèque indisponible'); return; }
         lib.textContent = 'Chargement…';
         A.listImages('images').then(function (list) {
           lib.textContent = 'Bibliothèque'; grid.textContent = '';
-          (list || []).slice(0, 60).forEach(function (x) { grid.appendChild(E('button', { type: 'button', title: x.name, onclick: function () { url.value = x.url; F.x = 50; F.y = 50; F.z = 1; zoom.value = '1'; apply(); } }, [E('img', { src: x.url, alt: x.name, loading: 'lazy' })])); });
+          (list || []).slice(0, 60).forEach(function (x) { grid.appendChild(E('button', { type: 'button', title: x.name, onclick: function () { url.value = x.url; source = ''; F.x = 50; F.y = 50; F.z = 1; zoom.value = '1'; apply(); } }, [E('img', { src: x.url, alt: x.name, loading: 'lazy' })])); });
           if (!(list || []).length) grid.appendChild(E('p', { class: 'rt-note', text: 'Aucune image envoyée pour l’instant.' }));
         }, function () { lib.textContent = 'Bibliothèque'; say('Bibliothèque indisponible'); });
       } }, ['Bibliothèque']);
@@ -357,6 +367,8 @@
         box,
         E('label', { class: 'rt-zoom' }, ['Zoom ', zoom]),
         E('div', { class: 'rt-row' }, [E('button', { type: 'button', class: 'rt-b', onclick: function () { F.x = 50; F.y = 50; F.z = 1; zoom.value = '1'; save(false); } }, ['Recentrer']), cropBtn]),
+        E('span', { class: 'rt-lbl', text: 'Taille dans la page' }), taille,
+        E('div', { class: 'rt-row' }, [srcBtn]),
         E('div', { class: 'rt-orig', text: 'Origine : ' + orig }),
         E('span', { class: 'rt-lbl', text: 'Nouvelle image' }), url,
         E('span', { class: 'rt-lbl', text: 'Où' }), scope,
