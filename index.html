@@ -6580,6 +6580,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
       <span class="gz-mast">La Gazette <span>du Cotentin</span></span>
       <span class="gz-folio">{{gzCover.numero}} · page {{pageNo}} / {{pageTotal}}</span>
       <span class="gz-sp"></span>
+      <sc-if value="{{gzCanEdit}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{gzEdit}}" class="gz-tool gz-tool-choc" title="Ouvre cette page dans l’espace administrateur">Modifier<span class="gz-tool-l"> cette page</span></button></sc-if>
       <button type="button" onClick="{{gotoToc}}" class="gz-tool">Sommaire</button>
       <sc-if value="{{hasChoc}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{gotoChoc}}" class="gz-tool gz-tool-choc" aria-label="Le détail choc, page {{chocPage}}"><span aria-hidden="true">🔥</span><span class="gz-tool-l"> Détail choc</span></button></sc-if>
       <button type="button" onClick="{{readerFont}}" class="gz-tool gz-tool-aa" aria-label="Taille du texte">Aa {{readerFontLabel}}</button>

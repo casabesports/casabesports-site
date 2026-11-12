@@ -148,7 +148,7 @@ class Component extends DCLogic {
     // Articles ajoutés par la rédaction ou l'automatisation : contenus/articles.js (les plus récents en premier)
     const extra = (typeof window !== 'undefined' && Array.isArray(window.CASA_ARTICLES) ? window.CASA_ARTICLES : [])
       // brouillon : jamais affiché ; publierLe (date ISO) : affiché à partir de cette date
-      .filter((a) => a && a.id && a.title && !a.brouillon && !(a.publierLe && new Date(a.publierLe) > new Date()) && !articles.some((b) => b.id === a.id))
+      .filter((a) => a && a.id && a.title && (window.CASA_APERCU || (!a.brouillon && !(a.publierLe && new Date(a.publierLe) > new Date()))) && !articles.some((b) => b.id === a.id))
       .map((a) => Object.assign({ sport: 'Multisport', tag: '', date: '', read: '2 min', premium: false, img: 'assets/hero.jpg', alt: a.title, dek: '', clubs: [], points: [], author: 'la rédaction' }, a,
         // version anglaise de l'article si elle existe (titleEn, dekEn, bodyEn, tagEn)
         (window.CasaLang && window.CasaLang.lang === 'en') ? Object.assign({}, a.titleEn ? { title: a.titleEn } : {}, a.dekEn ? { dek: a.dekEn } : {}, a.bodyEn ? { body: a.bodyEn } : {}, a.tagEn ? { tag: a.tagEn } : {}) : {}));
@@ -2423,7 +2423,7 @@ class Component extends DCLogic {
       pagePrev: () => this.gzGo(pIdx - 1), pageNext: () => this.gzGo(pIdx + 1), noPrev: pIdx === 0, noNext: pIdx >= NP - 1,
       prevLabel: pIdx > 0 ? 'Page précédente : ' + G.pages[pIdx - 1].title : 'Première page', nextLabel: pIdx < NP - 1 ? 'Page suivante : ' + G.pages[pIdx + 1].title : 'Dernière page',
       gotoToc: () => this.gzGo(G.idx('toc')), gotoChoc: () => this.gzGo(chocI), chocPage: chocP ? chocP.n : 0, hasChoc: G.pages.some((p) => p.kind === 'choc'),
-      gzCover: (() => { const N = window.CASA_GAZETTE_NUMERO || {}; return { numero: 'N°' + (N.numero || '1'), date: N.date || '', mention: N.mention || '', surtitre: N.surtitre || '', titre: N.titre || 'La Gazette du Cotentin', accroche: N.accroche || '', image: N.image || 'assets/gz_cover.jpg', legende: N.legende || '', hasLegende: !!N.legende, numDate: 'N°' + (N.numero || '1') + (N.date ? ' · ' + N.date : '') }; })(), gzProg: Math.round((pIdx + 1) / NP * 100) + '%', gzVote, gzCount: String(NP),
+      gzCover: (() => { const N = window.CASA_GAZETTE_NUMERO || {}; return { numero: 'N°' + (N.numero || '1'), date: N.date || '', mention: N.mention || '', surtitre: N.surtitre || '', titre: N.titre || 'La Gazette du Cotentin', accroche: N.accroche || '', image: N.image || 'assets/gz_cover.jpg', legende: N.legende || '', hasLegende: !!N.legende, numDate: 'N°' + (N.numero || '1') + (N.date ? ' · ' + N.date : '') }; })(), gzProg: Math.round((pIdx + 1) / NP * 100) + '%', gzCanEdit: s.role === 'admin' && !window.CASA_APERCU, gzEdit: () => { this.setState({ readerOpen: false }); if (window.CasaAdmin && window.CasaAdmin.editGazette) window.CasaAdmin.editGazette(pIdx); }, gzVote, gzCount: String(NP),
       readerSize: readerSizes[s.readerFont], readerFontLabel: ['A', 'A+', 'A++'][s.readerFont], readerFont: () => this.setState({ readerFont: (s.readerFont + 1) % 3 }),
       goGazetteFromReader: () => this.go('offers', { offerTab: 'La Gazette' }),
       // formulaires

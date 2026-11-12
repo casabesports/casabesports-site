@@ -21,8 +21,8 @@
     { key: 'CASA_CLUBHOUSE', label: 'Club House', desc: 'Le message de bienvenue et le sondage de la semaine (question vide = pas de sondage).' },
     { key: 'CASA_REGLEMENTS', label: 'Règlements des sports', desc: 'Les règles expliquées de chaque discipline (réalité augmentée et pages sport).' },
     { key: 'CASA_STADES', label: 'Stades (réalité augmentée)', desc: 'Les communes et stades utilisés par « Ma compo en AR ».' },
-    { key: 'CASA_GAZETTE_NUMERO', label: 'Gazette : le numéro', desc: 'Couverture, numéro, date, accroche et image de La Gazette du Cotentin.' },
-    { key: 'CASA_GAZETTE', label: 'Gazette : les pages', desc: 'Les pages du magazine, dans l’ordre (modèles : article, portrait, number, choc, humeur).', item: 'title' },
+    { key: 'CASA_GAZETTE_NUMERO', label: 'Gazette : la Une (page 1)', desc: 'La première page de La Gazette : numéro, date, surtitre, grand titre, accroche, photo et légende. Le sommaire (page 2) se remplit tout seul.' },
+    { key: 'CASA_GAZETTE', label: 'Gazette : pages intérieures (page 3 et suivantes)', desc: 'Les pages du magazine après la Une et le sommaire, dans l’ordre (modèles : article, portrait, number, choc, humeur).', item: 'title' },
     { key: 'CASA_LIEUX', label: 'Lieux', desc: 'Les lieux du territoire : textes et vraies photos (champ « Photo »).', item: 'name' },
     { key: 'CASA_BOUTIQUE', label: 'Boutique : présentation', desc: 'Bandeau de la boutique et affiches des collections (images de présentation).' },
     { key: 'CASA_PRODUITS', label: 'Boutique : produits', desc: 'Fiches produits : nom, prix, photos, tailles, couleurs.', item: 'name' },
@@ -170,6 +170,9 @@
     '.cba-grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0 .8rem}' +
     '.cba-tbar{padding:.3rem 0}.cba-body-in{font-size:16px;line-height:1.6}' +
     '.cba-prev{max-width:720px;margin:0 auto;font-size:17px;line-height:1.65}.cba-prev h1{font-size:2rem;line-height:1.1;margin:.3rem 0 .6rem}.cba-prev .dek{font-size:1.15rem;font-weight:600}.cba-prev img{width:100%;height:auto;display:block;margin:1rem 0}.cba-prev h2{font-size:1.3rem;margin:1.4rem 0 .4rem}.cba-prev blockquote{border-left:4px solid var(--ink,#111);margin:1rem 0;padding:.2rem 1rem;font-style:italic;font-size:1.15rem}.cba-prev figure{margin:1rem 0}.cba-prev figcaption{font-size:13px;color:var(--muted,#666)}.cba-prev .pts{background:var(--surface-2,#f4f4f4);padding:.8rem 1rem .8rem 2rem}.cba-prev .by{color:var(--muted,#666);font-size:14px}' +
+    '.cba-pvbar{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483002;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:center;background:#0b0b0b;color:#fff;padding:.6rem .8rem;border:2px solid #fff;box-shadow:0 18px 50px -12px rgba(0,0,0,.6);font-family:var(--font-body,system-ui,sans-serif);font-size:14px;width:max-content;max-width:calc(100vw - 24px)}' +
+    '.cba-pvbar .cba-btn{border-color:#fff;background:transparent;color:#fff}.cba-pvbar .cba-btn.pri{background:#fff;color:#0b0b0b}' +
+    '.cba-tag.dr{background:#2f5d8a}' +
     '.cba-tbl{width:100%;border-collapse:collapse;font-size:14px}.cba-tbl td,.cba-tbl th{border-bottom:1px solid var(--line,#ddd);padding:.5rem .4rem;text-align:left;vertical-align:top}';
 
   // ---------- ouverture ----------
@@ -191,6 +194,7 @@
   }
   function close(fromPop) {
     if (!S.open) return;
+    if (PV) endPreview(false);
     if (S.dirty && !confirm('Des modifications ne sont pas enregistrées. Quitter quand même ?')) { if (fromPop) { try { history.pushState(null, '', '#/admin'); } catch (e) {} } return; }
     S.open = false; S.dirty = false; clearInterval(timer);
     if (root) root.remove(); if (toastEl) toastEl.remove(); root = null;
@@ -199,8 +203,8 @@
     pushed = false;
     if (window.CasaSite) { try { window.CasaSite.syncRoute(window.CasaSite.state, true); } catch (e) {} }
   }
-  window.addEventListener('popstate', function () { if (S.open && location.hash !== '#/admin') close(true); });
-  window.addEventListener('keydown', function (e) { if (S.open && e.key === 'Escape' && !document.querySelector('.cba-modal')) close(); });
+  window.addEventListener('popstate', function () { if (PV) return; if (S.open && location.hash !== '#/admin') close(true); });
+  window.addEventListener('keydown', function (e) { if (PV) { if (e.key === 'Escape') endPreview(false); return; } if (S.open && e.key === 'Escape' && !document.querySelector('.cba-modal')) close(); });
   window.addEventListener('beforeunload', function (e) { if (S.open && S.dirty) { e.preventDefault(); e.returnValue = ''; } });
   // Adresse directe #/admin (au chargement ou tapée ensuite) : ouverture dès que le rôle administrateur est confirmé.
   // Sans rôle admin après quelques secondes, le site explique quoi faire (se connecter, ou changer de compte),
@@ -374,11 +378,11 @@
     if (S.key) return viewEditor();
     var edited = A.editedKeys ? A.editedKeys() : [];
     return [E('h1', { class: 'cba-h' }, 'Contenus du site'),
-      E('p', { class: 'cba-sub' }, 'Choisissez une section, modifiez-la puis « Enregistrer et publier » : la modification est visible immédiatement par tous les visiteurs.'),
+      E('p', { class: 'cba-sub' }, 'Choisissez une section et modifiez-la. « Aperçu sur le site » montre le résultat sans rien publier ; vos changements sont gardés en brouillon sur cet appareil jusqu’à « Enregistrer et publier ».'),
       E('div', { class: 'cba-secs' }, SECTIONS.map(function (sec) {
         var v = window[sec.key]; var n = Array.isArray(v) ? v.length + ' élément' + (v.length > 1 ? 's' : '') : '';
         return E('div', { class: 'cba-card', style: 'margin:0;display:flex;flex-direction:column;gap:.4rem' },
-          E('strong', { style: 'font-size:1.05rem' }, sec.label, edited.indexOf(sec.key) >= 0 ? E('span', { class: 'cba-tag' }, 'modifié en ligne') : null),
+          E('strong', { style: 'font-size:1.05rem' }, sec.label, edited.indexOf(sec.key) >= 0 ? E('span', { class: 'cba-tag' }, 'modifié en ligne') : null, draftGet(sec.key) ? E('span', { class: 'cba-tag dr' }, 'brouillon') : null),
           E('span', { style: 'color:var(--text-2);font-size:14px;flex:1' }, sec.desc), n ? E('span', { style: 'color:var(--muted);font-size:13px' }, n) : null,
           E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.key = sec.key; S.work = withFields(sec.key, clone(window[sec.key])); S.dirty = false; S.openCards = {}; S.art = null; render(); body.scrollTop = 0; } }, 'Modifier'));
       }))];
@@ -389,7 +393,7 @@
     return v.map(function (x) { if (!x || typeof x !== 'object' || Array.isArray(x)) return x; var o = Object.assign({}, x); Object.keys(T).forEach(function (f) { if (!(f in o)) o[f] = clone(T[f]); }); return o; });
   }
   function secOf(k) { return SECTIONS.find(function (s) { return s.key === k; }) || { label: k }; }
-  function mark() { if (!S.dirty) { S.dirty = true; var b = root && root.querySelector('.cba-save'); if (b) b.disabled = false; } }
+  function mark() { draftLater(); if (!S.dirty) { S.dirty = true; var b = root && root.querySelector('.cba-save'); if (b) b.disabled = false; } }
   function save() {
     var k = S.key, v = S.work;
     if (Array.isArray(v)) {
@@ -399,8 +403,91 @@
       if (dup) { toast('Identifiant en double : ' + dup, true); render(); return; }
     }
     S.busy = true; render();
-    A.saveContent(k, v).then(function () { S.busy = false; S.dirty = false; S.work = withFields(k, clone(window[k])); render(); toast('Publié : visible par tous les visiteurs'); }, function (e) { S.busy = false; render(); err(e); });
+    A.saveContent(k, v).then(function () { draftDel(k); S.busy = false; S.dirty = false; S.work = withFields(k, clone(window[k])); render(); toast('Publié : visible par tous les visiteurs'); }, function (e) { S.busy = false; render(); err(e); });
   }
+  // ---------- Brouillons (gardés sur cet appareil jusqu'à la publication) ----------
+  var DKEY = 'cba-brouillon:', dTimer = null;
+  function draftGet(k) { try { var d = JSON.parse(localStorage.getItem(DKEY + k) || 'null'); return d && d.v !== undefined ? d : null; } catch (e) { return null; } }
+  function draftPut(k, v) { try { localStorage.setItem(DKEY + k, JSON.stringify({ at: new Date().toISOString(), v: v })); return true; } catch (e) { return false; } }
+  function draftDel(k) { try { localStorage.removeItem(DKEY + k); } catch (e) {} }
+  function draftLater() {
+    clearTimeout(dTimer);
+    dTimer = setTimeout(function () { if (!S.dirty) return; if (S.tab === 'sport' && S.sp) draftPut('CASA_SPORT', S.sp); else if (S.key && S.work != null) draftPut(S.key, S.work); }, 1000);
+  }
+  function draftNote(k, apply) {
+    var d = draftGet(k);
+    if (!d || S.dirty) return null;
+    var cur = k === 'CASA_SPORT' ? S.sp : S.work;
+    try { if (JSON.stringify(d.v) === JSON.stringify(cur)) return null; } catch (e) {}
+    return E('div', { class: 'cba-note' }, E('strong', {}, 'Brouillon non publié'), ' du ' + fmtDate(d.at) + ' (gardé sur cet appareil). ',
+      E('div', { class: 'cba-row', style: 'margin-top:.5rem' },
+        E('button', { type: 'button', class: 'cba-btn sm pri', onclick: function () { apply(clone(d.v)); S.dirty = true; render(); toast('Brouillon repris : pensez à publier'); } }, 'Reprendre le brouillon'),
+        E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { startPreview(k, d.v); } }, 'Aperçu du brouillon'),
+        E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Supprimer ce brouillon ?')) return; draftDel(k); render(); } }, 'Supprimer le brouillon')));
+  }
+  // Les deux sections de la Gazette se répondent
+  function gazetteLinks(k) {
+    if (k !== 'CASA_GAZETTE' && k !== 'CASA_GAZETTE_NUMERO') return null;
+    var other = k === 'CASA_GAZETTE' ? 'CASA_GAZETTE_NUMERO' : 'CASA_GAZETTE';
+    return E('div', { class: 'cba-row', style: 'margin:-.4rem 0 1rem' }, E('span', { style: 'color:var(--muted,#666);font-size:14px' }, k === 'CASA_GAZETTE' ? 'La page 1 (la Une) se modifie à part :' : 'Les pages 3 et suivantes se modifient à part :'),
+      E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { editSection(other, null); } }, k === 'CASA_GAZETTE' ? 'Modifier la Une' : 'Modifier les pages intérieures'));
+  }
+  function editSection(k, idx) {
+    if (S.dirty && S.key !== k && !confirm('Des modifications ne sont pas enregistrées (elles restent en brouillon). Changer de section ?')) return;
+    if (S.tab !== 'content') { S.tab = 'content'; }
+    S.key = k; S.work = withFields(k, clone(window[k])); S.dirty = false; S.openCards = {}; S.art = null;
+    if (idx != null) S.openCards[k + '[' + idx + ']'] = true;
+    render(); var b = root && root.querySelector('.cba-body'); if (b) b.scrollTop = 0;
+  }
+  // Depuis la liseuse : page 1-2 → la Une, page 3+ → la page intérieure correspondante
+  function editGazette(pageIdx) {
+    var go = function () {
+      if (pageIdx < 2) { editSection('CASA_GAZETTE_NUMERO', null); return; }
+      var n = pageIdx - 2, arr = Array.isArray(window.CASA_GAZETTE) ? window.CASA_GAZETTE : [], seen = -1, raw = null;
+      for (var i = 0; i < arr.length; i++) { if (arr[i] && arr[i].title) { seen++; if (seen === n) { raw = i; break; } } }
+      editSection('CASA_GAZETTE', raw);
+    };
+    if (!S.open) { open(); setTimeout(go, 0); } else go();
+  }
+
+  // ---------- Aperçu sur le site, avant publication ----------
+  var PV = null, pvBar = null;
+  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live' };
+  function openCardIdx(k) { var m = null; Object.keys(S.openCards || {}).forEach(function (p) { var r = p.match(new RegExp('^' + k + '\\[(\\d+)\\]$')); if (r && S.openCards[p]) m = Number(r[1]); }); return m; }
+  function startPreview(k, value) {
+    var site = window.CasaSite; if (!site || PV) return;
+    var v = clone(value), view = VIEW_OF[k] || 'home', extra = {};
+    if (k === 'CASA_ARTICLES' && Array.isArray(v) && S.art != null && v[S.art]) { if (!v[S.art].id) v[S.art].id = 'apercu-article'; if (!v[S.art].title) v[S.art].title = 'Article sans titre'; view = 'article'; extra = { articleId: v[S.art].id }; }
+    PV = { key: k, orig: window[k], val: clone(value) };
+    window[k] = v; window.CASA_APERCU = true;
+    try { site.refreshContent(); } catch (e) {}
+    root.style.display = 'none'; document.documentElement.style.overflow = '';
+    pvBar = E('div', { class: 'cba-pvbar', role: 'region', 'aria-label': 'Aperçu avant publication', translate: 'no' },
+      E('span', {}, E('strong', {}, 'Aperçu'), ' · rien n’est encore publié'),
+      E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { endPreview(false); } }, '← Revenir à l’édition'),
+      E('button', { type: 'button', class: 'cba-btn sm pri', onclick: function () { endPreview(true); } }, 'Publier'));
+    document.body.appendChild(pvBar);
+    try {
+      if (view === 'gazette') {
+        var page = 0;
+        if (k === 'CASA_GAZETTE') { var i = openCardIdx(k), arr = Array.isArray(v) ? v : [], n = 0; if (i == null) i = 0; for (var j = 0; j < i && j < arr.length; j++) if (arr[j] && arr[j].title) n++; page = (arr[i] && arr[i].title) ? n + 2 : (arr.some(function (x) { return x && x.title; }) ? 2 : 1); }
+        site.setState({ readerOpen: true, page: page });
+      } else site.go(view, extra);
+    } catch (e) {}
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  function endPreview(publish) {
+    if (!PV) return; var site = window.CasaSite, k = PV.key, val = PV.val;
+    window[k] = PV.orig; window.CASA_APERCU = false;
+    if (pvBar) pvBar.remove(); pvBar = null;
+    PV = null;
+    try { site.setState({ readerOpen: false }); site.refreshContent(); } catch (e) {}
+    if (root) root.style.display = ''; document.documentElement.style.overflow = 'hidden';
+    try { history.replaceState(null, '', '#/admin'); } catch (e) {}
+    pushed = false; render();
+    if (publish) { if (k === 'CASA_SPORT') { S.sp = val; spSave(); } else if (S.key === k) { S.work = val; S.dirty = true; save(); } }
+  }
+
   function viewEditor() {
     var sec = secOf(S.key), edited = (A.editedKeys ? A.editedKeys() : []).indexOf(S.key) >= 0;
     var ed = E('div', { class: 'cba-ed' });
@@ -412,13 +499,17 @@
       E('div', { class: 'cba-row' },
         E('button', { type: 'button', class: 'cba-btn', onclick: function () { if (S.dirty && !confirm('Abandonner les modifications non enregistrées ?')) return; S.key = null; S.work = null; S.dirty = false; render(); } }, '← Sections'),
         E('strong', { style: 'font-size:1.2rem;margin-right:auto' }, sec.label),
+        E('button', { type: 'button', class: 'cba-btn', onclick: function () { startPreview(S.key, S.work); } }, 'Aperçu sur le site'),
+        E('button', { type: 'button', class: 'cba-btn', disabled: !S.dirty || null, onclick: function () { toast(draftPut(S.key, S.work) ? 'Brouillon enregistré sur cet appareil (non publié)' : 'Brouillon impossible : stockage du navigateur indisponible', !draftGet(S.key)); } }, 'Enregistrer le brouillon'),
         E('button', { type: 'button', class: 'cba-btn pri cba-save', disabled: (!S.dirty || S.busy) || null, onclick: save }, S.busy ? 'Publication…' : 'Enregistrer et publier'),
-        E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.work = withFields(S.key, clone(window[S.key])); S.dirty = false; render(); } }, 'Annuler les modifications'),
+        E('button', { type: 'button', class: 'cba-btn', onclick: function () { if ((S.dirty || draftGet(S.key)) && !confirm('Abandonner les modifications et supprimer le brouillon ?')) return; draftDel(S.key); S.work = withFields(S.key, clone(window[S.key])); S.dirty = false; render(); } }, 'Annuler les modifications'),
         edited ? E('button', { type: 'button', class: 'cba-btn dan', onclick: function () {
           if (!confirm('Revenir à la version du fichier (contenus/ du dépôt) pour « ' + sec.label + ' » ? Les modifications faites ici seront effacées.')) return;
           A.resetContent(S.key).then(function () { S.work = withFields(S.key, clone(window[S.key])); S.dirty = false; render(); toast('Version d’origine rétablie'); }, err);
         } }, 'Version d’origine') : null)),
       E('p', { class: 'cba-sub' }, sec.desc),
+      draftNote(S.key, function (v) { S.work = withFields(S.key, v); }),
+      gazetteLinks(S.key),
       ed];
   }
   // Champ générique : parent[k]
@@ -933,9 +1024,9 @@
     if (v.sources.indexOf('Saisie de la rédaction (espace administrateur)') < 0) v.sources.push('Saisie de la rédaction (espace administrateur)');
     v.maj = new Date().toISOString();
     S.busy = true; render();
-    A.saveContent('CASA_SPORT', v).then(function () { S.busy = false; spLoad(); render(); toast('Publié : visible par tous les visiteurs'); }, function (e) { S.busy = false; render(); err(e); });
+    A.saveContent('CASA_SPORT', v).then(function () { draftDel('CASA_SPORT'); S.busy = false; spLoad(); render(); toast('Publié : visible par tous les visiteurs'); }, function (e) { S.busy = false; render(); err(e); });
   }
-  function spMark() { if (!S.dirty) { S.dirty = true; var b = root && root.querySelector('.cba-save'); if (b) b.disabled = false; } }
+  function spMark() { draftLater(); if (!S.dirty) { S.dirty = true; var b = root && root.querySelector('.cba-save'); if (b) b.disabled = false; } }
   function spIn(obj, k, opts) {
     opts = opts || {};
     return E('input', { class: 'cba-in', type: opts.type || 'text', value: obj[k] == null ? '' : String(obj[k]), placeholder: opts.ph || null, list: opts.list || null, style: opts.style || null,
@@ -948,10 +1039,13 @@
     var nc = { sport: 'Football', label: '' };
     var out = [E('div', { class: 'cba-bar' }, E('div', { class: 'cba-row' },
         E('strong', { style: 'font-size:1.2rem;margin-right:auto' }, 'Résultats et classements'),
+        E('button', { type: 'button', class: 'cba-btn', onclick: function () { startPreview('CASA_SPORT', S.sp); } }, 'Aperçu sur le site'),
+        E('button', { type: 'button', class: 'cba-btn', disabled: !S.dirty || null, onclick: function () { toast(draftPut('CASA_SPORT', S.sp) ? 'Brouillon enregistré sur cet appareil (non publié)' : 'Brouillon impossible : stockage du navigateur indisponible'); } }, 'Enregistrer le brouillon'),
         E('button', { type: 'button', class: 'cba-btn pri cba-save', disabled: (!S.dirty || S.busy) || null, onclick: spSave }, S.busy ? 'Publication…' : 'Enregistrer et publier'),
-        E('button', { type: 'button', class: 'cba-btn', onclick: function () { if (S.dirty && !confirm('Abandonner les modifications non enregistrées ?')) return; spLoad(); render(); } }, 'Annuler les modifications'),
+        E('button', { type: 'button', class: 'cba-btn', onclick: function () { if ((S.dirty || draftGet('CASA_SPORT')) && !confirm('Abandonner les modifications et supprimer le brouillon ?')) return; draftDel('CASA_SPORT'); spLoad(); render(); } }, 'Annuler les modifications'),
         edited ? E('button', { type: 'button', class: 'cba-btn dan', onclick: function () { if (!confirm('Effacer tout ce qui a été saisi ici et revenir au fichier contenus/sport.js du dépôt ?')) return; S.busy = true; render(); A.resetContent('CASA_SPORT').then(function () { S.busy = false; spLoad(); render(); toast('Version d’origine rétablie'); }, function (e) { S.busy = false; render(); err(e); }); } }, 'Version d’origine') : null)),
       E('p', { class: 'cba-sub' }, 'Saisissez vous-même les classements, les scores et les prochains matchs. Ils s’affichent dans « Le Terrain » dès que vous publiez. Une case de score vide = match à venir.'),
+      draftNote('CASA_SPORT', function (d) { S.sp = d; }),
       v.maj ? E('p', { class: 'cba-sub', style: 'margin-top:-.6rem' }, 'Dernière publication : ' + fmtDate(v.maj)) : null,
       E('datalist', { id: 'cba-teams' }, spTeams().map(function (t) { return E('option', { value: t }); }))];
 
@@ -1022,6 +1116,7 @@
     var P = function (t) { return E('p', { style: 'line-height:1.6' }, t); };
     return [E('h1', { class: 'cba-h' }, 'Aide'),
       E('div', { class: 'cba-card' }, E('strong', {}, 'Modifier le site'),
+        P('Avant de publier, « Aperçu sur le site » montre la page telle que les visiteurs la verront, sans rien publier : « Revenir à l’édition » pour continuer, « Publier » pour mettre en ligne. Vos changements sont aussi gardés automatiquement en brouillon sur cet appareil : en revenant sur la section, « Reprendre le brouillon ». Dans la Gazette, le bouton « Modifier cette page » ouvre directement la bonne page ici.'),
         P('Contenus du site › choisissez la section › modifiez › « Enregistrer et publier ». La modification est en ligne tout de suite, pour tous les visiteurs. « Version d’origine » efface vos changements et rétablit le fichier du dépôt GitHub.'),
         P('Les articles déposés par la Rédaction quotidienne continuent d’apparaître en plus de ceux que vous modifiez ici.')),
       E('div', { class: 'cba-card' }, E('strong', {}, 'Résultats et classements'),
@@ -1034,5 +1129,5 @@
         P('Seules les personnes listées dans Équipe et accès voient l’espace rédaction. Un abonné peut vous envoyer une demande depuis Mon espace ; vous l’acceptez ou la refusez en un clic.'))];
   }
 
-  window.CasaAdmin = { open: open, close: close, wantOpen: wantOpen, cropImage: cropImage, isOpen: function () { return S.open; } };
+  window.CasaAdmin = { open: open, close: close, editGazette: editGazette, editSection: function (k, i) { if (!S.open) open(); editSection(k, i == null ? null : i); }, wantOpen: wantOpen, cropImage: cropImage, isOpen: function () { return S.open; } };
 })();
