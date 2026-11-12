@@ -119,7 +119,7 @@
   };
 
   // ---------- Contenus en ligne : appliqués avant l'affichage (copie locale), puis mis à jour ----------
-  var CONTENT_KEYS = ['CASA_ARTICLES', 'CASA_LIEUX', 'CASA_BOUTIQUE', 'CASA_PRODUITS', 'CASA_VIDEOS', 'CASA_CULTURE', 'CASA_FONDS', 'CASA_APROPOS', 'CASA_LEGAL', 'CASA_LEGAL_MAJ', 'CASA_GAZETTE', 'CASA_GAZETTE_NUMERO', 'CASA_SPORT'];
+  var CONTENT_KEYS = ['CASA_ARTICLES', 'CASA_LIEUX', 'CASA_BOUTIQUE', 'CASA_PRODUITS', 'CASA_VIDEOS', 'CASA_CULTURE', 'CASA_FONDS', 'CASA_APROPOS', 'CASA_LEGAL', 'CASA_LEGAL_MAJ', 'CASA_GAZETTE', 'CASA_GAZETTE_NUMERO', 'CASA_SPORT', 'CASA_CLUBS', 'CASA_JOUEURS', 'CASA_PARTENAIRES', 'CASA_ABONNEMENTS', 'CASA_CLUBHOUSE', 'CASA_REGLEMENTS', 'CASA_STADES'];
   var CKEY = 'cb-contenu';
   var ORIG = {};
   CONTENT_KEYS.forEach(function (k) { try { ORIG[k] = JSON.parse(JSON.stringify(window[k] === undefined ? null : window[k])); } catch (e) { ORIG[k] = window[k]; } });

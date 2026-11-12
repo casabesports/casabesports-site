@@ -127,60 +127,11 @@ class Component extends DCLogic {
     // Vidéos : contenus/videos.js
     const videos = ((typeof window !== 'undefined' && window.CASA_VIDEOS) || []).slice();
     const C = (id, name, sport, city, img) => ({ id, name, sport, city, img: img || null });
-    const clubs = [
-      C('esph', 'ES Pointe Hague', 'Football', 'Beaumont-Hague'),
-      C('as-cherbourg', 'AS Cherbourg Football', 'Football', 'Cherbourg', 'assets/img_4606c0a1.jpg'),
-      C('as-tourlaville', 'AS Tourlaville Football', 'Football', 'Tourlaville', 'assets/img_a1612881.jpg'),
-      C('a2c', 'A2C', 'Multisport', 'Cherbourg', 'assets/img_b0f4c33c.jpg'),
-      C('fceh', 'FCEH', 'Football', 'Équeurdreville'),
-      C('redoutables', 'Les Redoutables', 'Water-polo', 'Cherbourg'),
-      C('marais-basket', 'Les Marais Cherbourg Basketball', 'Basketball', 'Cherbourg'),
-      C('bc-hague', 'Basket Club de la Hague', 'Basketball', 'Urville-Nacqueville'),
-      C('bayeux-fc', 'Bayeux FC', 'Football', 'Bayeux'),
-      C('cs-barfleur', 'CS Barfleur', 'Football', 'Barfleur'),
-      C('cs-carentan', 'CS Carentan Football', 'Football', 'Carentan'),
-      C('fc-digosville', 'FC Digosville', 'Football', 'Digosville'),
-      C('fc-saint-lo', 'FC Saint-Lô Manche', 'Football', 'Saint-Lô'),
-      C('flers', 'Flers FC', 'Football', 'Flers'),
-      C('gazelec', 'Gazélec FC', 'Football', 'Cherbourg'),
-      C('valognaise', 'La Valognaise Basket', 'Basketball', 'Valognes'),
-      C('pl-octeville', 'PL Octeville', 'Football', 'Cherbourg'),
-      C('pl-tourlaville', 'PL Tourlaville Basket', 'Basketball', 'Tourlaville'),
-      C('sc-douve', 'SC Douve Divette', 'Football', 'Tollevast'),
-      C('uc-briquebec', 'UC Briquebec', 'Football', 'Bricquebec'),
-      C('us-avranches', 'US Avranches MSM', 'Football', 'Avranches'),
-      C('us-cote-isles', 'US Côte des Isles', 'Football', 'Barneville-Carteret'),
-      C('uson-mondeville', 'USON Mondeville FC', 'Football', 'Mondeville'),
-      C('ust-basket', 'UST Basket', 'Basketball', 'Équeurdreville'),
-      C('as-greville', 'AS Gréville-Hague', 'Football', 'Gréville-Hague')
-    ];
+    // Clubs : contenus/clubs.js (modifiable dans l'espace administrateur)
+    const clubs = ((typeof window !== 'undefined' && Array.isArray(window.CASA_CLUBS)) ? window.CASA_CLUBS : []).filter((c) => c && c.id && c.name).map((c) => C(c.id, c.name, c.sport || 'Football', c.city || '', c.img || null));
     const P = (id, num, name, role, club, clubLabel, img) => ({ id, num, name, role, club, clubLabel, img: img || null });
-    const players = [
-      P('rouleau', '9', 'Bastien Rouleau', 'Attaquant', 'esph', 'ES Pointe Hague', 'assets/p_rouleau.jpg'),
-      P('letan', '7', 'Brice Letan', 'Attaquant', 'as-cherbourg', 'AS Cherbourg Football', 'assets/p_letan.jpg'),
-      P('piedagnel', '96', 'Bryan Piedagnel', 'Arbitre', null, 'Arbitrage', 'assets/p_piedagnel.jpg'),
-      P('mariette', '99', 'Cloé Mariette', 'Arbitre & VP District', null, 'District de la Manche', 'assets/p_mariette.jpg'),
-      P('c-gosselin', '98', 'Christophe Gosselin', 'Entraîneur', 'as-cherbourg', 'AS Cherbourg Football', 'assets/p_cgosselin.jpg'),
-      P('e-dubois', '52', 'Erwan Dubois', 'Poste 4-5', null, 'Cherbourg Basketball', 'assets/p_edubois.jpg'),
-      P('diabate', '5', 'Abdul-Kader Diabaté', 'Défenseur', 'esph', 'ES Pointe Hague'),
-      P('leterrier', '5', 'Alan Leterrier', 'Défenseur', 'fceh', 'FCEH'),
-      P('baudet', '6', 'Antoine Baudet', 'Milieu', 'esph', 'ES Pointe Hague'),
-      P('halipre', '14', 'Antoine Halipre', 'Attaquant', 'esph', 'ES Pointe Hague'),
-      P('vautier', '6', 'Antonin Vautier', 'Milieu', 'esph', 'ES Pointe Hague'),
-      P('aubin', '11', 'Aubin Pierre', 'Milieu', 'esph', 'ES Pointe Hague'),
-      P('schneider', '9', 'Baptiste Schneider', 'Attaquant', 'as-tourlaville', 'AS Tourlaville Football'),
-      P('lebrun', '7', 'Brice Le Brun', 'Attaquant', 'esph', 'ES Pointe Hague'),
-      P('collet', '8', 'Calvyn Collet', 'Milieu', 'esph', 'ES Pointe Hague'),
-      P('paciorek', '5', 'Dorian Pacioreck', 'Défenseur', 'as-cherbourg', 'AS Cherbourg Football'),
-      P('delente', '11', 'Enzo Delente', 'Attaquant', 'esph', 'ES Pointe Hague'),
-      P('leboullenger', '23', 'Ethan Leboullenger', 'Poste 2-1', null, 'Cherbourg Basketball'),
-      P('lebresne', '10', 'Ethan Lebresne', 'Attaquant', 'esph', 'ES Pointe Hague'),
-      P('renouf', '10', 'Ethan Renouf', 'Attaquant', 'esph', 'ES Pointe Hague'),
-      P('crestey', '12', 'Florent Crestey', 'Attaquant', 'esph', 'ES Pointe Hague'),
-      P('billard', '99', 'Florian Billard', 'Entraîneur', 'fceh', 'FCEH'),
-      P('f-dubois', '5', 'Florian Dubois', 'Défenseur', 'as-cherbourg', 'AS Cherbourg Football'),
-      P('f-gosselin', '8', 'François Gosselin', 'Milieu', 'esph', 'ES Pointe Hague')
-    ];
+    // Joueurs : contenus/joueurs.js (modifiable dans l'espace administrateur)
+    const players = ((typeof window !== 'undefined' && Array.isArray(window.CASA_JOUEURS)) ? window.CASA_JOUEURS : []).filter((p) => p && p.id && p.name).map((p) => P(p.id, String(p.num == null ? '' : p.num), p.name, p.role || '', p.club || null, p.clubLabel || ((clubs.find((c) => c.id === p.club) || {}).name) || '', p.img || null));
     const cities = { 'Cherbourg': [49.639, -1.616], 'Tourlaville': [49.638, -1.565], 'Équeurdreville': [49.655, -1.68], 'Beaumont-Hague': [49.664, -1.84], 'Urville-Nacqueville': [49.674, -1.74], 'Gréville-Hague': [49.677, -1.80], 'Digosville': [49.632, -1.525], 'Tollevast': [49.575, -1.628], 'Bricquebec': [49.47, -1.633], 'Valognes': [49.509, -1.47], 'Barfleur': [49.671, -1.264], 'Barneville-Carteret': [49.383, -1.75], 'Carentan': [49.303, -1.248], 'Saint-Lô': [49.116, -1.09], 'Avranches': [48.684, -1.357], 'Bayeux': [49.276, -0.703], 'Flers': [48.75, -0.57], 'Mondeville': [49.175, -0.32] };
     const sports = ['Football', 'Basketball', 'Rugby', 'Water-polo', 'Trail', 'Natation', 'Pétanque', 'Roller', 'Équitation', 'Ping-pong', 'Kitesurf', 'Karting', 'Judo', 'Volley-ball', 'Tennis', 'Golf', 'Wing foil', 'Hockey', 'Boxe'];
     // Articles ajoutés par la rédaction ou l'automatisation : contenus/articles.js (les plus récents en premier)
@@ -231,14 +182,8 @@ class Component extends DCLogic {
 
     // Matchs
     const M = (id, sport, comp, date, time, home, away, hs, as, status, o) => Object.assign({ id, sport, comp, date, time, home, away, hs, as, status, verified: false, venue: '[Stade]', minute: 0, article: null }, o || {});
-    const matches = [
-      M('m-cfa-mondeville', 'Football', 'cdf', '2026-09-13', '15:00', 'USON Mondeville FC', 'ES Pointe Hague', null, null, 'done', { verified: true, note: 'Qualifié aux tirs au but', article: 'pointe-hague' }),
-      M('m-cfa-avranches', 'Football', 'cdf', null, '[Heure]', 'ES Pointe Hague', 'US Avranches MSM', null, null, 'up', { verified: true, venue: 'Beaumont-Hague', article: 'pointe-hague' }),
-      M('m-asc-astdv', 'Football', 'r1', '2026-05-31', '15:00', 'AS Cherbourg Football', 'ASTDV B', 8, 0, 'done', { verified: true, article: 'photographe' }),
-      M('m-fceh-agneaux', 'Football', 'r2', '2026-05-23', '18:00', 'FCEH', 'Agneaux FC', 5, 1, 'done', { verified: true, venue: 'Stade Jean-Jaurès', article: 'fceh' }),
-      M('b-tic', 'Basketball', 'tic', '2026-05-23', '[Heure]', 'Blue Squad', 'Sélection de la Manche', null, null, 'done', { verified: true, note: 'Défaite en demi-finale', article: 'blue-squad' }),
-      M('r-gala', 'Rugby', 'gala', '2026-06-18', '[Heure]', 'Marine nationale', 'British Police', null, null, 'done', { verified: true, note: '400 ans de la Marine nationale', article: 'marine-nationale' })
-    ];
+    // Matchs et résultats : contenus/sport.js (onglet Résultats de l'espace administrateur)
+    const matches = [];
     const comps = {
       Football: [{ id: 'cdf', label: 'Coupe de France' }, { id: 'r2', label: 'Régional 2' }, { id: 'r1', label: 'Régional 1' }],
       Basketball: [{ id: 'tic', label: 'Tournoi international' }],
@@ -253,19 +198,15 @@ class Component extends DCLogic {
     (SP.matches || []).forEach((m) => { if (m && m.id && !matches.some((x) => x.id === m.id)) matches.push(M(m.id, m.sport, m.comp, m.date || null, m.time || '', m.home, m.away, m.hs == null ? null : m.hs, m.as == null ? null : m.as, m.status || (m.hs == null ? 'up' : 'done'), { verified: true, venue: m.venue || '', source: m.source || '' })); });
     Object.keys(SP.comps || {}).forEach((sp) => { comps[sp] = (comps[sp] || []).filter((c) => !(SP.comps[sp] || []).some((n) => n.id === c.id)).concat(SP.comps[sp] || []); });
     const teamClubBase = { 'FCEH': 'fceh', 'AS Tourlaville Football': 'as-tourlaville', 'CS Carentan Football': 'cs-carentan', 'US Côte des Isles': 'us-cote-isles', 'SC Douve Divette': 'sc-douve', 'UC Briquebec': 'uc-briquebec', 'ES Pointe Hague': 'esph', 'US Avranches MSM': 'us-avranches', 'USON Mondeville FC': 'uson-mondeville', 'AS Cherbourg Football': 'as-cherbourg', 'Les Marais Cherbourg Basketball': 'marais-basket', 'UST Basket': 'ust-basket', 'PL Tourlaville Basket': 'pl-tourlaville', 'La Valognaise Basket': 'valognaise', 'Basket Club de la Hague': 'bc-hague', 'Les Redoutables': 'redoutables' };
-    const teamClub = Object.assign({}, teamClubBase, SP.teamClub || {});
-    const subPlans = {
-      casab: { name: 'Casa B+', mois: 4.99, an: 49, perks: ['Tous les articles et vidéos Premium', 'Lecture audio et résumé express', 'Alertes de vos clubs', '−10 % sur la boutique'], casab: true, gazette: null, paper: false },
-      'gaz-num': { name: 'La Gazette · Numérique', mois: 3.99, an: 39, perks: ['Chaque numéro en liseuse dès sa parution', 'Archives complètes', 'Sur mobile, tablette et ordinateur'], casab: false, gazette: 'num', paper: false },
-      'gaz-pap': { name: 'La Gazette · Papier', mois: 6.9, an: 69, perks: ['Le magazine dans votre boîte aux lettres', 'Livraison incluse dans la Manche', 'Posters et cahier pratique'], casab: false, gazette: 'pap', paper: true },
-      'gaz-duo': { name: 'La Gazette · Papier + Numérique', mois: 8.9, an: 89, perks: ['Le papier chez vous', 'La liseuse numérique en avant-première', 'Archives complètes'], casab: false, gazette: 'duo', paper: true },
-      pack: { name: 'Pack Supporter', mois: 11.9, an: 119, perks: ['Casa B+ complet', 'La Gazette papier + numérique', '−10 % sur la boutique', 'Une écharpe offerte avec l’annuel'], casab: true, gazette: 'duo', paper: true }
-    };
+    const clubNames = {}; this.data().clubs.forEach((c) => { clubNames[c.name] = c.id; });
+    const teamClub = Object.assign({}, teamClubBase, clubNames, SP.teamClub || {});
+    // Formules d'abonnement : contenus/abonnements.js (modifiable dans l'espace administrateur)
+    const subPlans = {};
+    ((typeof window !== 'undefined' && window.CASA_ABONNEMENTS) || []).forEach((f) => { if (f && f.id) subPlans[f.id] = Object.assign({ name: f.id, mois: 0, an: 0, perks: [], casab: false, gazette: null, paper: false }, f, { gazette: f.gazette || null, perks: (f.perks || []).filter(Boolean) }); });
     // Lieux (arrière-plans « Lieux de légende », lieu du jour) : contenus/lieux.js
     const places = (typeof window !== 'undefined' && Array.isArray(window.CASA_LIEUX) && window.CASA_LIEUX.length) ? window.CASA_LIEUX.filter((p) => p && p.id).map((p) => Object.assign({}, p, { img: p.photo || p.img, isPhoto: !!p.photo })) : [{ id: 'rade', name: 'Casa Besports', short: 'Casa Besports', where: 'Cotentin', year: '', img: 'assets/hero.jpg', hook: '', desc: '', moment: '' }];
-    const partners = [
-      { id: 'olisto', name: 'OlistO', mono: 'O', sector: 'Crédit immobilier · regroupement de crédits · assurance emprunteur', city: 'Réseau de courtage', tier: 'Platinum', color: '#163a5f', since: 2026, perk: 'Étude de votre projet offerte', desc: 'Réseau de courtage en crédit immobilier, regroupement de crédits, assurance emprunteur, prêt professionnel et immobilier neuf. Partenaire Casa Besports.', real: true },
-    ];
+    // Partenaires : contenus/partenaires.js (modifiable dans l'espace administrateur)
+    const partners = ((typeof window !== 'undefined' && window.CASA_PARTENAIRES) || []).filter((p) => p && p.id && p.name).map((p) => Object.assign({ sector: '', city: '', tier: '', since: new Date().getFullYear(), perk: '', desc: '', real: true }, p, { mono: p.mono || (p.name || '?')[0].toUpperCase(), color: p.color || '#163a5f' }));
     const team = ((typeof window !== 'undefined' && window.CASA_EQUIPE) || []).map((m, i) => ({ id: i === 0 ? 'admin' : 'm' + i, name: m.name, mail: m.email, role: m.role === 'admin' ? 'admin' : 'writer' }));
     const seedPosts = [];
     const seedAt = {};
@@ -523,7 +464,7 @@ class Component extends DCLogic {
     const r = this.state.role;
     if (r === 'admin') { const n = this.state.name.trim() || 'Administrateur principal'; return { name: n, first: n.split(' ')[0], role: 'admin', roleLabel: 'Administrateur principal · validation et publication' }; }
     if (r === 'writer') { const n = this.state.name.trim() || 'Rédaction'; return { name: n, first: n.split(' ')[0], role: 'writer', roleLabel: 'Rédaction · écriture et soumission' }; }
-    if (r === 'club') { const cl = this.data().clubs.find((c) => c.id === this.state.clubRoleId) || this.data().clubs[0]; return { name: 'Correspondant ' + cl.name, first: 'Correspondant', role: 'club', roleLabel: 'Correspondant de club · ' + cl.name }; }
+    if (r === 'club') { const cl = this.data().clubs.find((c) => c.id === this.state.clubRoleId) || this.data().clubs[0] || { name: 'club' }; return { name: 'Correspondant ' + cl.name, first: 'Correspondant', role: 'club', roleLabel: 'Correspondant de club · ' + cl.name }; }
     return { name: 'Visiteur', first: 'Visiteur', role: null, roleLabel: '' };
   }
   blocksOf(body) {
@@ -631,7 +572,7 @@ class Component extends DCLogic {
       const city = ci ? (ci === 'Saint-Lo' ? 'Saint-Lô' : ci) : this.state.wxCity || 'Cherbourg';
       const Wc = (this.state.wxLive || {})[city] || this.wxDemo(city);
       const [lab] = this.wxIcon(Wc.cur.code); const d1 = Wc.days[1]; const [lab1] = this.wxIcon(d1.code);
-      return { text: 'Météo à ' + city + (Wc.live ? '' : ' (démo)') + ' : ' + lab.toLowerCase() + ', ' + Wc.cur.t + '°, vent ' + Wc.cur.wind + ' km/h.\nDemain : ' + lab1.toLowerCase() + ', ' + d1.min + '° à ' + d1.max + '°, pluie ' + d1.pp + ' %.', actions: [act('Prévisions détaillées', () => { this.setState({ wxCity: city }); this.go('meteo'); })] };
+      return { text: 'Météo à ' + city + (Wc.live ? '' : ' (estimation)') + ' : ' + lab.toLowerCase() + ', ' + Wc.cur.t + '°, vent ' + Wc.cur.wind + ' km/h.\nDemain : ' + lab1.toLowerCase() + ', ' + d1.min + '° à ' + d1.max + '°, pluie ' + d1.pp + ' %.', actions: [act('Prévisions détaillées', () => { this.setState({ wxCity: city }); this.go('meteo'); })] };
     }
     // espace privé
     const lm = q.match(/ajoute(?:r)?\s+(.+?)\s+(?:a|dans)\s+(?:ma|la|mes)\s+(?:liste\s+de\s+)?(courses|sac|taches|liste)/);
@@ -727,7 +668,7 @@ class Component extends DCLogic {
       return { text: 'Ma sélection' + (budget ? ' à moins de ' + budget + ' €' : '') + ' :\n' + pool.map((p) => '• ' + p.name + ' — ' + eur(p.price)).join('\n') + (this.state.subs.casab ? '\nRemise abonné −10 % appliquée au panier.' : ''), actions: pool.map((p) => act('Voir ' + p.name.split(' «')[0], () => this.go('product', { productId: p.id, color: 0, size: null, qty: 1, persoName: '', persoNum: '' }))) };
     }
     if (has(/abonn|casa b|premium|tarif|prix|pack/)) return { text: 'Les formules :\n• Casa B+ : 4,99 € / mois (articles Premium, alertes, −10 % boutique)\n• La Gazette : dès 3,99 € / mois\n• Pack Supporter : 11,90 € / mois (tout compris)\nEn annuel, deux mois sont offerts.', actions: [act('Comparer les offres', () => this.go('offers'))] };
-    if (has(/partenaire|sponsor|avantage/)) return { text: 'Partenaires (fictifs, démo) :\n' + X.partners.map((p) => '• ' + p.name + ' — ' + p.perk).join('\n'), actions: [act('Voir les partenaires', () => this.go('partners'))] };
+    if (has(/partenaire|sponsor|avantage/)) return { text: 'Nos partenaires :\n' + X.partners.map((p) => '• ' + p.name + ' — ' + p.perk).join('\n'), actions: [act('Voir les partenaires', () => this.go('partners'))] };
     if (has(/redaction|relecture|relire|valider|publier|admin|brouillon/)) {
       if (!this.state.role) return { text: 'L’espace rédaction est réservé à l’équipe.', actions: [act('Se connecter', () => this.setState({ loginOpen: true }))] };
       const pend = this.posts().filter((p) => p.status === 'review');
@@ -994,12 +935,12 @@ class Component extends DCLogic {
     const d = (n) => this.addDays(n);
     this._ch = {
       posts: [
-        { id: 's1', author: 'La rédaction', staff: true, room: 'Général', time: 'épinglé', text: 'Bienvenue au Club House ! Respect, bienveillance et passion : la charte est simple. Présentez-vous et dites-nous quel club vous suivez.', likes: 31, liked: false, comments: [] },
+        { id: 's1', author: 'La rédaction', staff: true, room: 'Général', time: 'épinglé', text: ((window.CASA_CLUBHOUSE || {}).bienvenue) || 'Bienvenue au Club House !', likes: 0, liked: false, comments: [] },
       ],
       ads: [],
       events: [],
       rsvp: {},
-      poll: { q: 'Le moment fort de la saison ?', opts: [{ t: 'Le 5-1 et le maintien du FCEH', v: 0 }, { t: 'Le 8-0 de l’AS Cherbourg', v: 0 }, { t: 'Les Redoutables en Coupe de la Manche', v: 0 }, { t: 'Le parcours de la Blue Squad', v: 0 }] },
+      poll: { q: '', opts: [] },
       pollVote: null
     };
     return this._ch;
@@ -1288,7 +1229,7 @@ class Component extends DCLogic {
         scoreMid: hasScore ? m.hs + ' – ' + m.as : (done ? '·' : 'vs'),
         statusLabel, stColor: live ? 'var(--danger)' : done ? 'var(--muted)' : 'var(--gold-text)', pulse: live ? 'pulse' : '',
         progress: live ? Math.round(minute / (m.sport === 'Basketball' ? 40 : 90) * 100) + '%' : done ? '100%' : '0%',
-        vLabel: m.verified ? 'Vérifié' : 'Démo', vColor: m.verified ? 'var(--success)' : 'var(--gold-text)',
+        vLabel: m.verified ? 'Vérifié' : 'À confirmer', vColor: m.verified ? 'var(--success)' : 'var(--gold-text)',
         homeW: hasScore && m.hs > m.as ? '800' : '600', awayW: hasScore && m.as > m.hs ? '800' : '600',
         open: () => this.setState({ matchId: m.id }),
         upcoming: m.status === 'up', opts: pronoOpts(m),
@@ -1372,7 +1313,7 @@ class Component extends DCLogic {
     const clubSports = ['Tous', 'Football', 'Basketball', 'Water-polo', 'Multisport'];
     const clubChips = clubSports.map((c) => Object.assign(pill(c === s.clubSport), { label: c, pick: () => this.setState({ clubSport: c }) }));
     const clubList = D.clubs.filter((c) => s.clubSport === 'Tous' || c.sport === s.clubSport).map((c) => clubV(c));
-    const curC = clubById(s.clubId) || D.clubs[0];
+    const curC = clubById(s.clubId) || D.clubs[0] || { id: '', name: 'Aucun club', sport: '', city: '', img: null };
     const club = clubV(curC);
     club.hasImg = !!curC.img;
     club.openSport = () => this.go('discipline', { discId: curC.sport });
@@ -1391,7 +1332,7 @@ class Component extends DCLogic {
     const roleChips = roles.map((r) => Object.assign(pill(r === s.plRole), { label: r, pick: () => this.setState({ plRole: r }) }));
     const isStaff = (p) => /Arbitre|Entraîneur|VP/.test(p.role);
     const playerList = D.players.filter((p) => s.plRole === 'Tous' || (s.plRole === 'Staff & arbitres' ? isStaff(p) : p.role === s.plRole)).map(playerV);
-    const curP = D.players.find((p) => p.id === s.playerId) || D.players[0];
+    const curP = D.players.find((p) => p.id === s.playerId) || D.players[0] || { id: '', num: '', name: 'Aucun joueur', role: '', club: null, clubLabel: '', img: null };
     const pf = s.followPlayers.indexOf(curP.id) >= 0;
     const pl = Object.assign(playerV(curP), {
       hasClub: !!curP.club, noClub: !curP.club, openClub: () => this.go('club', { clubId: curP.club, clubTab: 'players' }),
@@ -1885,7 +1826,7 @@ class Component extends DCLogic {
       days, next3: days.slice(1, 4), play, adviceShort, sunrise: W.sunrise, sunset: W.sunset, waves: W.waves, loading: !!s.wxLoading,
       source: W.live ? 'Prévisions Open-Meteo · en direct' : 'Connexion au service météo…', srcColor: W.live ? 'var(--success)' : 'var(--gold-text)',
       updated: W.live ? 'Mis à jour à ' + new Date(W.at).toTimeString().slice(0, 5) + ' · actualisé toutes les 10 min' : 'Estimation en attendant les données en direct',
-      credit: W.live ? 'Données météo : Open-Meteo.com (CC BY 4.0). Vigilance et marées : à relier aux flux officiels Météo-France et SHOM.' : 'Démonstration : la version en ligne affiche les prévisions réelles (Open-Meteo). Vigilance et marées : flux Météo-France et SHOM à brancher.' };
+      credit: W.live ? 'Données météo : Open-Meteo.com (CC BY 4.0). Vigilance et marées : à relier aux flux officiels Météo-France et SHOM.' : 'Prévisions en cours de chargement depuis Open-Meteo. Si elles n’apparaissent pas, vérifiez votre connexion puis rechargez la page.' };
     const wxCities = wxBase.map((c) => Object.assign(pill(c === wxCity), { label: c, pick: () => { this.setState({ wxCity: c }); this.writeLS('cb-wx-city', c); this.fetchWeather(c); } }));
     const wxMine = wxExtra.map((x) => Object.assign(pill(x.name === wxCity), { label: x.name, region: x.region, pick: () => { this.setState({ wxCity: x.name }); this.writeLS('cb-wx-city', x.name); this.fetchWeather(x.name); }, remove: () => this.wxRemove(x.name) }));
     const wxFind = { q: s.wxQ || '', onQ: (e) => { const v = e.target.value; this.setState({ wxQ: v, wxNone: false }); clearTimeout(this._wxT); this._wxT = setTimeout(() => this.wxSearch(v), 350); },
@@ -2183,11 +2124,14 @@ class Component extends DCLogic {
         toggleComments: () => this.setState({ chOpen: Object.assign({}, s.chOpen, { [p.id]: !open }) }),
         comment: () => { if (needLogin() || !chf.comment.trim()) return; updPost(p.id, (q) => Object.assign({}, q, { comments: q.comments.concat([{ author: meName, text: chf.comment.trim(), mine: true }]) })); this.setState({ chf: Object.assign({}, chf, { comment: '' }) }); this.say('Commentaire publié · +2 pts'); },
         remove: () => saveCh({ posts: chState.posts.filter((q) => q.id !== p.id) }) }; });
-    const poll = chState.poll;
+    // Sondage : contenus/clubhouse.js (modifiable dans l'espace administrateur) ; le vote est mémorisé par question
+    const SD = (window.CASA_CLUBHOUSE || {}).sondage || {};
+    const poll = { q: SD.question || '', opts: (SD.options || []).filter(Boolean).map((t) => ({ t: String(t), v: 0 })) };
+    if (chState.pollQ !== poll.q && chState.pollVote != null) chState.pollVote = null;
     const pollTotal = poll.opts.reduce((a, o, i) => a + o.v + (chState.pollVote === i ? 1 : 0), 0);
-    const pollV = { q: poll.q, total: String(pollTotal), opts: poll.opts.map((o, i) => { const v = o.v + (chState.pollVote === i ? 1 : 0); const pc = pollTotal ? Math.round(v / pollTotal * 100) : 0; const mine = chState.pollVote === i;
+    const pollV = { has: !!(poll.q && poll.opts.length), q: poll.q, total: String(pollTotal), opts: poll.opts.map((o, i) => { const v = o.v + (chState.pollVote === i ? 1 : 0); const pc = pollTotal ? Math.round(v / pollTotal * 100) : 0; const mine = chState.pollVote === i;
       return { t: o.t, pct: pc + ' %', w: pc + '%', bar: mine ? 'var(--acc)' : 'var(--line-2)', border: mine ? 'var(--acc)' : 'var(--line)', pressed: mine ? 'true' : 'false',
-        vote: () => { if (needLogin()) return; saveCh({ pollVote: mine ? null : i }); if (!mine) this.say('Vote enregistré · +5 pts'); } }; }) };
+        vote: () => { if (needLogin()) return; saveCh({ pollVote: mine ? null : i, pollQ: poll.q }); if (!mine) this.say('Vote enregistré · +5 pts'); } }; }) };
     const evDate = (iso) => { const d = pd(iso); return { dow: DOW[d.getDay()], day: String(d.getDate()), mon: MONTHS[d.getMonth()] }; };
     const chEvents = chState.events.slice().sort((a, b) => (a.date < b.date ? -1 : 1)).map((e) => { const going = !!(chState.rsvp || {})[e.id];
       return Object.assign({}, e, evDate(e.date), { going: String(e.going + (going ? 1 : 0)), btnLabel: going ? 'J’y vais ✓' : 'J’y vais', btnBg: going ? 'var(--inv-bg)' : 'var(--surface)', btnFg: going ? 'var(--on-inv)' : 'var(--ink)',
@@ -2206,7 +2150,7 @@ class Component extends DCLogic {
     const ch = { tFil: chTab === 'fil', tAnnonces: chTab === 'annonces', tEvents: chTab === 'events', tLigue: chTab === 'ligue', tCarte: chTab === 'carte',
       posts: chPosts, rooms: ['Tous'].concat(ROOMS).map((r) => Object.assign(pill(r === room), { label: r, pick: () => this.setState({ chRoom: r }) })), roomOpts: ROOMS.map((v) => ({ v })),
       publish: () => { if (needLogin()) return; if (chf.text.trim().length < 3) { this.say('Écrivez quelques mots'); return; } saveCh({ posts: [{ id: 'm' + Date.now(), author: meName, room: chf.room, time: 'à l’instant', text: chf.text.trim().slice(0, 500), likes: 0, liked: false, comments: [], mine: true, staff: !!s.role }].concat(chState.posts) }); this.setState({ chf: Object.assign({}, chf, { text: '' }), chRoom: 'Tous' }); this.say('Publié au Club House · +5 pts'); },
-      poll: pollV, nextEvent: { title: nextEv.title, when: fmtDay(nextEv.date) + ' · ' + nextEv.time, place: nextEv.place }, goEvents: () => this.setState({ chTab: 'events' }), goCard: () => this.setState({ chTab: 'carte' }), goPronos: () => this.go('live', { dTab: 'pronos' }),
+      poll: pollV, nextEvent: chEvents[0] ? { title: nextEv.title, when: fmtDay(nextEv.date) + ' · ' + nextEv.time, place: nextEv.place } : { title: 'Aucun rendez-vous pour l’instant', when: 'Proposez le vôtre', place: 'onglet Événements' }, goEvents: () => this.setState({ chTab: 'events' }), goCard: () => this.setState({ chTab: 'carte' }), goPronos: () => this.go('live', { dTab: 'pronos' }),
       adCats: AD_CATS.map((c) => Object.assign(pill(c === adCat), { label: c, pick: () => this.setState({ chAdCat: c }) })), showAds: adCat !== 'Covoiturage', showRides: adCat === 'Covoiturage', ads: chAds,
       publishAd: () => { if (needLogin()) return; if (!chf.adTitle.trim()) { this.say('Titre requis'); return; } saveCh({ ads: [{ id: 'a' + Date.now(), type: chf.adType, cat: chf.adCat, title: chf.adTitle.trim(), text: chf.adText.trim(), author: meName, where: chf.adWhere.trim() || 'Cotentin', time: 'à l’instant', mine: true }].concat(chState.ads) }); this.setState({ chf: Object.assign({}, chf, { adTitle: '', adText: '', adWhere: '' }) }); this.say('Annonce publiée · +5 pts'); },
       addRide: () => { if (needLogin()) return; pv.addRide(); },
