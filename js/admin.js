@@ -31,6 +31,7 @@
     { key: 'CASA_FONDS', label: 'Fonds de page', desc: 'L’image derrière chaque page du site.' },
     { key: 'CASA_APROPOS', label: 'À propos', desc: 'L’histoire de Casa Besports : ouverture, manifeste, étapes, piliers, conviction et appel final.' },
     { key: 'CASA_LEGAL', label: 'Pages légales', desc: 'Mentions légales, confidentialité, CGV, CGU.' },
+    { key: 'CASA_RETOUCHES', label: 'Retouches des pages', desc: 'Textes et images changés directement sur le site (bouton « ✎ Retoucher » en bas à gauche du site). Ici : les revoir, les corriger ou les supprimer.' },
     { key: 'CASA_LEGAL_MAJ', label: 'Pages légales : date', desc: 'Date de dernière mise à jour affichée.' }
   ];
   // Modèle d'un nouvel élément quand la liste est vide
@@ -47,7 +48,7 @@
     CASA_CULTURE: { salle: '3', title: '', author: '', year: '', technique: '', img: '', alt: '', text: '' }
   };
   // Modèle d'un élément ajouté dans une sous-liste vide
-  var NESTED = { dates: { annee: '', titre: '', texte: '', titreEn: '', texteEn: '' }, etapes: { annee: '', titre: '', photo: '', alt: '', paragraphes: [] }, etapesEn: { annee: '', titre: '', alt: '', paragraphes: [] }, piliers: { titre: '', texte: '' }, piliersEn: { titre: '', texte: '' }, paras: { t: '' }, sections: ['', ''], collections: { ligne: '', nom: '', accroche: '', titre: '', texte: '', image: '' } };
+  var NESTED = { textes: { avant: '', apres: '', apresEn: '', page: '' }, images: { avant: '', apres: '', page: '' }, dates: { annee: '', titre: '', texte: '', titreEn: '', texteEn: '' }, etapes: { annee: '', titre: '', photo: '', alt: '', paragraphes: [] }, etapesEn: { annee: '', titre: '', alt: '', paragraphes: [] }, piliers: { titre: '', texte: '' }, piliersEn: { titre: '', texte: '' }, paras: { t: '' }, sections: ['', ''], collections: { ligne: '', nom: '', accroche: '', titre: '', texte: '', image: '' } };
   var LABELS = {
     id: 'Identifiant (unique, sans espace ni accent)', title: 'Titre', titre: 'Titre', titleEn: 'Titre (anglais)', titreEn: 'Titre (anglais)', dek: 'Chapeau', dekEn: 'Chapeau (anglais)',
     body: 'Texte de l’article (## intertitre, > citation, ![légende](image))', bodyEn: 'Texte (anglais)', tag: 'Rubrique', tagEn: 'Rubrique (anglais)', sport: 'Discipline', date: 'Date affichée', read: 'Temps de lecture',
@@ -61,7 +62,7 @@
     color: 'Couleur du logo (#xxxxxx)', since: 'Partenaire depuis (année)', perk: 'Avantage offert', real: 'Vrai partenaire (affiché)', mois: 'Prix par mois (€)', an: 'Prix par an (€)', perks: 'Avantages', casab: 'Donne accès à Casa B+',
     gazette: 'Gazette incluse (num, pap, duo ou vide)', paper: 'Envoi papier', bienvenue: 'Message de bienvenue (épinglé)', sondage: 'Sondage de la semaine', question: 'Question (vide = pas de sondage)', options: 'Réponses possibles',
     intro: 'Introduction', cles: 'Chiffres clés', source: 'Source', lien: 'Texte du lien', lieux: 'Communes', equipes: 'Équipes', exacts: 'Stades précis', lat: 'Latitude', lon: 'Longitude', cherche: 'Mot du nom du stade',
-    citation: 'Citation', citationEn: 'Citation (anglais)', dates: 'Frise des dates', annee: 'Année', etapes: 'Étapes de l’histoire', etapesEn: 'Étapes (anglais)', piliers: 'Piliers', piliersEn: 'Piliers (anglais)', manifeste: 'Manifeste (paragraphes)', manifesteEn: 'Manifeste (anglais)', manifesteFin: 'Phrase après la citation', soustitre: 'Sous-titre', intro: 'Phrase d’introduction', photoAlt: 'Description de la photo', alt: 'Description de la photo', raisonSurtitre: 'Surtitre des piliers', raisonTitre: 'Titre des piliers', signature: 'Phrase de conviction', signatureSurtitre: 'Surtitre de la conviction', signatureSuite: 'Suite de la conviction', appel: 'Appel final (paragraphes)', appelTitre: 'Titre de l’appel final', appelFin: 'Dernière phrase', sections: 'Sections', src: 'Source', why: 'Pourquoi ça compte', big: 'Chiffre', l: 'Unité'
+    citation: 'Citation', citationEn: 'Citation (anglais)', dates: 'Frise des dates', textes: 'Textes retouchés', images: 'Images remplacées', avant: 'D’origine (texte ou image)', apres: 'Remplacé par', apresEn: 'Remplacé par (anglais)', page: 'Page (vide = toutes les pages)', annee: 'Année', etapes: 'Étapes de l’histoire', etapesEn: 'Étapes (anglais)', piliers: 'Piliers', piliersEn: 'Piliers (anglais)', manifeste: 'Manifeste (paragraphes)', manifesteEn: 'Manifeste (anglais)', manifesteFin: 'Phrase après la citation', soustitre: 'Sous-titre', intro: 'Phrase d’introduction', photoAlt: 'Description de la photo', alt: 'Description de la photo', raisonSurtitre: 'Surtitre des piliers', raisonTitre: 'Titre des piliers', signature: 'Phrase de conviction', signatureSurtitre: 'Surtitre de la conviction', signatureSuite: 'Suite de la conviction', appel: 'Appel final (paragraphes)', appelTitre: 'Titre de l’appel final', appelFin: 'Dernière phrase', sections: 'Sections', src: 'Source', why: 'Pourquoi ça compte', big: 'Chiffre', l: 'Unité'
   };
   var LONG = /^(body|bodyEn|desc|texte|text|dek|dekEn|hook|moment|t|kicker|accroche|motif|message|why|citation|citationEn|note)$/;
 
@@ -452,7 +453,7 @@
 
   // ---------- Aperçu sur le site, avant publication ----------
   var PV = null, pvBar = null;
-  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live' };
+  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home' };
   function openCardIdx(k) { var m = null; Object.keys(S.openCards || {}).forEach(function (p) { var r = p.match(new RegExp('^' + k + '\\[(\\d+)\\]$')); if (r && S.openCards[p]) m = Number(r[1]); }); return m; }
   function startPreview(k, value) {
     var site = window.CasaSite; if (!site || PV) return;
@@ -1119,6 +1120,8 @@
         P('Avant de publier, « Aperçu sur le site » montre la page telle que les visiteurs la verront, sans rien publier : « Revenir à l’édition » pour continuer, « Publier » pour mettre en ligne. Vos changements sont aussi gardés automatiquement en brouillon sur cet appareil : en revenant sur la section, « Reprendre le brouillon ». Dans la Gazette, le bouton « Modifier cette page » ouvre directement la bonne page ici.'),
         P('Contenus du site › choisissez la section › modifiez › « Enregistrer et publier ». La modification est en ligne tout de suite, pour tous les visiteurs. « Version d’origine » efface vos changements et rétablit le fichier du dépôt GitHub.'),
         P('Les articles déposés par la Rédaction quotidienne continuent d’apparaître en plus de ceux que vous modifiez ici.')),
+      E('div', { class: 'cba-card' }, E('strong', {}, 'Retoucher n’importe quel texte ou image'),
+        P('Sur le site (espace admin fermé), bouton « ✎ Retoucher » en bas à gauche : cliquez sur un titre, un paragraphe, un bouton ou une image, modifiez, « Appliquer » pour voir le résultat, puis « Publier » dans la barre noire. « Naviguer » permet de changer de page sans perdre vos retouches. Tout se retrouve dans Contenus du site › Retouches des pages.')),
       E('div', { class: 'cba-card' }, E('strong', {}, 'Résultats et classements'),
         P('Onglet Résultats : ajoutez une compétition, remplissez son classement et ses matchs, puis « Enregistrer et publier ». Ce que vous publiez ici remplace le fichier contenus/sport.js tant que vous ne cliquez pas sur « Version d’origine ».')),
       E('div', { class: 'cba-card' }, E('strong', {}, 'Images'),
@@ -1129,5 +1132,5 @@
         P('Seules les personnes listées dans Équipe et accès voient l’espace rédaction. Un abonné peut vous envoyer une demande depuis Mon espace ; vous l’acceptez ou la refusez en un clic.'))];
   }
 
-  window.CasaAdmin = { open: open, close: close, editGazette: editGazette, editSection: function (k, i) { if (!S.open) open(); editSection(k, i == null ? null : i); }, wantOpen: wantOpen, cropImage: cropImage, isOpen: function () { return S.open; } };
+  window.CasaAdmin = { open: open, close: close, uploadFile: uploadFile, ensureCss: function () { if (!document.getElementById('cba-css')) document.head.appendChild(E('style', { id: 'cba-css', text: CSS })); }, editGazette: editGazette, editSection: function (k, i) { if (!S.open) open(); editSection(k, i == null ? null : i); }, wantOpen: wantOpen, cropImage: cropImage, isOpen: function () { return S.open; } };
 })();
