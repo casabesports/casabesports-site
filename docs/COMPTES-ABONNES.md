@@ -18,7 +18,7 @@ Tant que `js/config.js` est vide, la fenêtre de connexion reste en mode démons
 ## 2. Indiquer l'adresse du site
 
 **Authentication › URL Configuration** :
-- *Site URL* : l'adresse de votre site, par ex. `https://casabesports.netlify.app` (plus tard `https://casabesports.fr`).
+- *Site URL* : l'adresse de votre site, par ex. `https://casabesports.pages.dev` (plus tard `https://casabesports.fr`). Voir aussi docs/CLOUDFLARE-PAGES.md.
 - *Redirect URLs* : ajoutez la même adresse suivie de `/**`, et `https://*--casabesports.netlify.app/**` pour les aperçus Netlify.
 
 ## 3. Brancher le site

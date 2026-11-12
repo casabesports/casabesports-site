@@ -25,19 +25,21 @@ Site statique : aucun serveur à maintenir, aucune base de données, hébergemen
 - **Ajouter une photo** : déposez-la dans `assets/`, puis utilisez `assets/nom-du-fichier.jpg` dans le contenu.
 - **Couleurs** : variables `--bg`, `--ink`, `--acc`… dans le premier `<style>` de `index.html`.
 
-Avec GitHub + Netlify (voir ci-dessous), chaque modification enregistrée sur github.com est en ligne en ~30 secondes.
+Avec GitHub + Cloudflare Pages (voir ci-dessous), chaque modification enregistrée sur github.com est en ligne en ~1 minute.
 Pour une modification plus large, demandez à Claude : il travaille directement sur le dépôt GitHub.
 
 ## Tester sur votre ordinateur
 
 Double-cliquer sur `index.html` fonctionne en partie ; pour un test fidèle :
-`python3 -m http.server` dans ce dossier, puis ouvrir http://localhost:8000
+`sh outils/build.sh` puis `python3 -m http.server -d _site`, puis ouvrir http://localhost:8000
 
 ## Mise en ligne (une seule fois)
 
 1. **GitHub** (gratuit) : créer un compte sur github.com, puis un dépôt `casabesports-site`. « Add file › Upload files » : glisser tout le contenu de ce dossier.
-2. **Netlify** (gratuit) : créer un compte sur netlify.com avec « Sign up with GitHub », puis « Add new site › Import an existing project › GitHub › casabesports-site ». Laisser les réglages par défaut, « Deploy ». Le site est en ligne sur une adresse `xxx.netlify.app`.
-3. **Nom de domaine** : dans Netlify, « Domain management › Add a domain » → `casabesports.fr`. Si le domaine est chez OVH, Gandi, IONOS…, Netlify indique les 2 enregistrements DNS à copier chez eux. Le HTTPS est activé automatiquement.
+2. **Cloudflare Pages** (gratuit) : guide pas à pas dans `docs/CLOUDFLARE-PAGES.md` (build : `sh outils/build.sh`, dossier de sortie : `_site`). Le site est en ligne sur `casabesports.pages.dev`.
+3. **Nom de domaine** : Cloudflare Pages › Custom domains › `casabesports.fr` (même guide, étape 4). Le HTTPS est activé automatiquement.
+
+Le site fonctionnait avant sur Netlify (`netlify.toml` est gardé) : son offre gratuite à crédits a bloqué les mises en ligne le 12 novembre 2026.
 
 ## Limites actuelles (version statique)
 

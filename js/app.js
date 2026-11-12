@@ -1040,11 +1040,12 @@ class Component extends DCLogic {
   crmNow() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0'); }
   // Un événement du site (formulaire, commande, newsletter, OlistO…) crée ou met à jour un contact
   // Envoi de chaque demande (contact, newsletter, commande, abonnement) à l'équipe :
-  // 1) Netlify Forms (formulaire « demandes », notification e-mail) ; 2) table Supabase « messages » (sauvegarde illimitée)
+  // 1) table Supabase « messages » (Espace admin › Messagerie) ; 2) Netlify Forms, seulement si le site tourne sur Netlify
   sendLead(ev) {
     const d = { source: ev.source || 'Site', nom: ev.name || '', email: ev.email || '', telephone: ev.phone || '', ville: ev.city || '', profil: ev.profile || ev.type || '', sujet: ev.subject || '', message: ev.message || ev.note || '', consentement: ev.consent || '', page: location.href };
     try {
-      if (/^https?:/.test(location.protocol)) {
+      // Netlify Forms n'existe que sur les adresses Netlify (sur Cloudflare, la sauvegarde Supabase ci-dessous suffit)
+      if (/^https?:/.test(location.protocol) && /netlify\.app$/.test(location.hostname)) {
         const body = new URLSearchParams(Object.assign({ 'form-name': 'demandes' }, d)).toString();
         fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }).catch(() => {});
       }

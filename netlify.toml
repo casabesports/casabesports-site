@@ -1,6 +1,6 @@
-# Réglages Netlify (ignorés par les autres hébergeurs)
+# Réglages Netlify (ignorés par les autres hébergeurs). Le site principal est maintenant sur Cloudflare Pages (docs/CLOUDFLARE-PAGES.md).
 [build]
-  publish = "."
+  publish = "_site"
   # Insère l'adresse réelle du site dans les balises de partage et le plan du site
   command = "sh outils/netlify-build.sh"
 

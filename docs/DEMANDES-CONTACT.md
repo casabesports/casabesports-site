@@ -3,6 +3,8 @@
 Chaque demande envoyée depuis le site part automatiquement vers vous, par **deux chemins** :
 formulaire de contact, demandes OlistO (« Être rappelé », simulateur), propositions de sujets, résultats de clubs, devis, newsletter, commandes boutique et abonnements.
 
+> Depuis le passage sur Cloudflare Pages (docs/CLOUDFLARE-PAGES.md), seul le chemin 2 (Supabase, lisible dans Espace admin › Messagerie) fonctionne. Le chemin 1 ne sert que si le site tourne encore sur Netlify.
+
 ## 1. Par e-mail, via Netlify (5 min, une seule fois)
 
 1. Netlify › votre projet › **Forms** › **Enable form detection** (si le bouton est proposé).

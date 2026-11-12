@@ -1,0 +1,15 @@
+# En-têtes de sécurité et de cache (lu par Cloudflare Pages et Netlify)
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(self), geolocation=(self), microphone=()
+
+/assets/*
+  Cache-Control: public, max-age=604800
+
+/js/*
+  Cache-Control: public, max-age=3600
+
+/contenus/*
+  Cache-Control: public, max-age=300

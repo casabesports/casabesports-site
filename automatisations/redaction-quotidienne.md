@@ -29,5 +29,5 @@ Le site est statique ; les articles ajoutés vivent dans `contenus/articles.js` 
 
 ## 4. Vérifier puis publier
 - `node --check contenus/articles.js` doit passer.
-- Commit sur `main` : « Rédaction : <titres> », puis `git push origin main` (Netlify publie en ~30 s).
+- Commit sur `main` : « Rédaction : <titres> », puis `git push origin main` (le site est republié en ~1 min).
 - Compte rendu final, court, en français : articles publiés (titres), infos manquantes, problèmes éventuels.
