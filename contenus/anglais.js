@@ -1128,4 +1128,13 @@ window.CASA_EN = {
   "Président · {{c}}": "President · {{c}}",
   "La rédaction : Bienvenue au Club House ! Respect, bienveillance et passion : la charte est simple. Présen…": "The newsroom: Welcome to the Club House! Respect, kindness and passion: the charter is simple. Introd…",
   "Plan IGN v2 © IGN – Géoplateforme, Carte embarquée : IGN Admin Express, INSEE COG 2026 (Licence Ouverte), Natural Earth": "IGN Plan v2 © IGN – Géoplateforme, Built-in map: IGN Admin Express, INSEE COG 2026 (Licence Ouverte), Natural Earth",
+  "Virtuoza · Collection Casa Besports": "Virtuoza · Casa Besports collection",
+  "Virtuoza · Collection Casa Besports · Œuvre créée avec l’IA": "Virtuoza · Casa Besports collection · AI-created artwork",
+  "Œuvre créée avec l’IA": "AI-created artwork",
+  "Création numérique avec l’IA · format portrait": "AI-assisted digital creation · portrait format",
+  "Casa Besports, SASU au capital de 1 000 €, immatriculée sous le numéro [SIRET]. Siège : hybride. Directeur de la publication : Kader Allou. Contact : kader.allou.pro@outlook.fr.": "Casa Besports, a single-shareholder simplified joint-stock company (SASU) with share capital of €1,000, registered under number [SIRET]. Head office: hybrid. Publication director: Kader Allou. Contact: kader.allou.pro@outlook.fr.",
+  "Casa Besports, joignable à kader.allou.pro@outlook.fr.": "Casa Besports, reachable at kader.allou.pro@outlook.fr.",
+  "Accès, rectification, effacement, opposition, limitation et portabilité, en écrivant à kader.allou.pro@outlook.fr. Vous pouvez introduire une réclamation auprès de la CNIL (www.cnil.fr).": "Access, rectification, erasure, objection, restriction and portability, by writing to kader.allou.pro@outlook.fr. You can lodge a complaint with the CNIL (www.cnil.fr).",
+  "Responsable du traitement": "Data controller",
+  "Vos droits": "Your rights",
 };

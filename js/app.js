@@ -263,7 +263,7 @@ class Component extends DCLogic {
     // Lieux (arrière-plans « Lieux de légende », lieu du jour) : contenus/lieux.js
     const places = (typeof window !== 'undefined' && Array.isArray(window.CASA_LIEUX) && window.CASA_LIEUX.length) ? window.CASA_LIEUX.filter((p) => p && p.id).map((p) => Object.assign({}, p, { img: p.photo || p.img, isPhoto: !!p.photo })) : [{ id: 'rade', name: 'Casa Besports', short: 'Casa Besports', where: 'Cotentin', year: '', img: 'assets/hero.jpg', hook: '', desc: '', moment: '' }];
     const partners = [
-      { id: 'olisto', name: 'OlistO', mono: 'O', sector: 'Crédit immobilier · regroupement de crédits · assurance emprunteur', city: 'Réseau de courtage', tier: 'Platinum', color: '#163a5f', since: 2026, perk: 'Étude de votre projet offerte (à confirmer)', desc: 'Réseau de courtage en crédit immobilier, regroupement de crédits, assurance emprunteur, prêt professionnel et immobilier neuf. Partenaire Casa Besports.', real: true },
+      { id: 'olisto', name: 'OlistO', mono: 'O', sector: 'Crédit immobilier · regroupement de crédits · assurance emprunteur', city: 'Réseau de courtage', tier: 'Platinum', color: '#163a5f', since: 2026, perk: 'Étude de votre projet offerte', desc: 'Réseau de courtage en crédit immobilier, regroupement de crédits, assurance emprunteur, prêt professionnel et immobilier neuf. Partenaire Casa Besports.', real: true },
     ];
     const team = ((typeof window !== 'undefined' && window.CASA_EQUIPE) || []).map((m, i) => ({ id: i === 0 ? 'admin' : 'm' + i, name: m.name, mail: m.email, role: m.role === 'admin' ? 'admin' : 'writer' }));
     const seedPosts = [];
@@ -910,7 +910,7 @@ class Component extends DCLogic {
       text: p.hook + ' ' + p.moment, kind: 'place', placeId: p.id }));
     const rooms = [
       { n: '1', title: 'Le tableau', intro: 'L’œuvre qui a donné son visage à Casa Besports.', min: '320px', works: [
-        { title: 'Le match du port', author: 'Collection Casa Besports · artiste [À CRÉDITER]', year: '[ANNÉE]', technique: 'Peinture numérique · format portrait', img: B('0855c8136dcdda770cb476333ba7ad46'), alt: 'Partie de football sur les quais, devant des paquebots', ratio: '2 / 3', fit: 'cover', bg: '#1a1a1a', scope: '',
+        { title: 'Le match du port', author: 'Virtuoza · Collection Casa Besports', year: 'Œuvre créée avec l’IA', technique: 'Création numérique avec l’IA · format portrait', img: B('0855c8136dcdda770cb476333ba7ad46'), alt: 'Partie de football sur les quais, devant des paquebots', ratio: '2 / 3', fit: 'cover', bg: '#1a1a1a', scope: '',
           text: 'Une partie de football improvisée sur les pavés d’un quai, entre grues, caisses et cheminées de paquebots. La scène condense ce que Casa Besports raconte chaque semaine : le jeu au cœur de la vie populaire et portuaire du Cotentin. Elle est disponible en affiche d’art à la boutique.', kind: 'poster' }] },
       { n: '2', title: 'Lieux de légende', intro: 'Les paysages du territoire, chacun lié à un moment d’histoire.', min: '300px', works: [] },
       { n: '3', title: 'Photographie du terrain', intro: 'Le sport amateur saisi au plus près, par la photothèque de la rédaction.', min: '280px', works: [] },
