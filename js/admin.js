@@ -573,6 +573,7 @@
     if (S.key === 'CASA_ARTICLES' && Array.isArray(v)) add(ed, S.art != null ? viewArticleEditor() : viewArticleList());
     else if (S.key === 'CASA_GAZETTE' && Array.isArray(v)) add(ed, viewGazette());
     else if (S.key === 'CASA_FONDS' && v && typeof v === 'object') add(ed, viewFonds());
+    else if (S.key === 'CASA_RETOUCHES' && v && typeof v === 'object') add(ed, viewRetouches());
     else if (Array.isArray(v) || (v && typeof v === 'object')) add(ed, field({ v: v }, 'v', S.key, S.key, true));
     else add(ed, field(S, 'work', S.key, S.key, true));
     return [E('div', { class: 'cba-bar' },
@@ -591,6 +592,34 @@
       draftNote(S.key, function (v) { S.work = withFields(S.key, v); }),
       gazetteLinks(S.key),
       ed];
+  }
+  // ---------- Retouches : liste lisible des textes et images changés sur le site ----------
+  var PAGE_NOMS = { home: 'Accueil', news: 'Actualités', article: 'Article', live: 'Le Terrain', videos: 'Vidéos', clubs: 'Clubs', players: 'Joueurs', shop: 'Boutique', offers: 'Abonnements', clubhouse: 'Club House', culture: 'Culture', meteo: 'Météo', partners: 'Partenaires', about: 'À propos', contact: 'Contact', legal: 'Mentions légales', app: 'Application', disciplines: 'Disciplines', account: 'Mon espace' };
+  function viewRetouches() {
+    var v = S.work; v.textes = Array.isArray(v.textes) ? v.textes : []; v.images = Array.isArray(v.images) ? v.images : [];
+    var where = function (r) { var pg = !r.page || r.page === '*' ? 'Tout le site' : (PAGE_NOMS[r.page] || r.page); return pg + (r.n != null && r.n !== '' ? ' · cet emplacement seulement' : ''); };
+    var del = function (list, i) { if (!confirm('Supprimer cette retouche ? Le site reprendra le texte ou l’image d’origine.')) return; list.splice(i, 1); mark(); render(); };
+    var texts = v.textes.map(function (r, i) {
+      var ta = E('textarea', { class: 'cba-in', rows: '2', value: r.apres || '', oninput: function (e) { r.apres = e.target.value; mark(); } });
+      return E('div', { class: 'cba-card', style: 'margin:.5rem 0' },
+        E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('span', { class: 'cba-tag' }, where(r)), E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { del(v.textes, i); } }, 'Supprimer')),
+        E('div', { class: 'cba-lbl' }, 'Texte d’origine'), E('p', { style: 'margin:.2rem 0 .4rem;color:var(--muted);text-decoration:line-through' }, r.avant || ''),
+        E('div', { class: 'cba-lbl' }, 'Remplacé par'), ta,
+        E('div', { class: 'cba-lbl' }, 'En anglais (facultatif)'), E('input', { class: 'cba-in', value: r.apresEn || '', oninput: function (e) { r.apresEn = e.target.value; mark(); } }));
+    });
+    var imgs = v.images.map(function (r, i) {
+      var th = function (src, cap) { return E('figure', { style: 'margin:0;text-align:center' }, E('img', { src: src || null, alt: '', style: 'width:150px;height:100px;object-fit:cover;background:#ddd;display:block' }), E('figcaption', { style: 'font-size:12px;color:var(--muted)' }, cap)); };
+      var taille = { plein: 'Pleine largeur', entiere: 'Image entière' }[r.taille] || 'Taille prévue par la page';
+      return E('div', { class: 'cba-card', style: 'margin:.5rem 0' },
+        E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('span', { class: 'cba-tag' }, where(r)), E('span', { class: 'cba-row' },
+          r.source ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { r.apres = r.source; delete r.source; mark(); render(); } }, 'Revenir à la photo non rognée') : null,
+          E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { del(v.images, i); } }, 'Supprimer'))),
+        E('div', { class: 'cba-row', style: 'align-items:center;gap:1rem;margin-top:.5rem' }, th(r.avant, 'Origine'), E('span', { style: 'font-size:1.6rem' }, '→'), th(r.apres || r.avant, r.apres ? 'Nouvelle image' : 'Même image, recadrée'),
+          E('span', { style: 'font-size:13px;color:var(--muted)' }, taille + (r.z && r.z !== 1 ? ' · zoom ' + r.z : ''))));
+    });
+    return E('div', {},
+      E('h3', { style: 'margin:1rem 0 .3rem' }, 'Textes (' + texts.length + ')'), texts.length ? texts : E('p', { class: 'cba-sub' }, 'Aucun texte retouché.'),
+      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Images (' + imgs.length + ')'), imgs.length ? imgs : E('p', { class: 'cba-sub' }, 'Aucune image retouchée.'));
   }
   // ---------- Fonds de page : une image par page, avec son cadrage ----------
   var FOND_PAGES = [['accueil', 'Accueil'], ['actualites', 'Actualités et articles'], ['direct', 'Direct'], ['videos', 'Vidéos'], ['disciplines', 'Disciplines'], ['clubs', 'Clubs et carte'], ['joueurs', 'Joueurs'], ['boutique', 'Boutique'], ['abonnements', 'Abonnements'], ['compte', 'Mon espace'], ['quotidien', 'Le quotidien (abonnés)'], ['clubhouse', 'Club House'], ['culture', 'Culture'], ['meteo', 'Météo'], ['partenaires', 'Partenaires'], ['apropos', 'À propos'], ['contact', 'Contact'], ['mentions', 'Mentions légales'], ['application', 'Application'], ['redaction', 'Rédaction']];
@@ -1022,9 +1051,20 @@
       return A.uploadImage(b, path).then(function (u) { S.images = []; S.loaded.img = false; return u; });
     });
   }
+  // Images encore utilisées dans un article ou une page : on ne supprime pas le fichier, on le retire seulement de la bibliothèque
+  function hiddenImgs() { try { return JSON.parse(localStorage.getItem('cba-img-masquees') || '[]') || []; } catch (e) { return []; } }
+  function usedIn(im) {
+    var out = [];
+    SECTIONS.forEach(function (sec) {
+      var v = window[sec.key]; if (v == null) return;
+      var check = function (x, label) { var j = JSON.stringify(x) || ''; if (j.indexOf(im.url) >= 0 || (im.path && j.indexOf(im.path) >= 0)) out.push(label); };
+      if (Array.isArray(v)) v.forEach(function (x, i) { check(x, sec.label + ' › ' + (itemTitle(x, i) || '')); }); else check(v, sec.label);
+    });
+    return out;
+  }
   function loadImages() {
     if (!A.listImages) return Promise.resolve();
-    return A.listImages('images').then(function (d) { S.images = d; S.loaded.img = true; render(); }, function (e) { S.loaded.img = true; render(); if (S.setup === 'ok') err(e); });
+    return A.listImages('images').then(function (d) { var h = hiddenImgs(); S.images = (d || []).filter(function (x) { return h.indexOf(x.path) < 0; }); S.loaded.img = true; render(); }, function (e) { S.loaded.img = true; render(); if (S.setup === 'ok') err(e); });
   }
   function copy(t) { try { navigator.clipboard.writeText(t).then(function () { toast('Adresse copiée'); }, function () { prompt('Adresse de l’image :', t); }); } catch (e) { prompt('Adresse de l’image :', t); } }
   function imageGrid(onPick) {
@@ -1035,7 +1075,16 @@
         onPick ? E('button', { type: 'button', class: 'cba-btn sm pri', onclick: function () { onPick(im.url); } }, 'Choisir') :
           [E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { copy(im.url); } }, 'Copier l’adresse'),
            E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { cropImage(im.url).then(function (x) { if (!x) return; toast('Envoi de la copie rognée…'); uploadFile(x).then(function (u) { loadImages(); copy(u); toast('Copie rognée enregistrée (l’originale est conservée)'); }, err); }); } }, 'Rogner'),
-           E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Supprimer cette image ? Si elle est utilisée sur le site, elle n’y apparaîtra plus.')) return; A.removeImage(im.path).then(function () { S.images = S.images.filter(function (x) { return x.path !== im.path; }); render(); toast('Image supprimée'); }, err); } }, 'Supprimer')])));
+           E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () {
+             var used = usedIn(im);
+             if (used.length) {
+               if (!confirm('Cette image est utilisée dans : ' + used.slice(0, 5).join(' ; ') + (used.length > 5 ? '…' : '') + '.\n\nElle sera retirée de la bibliothèque mais restera affichée là où elle est utilisée. Pour l’enlever d’un article, retirez-la depuis l’article. Continuer ?')) return;
+               try { var h = hiddenImgs(); h.push(im.path); localStorage.setItem('cba-img-masquees', JSON.stringify(h)); } catch (e) {}
+               S.images = S.images.filter(function (x) { return x.path !== im.path; }); render(); toast('Retirée de la bibliothèque, conservée dans ' + (used.length > 1 ? 'les contenus qui l’utilisent' : used[0]));
+               return;
+             }
+             if (!confirm('Supprimer définitivement cette image ? Elle n’est utilisée nulle part sur le site.')) return;
+             A.removeImage(im.path).then(function () { S.images = S.images.filter(function (x) { return x.path !== im.path; }); render(); toast('Image supprimée'); }, err); } }, 'Supprimer')])));
     }));
   }
   function upZone() {
