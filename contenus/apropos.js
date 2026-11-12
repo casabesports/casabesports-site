@@ -15,8 +15,10 @@ window.CASA_APROPOS = {
   citation: 'Le sport local ne manque pas d’histoires. Il manque parfois de lumière.',
   photo: 'assets/hero.jpg',
   dates: [
-    // { annee: '2024', titre: 'La naissance', texte: 'Ce qui s’est passé cette année-là…' },
-    // { annee: '2025', titre: '…', texte: '…' },
+    { annee: '2021', titre: 'La banque', texte: 'Kader Allou devient banquier au Crédit Agricole Normandie, à Cherbourg. Il y passe cinq ans, jusqu’en septembre 2026.', titreEn: 'Banking', texteEn: 'Kader Allou becomes a banker at Crédit Agricole Normandie in Cherbourg, where he spends five years, until September 2026.' },
+    { annee: '2024', titre: 'La naissance de Casa Besports', texte: 'En août, il fonde Casa Besports, média sportif et partenariats du Cotentin.', titreEn: 'Casa Besports is born', texteEn: 'In August, he founds Casa Besports, a sports media and partnerships company in the Cotentin.' },
+    { annee: '2026', titre: 'Correspondant de presse', texte: 'En avril, il devient correspondant de La Manche Libre à Cherbourg.', titreEn: 'Press correspondent', texteEn: 'In April, he becomes a correspondent for La Manche Libre in Cherbourg.' },
+    { annee: '2026', titre: 'Courtier OlistO', texte: 'En septembre, il devient courtier indépendant en prêts immobiliers au sein du réseau OlistO, partenaire de Casa Besports.', titreEn: 'OlistO broker', texteEn: 'In September, he becomes an independent mortgage broker with the OlistO network, a Casa Besports partner.' }
   ],
 
   titreEn: 'The sports media of La Manche, by and for enthusiasts',

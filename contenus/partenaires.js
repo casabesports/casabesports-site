@@ -16,7 +16,7 @@ window.CASA_PARTENAIRES = [
     "color": "#163a5f",
     "since": 2026,
     "perk": "Étude de votre projet offerte",
-    "site": "",
+    "site": "https://olisto.fr/",
     "app": "",
     "desc": "Réseau de courtage en crédit immobilier, regroupement de crédits, assurance emprunteur, prêt professionnel et immobilier neuf. Partenaire Casa Besports.",
     "real": true
