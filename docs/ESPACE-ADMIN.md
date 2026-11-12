@@ -19,6 +19,8 @@ C'est tout. Votre adresse `kader.allou.pro@outlook.fr` y est déclarée administ
 
 Connectez-vous sur le site avec cette adresse. Le bouton noir **Admin** apparaît dans l'en-tête (et « Plus › Espace administrateur », et un bloc dans Mon espace). L'adresse directe est `…/#/admin`.
 
+Sur téléphone, le bouton de l'en-tête est masqué : passez par l'onglet **Mon espace** (bloc noir « Ouvrir l'espace administrateur ») ou par **Plus › Espace administrateur**. Ces accès n'apparaissent **que si vous êtes connecté avec l'adresse administrateur**. Sous « Bonjour … », Mon espace affiche « Connecté avec : … » : si l'adresse n'est pas la bonne, déconnectez-vous et reconnectez-vous avec la bonne. Si vous ouvrez `…/#/admin` sans être connecté, le site ouvre la fenêtre de connexion, puis l'espace administrateur s'ouvre tout seul une fois connecté.
+
 Personne d'autre ne voit ce bouton. Et même si quelqu'un trouvait l'adresse, Supabase refuse toute lecture ou modification qui ne vient pas de votre compte (adresse e-mail confirmée).
 
 ## 3. Modifier le site
@@ -26,7 +28,18 @@ Personne d'autre ne voit ce bouton. Et même si quelqu'un trouvait l'adresse, Su
 **Contenus du site** › choisissez la section › **Modifier**.
 
 - Chaque élément (un article, un lieu, un produit…) se déplie en cliquant sur son titre. Boutons ↑ ↓ pour l'ordre, **Dupliquer**, **Supprimer**, **+ Ajouter**.
-- Les champs image ont **Envoyer une photo** (depuis votre ordinateur ou téléphone) et **Bibliothèque** (vos photos déjà envoyées).
+- Les champs image ont **Envoyer une photo** (depuis votre ordinateur ou téléphone), **Rogner** et **Bibliothèque** (vos photos déjà envoyées).
+- **Rognage** : choisissez un format (16:9 pour les articles, 4:3, 3:2, carré, 4:5, 3:4, 9:16 ou format d'origine), faites glisser la photo, zoomez, pivotez si besoin. La photo rognée est enregistrée comme une nouvelle image : l'originale n'est jamais abîmée. Le rognage est proposé à chaque envoi de photo, et dans l'onglet **Images** (bouton « Rogner » sous chaque photo).
+
+### Écrire un article
+
+**Contenus du site › Articles › Modifier › + Rédiger un article**, puis choisissez un format : Article, Brève, Compte rendu de match, Portrait, Interview, Tribune / édito, Annonce / agenda ou Page blanche. Chaque format pré-remplit un plan à compléter. Vous pouvez aussi **reprendre un article de l'espace Rédaction**.
+
+- **Publication** : *Brouillon* (invisible), *En ligne* dès l'enregistrement, ou *Programmer* une date et une heure de mise en ligne.
+- **Texte** : boutons Intertitre, Citation, Liste, Paragraphe, **Photo dans le texte** (envoyée et rognée). Sélectionnez des mots puis cliquez un bouton pour les transformer. Le collage depuis Word ou une page web garde intertitres, citations et listes. Le temps de lecture se calcule tout seul.
+- **Assistant** : proposer un chapeau, des titres, les points clés depuis le texte, relire.
+- **Aperçu** : l'article tel qu'il apparaîtra. Version anglaise facultative en bas.
+- Rien n'est en ligne avant **Enregistrer et publier**.
 - **Enregistrer et publier** : c'est en ligne immédiatement, pour tous les visiteurs.
 - **Version d'origine** : efface vos changements de cette section et rétablit le fichier du dépôt (`contenus/…`).
 

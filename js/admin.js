@@ -147,6 +147,14 @@
     '.cba-toast.on{transform:translate(-50%,0);visibility:visible}.cba-toast.bad{background:var(--danger,#c22);color:#fff}' +
     '.cba-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2147483001;display:flex;align-items:center;justify-content:center;padding:1rem}' +
     '.cba-modal>div{background:var(--bg,#fff);max-width:900px;width:100%;max-height:85vh;overflow:auto;padding:1rem}' +
+    '.cba-crop{max-width:820px!important}.cba-crop-stage{display:flex;justify-content:center;background:#111;padding:.5rem;margin-top:.4rem}.cba-crop-cv{touch-action:none;cursor:grab;max-width:100%;display:block}.cba-crop-cv:active{cursor:grabbing}' +
+    '.cba-chip-sub{display:block;font-size:10px;font-weight:600;opacity:.75}' +
+    '.cba-fmt{display:flex;flex-direction:column;gap:.3rem;text-align:left;cursor:pointer;margin:0;font:inherit;color:inherit}.cba-fmt span{font-size:13px;color:var(--text-2,#555)}.cba-fmt:hover{border-color:var(--ink,#111)}' +
+    '.cba-radio{display:inline-flex;gap:.45rem;align-items:center;font-weight:700;min-height:36px;margin-right:.8rem}' +
+    '.cba-count{float:right;font-weight:600;text-transform:none;letter-spacing:0}' +
+    '.cba-grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0 .8rem}' +
+    '.cba-tbar{padding:.3rem 0}.cba-body-in{font-size:16px;line-height:1.6}' +
+    '.cba-prev{max-width:720px;margin:0 auto;font-size:17px;line-height:1.65}.cba-prev h1{font-size:2rem;line-height:1.1;margin:.3rem 0 .6rem}.cba-prev .dek{font-size:1.15rem;font-weight:600}.cba-prev img{width:100%;height:auto;display:block;margin:1rem 0}.cba-prev h2{font-size:1.3rem;margin:1.4rem 0 .4rem}.cba-prev blockquote{border-left:4px solid var(--ink,#111);margin:1rem 0;padding:.2rem 1rem;font-style:italic;font-size:1.15rem}.cba-prev figure{margin:1rem 0}.cba-prev figcaption{font-size:13px;color:var(--muted,#666)}.cba-prev .pts{background:var(--surface-2,#f4f4f4);padding:.8rem 1rem .8rem 2rem}.cba-prev .by{color:var(--muted,#666);font-size:14px}' +
     '.cba-tbl{width:100%;border-collapse:collapse;font-size:14px}.cba-tbl td,.cba-tbl th{border-bottom:1px solid var(--line,#ddd);padding:.5rem .4rem;text-align:left;vertical-align:top}';
 
   // ---------- ouverture ----------
@@ -179,8 +187,23 @@
   window.addEventListener('popstate', function () { if (S.open && location.hash !== '#/admin') close(true); });
   window.addEventListener('keydown', function (e) { if (S.open && e.key === 'Escape' && !document.querySelector('.cba-modal')) close(); });
   window.addEventListener('beforeunload', function (e) { if (S.open && S.dirty) { e.preventDefault(); e.returnValue = ''; } });
-  // Adresse directe #/admin : ouverture dès que le rôle administrateur est confirmé
-  (function wait(n) { if (location.hash !== '#/admin' || n > 40) return; if (isAdmin()) { open(); return; } setTimeout(function () { wait(n + 1); }, 250); })(0);
+  // Adresse directe #/admin (au chargement ou tapée ensuite) : ouverture dès que le rôle administrateur est confirmé.
+  // Sans rôle admin après quelques secondes, le site explique quoi faire (se connecter, ou changer de compte),
+  // puis l'espace s'ouvre tout seul dès que la connexion administrateur aboutit (pendant 10 minutes).
+  var want = 0;
+  function wantOpen() { want = Date.now() + 600000; }
+  setInterval(function () { if (want && !S.open && isAdmin()) { want = 0; open(); } else if (want && Date.now() > want) want = 0; }, 500);
+  function fromHash() {
+    if (location.hash !== '#/admin' || S.open) return;
+    (function wait(n) {
+      if (S.open || location.hash !== '#/admin') return;
+      if (isAdmin()) { open(); return; }
+      if (n > 24) { if (window.CasaSite) window.CasaSite.go('admin'); return; }
+      setTimeout(function () { wait(n + 1); }, 250);
+    })(0);
+  }
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
 
   function loadTab(t) {
     if (t === 'msg') { loadMsgs(); loadContacts(); }
@@ -340,7 +363,7 @@
         return E('div', { class: 'cba-card', style: 'margin:0;display:flex;flex-direction:column;gap:.4rem' },
           E('strong', { style: 'font-size:1.05rem' }, sec.label, edited.indexOf(sec.key) >= 0 ? E('span', { class: 'cba-tag' }, 'modifié en ligne') : null),
           E('span', { style: 'color:var(--text-2);font-size:14px;flex:1' }, sec.desc), n ? E('span', { style: 'color:var(--muted);font-size:13px' }, n) : null,
-          E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.key = sec.key; S.work = withFields(sec.key, clone(window[sec.key])); S.dirty = false; S.openCards = {}; render(); body.scrollTop = 0; } }, 'Modifier'));
+          E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.key = sec.key; S.work = withFields(sec.key, clone(window[sec.key])); S.dirty = false; S.openCards = {}; S.art = null; render(); body.scrollTop = 0; } }, 'Modifier'));
       }))];
   }
   // Affiche aussi les champs prévus par le modèle (ex. « Photo » des lieux) même s'ils sont encore vides
@@ -365,7 +388,8 @@
     var sec = secOf(S.key), edited = (A.editedKeys ? A.editedKeys() : []).indexOf(S.key) >= 0;
     var ed = E('div', { class: 'cba-ed' });
     var v = S.work;
-    if (Array.isArray(v) || (v && typeof v === 'object')) add(ed, field({ v: v }, 'v', S.key, S.key, true));
+    if (S.key === 'CASA_ARTICLES' && Array.isArray(v)) add(ed, S.art != null ? viewArticleEditor() : viewArticleList());
+    else if (Array.isArray(v) || (v && typeof v === 'object')) add(ed, field({ v: v }, 'v', S.key, S.key, true));
     else add(ed, field(S, 'work', S.key, S.key, true));
     return [E('div', { class: 'cba-bar' },
       E('div', { class: 'cba-row' },
@@ -403,14 +427,18 @@
     inp.addEventListener('input', function (e) { parent[k] = (v === null && e.target.value === '') ? null : e.target.value; mark(); });
     return [lab, inp];
   }
-  function imgField(parent, k) {
+  function imgField(parent, k, ratio) {
+    ratio = ratio || (S.key === 'CASA_ARTICLES' ? '16:9' : null);
     var prev = E('img', { alt: '', src: parent[k] || null });
-    var inp = E('input', { class: 'cba-in', value: parent[k] || '', placeholder: 'assets/… ou adresse d’une image envoyée', oninput: function (e) { parent[k] = e.target.value; prev.src = e.target.value; mark(); } });
-    var set = function (url) { parent[k] = url; inp.value = url; prev.src = url; mark(); };
-    var file = E('input', { type: 'file', accept: 'image/*', style: 'display:none', onchange: function (e) { var f = e.target.files && e.target.files[0]; if (!f) return; upBtn.disabled = true; upBtn.textContent = 'Envoi…'; uploadFile(f).then(function (u) { set(u); upBtn.disabled = false; upBtn.textContent = 'Envoyer une photo'; toast('Photo envoyée : pensez à « Enregistrer et publier »'); }, function (er) { upBtn.disabled = false; upBtn.textContent = 'Envoyer une photo'; err(er); }); } });
+    var inp = E('input', { class: 'cba-in', value: parent[k] || '', placeholder: 'assets/… ou adresse d’une image envoyée', oninput: function (e) { parent[k] = e.target.value; prev.src = e.target.value; cropBtn.style.display = e.target.value ? '' : 'none'; mark(); } });
+    var set = function (url) { parent[k] = url; inp.value = url; prev.src = url; cropBtn.style.display = url ? '' : 'none'; mark(); };
+    var busy = function (on, b, label) { b.disabled = on || null; b.textContent = on ? 'Envoi…' : label; };
+    var send = function (f, b, label) { busy(true, b, label); return uploadFile(f).then(function (u) { set(u); busy(false, b, label); toast('Photo enregistrée : pensez à « Enregistrer et publier »'); }, function (er) { busy(false, b, label); err(er); }); };
+    var file = E('input', { type: 'file', accept: 'image/*', style: 'display:none', onchange: function (e) { var f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return; cropImage(f, { file: f, ratio: ratio }).then(function (x) { if (x) send(x, upBtn, 'Envoyer une photo'); }); } });
     var upBtn = E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { file.click(); } }, 'Envoyer une photo');
+    var cropBtn = E('button', { type: 'button', class: 'cba-btn sm', style: parent[k] ? '' : 'display:none', onclick: function () { cropImage(parent[k], { ratio: ratio }).then(function (x) { if (x) send(x, cropBtn, 'Rogner'); }); } }, 'Rogner');
     return E('div', { class: 'cba-img' }, prev, E('div', { class: 'grow' }, inp,
-      E('div', { class: 'cba-row', style: 'margin-top:.35rem' }, upBtn, file,
+      E('div', { class: 'cba-row', style: 'margin-top:.35rem' }, upBtn, file, cropBtn,
         E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { pickImage(set); } }, 'Bibliothèque'),
         parent[k] ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { set(''); } }, 'Retirer') : null)));
   }
@@ -453,6 +481,287 @@
       canAdd ? E('button', { type: 'button', class: 'cba-btn sm', style: 'margin-top:.3rem', onclick: function () { addNew(false); } }, '+ Ajouter') : E('p', { style: 'color:var(--muted);font-size:13px' }, 'Liste vide.'));
   }
 
+  // ================= ROGNAGE =================
+  // cropImage(source, { ratio, file }) → Promise<File|null> (null = annulé). source : adresse d'image ou File.
+  // Avec opts.file, un bouton « Envoyer sans rogner » renvoie le fichier d'origine.
+  var RATIOS = [['16:9', 16 / 9, 'Article, une'], ['4:3', 4 / 3, 'Photo classique'], ['3:2', 3 / 2, 'Reflex'], ['1:1', 1, 'Carré, réseaux'], ['4:5', 4 / 5, 'Portrait, Instagram'], ['3:4', 3 / 4, 'Portrait'], ['9:16', 9 / 16, 'Story'], ['orig', 0, 'Format d’origine']];
+  var lastRatio = '16:9';
+  function cropImage(source, opts) {
+    opts = opts || {};
+    return new Promise(function (resolve) {
+      var url = typeof source === 'string' ? source : URL.createObjectURL(source);
+      var name = (opts.file && opts.file.name) || (typeof source === 'string' ? decodeURIComponent(source.split('?')[0].split('/').pop() || 'image') : source.name || 'image');
+      var im = new Image(); if (typeof source === 'string' && !/^(blob:|data:)/.test(url)) im.crossOrigin = 'anonymous';
+      var st = { rk: opts.ratio || lastRatio, rot: 0, zoom: 1, ox: 0, oy: 0, W: 0, H: 0 };
+      var done = false;
+      var finish = function (v) { if (done) return; done = true; m.remove(); if (typeof source !== 'string') URL.revokeObjectURL(url); window.removeEventListener('resize', layout); resolve(v); };
+      var cv = E('canvas', { class: 'cba-crop-cv', 'aria-label': 'Zone de rognage : faites glisser la photo pour la cadrer' });
+      var stage = E('div', { class: 'cba-crop-stage' }, cv);
+      var zoom = E('input', { type: 'range', min: '1', max: '4', step: '0.01', value: '1', 'aria-label': 'Zoom', style: 'flex:1 1 160px', oninput: function (e) { setZoom(Number(e.target.value)); } });
+      var info = E('span', { style: 'font-size:13px;color:var(--muted,#666)' });
+      var chips = E('div', { class: 'cba-row', style: 'margin:.5rem 0' });
+      var okBtn = E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { exportCrop(); } }, opts.file ? 'Rogner et envoyer' : 'Enregistrer la photo rognée');
+      var box = E('div', { class: 'cba-crop' },
+        E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('strong', { style: 'font-size:1.1rem' }, 'Rogner la photo'), E('button', { type: 'button', class: 'cba-btn', onclick: function () { finish(null); } }, 'Annuler')),
+        E('p', { class: 'cba-sub', style: 'margin:.3rem 0 0' }, 'Choisissez un format, puis faites glisser la photo et zoomez pour la cadrer.'),
+        chips, stage,
+        E('div', { class: 'cba-row', style: 'margin-top:.6rem' }, E('span', { style: 'font-weight:800' }, 'Zoom'), zoom,
+          E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { st.rot = (st.rot + 90) % 360; reset(); } }, 'Pivoter ⟳'),
+          E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { reset(); } }, 'Recentrer')),
+        E('div', { class: 'cba-row', style: 'margin-top:.8rem' }, okBtn,
+          opts.file ? E('button', { type: 'button', class: 'cba-btn', onclick: function () { finish(opts.file); } }, 'Envoyer sans rogner') : null, info));
+      var m = E('div', { class: 'cba-modal', onclick: function (e) { if (e.target === m) finish(null); } }, box);
+      (root || document.body).appendChild(m);
+      function ratio() { var r = RATIOS.find(function (x) { return x[0] === st.rk; }); return r && r[1] ? r[1] : iw() / ih(); }
+      function iw() { return st.rot % 180 ? im.naturalHeight : im.naturalWidth; }
+      function ih() { return st.rot % 180 ? im.naturalWidth : im.naturalHeight; }
+      function scale() { return Math.max(st.W / iw(), st.H / ih()) * st.zoom; }
+      function clamp() { var s = scale(); st.ox = Math.min(0, Math.max(st.W - iw() * s, st.ox)); st.oy = Math.min(0, Math.max(st.H - ih() * s, st.oy)); }
+      function drawTo(ctx, W, H, s, ox, oy) {
+        ctx.save(); ctx.translate(ox, oy); ctx.scale(s, s);
+        if (st.rot === 90) { ctx.translate(im.naturalHeight, 0); ctx.rotate(Math.PI / 2); }
+        else if (st.rot === 180) { ctx.translate(im.naturalWidth, im.naturalHeight); ctx.rotate(Math.PI); }
+        else if (st.rot === 270) { ctx.translate(0, im.naturalWidth); ctx.rotate(-Math.PI / 2); }
+        ctx.drawImage(im, 0, 0); ctx.restore();
+      }
+      function draw() {
+        var ctx = cv.getContext('2d'); ctx.clearRect(0, 0, cv.width, cv.height);
+        drawTo(ctx, st.W, st.H, scale(), st.ox, st.oy);
+        // repères des tiers
+        ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1; ctx.beginPath();
+        [1, 2].forEach(function (i) { ctx.moveTo(st.W * i / 3, 0); ctx.lineTo(st.W * i / 3, st.H); ctx.moveTo(0, st.H * i / 3); ctx.lineTo(st.W, st.H * i / 3); }); ctx.stroke();
+        var s = scale(), w = Math.round(Math.min(1600, st.W / s)), h = Math.round(w / ratio());
+        info.textContent = 'Résultat : ' + w + ' × ' + h + ' px' + (w < 800 ? ' · photo un peu petite, elle peut paraître floue' : '');
+      }
+      function layout() {
+        var maxW = Math.min(stage.clientWidth || 600, 760), maxH = Math.max(220, Math.min(window.innerHeight * 0.55, 520)), r = ratio();
+        var W = maxW, H = W / r; if (H > maxH) { H = maxH; W = H * r; }
+        var cx = st.W ? (st.W / 2 - st.ox) / (iw() * scale()) : 0.5, cy = st.H ? (st.H / 2 - st.oy) / (ih() * scale()) : 0.5;
+        st.W = Math.round(W); st.H = Math.round(H); cv.width = st.W; cv.height = st.H; cv.style.width = st.W + 'px'; cv.style.height = st.H + 'px';
+        var s = scale(); st.ox = st.W / 2 - cx * iw() * s; st.oy = st.H / 2 - cy * ih() * s; clamp(); draw();
+      }
+      function reset() { st.zoom = 1; zoom.value = '1'; st.W = 0; st.H = 0; layout(); }
+      function setZoom(z) {
+        var s0 = scale(), cx = (st.W / 2 - st.ox) / s0, cy = (st.H / 2 - st.oy) / s0;
+        st.zoom = Math.max(1, Math.min(4, z)); var s = scale(); st.ox = st.W / 2 - cx * s; st.oy = st.H / 2 - cy * s; clamp(); draw();
+      }
+      function chipsRender() {
+        chips.textContent = '';
+        RATIOS.forEach(function (r) { add(chips, E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String(st.rk === r[0]), title: r[2], onclick: function () { st.rk = r[0]; lastRatio = r[0]; chipsRender(); reset(); } }, r[0] === 'orig' ? 'Original' : r[0], E('span', { class: 'cba-chip-sub' }, r[2]))); });
+      }
+      function exportCrop() {
+        var s = scale(), sw = st.W / s, outW = Math.round(Math.min(1600, sw)), outH = Math.round(outW / ratio()), k = outW / st.W;
+        var out = document.createElement('canvas'); out.width = outW; out.height = outH;
+        var ctx = out.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, outW, outH);
+        drawTo(ctx, outW, outH, s * k, st.ox * k, st.oy * k);
+        okBtn.disabled = true; okBtn.textContent = 'Préparation…';
+        try {
+          out.toBlob(function (b) {
+            if (!b) { okBtn.disabled = false; okBtn.textContent = 'Réessayer'; toast('Rognage impossible', true); return; }
+            finish(new File([b], name.replace(/\.[^.]+$/, '') + '-rognee.jpg', { type: 'image/jpeg' }));
+          }, 'image/jpeg', 0.86);
+        } catch (e) { finish(null); toast('Cette image vient d’un autre site et ne peut pas être rognée ici : enregistrez-la sur votre appareil, puis utilisez « Envoyer une photo ».', true); }
+      }
+      // glisser (souris, doigt) et molette
+      var drag = null;
+      cv.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY, ox: st.ox, oy: st.oy }; try { cv.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); });
+      cv.addEventListener('pointermove', function (e) { if (!drag) return; st.ox = drag.ox + e.clientX - drag.x; st.oy = drag.oy + e.clientY - drag.y; clamp(); draw(); });
+      cv.addEventListener('pointerup', function () { drag = null; }); cv.addEventListener('pointercancel', function () { drag = null; });
+      cv.addEventListener('wheel', function (e) { e.preventDefault(); var z = st.zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08); zoom.value = String(Math.max(1, Math.min(4, z))); setZoom(z); }, { passive: false });
+      im.onload = function () { chipsRender(); reset(); window.addEventListener('resize', layout); };
+      im.onerror = function () { finish(null); toast('Impossible d’ouvrir cette image', true); };
+      im.src = url;
+    });
+  }
+
+  // ================= ARTICLES : rédaction =================
+  var FORMATS = [
+    ['article', 'Article', 'Le format classique : chapeau, intertitres, citation.', '3 min', 'L’essentiel en deux ou trois phrases : qui, quoi, où, quand.\n\n## Premier intertitre\n\nLe développement : les faits, le contexte, les chiffres.\n\n> « Une citation d’un acteur de l’événement », confie Prénom Nom.\n\n## Deuxième intertitre\n\nLa conclusion et la prochaine échéance.'],
+    ['breve', 'Brève', 'Une info courte, sans intertitre.', '1 min', 'L’information en une ou deux phrases.\n\nUn détail utile : date, lieu, contact.'],
+    ['compte-rendu', 'Compte rendu de match', 'Score, temps forts, réactions, la suite.', '3 min', 'Équipe A 2 – 1 Équipe B (mi-temps : 1 – 0). Le résumé du match en deux phrases.\n\n## Le film du match\n\n- 12e : premier but de …\n- 45e : …\n- 78e : …\n\n## Les réactions\n\n> « … », l’entraîneur de l’équipe A.\n\n## La suite\n\nProchain match : … contre …, le … à …'],
+    ['portrait', 'Portrait', 'Une personne, son parcours, ce qui l’anime.', '4 min', 'Une scène ou un détail qui fait entrer dans l’histoire de la personne.\n\n## Son parcours\n\n…\n\n> « … »\n\n## Ce qui l’anime\n\n…\n\n## Et demain\n\n…'],
+    ['interview', 'Interview', 'Questions en intertitres, réponses en paragraphes.', '4 min', 'Présentation de la personne interrogée en deux phrases.\n\n## Première question ?\n\nRéponse.\n\n## Deuxième question ?\n\nRéponse.\n\n## Troisième question ?\n\nRéponse.'],
+    ['tribune', 'Tribune / édito', 'Un point de vue signé.', '3 min', 'Le constat de départ.\n\n## L’argument\n\n…\n\n## Ce que nous proposons\n\n…'],
+    ['agenda', 'Annonce / agenda', 'Un événement à venir, les infos pratiques.', '1 min', 'Ce qui se prépare, en une phrase.\n\n- Quoi : …\n- Quand : …\n- Où : …\n- Tarif : …\n\nInscriptions et renseignements : …'],
+    ['vierge', 'Page blanche', 'Aucun plan, vous écrivez librement.', '2 min', '']
+  ];
+  var SPORTS = ['Football', 'Basketball', 'Rugby', 'Handball', 'Volley-ball', 'Water-polo', 'Natation', 'Trail', 'Tennis', 'Judo', 'Boxe', 'Pétanque', 'Roller', 'Équitation', 'Ping-pong', 'Kitesurf', 'Karting', 'Golf', 'Hockey', 'Wing foil', 'Multisport', 'Autre'];
+  function fmtOf(id) { return FORMATS.find(function (f) { return f[0] === id; }) || FORMATS[0]; }
+  function dayLabel(d) { return (d || new Date()).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); }
+  function plainText(b) { return String(b || '').replace(/^!\[[^\]]*\]\([^)]*\)\s*$/gm, '').replace(/^##\s+|^>\s*|^[-•]\s+/gm, '').replace(/\*\*/g, ''); }
+  function readTime(b) { var w = plainText(b).split(/\s+/).filter(Boolean).length; return Math.max(1, Math.round(w / 220)) + ' min'; }
+  function artStatus(a) {
+    if (a.brouillon) return ['Brouillon', '#7a5208', 'non visible sur le site'];
+    if (a.publierLe && new Date(a.publierLe) > new Date()) return ['Programmé', '#1d4ed8', 'en ligne le ' + fmtDate(a.publierLe)];
+    return ['En ligne', '#11583f', ''];
+  }
+  function newArticle(fmt, from) {
+    var f = fmtOf(fmt), a = clone(TEMPLATES.CASA_ARTICLES);
+    a.format = f[0]; a.body = f[4]; a.read = f[3]; a.date = dayLabel(); a.brouillon = true; a.publierLe = '';
+    a.author = (window.CasaSite && window.CasaSite.state && window.CasaSite.state.name) || 'La rédaction';
+    if (f[0] === 'compte-rendu') a.tag = 'Résultat'; if (f[0] === 'agenda') a.tag = 'Agenda'; if (f[0] === 'tribune') a.tag = 'Tribune'; if (f[0] === 'interview') a.tag = 'Interview'; if (f[0] === 'portrait') a.tag = 'Portrait';
+    if (from) Object.assign(a, from);
+    return a;
+  }
+  function studioPosts() { try { return (window.CasaSite && window.CasaSite.posts ? window.CasaSite.posts() : []).filter(function (p) { return p && p.title && (p.body || p.dek); }); } catch (e) { return []; } }
+  function pickFormat(done) {
+    var m = E('div', { class: 'cba-modal', onclick: function (e) { if (e.target === m) m.remove(); } });
+    var posts = studioPosts();
+    var box = E('div', {},
+      E('div', { class: 'cba-row', style: 'justify-content:space-between;margin-bottom:.4rem' }, E('strong', { style: 'font-size:1.1rem' }, 'Quel type d’article ?'), E('button', { type: 'button', class: 'cba-btn', onclick: function () { m.remove(); } }, 'Fermer')),
+      E('p', { class: 'cba-sub' }, 'Chaque format propose un plan à compléter. Vous pourrez tout modifier ensuite.'),
+      E('div', { class: 'cba-secs' }, FORMATS.map(function (f) {
+        return E('button', { type: 'button', class: 'cba-card cba-fmt', onclick: function () { m.remove(); done(newArticle(f[0])); } }, E('strong', {}, f[1]), E('span', {}, f[2]));
+      })),
+      posts.length ? [E('h2', { style: 'margin:1.2rem 0 .3rem;font-size:1.05rem' }, 'Ou reprendre un article de l’espace Rédaction'),
+        E('p', { class: 'cba-sub' }, 'Les articles écrits dans l’espace Rédaction de cet appareil. Une fois repris ici, ils peuvent être publiés pour tous les visiteurs.'),
+        E('div', { class: 'cba-list', style: 'max-height:40vh' }, posts.slice(0, 60).map(function (p) {
+          return E('button', { type: 'button', class: 'cba-it', onclick: function () {
+            m.remove();
+            var t = (window.CasaRedac && window.CasaRedac.TYPES || []).some(function (x) { return x[0] === p.type; }) ? p.type : 'article';
+            done(newArticle(t === 'breve' || t === 'portrait' || t === 'tribune' || t === 'compte-rendu' ? t : 'article', { title: p.title || '', dek: p.dek || '', body: p.body || '', img: p.img && p.img !== 'assets/hero.jpg' ? p.img : '', alt: p.alt || '', sport: p.sport || 'Football', tag: p.tag || '', clubs: (p.clubs || []).slice(), premium: !!p.premium, author: p.author || 'La rédaction', read: readTime(p.body) }));
+          } }, E('span', { class: 't' }, p.title), E('span', { class: 'm' }, [p.status === 'published' ? 'Publié' : p.status === 'review' ? 'En relecture' : 'Brouillon', p.author, p.updated].filter(Boolean).join(' · ')));
+        }))] : null);
+    add(m, box); root.appendChild(m);
+  }
+  function viewArticleList() {
+    var arr = S.work;
+    var start = function (a) { arr.unshift(a); S.art = 0; S.artMode = 'write'; mark(); render(); body.scrollTop = 0; };
+    return E('div', {},
+      E('div', { class: 'cba-row', style: 'margin-bottom:.8rem' },
+        E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { pickFormat(start); } }, '+ Rédiger un article'),
+        E('span', { style: 'color:var(--muted,#666);font-size:13px' }, arr.length + ' article' + (arr.length > 1 ? 's' : '') + ' ajouté' + (arr.length > 1 ? 's' : '') + ' · le plus récent en premier')),
+      arr.length ? E('div', { class: 'cba-list', style: 'max-height:none' }, arr.map(function (a, i) {
+        var st = artStatus(a || {});
+        var mv = function (d) { var j = i + d; if (j < 0 || j >= arr.length) return; var t = arr[i]; arr[i] = arr[j]; arr[j] = t; mark(); render(); };
+        return E('div', { class: 'cba-it', style: 'display:flex;gap:.7rem;align-items:center;cursor:default' },
+          a.img ? E('img', { src: a.img, alt: '', style: 'width:72px;height:54px;object-fit:cover;flex:none;background:var(--surface-2,#eee)' }) : E('span', { style: 'width:72px;height:54px;flex:none;background:var(--surface-2,#eee)' }),
+          E('span', { style: 'flex:1;min-width:0' }, E('span', { class: 't' }, a.title || '(sans titre)'),
+            E('span', { class: 'm' }, E('b', { style: 'color:' + st[1] }, st[0]), ' · ', [fmtOf(a.format)[1], a.sport, a.date, st[2]].filter(Boolean).join(' · '))),
+          E('span', { class: 'cba-tools' },
+            E('button', { type: 'button', class: 'cba-btn sm pri', onclick: function () { S.art = i; S.artMode = 'write'; render(); body.scrollTop = 0; } }, 'Modifier'),
+            E('button', { type: 'button', class: 'cba-btn sm', 'aria-label': 'Monter', onclick: function () { mv(-1); } }, '↑'),
+            E('button', { type: 'button', class: 'cba-btn sm', 'aria-label': 'Descendre', onclick: function () { mv(1); } }, '↓'),
+            E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { var c = clone(a); c.id = ''; c.title = (c.title || '') + ' (copie)'; c.brouillon = true; arr.splice(i + 1, 0, c); mark(); render(); } }, 'Dupliquer'),
+            E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Supprimer « ' + (a.title || 'cet article') + ' » ?')) return; arr.splice(i, 1); mark(); render(); } }, 'Supprimer')));
+      })) : E('p', { style: 'color:var(--muted,#666)' }, 'Aucun article pour l’instant. Cliquez sur « Rédiger un article ».'));
+  }
+  function insertAt(ta, a, snip, sel) {
+    var s0 = ta.selectionStart == null ? ta.value.length : ta.selectionStart, s1 = ta.selectionEnd == null ? s0 : ta.selectionEnd;
+    var picked = ta.value.slice(s0, s1), text = typeof snip === 'function' ? snip(picked) : snip;
+    ta.value = ta.value.slice(0, s0) + text + ta.value.slice(s1); a.body = ta.value; mark();
+    var c = s0 + text.length; if (sel) { var k = text.indexOf(sel); if (k >= 0) { ta.setSelectionRange(s0 + k, s0 + k + sel.length); ta.focus(); return; } }
+    ta.setSelectionRange(c, c); ta.focus();
+  }
+  function counter(el, v, max) { var n = String(v || '').length; el.textContent = n + (max ? ' / ' + max : '') + ' signes'; el.style.color = max && n > max ? 'var(--danger,#c22)' : ''; }
+  function txt(a, k, label, opts) {
+    opts = opts || {};
+    var c = E('span', { class: 'cba-count' });
+    var inp = opts.long ? E('textarea', { class: 'cba-in', rows: String(opts.rows || 3), value: a[k] || '', placeholder: opts.ph || null }) : E('input', { class: 'cba-in', value: a[k] || '', placeholder: opts.ph || null });
+    inp.addEventListener('input', function () { a[k] = inp.value; mark(); if (opts.max) counter(c, inp.value, opts.max); if (opts.on) opts.on(); });
+    if (opts.max) counter(c, a[k], opts.max);
+    return [E('label', { class: 'cba-lbl' }, label, opts.max ? c : null), inp];
+  }
+  function preview(a) {
+    var blocks = window.CasaSite && window.CasaSite.blocksOf ? window.CasaSite.blocksOf(a.body) : [];
+    return E('article', { class: 'cba-prev' },
+      E('div', { class: 'cba-lbl', style: 'margin-top:0' }, [a.sport, a.tag, a.date, a.read].filter(Boolean).join(' · ')),
+      E('h1', {}, a.title || 'Titre de l’article'), a.dek ? E('p', { class: 'dek' }, a.dek) : null,
+      a.img ? E('img', { src: a.img, alt: a.alt || '' }) : null,
+      (a.points || []).filter(Boolean).length ? E('ul', { class: 'pts' }, a.points.filter(Boolean).map(function (p) { return E('li', {}, p); })) : null,
+      blocks.map(function (b) { return b.isImg ? E('figure', {}, E('img', { src: b.src, alt: b.t }), b.t ? E('figcaption', {}, b.t) : null) : b.isH ? E('h2', {}, b.t) : b.isQ ? E('blockquote', {}, b.t) : b.isL ? E('p', { class: 'li' }, '• ' + b.t) : E('p', {}, b.t); }),
+      E('p', { class: 'by' }, 'Par ' + (a.author || 'la rédaction')));
+  }
+  function viewArticleEditor() {
+    var arr = S.work, a = arr[S.art];
+    if (!a) { S.art = null; return viewArticleList(); }
+    if (!Array.isArray(a.points)) a.points = []; if (!Array.isArray(a.clubs)) a.clubs = [];
+    var st = artStatus(a);
+    var back = E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.art = null; render(); body.scrollTop = 0; } }, '← Tous les articles');
+    var modes = E('div', { class: 'cba-row' }, [['write', 'Écrire'], ['preview', 'Aperçu']].map(function (x) { return E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String((S.artMode || 'write') === x[0]), onclick: function () { S.artMode = x[0]; render(); } }, x[1]); }));
+    var head = E('div', { class: 'cba-row', style: 'margin-bottom:.6rem' }, back, modes, E('span', { style: 'font-weight:800;color:' + st[1] }, st[0] + (st[2] ? ' · ' + st[2] : '')));
+    if (S.artMode === 'preview') return E('div', {}, head, preview(a));
+
+    // statut de publication
+    var when = E('input', { class: 'cba-in', type: 'datetime-local', style: 'max-width:260px', value: a.publierLe ? new Date(new Date(a.publierLe).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '', onchange: function (e) { a.publierLe = e.target.value ? new Date(e.target.value).toISOString() : ''; a.brouillon = false; mark(); render(); } });
+    var mode = a.brouillon ? 'draft' : a.publierLe ? 'later' : 'now';
+    var radio = function (id, label, apply) { return E('label', { class: 'cba-radio' }, E('input', { type: 'radio', name: 'cba-pub', checked: mode === id || null, onchange: function () { apply(); mark(); render(); } }), label); };
+    var pub = E('div', { class: 'cba-card' }, E('div', { class: 'cba-lbl', style: 'margin-top:0' }, 'Publication'),
+      E('div', { class: 'cba-row' },
+        radio('draft', 'Brouillon (invisible sur le site)', function () { a.brouillon = true; }),
+        radio('now', 'En ligne dès l’enregistrement', function () { a.brouillon = false; a.publierLe = ''; }),
+        radio('later', 'Programmer', function () { a.brouillon = false; if (!a.publierLe) { var d = new Date(Date.now() + 86400000); d.setHours(8, 0, 0, 0); a.publierLe = d.toISOString(); } })),
+      mode === 'later' ? E('div', { class: 'cba-row', style: 'margin-top:.4rem' }, E('span', {}, 'Mise en ligne le'), when) : null,
+      E('p', { style: 'margin:.5rem 0 0;font-size:13px;color:var(--muted,#666)' }, 'Rien n’est visible tant que vous n’avez pas cliqué « Enregistrer et publier » en haut.'));
+
+    // texte + barre d'outils
+    var ta = E('textarea', { class: 'cba-in cba-body-in', rows: '18', value: a.body || '' });
+    var bodyInfo = E('span', { class: 'cba-count' });
+    var upd = function () { a.read = readTime(a.body); var n = plainText(a.body).split(/\s+/).filter(Boolean).length; bodyInfo.textContent = n + ' mots · ' + a.read + ' de lecture'; };
+    ta.addEventListener('input', function () { a.body = ta.value; mark(); upd(); });
+    ta.addEventListener('paste', function (e) {
+      var html = e.clipboardData && e.clipboardData.getData('text/html');
+      if (!html || !window.CasaRedac || !window.CasaRedac.htmlToMarkup) return;
+      var mk = window.CasaRedac.htmlToMarkup(html, 'article'); if (!mk) return;
+      e.preventDefault(); insertAt(ta, a, mk); upd(); toast('Texte collé : intertitres, citations et listes conservés');
+    });
+    upd();
+    var bodyImg = function () {
+      var f = E('input', { type: 'file', accept: 'image/*', style: 'display:none', onchange: function (e) {
+        var file = e.target.files && e.target.files[0]; if (!file) return;
+        cropImage(file, { file: file, ratio: '16:9' }).then(function (x) { if (!x) return; toast('Envoi de la photo…'); return uploadFile(x).then(function (u) { var leg = prompt('Légende de la photo (facultatif) :', '') || ''; insertAt(ta, a, '\n\n![' + leg.replace(/[\[\]]/g, '') + '](' + u + ')\n\n'); upd(); toast('Photo insérée dans le texte'); }); }).catch(err);
+      } });
+      root.appendChild(f); f.click(); setTimeout(function () { f.remove(); }, 60000);
+    };
+    var tools = [
+      ['Intertitre', function (s) { return '\n\n## ' + (s || 'Intertitre') + '\n\n'; }, 'Intertitre'],
+      ['Citation', function (s) { return '\n\n> « ' + (s || 'Citation') + ' »\n\n'; }, 'Citation'],
+      ['Liste', function (s) { return '\n' + (s ? s.split('\n').map(function (l) { return '- ' + l; }).join('\n') : '- Élément') + '\n'; }, 'Élément'],
+      ['Paragraphe', '\n\nNouveau paragraphe.', 'Nouveau paragraphe.']
+    ];
+    var bar = E('div', { class: 'cba-row cba-tbar' }, tools.map(function (t) { return E('button', { type: 'button', class: 'cba-btn sm', onmousedown: function (e) { e.preventDefault(); }, onclick: function () { insertAt(ta, a, t[1], t[2]); upd(); } }, t[0]); }),
+      E('button', { type: 'button', class: 'cba-btn sm', onclick: bodyImg }, 'Photo dans le texte'),
+      E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { var f = fmtOf(a.format); if (!f[4]) return; if (a.body && !confirm('Ajouter le plan « ' + f[1] + ' » à la fin du texte ?')) return; insertAt(ta, a, (a.body ? '\n\n' : '') + f[4]); upd(); } }, 'Insérer le plan du format'));
+
+    // assistant intégré (sans IA en ligne : résumé à partir du texte)
+    var R = window.CasaRedac;
+    var assist = R && R.localAI ? E('div', { class: 'cba-row', style: 'margin-top:.4rem' },
+      E('span', { style: 'font-size:13px;font-weight:800' }, 'Assistant :'),
+      E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { var r = R.localAI('chapo', a)[0]; if (a.dek && !confirm('Remplacer le chapeau actuel par : « ' + r + ' » ?')) return; a.dek = r; mark(); render(); } }, 'Proposer un chapeau'),
+      E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { var r = R.localAI('resume', a); if (!r.length) { toast('Écrivez d’abord le texte', true); return; } a.points = r; mark(); render(); } }, 'Points clés depuis le texte'),
+      E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { var r = R.localAI('titres', a); var c = prompt('Titres proposés (tapez 1, 2 ou 3) :\n1. ' + r[0] + '\n2. ' + r[1] + '\n3. ' + r[2], '1'); var k = Number(c) - 1; if (r[k]) { a.title = r[k]; mark(); render(); } } }, 'Proposer des titres'),
+      E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { var r = R.localAI('relecture', a); alert('Relecture :\n\n' + (r.join ? r.join('\n') : r)); } }, 'Relire')) : null;
+
+    // clubs liés
+    var clubs = []; try { clubs = window.CasaSite.data().clubs || []; } catch (e) {}
+    var clubBox = E('div', { class: 'cba-row' }, clubs.map(function (c) { var on = a.clubs.indexOf(c.id) >= 0; return E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String(on), onclick: function () { a.clubs = on ? a.clubs.filter(function (x) { return x !== c.id; }) : a.clubs.concat([c.id]); mark(); render(); } }, c.name); }));
+
+    var sportSel = E('select', { class: 'cba-in', onchange: function (e) { a.sport = e.target.value; mark(); } }, SPORTS.concat(SPORTS.indexOf(a.sport) < 0 && a.sport ? [a.sport] : []).map(function (s) { return E('option', { value: s, selected: a.sport === s || null }, s); }));
+    var fmtSel = E('select', { class: 'cba-in', onchange: function (e) { a.format = e.target.value; mark(); } }, FORMATS.map(function (f) { return E('option', { value: f[0], selected: (a.format || 'article') === f[0] || null }, f[1]); }));
+    var pts = E('div', {}, a.points.map(function (p, i) { return E('div', { class: 'cba-row', style: 'margin:.3rem 0' }, E('input', { class: 'cba-in', style: 'flex:1 1 240px', value: p || '', oninput: function (e) { a.points[i] = e.target.value; mark(); } }), E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { a.points.splice(i, 1); mark(); render(); } }, 'Retirer')); }),
+      a.points.length < 4 ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { a.points.push(''); mark(); render(); } }, '+ Point clé') : null);
+
+    return E('div', { class: 'cba-art' }, head, pub,
+      E('div', { class: 'cba-card' },
+        txt(a, 'title', 'Titre', { max: 80, ph: 'Un titre clair, 80 signes maximum' }),
+        txt(a, 'dek', 'Chapeau', { long: true, rows: 2, max: 220, ph: 'Une ou deux phrases qui donnent envie de lire' }),
+        E('div', { class: 'cba-grid2' },
+          E('div', {}, E('label', { class: 'cba-lbl' }, 'Format'), fmtSel),
+          E('div', {}, E('label', { class: 'cba-lbl' }, 'Discipline'), sportSel),
+          E('div', {}, txt(a, 'tag', 'Rubrique / compétition', { ph: 'Régional 2, Coupe de France…' })),
+          E('div', {}, txt(a, 'date', 'Date affichée', { ph: dayLabel() })),
+          E('div', {}, txt(a, 'author', 'Auteur'))),
+        E('label', { class: 'cba-radio', style: 'margin-top:.7rem' }, E('input', { type: 'checkbox', checked: a.premium || null, onchange: function (e) { a.premium = e.target.checked; mark(); } }), 'Réservé aux abonnés Casa B+')),
+      E('div', { class: 'cba-card' }, E('div', { class: 'cba-lbl', style: 'margin-top:0' }, 'Photo principale'), imgField(a, 'img', '16:9'), txt(a, 'alt', 'Description de la photo (pour les malvoyants et Google)')),
+      E('div', { class: 'cba-card' }, E('label', { class: 'cba-lbl', style: 'margin-top:0' }, 'Texte de l’article', bodyInfo), bar, ta, assist,
+        E('p', { style: 'margin:.4rem 0 0;font-size:13px;color:var(--muted,#666)' }, 'Sélectionnez un mot puis cliquez « Intertitre » ou « Citation » pour le transformer. Vous pouvez coller un texte depuis Word ou une page web : la mise en forme est reprise.')),
+      E('div', { class: 'cba-card' }, E('div', { class: 'cba-lbl', style: 'margin-top:0' }, 'Points clés (2 ou 3, affichés en encadré)'), pts),
+      clubs.length ? E('div', { class: 'cba-card' }, E('div', { class: 'cba-lbl', style: 'margin-top:0' }, 'Clubs liés'), clubBox) : null,
+      E('details', { class: 'cba-card' }, E('summary', { style: 'font-weight:800;cursor:pointer' }, 'Version anglaise (facultatif, bouton EN du site)'),
+        txt(a, 'titleEn', 'Title'), txt(a, 'dekEn', 'Standfirst', { long: true, rows: 2 }), txt(a, 'tagEn', 'Section'), txt(a, 'bodyEn', 'Full text', { long: true, rows: 10 })),
+      E('div', { class: 'cba-row' }, E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.art = null; render(); body.scrollTop = 0; } }, '← Tous les articles')));
+  }
+
   // ================= IMAGES =================
   function resize(file) {
     return new Promise(function (res) {
@@ -493,6 +802,7 @@
       return E('figure', {}, E('img', { src: im.url, alt: im.name, loading: 'lazy' }), E('figcaption', {}, im.name, E('div', { class: 'cba-row', style: 'margin-top:.35rem' },
         onPick ? E('button', { type: 'button', class: 'cba-btn sm pri', onclick: function () { onPick(im.url); } }, 'Choisir') :
           [E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { copy(im.url); } }, 'Copier l’adresse'),
+           E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { cropImage(im.url).then(function (x) { if (!x) return; toast('Envoi de la copie rognée…'); uploadFile(x).then(function (u) { loadImages(); copy(u); toast('Copie rognée enregistrée (l’originale est conservée)'); }, err); }); } }, 'Rogner'),
            E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Supprimer cette image ? Si elle est utilisée sur le site, elle n’y apparaîtra plus.')) return; A.removeImage(im.path).then(function () { S.images = S.images.filter(function (x) { return x.path !== im.path; }); render(); toast('Image supprimée'); }, err); } }, 'Supprimer')])));
     }));
   }
@@ -500,7 +810,8 @@
     var file = E('input', { type: 'file', accept: 'image/*', multiple: true, style: 'display:none', onchange: function (e) { sendFiles(e.target.files); } });
     var z = E('div', { class: 'cba-card', style: 'border-style:dashed;text-align:center;padding:1.5rem' },
       E('p', { style: 'margin:0 0 .6rem' }, 'Glissez vos photos ici, ou'), E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { file.click(); } }, 'Choisir des photos'), file,
-      E('p', { style: 'margin:.6rem 0 0;font-size:13px;color:var(--muted)' }, 'Les photos sont réduites automatiquement (1600 px, JPEG) avant l’envoi.'));
+      E('label', { class: 'cba-radio', style: 'justify-content:center;margin-top:.6rem' }, E('input', { type: 'checkbox', checked: S.cropUp !== false || null, onchange: function (e) { S.cropUp = e.target.checked; } }), 'Rogner chaque photo avant l’envoi'),
+      E('p', { style: 'margin:.4rem 0 0;font-size:13px;color:var(--muted)' }, 'Les photos sont réduites automatiquement (1600 px, JPEG) avant l’envoi.'));
     z.addEventListener('dragover', function (e) { e.preventDefault(); z.style.background = 'var(--surface-2)'; });
     z.addEventListener('dragleave', function () { z.style.background = ''; });
     z.addEventListener('drop', function (e) { e.preventDefault(); z.style.background = ''; sendFiles(e.dataTransfer.files); });
@@ -511,11 +822,11 @@
     if (!list.length) return;
     toast('Envoi de ' + list.length + ' photo' + (list.length > 1 ? 's' : '') + '…');
     var chain = Promise.resolve(), ok = 0;
-    list.forEach(function (f) { chain = chain.then(function () { return uploadFile(f).then(function () { ok++; }, err); }); });
+    list.forEach(function (f) { chain = chain.then(function () { return (S.cropUp !== false ? cropImage(f, { file: f, ratio: 'orig' }) : Promise.resolve(f)).then(function (x) { if (!x) return; return uploadFile(x).then(function () { ok++; }, err); }); }); });
     chain.then(function () { if (ok) toast(ok + ' photo' + (ok > 1 ? 's envoyées' : ' envoyée')); loadImages(); });
   }
   function viewImages() {
-    return [E('h1', { class: 'cba-h' }, 'Images'), E('p', { class: 'cba-sub' }, 'Vos photos en ligne. Dans « Contenus du site », chaque champ image propose aussi « Envoyer une photo » et « Bibliothèque ».'), upZone(), imageGrid(null)];
+    return [E('h1', { class: 'cba-h' }, 'Images'), E('p', { class: 'cba-sub' }, 'Vos photos en ligne. « Rogner » crée une copie recadrée (l’originale reste). Dans « Contenus du site », chaque champ image propose aussi « Envoyer une photo », « Rogner » et « Bibliothèque ».'), upZone(), imageGrid(null)];
   }
   function pickImage(cb) {
     var m = E('div', { class: 'cba-modal', onclick: function (e) { if (e.target === m) m.remove(); } });
@@ -580,5 +891,5 @@
         P('Seules les personnes listées dans Équipe et accès voient l’espace rédaction. Un abonné peut vous envoyer une demande depuis Mon espace ; vous l’acceptez ou la refusez en un clic.'))];
   }
 
-  window.CasaAdmin = { open: open, close: close, isOpen: function () { return S.open; } };
+  window.CasaAdmin = { open: open, close: close, wantOpen: wantOpen, cropImage: cropImage, isOpen: function () { return S.open; } };
 })();
