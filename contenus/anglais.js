@@ -1487,4 +1487,8 @@ window.CASA_EN = {
   "Carte des terrains injoignable : stade posé au centre de la commune": "Pitch map unreachable: stadium placed in the town centre",
   "{{x}} au centre": "{{x}} in the centre",
   "90 à 120 m × 45 à 90 m": "90 to 120 m × 45 to 90 m",
+  "Visiter le site ↗": "Visit the website ↗",
+  "Ouvrir l’application ↗": "Open the app ↗",
+  "Site OlistO ↗": "OlistO website ↗",
+  "Application OlistO ↗": "OlistO app ↗",
 };

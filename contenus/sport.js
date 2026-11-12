@@ -15,7 +15,10 @@ window.CASA_SPORT = {
     'https://us-avranches.fr/calendrier-resultats-2026-2027/'
   ],
   comps: {
-    Football: [{ id: 'national-1', label: 'National 1' }]
+    Football: [{ id: 'cdf', label: 'Coupe de France' }, { id: 'r2', label: 'Régional 2' }, { id: 'r1', label: 'Régional 1' }, { id: 'national-1', label: 'National 1' }],
+    Basketball: [{ id: 'tic', label: 'Tournoi international' }],
+    'Water-polo': [{ id: 'cdm', label: 'Coupe de la Manche' }],
+    Rugby: [{ id: 'gala', label: 'Matchs de gala' }]
   },
   tables: {},
   matches: [

@@ -9,7 +9,7 @@ window.CASA_APROPOS = {
   surtitre: 'Notre histoire',
   titre: 'Le média sport de la Manche, par et pour les passionnés',
   paragraphes: [
-    'Fondé en 2024 par Kader Allou, ancien footballeur passé par la formation du Paris Saint-Germain, Casa Besports est un média indépendant ancré dans le Cotentin.',
+    'Fondé en 2024 par Kader Allou, footballeur passé par la réserve du Paris Saint-Germain, l’AS Cherbourg en National 3 et deux saisons en Géorgie, Casa Besports est un média indépendant ancré dans le Cotentin.',
     'Clubs, bénévoles, éducateurs, sportifs et partenaires : nous racontons les parcours, les émotions et les coulisses du sport de proximité.'
   ],
   citation: 'Le sport local ne manque pas d’histoires. Il manque parfois de lumière.',
@@ -21,7 +21,7 @@ window.CASA_APROPOS = {
 
   titreEn: 'The sports media of La Manche, by and for enthusiasts',
   paragraphesEn: [
-    'Founded in 2024 by Kader Allou, a former footballer trained at the Paris Saint-Germain academy, Casa Besports is an independent media rooted in the Cotentin.',
+    'Founded in 2024 by Kader Allou, a footballer who played for the Paris Saint-Germain reserves, AS Cherbourg in National 3 and two seasons in Georgia, Casa Besports is an independent media rooted in the Cotentin.',
     'Clubs, volunteers, coaches, athletes and partners: we tell the journeys, the emotions and the behind-the-scenes of grassroots sport.'
   ],
   citationEn: 'Local sport has no shortage of stories. Sometimes it just lacks the spotlight.'

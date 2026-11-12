@@ -36,6 +36,17 @@ function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(lo
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
 const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
 const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+// Lien vers le site d'un partenaire, marqué « vient de Casa Besports » (paramètres utm_ lus par Google Analytics, Matomo, HubSpot…)
+function cbPartnerLink(url, id, kind) {
+  const u0 = String(url || '').trim(); if (!u0) return '';
+  try {
+    const u = new URL(/^https?:\/\//i.test(u0) ? u0 : 'https://' + u0);
+    u.searchParams.set('utm_source', 'casabesports'); u.searchParams.set('utm_medium', 'partenariat');
+    u.searchParams.set('utm_campaign', 'partenaire-' + (id || 'casa')); if (kind) u.searchParams.set('utm_content', kind);
+    u.searchParams.set('ref', 'casabesports');
+    return u.toString();
+  } catch (e) { return ''; }
+}
 function cbRouteOf(st) { const k = CB_ROUTE_ID[st.view]; return '#/' + st.view + (k && st[k] != null ? '/' + encodeURIComponent(st[k]) : ''); }
 function cbParseRoute(h) {
   const m = String(h || '').match(/^#\/([a-z]+)(?:\/(.+))?$/); if (!m) return null;
@@ -184,12 +195,8 @@ class Component extends DCLogic {
     const M = (id, sport, comp, date, time, home, away, hs, as, status, o) => Object.assign({ id, sport, comp, date, time, home, away, hs, as, status, verified: false, venue: '[Stade]', minute: 0, article: null }, o || {});
     // Matchs et résultats : contenus/sport.js (onglet Résultats de l'espace administrateur)
     const matches = [];
-    const comps = {
-      Football: [{ id: 'cdf', label: 'Coupe de France' }, { id: 'r2', label: 'Régional 2' }, { id: 'r1', label: 'Régional 1' }],
-      Basketball: [{ id: 'tic', label: 'Tournoi international' }],
-      'Water-polo': [{ id: 'cdm', label: 'Coupe de la Manche' }],
-      Rugby: [{ id: 'gala', label: 'Matchs de gala' }]
-    };
+    // Compétitions affichées dans Le Terrain : toutes dans contenus/sport.js (modifiables ou supprimables dans Espace admin › Résultats)
+    const comps = {};
     const T = (team, j, g, n, p, diff, pts, form) => ({ team, j, g, n, p, diff, pts, form });
     // Classements et calendriers à jour : contenus/sport.js (mis à jour automatiquement)
     const SP = (typeof window !== 'undefined' && window.CASA_SPORT) || {};
@@ -1569,7 +1576,10 @@ class Component extends DCLogic {
     const partnerTiers = tiersDef.map(([id, label, line, min, h]) => ({ label, line, min, h, items: partners.filter((p) => p.tier === id) }));
     const ptRaw = X.partners.find((p) => p.id === s.partnerId);
     const claimed = ptRaw && s.claimed.indexOf(ptRaw.id) >= 0;
-    const pt = Object.assign({}, ptRaw || X.partners[0], {
+    const ptBase = ptRaw || X.partners[0] || {};
+    const pt = Object.assign({}, ptBase, {
+      siteHref: cbPartnerLink(ptBase.site, ptBase.id, 'site'), appHref: cbPartnerLink(ptBase.app, ptBase.id, 'application'),
+      hasSite: !!cbPartnerLink(ptBase.site, ptBase.id, 'site'), hasApp: !!cbPartnerLink(ptBase.app, ptBase.id, 'application'),
       note: ptRaw && ptRaw.real ? 'Partenaire Casa Besports.' : 'Partenaire Casa Besports.',
       claimLabel: ptRaw && ptRaw.real ? 'Découvrir l’offre OlistO' : claimed ? 'Avantage enregistré ✓' : (subscribed ? 'Profiter de l’avantage' : 'Réservé aux abonnés Casa B+'),
       claim: () => { if (ptRaw && ptRaw.real) { this.go('olisto'); return; } if (!subscribed) { this.go('offers', { offerTab: 'Casa B+' }); return; } if (!claimed) { this.setState({ claimed: s.claimed.concat([ptRaw.id]) }); this.say('Avantage ajouté à Mon espace'); } }
@@ -2174,7 +2184,9 @@ class Component extends DCLogic {
     const debtPct = oR > 0 ? (monthly + oC) / oR * 100 : 0;
     const e0 = (n) => Math.round(n).toLocaleString('fr-FR') + ' €';
     const setOl = (k) => (e) => this.setState({ [k]: e.target.value });
-    const ol = { m: String(s.olM ?? 180000), d: String(s.olD ?? 20), t: String(s.olT ?? 3.5), a: String(s.olA ?? 0.25), r: String(s.olR ?? 3600), c: String(s.olC ?? 150),
+    const olP = (X.partners || []).find((p) => p.id === 'olisto') || {};
+    const olSite = cbPartnerLink(olP.site, 'olisto', 'site'), olApp = cbPartnerLink(olP.app, 'olisto', 'application');
+    const ol = { siteHref: olSite, appHref: olApp, hasSite: !!olSite, hasApp: !!olApp, m: String(s.olM ?? 180000), d: String(s.olD ?? 20), t: String(s.olT ?? 3.5), a: String(s.olA ?? 0.25), r: String(s.olR ?? 3600), c: String(s.olC ?? 150),
       onM: setOl('olM'), onD: setOl('olD'), onT: setOl('olT'), onA: setOl('olA'), onR: setOl('olR'), onC: setOl('olC'),
       monthly: e0(monthly), ins: e0(insM), interest: e0(base * nM - oM), debt: (Math.round(debtPct * 10) / 10).toString().replace('.', ',') + ' %',
       debtW: Math.min(100, debtPct / 50 * 100) + '%', debtColor: debtPct <= 33 ? 'var(--success)' : debtPct <= 35 ? 'var(--gold-text)' : 'var(--danger)',
