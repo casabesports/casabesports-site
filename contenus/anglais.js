@@ -1510,4 +1510,9 @@ window.CASA_EN = {
   "Ouvrir l’application ↗": "Open the app ↗",
   "Site OlistO ↗": "OlistO website ↗",
   "Application OlistO ↗": "OlistO app ↗",
+  "Paiement sécurisé par Stripe : carte bancaire, Apple Pay ou Google Pay. Vous passez sur la page de paiement Stripe, puis vous revenez ici. Casa Besports ne voit jamais votre numéro de carte.": "Secure payment by Stripe: card, Apple Pay or Google Pay. You go to the Stripe payment page, then come back here. Casa Besports never sees your card number.",
+  "Paiement sécurisé par Stripe : carte bancaire, Apple Pay ou Google Pay. Vous passez sur la page de paiement Stripe, puis vous revenez ici. Casa Besports ne voit jamais votre numéro de carte. Les abonnements mensuels se résilient à tout moment depuis Mon espace.": "Secure payment by Stripe: card, Apple Pay or Google Pay. You go to the Stripe payment page, then come back here. Casa Besports never sees your card number. Monthly subscriptions can be cancelled at any time from My space.",
+  "Gérer ou résilier": "Manage or cancel",
+  "Revenir aux abonnements": "Back to subscriptions",
+  "Ouverture du paiement sécurisé…": "Opening secure payment…",
 };

@@ -67,7 +67,7 @@ class Component extends DCLogic {
       alerts: { matchs: true, articles: true, videos: false }, toast: '',
       dSport: 'Football', dComp: 'r2', dTab: 'live', calMonth: 9, calDay: 10, matchId: null, pronos: {}, reminders: [],
       shopLine: 'Tout', shopSort: 'pop', color: 0, size: null, qty: 1, persoName: '', persoNum: '', prodError: '', sizeGuide: false,
-      cart: [], cartOpen: false, ship: 'home', giftWrap: false, orderDone: false, orderNo: '', orders: [],
+      cart: [], cartOpen: false, ship: 'home', giftWrap: false, orderDone: false, orderNo: '', orders: [], payBusy: false, subPending: false, paidSubs: false, orderPaid: false,
       offerTab: 'Tout', readerOpen: false, page: 0, nlEmail: '', nlDone: false, tick: 0,
       hdrY: '0', scrolled: false, placeOverride: null, placeOpen: false, placeIdx: 0, partnerId: null, claimed: [],
       aiOpen: false, aiInput: '', aiTyping: false, aiMsgs: [{ role: 'bot', text: 'Bonjour, je suis Casa IA. Posez-moi une question sur les scores, la boutique, la Gazette, les clubs ou l’histoire du Cotentin.', actions: [] }],
@@ -88,6 +88,7 @@ class Component extends DCLogic {
           this.setState({ loggedIn: true, loginOpen: false, linkSent: false, codeSent: false, smsCode: '', email: u.email || this.state.email, phone: u.phone || this.state.phone, name: u.name || (staff && staff.name) || this.state.name, role: staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null });
           const firstFor = this._authFor !== u.id; this._authFor = u.id;
           if (firstFor && window.CasaAuth.myRole) window.CasaAuth.myRole().then((r) => { this.setState({ srvRole: r || null }); if (r === undefined || !this.state.loggedIn) return; const fileRole = staff ? (staff.role === 'admin' ? 'admin' : 'writer') : null; const role = r === 'admin' ? 'admin' : r === 'redacteur' ? 'writer' : (fileRole === 'admin' ? 'admin' : null); if (role !== this.state.role) this.setState({ role }); }, () => this.setState({ srvRole: 'erreur' }));
+          if (firstFor) this.loadPaid(this._waitPaid ? 5 : 0);
           if (firstFor && window.CasaAuth.myAccessRequest) window.CasaAuth.myAccessRequest().then((d) => this.setState({ accReq: d || null }), () => {});
           if (!u.name && this.state.name.trim()) window.CasaAuth.updateName(this.state.name.trim()).catch(() => {});
           if (firstFor && window.CasaAuth.registerMember) window.CasaAuth.registerMember(cbMemberNo(u.id), String(u.name || this.state.name || '').trim().split(/\s+/)[0] || null).catch(() => {});
@@ -95,7 +96,7 @@ class Component extends DCLogic {
           const needPw = !u.hasPassword || window.CasaAuth.recovery;
           this.setState({ hasPassword: !!u.hasPassword, pwOpen: needPw && !this.readLS('cb-pw-later-' + u.id, false) || window.CasaAuth.recovery, pw: '', pw2: '', pwDone: false });
           if (!wasIn) this.say('Connecté. Bienvenue !');
-        } else if (this.state.loggedIn) { this._authFor = null; this.setState({ loggedIn: false, role: null, accReq: null, subs: { casab: false, gazette: null } }); if (this.state.view === 'studio') this.go('home'); }
+        } else if (this.state.loggedIn) { this._authFor = null; this.setState({ loggedIn: false, role: null, accReq: null, subs: { casab: false, gazette: null }, paidSubs: false, orders: this.state.orders.filter((o) => !o.srv) }); if (this.state.view === 'studio') this.go('home'); }
       });
     }
     this._crmIv = setInterval(() => { if (this.state.role === 'admin') { const A = this.crmData().agents; ['qualif', 'hygiene', 'relance', 'fidel', 'rapport'].forEach((k) => { if (A[k] && A[k].on) this.runAgent(k); }); } }, 20000);
@@ -124,6 +125,7 @@ class Component extends DCLogic {
       this._onPop = () => { const r = cbParseRoute(location.hash) || { view: 'home' }; if (r.view === 'admin') return; if (r.view === 'studio' && !this.state.role) r.view = 'home'; this.setState(Object.assign({ menuOpen: false, moreOpen: false, searchOpen: false }, r)); this.setTitle(Object.assign({}, this.state, r)); try { window.scrollTo(0, 0); } catch (e) {} };
       window.addEventListener('popstate', this._onPop);
     } catch (e) {}
+    this.stripeReturn();
     try { const mq = new URLSearchParams(location.search).get('membre'); if (mq) setTimeout(() => { this.go('verifier', { mbQ: mq.slice(0, 20) }); this.checkMember(mq); }, 0); } catch (e) {}
     try { const vq = new URLSearchParams(location.search).get('verifier'); if (vq) setTimeout(() => this.go('verifier', { verifId: vq.slice(0, 20) }), 0); } catch (e) {}
     this.creaInit();
@@ -1109,6 +1111,56 @@ class Component extends DCLogic {
     this.setState(Object.assign({ view, hist: s.hist.concat([cur]).slice(-40), menuOpen: false, moreOpen: false, searchOpen: false, cartOpen: false, matchId: null, readerOpen: false, placeOpen: false, themeMenuOpen: false, customizeOpen: false, workIdx: null, partnerId: null, hdrY: '0', sq: '', summary: false, listening: false, playing: false, reaction: null, formError: '', prodError: '' }, extra || {}));
     try { window.scrollTo(0, 0); } catch (e) {}
     this.syncRoute(Object.assign({}, s, { view }, extra || {}), false);
+  }
+  // ---------- Paiements en ligne (js/paiement.js, docs/PAIEMENTS.md) ----------
+  // Abonnements et commandes payés : relus chez Supabase à la connexion (et après un retour de Stripe)
+  loadPaid(again) {
+    const P = window.CasaPaiement; if (!P || !this.state.loggedIn) return;
+    Promise.all([P.mesAbonnements(), P.mesCommandes()]).then(([abos, cmds]) => {
+      if (!this.state.loggedIn) return;
+      const plans = this.more().subPlans; const eur = (n) => (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace('.', ',') + ' €';
+      const date = (d) => { try { return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
+      const actifs = abos.filter((a) => P.estActif(a) && plans[a.formule]);
+      let casab = false, num = false, pap = false;
+      actifs.forEach((a) => { const p = plans[a.formule]; if (p.casab) casab = true; if (p.gazette === 'num' || p.gazette === 'duo') num = true; if (p.gazette === 'pap' || p.gazette === 'duo') pap = true; });
+      const srv = abos.filter((a) => plans[a.formule]).map((a) => ({ srv: true, label: plans[a.formule].name + (a.cadeau ? ' (offert)' : ''), detail: eur(a.montant) + (a.cadeau ? '' : a.periode === 'an' ? ' / an' : ' / mois') + (a.fin ? (P.estActif(a) ? (a.resiliation_prevue || a.cadeau ? ' · jusqu’au ' : ' · renouvelé le ') : ' · terminé le ') + date(a.fin) : ''), status: P.estActif(a) ? (a.resiliation_prevue ? 'Résilié' : 'Actif') : 'Terminé' }))
+        .concat(cmds.map((c) => ({ srv: true, label: 'Commande ' + c.numero, detail: (c.lignes || []).reduce((n, l) => n + (l.quantite || 0), 0) + ' article(s) · ' + eur(c.montant) + ' · ' + date(c.cree_le), status: { payee: 'Payée', preparee: 'En préparation', expediee: 'Expédiée', retiree: 'Retirée', remboursee: 'Remboursée', annulee: 'Annulée' }[c.statut] || c.statut })));
+      const st = { orders: srv.concat(this.state.orders.filter((o) => !o.srv)), paidSubs: actifs.length > 0 };
+      if (abos.length) st.subs = { casab, gazette: num && pap ? 'duo' : pap ? 'pap' : num ? 'num' : null };
+      this.setState(st);
+      // Retour de Stripe : l'avis de paiement peut arriver quelques secondes après la personne
+      if (again > 0 && this._waitPaid && !actifs.some((a) => a.formule === this._waitPaid)) setTimeout(() => this.loadPaid(again - 1), 3000);
+      else if (this._waitPaid && actifs.some((a) => a.formule === this._waitPaid)) { this._waitPaid = null; this.say('Votre abonnement est actif. Merci !'); }
+    });
+  }
+  stripeReturn() {
+    const P = window.CasaPaiement; const r = P && P.retour; if (!r) return;
+    P.retour = null;
+    setTimeout(() => {
+      if (r.etat === 'annule') {
+        const cart = r.type === 'commande' ? P.reprendrePanier() : [];
+        if (cart.length) this.setState({ cart });
+        this.say('Paiement annulé : rien n’a été débité.' + (cart.length ? ' Votre panier est toujours là.' : ''));
+        return;
+      }
+      if (r.type === 'commande') { P.oublierPanier(); this.setState({ view: 'order', orderDone: true, orderNo: r.numero, orderPaid: true, cart: [] }); this.say('Paiement reçu. Merci !'); setTimeout(() => this.loadPaid(), 4000); return; }
+      if (r.cadeau) { this.say('Paiement reçu : l’abonnement offert est activé pour votre proche. Il lui suffit de créer son compte avec son adresse e-mail.'); return; }
+      this._waitPaid = r.formule; this.say('Paiement reçu. Activation de votre abonnement…');
+      this.loadPaid(5);
+    }, 60);
+  }
+  // Passage chez Stripe ; si le paiement en ligne n'est pas encore activé, la demande part à l'équipe comme avant
+  payOnline(body, fallback) {
+    const P = window.CasaPaiement;
+    if (!P) { fallback(); return; }
+    this.setState({ payBusy: true, formError: '' });
+    if (body.type === 'commande') P.garderPanier(this.state.cart);
+    P.payer(body).catch((e) => {
+      this.setState({ payBusy: false });
+      if (e && e.code === 'non_configure') { P.oublierPanier(); fallback(); return; }
+      if (e && e.code === 'deja_abonne') { this.say(e.message); this.go('account'); return; }
+      this.setState({ formError: (e && e.message) || 'Paiement indisponible pour le moment.' });
+    });
   }
   // Demande d'accès à l'espace rédaction (abonné connecté) : table demandes_acces, sinon simple message
   requestAccess() {
@@ -2403,14 +2455,20 @@ class Component extends DCLogic {
       shipMsg: net >= FREE ? 'Livraison offerte ✓' : 'Plus que ' + eur(FREE - net) + ' pour la livraison offerte', shipPct: Math.min(100, Math.round(net / FREE * 100)) + '%',
       goOrder: () => this.go('order', { orderDone: false }), shipOpts, shipCost: shipPrice ? eur(shipPrice) : 'Offerte', needAddress: s.ship === 'home',
       giftWrap: s.giftWrap, toggleGift: () => this.setState({ giftWrap: !s.giftWrap }), orderTotal: eur(total), orderOpen: !s.orderDone, orderDone: s.orderDone, orderNo: s.orderNo,
-      orderNote: s.ship === 'cherwood' ? 'Votre commande vous attend chez Cherwood, à Cherbourg, sous 24 h.' : s.ship === 'stade' ? 'Retrait au stand Casa Besports lors du prochain grand match.' : 'Livraison prévue sous 2 à 4 jours ouvrés.',
+      payBusy: !!s.payBusy, payLabel: s.payBusy ? 'Ouverture du paiement sécurisé…' : 'Payer ' + eur(total),
+      orderNote: !s.orderPaid ? 'Le paiement en ligne ouvre très bientôt : l’équipe Casa Besports vous recontacte par e-mail pour régler votre commande.' : s.ship === 'cherwood' ? 'Votre commande vous attend chez Cherwood, à Cherbourg, sous 24 h.' : s.ship === 'stade' ? 'Retrait au stand Casa Besports lors du prochain grand match.' : 'Livraison prévue sous 2 à 4 jours ouvrés.',
       placeOrder: () => {
         if (!s.name.trim() || !validEmail || (s.ship === 'home' && !s.address.trim())) { this.setState({ formError: 'Nom, e-mail valide' + (s.ship === 'home' ? ' et adresse' : '') + ' requis.' }); return; }
         if (!s.cart.length) { this.setState({ formError: 'Votre panier est vide.' }); return; }
+        if (s.payBusy) return;
+        // Paiement en ligne (Stripe) : les prix sont recalculés côté serveur. Sinon (pas encore activé), la commande part à l'équipe.
+        const lignes = s.cart.map((l) => { const p = X.products.find((x) => x.id === l.id); return { id: l.id, size: l.size, qty: l.qty, perso: l.perso || '', variant: p && p.colors[l.color] ? p.colors[l.color].name : '' }; });
+        this.payOnline({ type: 'commande', lignes, livraison: s.ship, emballage: !!s.giftWrap, email: s.email.trim(), nom: s.name.trim() }, () => {
         const no = 'CB-' + String(Date.now()).slice(-6);
         this.crmCapture({ name: s.name.trim(), email: s.email, city: s.city || '', source: 'Boutique', type: 'Supporter', consent: '?', note: 'Commande ' + no + ' · ' + eur(total) });
-        this.setState({ orderDone: true, orderNo: no, cart: [], formError: '', loggedIn: true, orders: s.orders.concat([{ label: 'Commande ' + no, detail: cartCount + ' article(s) · ' + eur(total), status: 'En préparation' }]) });
+        this.setState({ orderDone: true, orderNo: no, orderPaid: false, cart: [], formError: '', orders: s.orders.concat([{ label: 'Commande ' + no, detail: cartCount + ' article(s) · ' + eur(total), status: 'À régler' }]) });
         try { window.scrollTo(0, 0); } catch (e) {}
+        });
       },
       // abonnements
       offerTabs, periods, offerCards, offerTabGazette: s.offerTab === 'La Gazette' || s.offerTab === 'Tout',
@@ -2418,18 +2476,27 @@ class Component extends DCLogic {
       subNeedsAddress, isGift: s.isGift, toggleIsGift: () => this.setState({ isGift: !s.isGift }),
       nameLabel: s.isGift ? 'Prénom du bénéficiaire' : 'Prénom', emailLabel: s.isGift ? 'E-mail du bénéficiaire' : 'E-mail',
       steps, step1: s.step === 1, step2: s.step === 2, step3: s.step === 3, step4: s.step === 4,
-      nextStep: () => { if (s.step === 2 && (!s.name.trim() || !validEmail || (sp.paper && !s.address.trim()))) { this.setState({ formError: 'Prénom, e-mail valide' + (sp.paper ? ' et adresse postale' : '') + ' requis.' }); return; } this.setState({ step: s.step + 1, formError: '' }); },
+      nextStep: () => { if (s.subPending) this.setState({ subPending: false }); if (s.step === 2 && (!s.name.trim() || !validEmail || (sp.paper && !s.address.trim()))) { this.setState({ formError: 'Prénom, e-mail valide' + (sp.paper ? ' et adresse postale' : '') + ' requis.' }); return; } this.setState({ step: s.step + 1, formError: '' }); },
       prevStep: () => this.setState({ step: Math.max(1, s.step - 1), formError: '' }),
       confirmSub: () => {
-        const subs = s.isGift ? s.subs : { casab: s.subs.casab || sp.casab, gazette: sp.gazette ? (s.subs.gazette && s.subs.gazette !== sp.gazette ? 'duo' : sp.gazette) : s.subs.gazette };
-        this.crmCapture({ name: s.name.trim(), email: s.email, source: 'Abonnement', type: s.isGift ? 'Supporter' : 'Abonné', consent: '?', note: sp.name + (s.isGift ? ' (cadeau)' : '') });
-        this.setState({ step: 4, subs, loggedIn: true, orders: s.orders.concat([{ label: sp.name + (s.isGift ? ' (cadeau)' : ''), detail: eur(priceOf(s.subPlan)) + ' ' + perLabel, status: 'Actif' }]) });
-        this.say(s.isGift ? 'Abonnement offert envoyé' : sp.name + ' activé');
+        if (s.payBusy) return;
+        this.payOnline({ type: 'abonnement', formule: s.subPlan, periode: period === 'an' ? 'an' : 'mois', cadeau: !!s.isGift, email: s.email.trim(), nom: s.name.trim(), adresse: sp.paper ? s.address.trim() : '' }, () => {
+        // Paiement en ligne pas encore activé : la demande part à l'équipe, sans activer l'abonnement
+        this.crmCapture({ name: s.name.trim(), email: s.email, source: 'Abonnement', type: s.isGift ? 'Supporter' : 'Abonné', consent: '?', note: sp.name + (s.isGift ? ' (cadeau)' : '') + ' · paiement à régler' });
+        this.setState({ step: 4, subPending: true, orders: s.orders.concat([{ label: sp.name + (s.isGift ? ' (cadeau)' : ''), detail: eur(priceOf(s.subPlan)) + ' ' + perLabel, status: 'À régler' }]) });
+        this.say('Demande d’abonnement envoyée');
+        });
       },
-      doneTitle: s.isGift ? 'Cadeau envoyé à ' + (s.name || 'votre proche') : 'Bienvenue, ' + (s.name || 'supporter'),
-      doneText: s.isGift ? 'Un e-mail avec la carte cadeau vient de partir.' : sp.gazette ? (sp.paper ? 'Votre premier numéro papier part au prochain bouclage. La liseuse est déjà ouverte.' : 'Le dernier numéro est disponible dans la liseuse.') : 'Tous les contenus Premium sont débloqués.',
-      doneCta: () => (sp.gazette && !s.isGift ? this.setState({ readerOpen: true, page: 0 }) : this.go('article', { articleId: 'pointe-hague' })), doneCtaLabel: sp.gazette && !s.isGift ? 'Ouvrir la Gazette' : 'Lire un article Premium',
-      cancelSub: () => { this.setState({ subs: { casab: false, gazette: null } }); this.say('Abonnements résiliés'); },
+      doneTitle: s.subPending ? 'Demande envoyée, merci ' + (s.name || '') : s.isGift ? 'Cadeau envoyé à ' + (s.name || 'votre proche') : 'Bienvenue, ' + (s.name || 'supporter'),
+      doneText: s.subPending ? 'Le paiement en ligne ouvre très bientôt. L’équipe Casa Besports vous écrit à ' + (s.email || 'votre adresse') + ' pour régler ' + sp.name + ' ; l’abonnement sera activé dès le paiement reçu.' : s.isGift ? 'Un e-mail avec la carte cadeau vient de partir.' : sp.gazette ? (sp.paper ? 'Votre premier numéro papier part au prochain bouclage. La liseuse est déjà ouverte.' : 'Le dernier numéro est disponible dans la liseuse.') : 'Tous les contenus Premium sont débloqués.',
+      doneCta: () => (s.subPending ? this.go('offers') : sp.gazette && !s.isGift ? this.setState({ readerOpen: true, page: 0 }) : this.go('article', { articleId: 'pointe-hague' })), doneCtaLabel: s.subPending ? 'Revenir aux abonnements' : sp.gazette && !s.isGift ? 'Ouvrir la Gazette' : 'Lire un article Premium',
+      subPayLabel: s.payBusy ? 'Ouverture du paiement sécurisé…' : 'Payer ' + eur(priceOf(s.subPlan)) + ' ' + perLabel, payError: s.step === 3 ? s.formError : '',
+      cancelLabel: s.paidSubs ? 'Gérer ou résilier' : 'Résilier',
+      // Abonnement payé en ligne : espace client Stripe (carte, factures, résiliation)
+      cancelSub: () => {
+        if (s.paidSubs && window.CasaPaiement) { window.CasaPaiement.portail().catch((e) => this.say(e.message)); return; }
+        this.setState({ subs: { casab: false, gazette: null } }); this.say('Abonnements résiliés');
+      },
       // liseuse
       readerOpen: s.readerOpen, openReader: () => this.setState({ readerOpen: true, page: 0, menuOpen: false }), closeReader: () => this.setState({ readerOpen: false }),
       pageNo: String(pIdx + 1), pageTotal: String(NP), pg, tocSecs, gzStrip, thumbs, quiz, gzOlisto: () => this.go('olisto'), adPartners: partners.filter((p) => !p.real), quizScore, quizTotal: String(G.quiz.length),
