@@ -1143,6 +1143,12 @@ class Component extends DCLogic {
       } catch (e) {}
       const LG = window.CasaLang; const en = LG && LG.lang === 'en';
       document.title = (t ? (LG ? LG.t(t) : t) + ' · ' : '') + (en ? 'Casa Besports — sports media of the Cotentin' : 'Casa Besports — le média sport du Cotentin');
+      const md = document.querySelector('meta[name="description"]');
+      if (md) {
+        if (!this._metaDesc) this._metaDesc = md.getAttribute('content');
+        const A = window.CASA_APROPOS || {};
+        md.setAttribute('content', st.view === 'about' ? ((en ? 'Our story: ' : 'Notre histoire : ') + ((en && A.soustitreEn) || A.soustitre || '')) : this._metaDesc);
+      }
     } catch (e) {}
   }
   back() {
@@ -1259,9 +1265,18 @@ class Component extends DCLogic {
     const sectionOf = { article: 'news', video: 'videos', discipline: 'disciplines', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
     const activeSec = sectionOf[s.view] || s.view;
     const nav = navDefs.map(([label, v]) => ({ label, color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
-    const moreNavBase = (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat(s.role ? [['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']] : []).concat([['Abonnements', 'offers', 'Casa B+ et La Gazette'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents'], ['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', '19 sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Partenaires', 'partners', 'Offres entreprises et clubs'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']])
-      .map(([label, v, sub]) => ({ label, sub, go: () => this.go(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : {}) }));
-    const nStaff = s.role === 'admin' ? 2 : s.role ? 1 : 0; const moreNav = moreNavBase.slice(0, nStaff).concat([{ label: 'L’application', sub: 'Scores, Club House et réalité augmentée', go: () => this.go('app') }, { label: 'Projet immobilier', sub: 'Avec notre partenaire OlistO', go: () => this.go('olisto') }]).concat(moreNavBase.slice(nStaff));
+    // Menu « Plus » regroupé en trois familles (les mêmes rubriques alimentent l'accès direct de l'accueil)
+    const goV = (v, extra) => () => this.go(v, extra || {});
+    const menuGroups = [
+      { titre: 'Le sport', items: [['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', 'Tous les sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Météo', 'meteo', 'Prévisions et conditions de jeu']] },
+      { titre: 'Vos services', items: [['Abonnements', 'offers', 'Casa B+ et La Gazette'], ['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents']] },
+      { titre: 'La maison', items: [['Partenaires', 'partners', 'Offres entreprises, OlistO et projet immobilier'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
+    ];
+    if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
+    menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
+    const moreNav = [].concat(...menuGroups.map((g) => g.items));
+    // Accueil : toutes les rubriques du site, en accès direct
+    const rubriques = [{ titre: 'L’essentiel', items: [['Le Terrain', 'live', 'Scores, agenda et classements'], ['Actualités', 'news', 'Récits et résultats'], ['Club House', 'clubhouse', 'La communauté des sportifs'], ['Culture', 'culture', 'Œuvres et patrimoine'], ['Clubs', 'clubs', 'Tous les clubs du Cotentin'], ['Boutique', 'shop', 'Maillots et collections']].map(([label, v, sub]) => ({ label, sub, go: goV(v) })) }].concat(menuGroups.filter((g) => g.titre !== 'Équipe'));
 
     // ---------- accueil ----------
     const liveCount = allM.filter((m) => m.status === 'live').length;
@@ -2305,7 +2320,7 @@ class Component extends DCLogic {
       isClubRole, notClubRole: !isClubRole, canReseau, stReseau: s.studioTab === 'reseau' && canReseau, stClubAny: isClubRole && ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0,
       newPostLabel: isClubRole ? 'Nouveau contenu' : 'Nouvel article',
       accent, heroOpacity: showBg ? Math.min(1, k * 2.2) : 0, sectionOpacity: showBg ? k * 0.45 : 0, progressW: progress + '%',
-      nav, moreNav, menuOpen: s.menuOpen, toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
+      nav, moreNav, menuGroups, rubriques, menuOpen: s.menuOpen, toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
       moreOpen: s.moreOpen, moreExp: s.moreOpen ? 'true' : 'false', toggleMore: () => this.setState({ moreOpen: !s.moreOpen }),
       gateways,
       isHome: V === 'home', isNews: V === 'news', isArticle: V === 'article', isVideos: V === 'videos', isVideo: V === 'video',
@@ -2507,10 +2522,30 @@ class Component extends DCLogic {
       weather, showWeather: s.dSport === 'Football' || s.dSport === 'Rugby' || s.dSport === 'Trail',
       about: (() => {
         const A = window.CASA_APROPOS || {}; const en = window.CasaLang && window.CasaLang.lang === 'en';
-        const pick = (k) => (en && A[k + 'En'] && (Array.isArray(A[k + 'En']) ? A[k + 'En'].length : true)) ? A[k + 'En'] : A[k];
-        const paras = (pick('paragraphes') || []).filter(Boolean).map((t) => ({ t }));
-        const dates = (A.dates || []).filter((d) => d && d.annee).map((d) => ({ annee: d.annee, titre: (en && d.titreEn) || d.titre || '', texte: (en && d.texteEn) || d.texte || '' }));
-        return { surtitre: A.surtitre || 'Notre histoire', titre: pick('titre') || 'Casa Besports', paras, citation: pick('citation') || '', hasQuote: !!pick('citation'), photo: A.photo || 'assets/hero.jpg', dates, hasDates: dates.length > 0, frise: 'Notre histoire en dates' };
+        const has = (v) => Array.isArray(v) ? v.length > 0 : !!v;
+        const pick = (k) => (en && has(A[k + 'En'])) ? A[k + 'En'] : A[k];
+        const arr = (k) => (pick(k) || []).filter(Boolean).map((t) => ({ t }));
+        // Chronologie : nouvelle forme (etapes) ou ancienne forme (dates) si une version en ligne l'utilise encore
+        const etEn = en ? (A.etapesEn || []) : [];
+        let etapes = (A.etapes || []).filter((e) => e && (e.annee || e.titre)).map((e, i) => {
+          const x = etEn[i] || {};
+          const ps = (x.paragraphes && x.paragraphes.length ? x.paragraphes : (e.paragraphes || (e.texte ? [e.texte] : []))).filter(Boolean);
+          return { annee: x.annee || e.annee || '', titre: x.titre || e.titre || '', photo: e.photo || '', hasPhoto: !!e.photo, alt: x.alt || e.alt || '', paras: ps.map((t) => ({ t })), side: i % 2 ? 'ab-step ab-rev' : 'ab-step', num: String(i + 1).padStart(2, '0') };
+        });
+        if (!etapes.length) etapes = (A.dates || []).filter((d) => d && d.annee).map((d, i) => ({ annee: d.annee, titre: (en && d.titreEn) || d.titre || '', photo: '', hasPhoto: false, alt: '', paras: [{ t: (en && d.texteEn) || d.texte || '' }], side: i % 2 ? 'ab-step ab-rev' : 'ab-step', num: String(i + 1).padStart(2, '0') }));
+        let manifeste = arr('manifeste'); if (!manifeste.length) manifeste = arr('paragraphes');
+        const piliers = (pick('piliers') || []).filter((p) => p && p.titre).map((p, i) => ({ titre: p.titre, texte: p.texte || '', num: String(i + 1).padStart(2, '0') }));
+        const appel = arr('appel');
+        return {
+          surtitre: pick('surtitre') || 'Notre histoire', titre: pick('titre') || 'Casa Besports', soustitre: pick('soustitre') || '', intro: pick('intro') || '', hasIntro: !!pick('intro'),
+          photo: A.photo || 'assets/hero.jpg', photoAlt: pick('photoAlt') || '',
+          manifeste, hasManifeste: manifeste.length > 0, citation: pick('citation') || '', hasQuote: !!pick('citation'), manifesteFin: pick('manifesteFin') || '', hasManifesteFin: !!pick('manifesteFin'),
+          etapes, hasEtapes: etapes.length > 0, frise: en ? 'Our story, step by step' : 'Notre histoire, étape par étape',
+          raisonSurtitre: pick('raisonSurtitre') || 'Notre raison d’être', raisonTitre: pick('raisonTitre') || '', piliers, hasPiliers: piliers.length > 0,
+          signatureSurtitre: pick('signatureSurtitre') || '', signature: pick('signature') || '', signatureSuite: pick('signatureSuite') || '', hasSignature: !!pick('signature'),
+          appelTitre: pick('appelTitre') || '', appel, appelFin: pick('appelFin') || '', hasAppel: !!pick('appelTitre') || appel.length > 0,
+          decouvrir: () => { try { const el = document.getElementById('ab-histoire'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
+        };
       })(),
       langLabel: window.CasaLang && window.CasaLang.lang === 'en' ? 'FR' : 'EN', langAria: window.CasaLang && window.CasaLang.lang === 'en' ? 'Passer le site en français' : 'Switch the site to English', toggleLang: () => { if (window.CasaLang) window.CasaLang.toggle(); },
       isLegal: V === 'legal', legal, legalTabs, legalLinks, legalMaj: 'Dernière mise à jour : ' + ((window.CASA_LEGAL_MAJ) || '—') + ' · Les passages entre [crochets] sont à compléter.',

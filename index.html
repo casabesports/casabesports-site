@@ -2077,6 +2077,103 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
   html.cb-app .lift16{bottom:94px!important}html.cb-app .lift22{bottom:100px!important}html.cb-app .lift90{bottom:166px!important}
   html.cb-app footer{display:none}
 </style>
+<style>
+/* ---------- Page À propos : récit documentaire, fond noir ---------- */
+.ab { background: #0a0a0a; color: #f4f4f2; margin-top: -1px; overflow: hidden; }
+.ab-wrap { max-width: 1180px; margin: 0 auto; padding-left: clamp(16px, 4vw, 40px); padding-right: clamp(16px, 4vw, 40px); }
+.ab-eb { font-size: 12px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.62); margin: 0 0 1rem; }
+.ab-h1 { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: -.02em; line-height: .95; font-size: clamp(2.5rem, 6.4vw, 5rem); margin: 0 0 1.25rem; color: #fff; max-width: 14ch; }
+.ab-h2 { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.02em; line-height: 1.02; font-size: clamp(2rem, 4.6vw, 3.6rem); margin: 0 0 2.5rem; color: #fff; }
+.ab-h3 { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 700; letter-spacing: -.01em; line-height: 1.12; font-size: clamp(1.45rem, 2.4vw, 2rem); margin: 0 0 1rem; color: #fff; }
+.ab-p { font-size: 1.05rem; line-height: 1.8; color: rgba(255,255,255,.78); margin: 0 0 1rem; }
+.ab-hero { position: relative; min-height: min(calc(100vh - 150px), 760px); display: flex; align-items: flex-end; }
+.ab-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(.35) contrast(1.05); }
+.ab-hero-veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,10,.35) 0%, rgba(10,10,10,.55) 45%, #0a0a0a 100%); }
+.ab-hero-in { position: relative; width: 100%; padding-top: 4rem; padding-bottom: clamp(5rem, 10vh, 6.5rem); }
+.ab-sub { font-size: clamp(1.15rem, 2vw, 1.45rem); line-height: 1.5; max-width: 40ch; color: #fff; margin: 0 0 .75rem; }
+.ab-intro { font-size: 1rem; line-height: 1.6; max-width: 48ch; color: rgba(255,255,255,.7); margin: 0 0 2rem; }
+.ab-btn { font: inherit; font-weight: 800; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; padding: 1rem 1.5rem; border-radius: 0; cursor: pointer; transition: background .2s, color .2s, border-color .2s; min-height: 48px; }
+.ab-btn-w { background: #fff; color: #0a0a0a; border: 2px solid #fff; }
+.ab-btn-w:hover { background: transparent; color: #fff; }
+.ab-btn-o { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.45); }
+.ab-btn-o:hover { border-color: #fff; background: rgba(255,255,255,.08); }
+.ab-btn:focus-visible { outline: 3px solid var(--acc, #fff); outline-offset: 3px; }
+.ab-manif { max-width: 900px; padding-top: clamp(4rem, 10vh, 7rem); padding-bottom: clamp(4rem, 10vh, 7rem); }
+.ab-lead { font-size: clamp(1.15rem, 2vw, 1.4rem); line-height: 1.7; color: rgba(255,255,255,.82); margin: 0 0 1.5rem; }
+.ab-quote { margin: 3.5rem 0; padding: 0; border: 0; text-align: center; }
+.ab-quote p { margin: 0 auto; max-width: 22ch; font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; font-size: clamp(1.9rem, 5vw, 3.6rem); color: #fff; }
+.ab-quote p::before, .ab-quote p::after { color: rgba(255,255,255,.45); }
+.ab-quote p::before { content: '« '; } .ab-quote p::after { content: ' »'; }
+.ab-fin { font-size: 1.1rem; font-weight: 700; text-align: center; color: #fff; margin: 0; letter-spacing: .02em; }
+.ab-tl-sec { padding-bottom: clamp(3rem, 8vh, 6rem); scroll-margin-top: 80px; }
+.ab-sec-t { border-top: 1px solid rgba(255,255,255,.18); padding-top: 1.5rem; margin-bottom: 3rem; }
+.ab-tl { list-style: none; margin: 0; padding: 0; position: relative; }
+.ab-tl::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: rgba(255,255,255,.22); }
+.ab-step { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 5rem); align-items: center; padding: 0 0 clamp(3.5rem, 9vh, 6rem); }
+.ab-step-txt { grid-column: 1; grid-row: 1; }
+.ab-step-img { grid-column: 2; grid-row: 1; margin: 0; }
+.ab-rev .ab-step-txt { grid-column: 2; } .ab-rev .ab-step-img { grid-column: 1; }
+.ab-step-img img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; filter: grayscale(.25); }
+.ab-dot { position: absolute; left: 50%; top: .55rem; width: 13px; height: 13px; margin-left: -6px; background: #fff; border: 3px solid #0a0a0a; box-shadow: 0 0 0 1px rgba(255,255,255,.5); }
+.ab-year { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 800; font-size: clamp(2.2rem, 4.5vw, 3.4rem); line-height: 1; letter-spacing: -.02em; color: #fff; margin: 0 0 .5rem; }
+.ab-pil-sec { padding-top: clamp(3rem, 8vh, 6rem); padding-bottom: clamp(3rem, 8vh, 6rem); border-top: 1px solid rgba(255,255,255,.18); }
+.ab-pils { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.18); }
+.ab-pil { background: #0a0a0a; padding: 2rem 1.75rem 1.5rem; }
+.ab-pil-n { font-weight: 800; font-size: 13px; letter-spacing: .18em; color: rgba(255,255,255,.5); margin: 0 0 2.5rem; }
+.ab-sign { background: #fff; color: #0a0a0a; padding: clamp(4rem, 12vh, 8rem) 0; text-align: center; }
+.ab-sign .ab-eb { color: rgba(0,0,0,.55); }
+.ab-sign-t { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 800; letter-spacing: -.02em; line-height: 1.08; font-size: clamp(2rem, 5.2vw, 4rem); max-width: 20ch; margin: 0 auto 1.5rem; }
+.ab-sign-s { font-size: 1.15rem; margin: 0; color: rgba(0,0,0,.72); }
+.ab-cta { max-width: 860px; text-align: center; padding-top: clamp(4rem, 10vh, 7rem); padding-bottom: clamp(4rem, 10vh, 7rem); }
+.ab-cta .ab-h2 { margin-bottom: 1.5rem; }
+.ab-cta-fin { font-weight: 700; color: #fff; font-size: 1.1rem; margin: 1.5rem 0 2.25rem; }
+.ab-btns { display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center; }
+@media (max-width: 760px) {
+  .ab-hero { min-height: 0; }
+  .ab-tl::before { left: 6px; }
+  .ab-step, .ab-rev { grid-template-columns: 1fr; gap: 1.25rem; padding-left: 2rem; }
+  .ab-step-txt, .ab-rev .ab-step-txt { grid-column: 1; grid-row: 1; }
+  .ab-step-img, .ab-rev .ab-step-img { grid-column: 1; grid-row: 2; }
+  .ab-dot { left: 6px; }
+  .ab-btns { flex-direction: column; align-items: stretch; }
+  .ab-hero-in .ab-btn { width: 100%; }
+}
+/* Apparition douce au défilement, seulement si le navigateur le permet et si l'utilisateur n'a pas réduit les animations */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .ab-rv { animation: abIn linear both; animation-timeline: view(); animation-range: entry 0% cover 28%; }
+    @keyframes abIn { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+  }
+  .ab-hero-in > * { animation: abUp .9s cubic-bezier(.2,.7,.2,1) both; }
+  .ab-hero-in > *:nth-child(2) { animation-delay: .08s; } .ab-hero-in > *:nth-child(3) { animation-delay: .16s; } .ab-hero-in > *:nth-child(n+4) { animation-delay: .24s; }
+  @keyframes abUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+}
+</style>
+<style>
+/* ---------- Menu « Plus » regroupé + accès direct aux rubriques ---------- */
+.mn-drop { position: absolute; top: 56px; right: 0; z-index: 50; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 20px 50px -20px rgba(8,15,26,.4); padding: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .25rem 1rem; width: min(820px, calc(100vw - 32px)); }
+.mn-gt { font-size: 11.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding: .35rem .6rem .4rem; }
+.mn-it { width: 100%; text-align: left; background: var(--surface); border: 0; padding: .55rem .6rem; cursor: pointer; min-height: 44px; display: flex; flex-direction: column; color: var(--text); }
+.mn-it:hover, .mn-it:focus-visible { background: var(--surface-2); }
+.mn-l { font-weight: 800; } .mn-s { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.mn-mgrp { padding-top: .9rem; } .mn-mgrp .mn-gt { padding-left: 0; }
+.mn-mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+.mn-mit { text-align: left; background: var(--surface); border: 1.5px solid var(--line-2); color: var(--text); font: inherit; font-weight: 700; font-size: 14.5px; padding: .6rem .75rem; min-height: 46px; cursor: pointer; }
+.rb { padding-top: 1rem; padding-bottom: 3.5rem; }
+.rb-h { font-size: clamp(1.6rem, 3vw, 2.2rem); margin: 0 0 1.25rem; padding-top: 1.5rem; border-top: 2px solid var(--ink); }
+.rb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1.5rem 1.75rem; }
+.rb-g .mn-gt { padding-left: 0; }
+.rb-it { width: 100%; display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: .75rem; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: .7rem 0; min-height: 52px; cursor: pointer; color: var(--text); font: inherit; }
+.rb-l { font-weight: 800; font-size: 16px; } .rb-s { grid-column: 1; font-size: 13px; color: var(--muted); }
+.rb-a { grid-column: 2; grid-row: 1 / span 2; color: var(--muted); transition: transform .2s; }
+.rb-it:hover .rb-a, .rb-it:focus-visible .rb-a { transform: translateX(4px); color: var(--ink); }
+@media (max-width: 600px) {
+  .rb-grid { grid-template-columns: 1fr 1fr; gap: 1.25rem .9rem; }
+  .rb-s { display: none; }
+  .rb-l { font-size: 15px; }
+  .rb-it { min-height: 46px; padding: .55rem 0; }
+}
+</style>
 </head>
 <body>
 <noscript>Casa Besports nécessite JavaScript pour fonctionner.</noscript>
@@ -2127,9 +2224,11 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
       </sc-for>
       <button type="button" class="navb" onClick="{{toggleMore}}" aria-expanded="{{moreExp}}" style="color: var(--muted); display: inline-flex; align-items: center; gap: .3rem">Plus <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></button>
       <sc-if value="{{moreOpen}}" hint-placeholder-val="{{ false }}">
-        <div style="position: absolute; top: 56px; right: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 0; box-shadow: 0 20px 50px -20px rgba(8,15,26,.4); padding: .5rem; min-width: 240px; display: flex; flex-direction: column">
-          <sc-for list="{{moreNav}}" as="n" hint-placeholder-count="6">
-            <button type="button" onClick="{{n.go}}" style="text-align: left; background: var(--surface); border: 0; border-radius: 0; padding: .7rem .8rem; cursor: pointer; min-height: 44px; display: flex; flex-direction: column"><span style="font-weight: 800; color: var(--text)">{{n.label}}</span><span style="font-size: 12.5px; color: var(--muted)">{{n.sub}}</span></button>
+        <div class="mn-drop">
+          <sc-for list="{{menuGroups}}" as="mg" hint-placeholder-count="3">
+            <div class="mn-col"><div class="mn-gt">{{mg.titre}}</div>
+              <sc-for list="{{mg.items}}" as="n" hint-placeholder-count="3"><button type="button" class="mn-it" onClick="{{n.go}}"><span class="mn-l">{{n.label}}</span><span class="mn-s">{{n.sub}}</span></button></sc-for>
+            </div>
           </sc-for>
         </div>
       </sc-if>
@@ -2187,11 +2286,11 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
       <sc-for list="{{nav}}" as="n" hint-placeholder-count="5">
         <button type="button" onClick="{{n.go}}" class="cond" style="text-align: left; font-size: 22px; font-weight: 600; background: none; border: 0; border-bottom: 1px solid var(--line); padding: .85rem 0; cursor: pointer; color: {{n.color}}">{{n.label}}</button>
       </sc-for>
-      <div style="display: flex; flex-wrap: wrap; gap: .4rem; padding-top: .75rem">
-        <sc-for list="{{moreNav}}" as="n" hint-placeholder-count="6">
-          <button type="button" onClick="{{n.go}}" class="chip" style="background: var(--surface); border: 1.5px solid var(--line-2); color: var(--text)">{{n.label}}</button>
-        </sc-for>
-      </div>
+      <sc-for list="{{menuGroups}}" as="mg" hint-placeholder-count="3">
+        <div class="mn-mgrp"><div class="mn-gt">{{mg.titre}}</div>
+          <div class="mn-mgrid"><sc-for list="{{mg.items}}" as="n" hint-placeholder-count="3"><button type="button" onClick="{{n.go}}" class="mn-mit">{{n.label}}</button></sc-for></div>
+        </div>
+      </sc-for>
       <button type="button" class="btn btn-ghost" onClick="{{accountClick}}" style="margin-top: .75rem; width: 100%">{{accountLabel}}</button>
       <div role="radiogroup" aria-label="Thème" style="display: flex; flex-wrap: wrap; gap: .4rem; padding-top: .75rem; align-items: center"><span class="cond" style="font-size: 12px; color: var(--muted); margin-right: .3rem">Thème</span>
         <sc-for list="{{themes}}" as="th" hint-placeholder-count="5"><button type="button" class="chip" role="radio" aria-checked="{{th.checked}}" onClick="{{th.pick}}" style="min-height: 40px; font-size: 14px; background: {{th.chipBg}}; color: {{th.chipFg}}; border: 1.5px solid {{th.chipBorder}}">{{th.short}}</button></sc-for>
@@ -2396,6 +2495,18 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     </div>
     <sc-if value="{{noModules}}" hint-placeholder-val="{{ false }}"><div style="border: 1.5px dashed var(--line-2); border-radius: 0; padding: 2rem; text-align: center; color: var(--muted)">Tous les blocs sont masqués. <button type="button" class="lnk" onClick="{{openCustomize}}" style="font-size: 15px">Personnaliser l’accueil</button></div></sc-if>
   </section>
+
+  <!-- Toutes les rubriques, en accès direct -->
+  <section class="wrap rb" aria-labelledby="rb-td">
+    <h2 id="rb-td" class="h2 rb-h">Toutes les rubriques</h2>
+    <div class="rb-grid">
+      <sc-for list="{{rubriques}}" as="rg" hint-placeholder-count="4">
+        <div class="rb-g"><div class="mn-gt">{{rg.titre}}</div>
+          <sc-for list="{{rg.items}}" as="ri" hint-placeholder-count="4"><button type="button" class="rb-it" onClick="{{ri.go}}"><span class="rb-l">{{ri.label}}</span><span class="rb-s">{{ri.sub}}</span><span class="rb-a" aria-hidden="true">→</span></button></sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </section>
 </sc-if>
 
 <!-- ================= ACCUEIL ================= -->
@@ -2533,6 +2644,18 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
       <p style="color: var(--text-2); line-height: 1.65; margin: 0 0 1rem; max-width: 32rem">{{gzCount}} pages en cinq cahiers : à la une, le terrain, les gens, le territoire et la pause. Des récits, des portraits, une question qui divise, une page qui ne sert à rien. Et dans chaque numéro, le détail choc : un fait vérifié qui change le regard sur une histoire.</p>
       <p style="color: var(--text-2); line-height: 1.65; margin: 0 0 1.5rem; max-width: 32rem">En numérique, en papier dans votre boîte aux lettres, ou les deux.</p>
       <div style="display: flex; gap: .6rem; flex-wrap: wrap"><button type="button" class="btn btn-dark" onClick="{{goGazette}}">S’abonner à la Gazette</button><button type="button" class="btn btn-ghost" onClick="{{openReader}}">Feuilleter le numéro</button></div>
+    </div>
+  </section>
+
+  <!-- Toutes les rubriques, en accès direct -->
+  <section class="wrap rb" aria-labelledby="rb-tm">
+    <h2 id="rb-tm" class="h2 rb-h">Toutes les rubriques</h2>
+    <div class="rb-grid">
+      <sc-for list="{{rubriques}}" as="rg" hint-placeholder-count="4">
+        <div class="rb-g"><div class="mn-gt">{{rg.titre}}</div>
+          <sc-for list="{{rg.items}}" as="ri" hint-placeholder-count="4"><button type="button" class="rb-it" onClick="{{ri.go}}"><span class="rb-l">{{ri.label}}</span><span class="rb-s">{{ri.sub}}</span><span class="rb-a" aria-hidden="true">→</span></button></sc-for>
+        </div>
+      </sc-for>
     </div>
   </section>
 </sc-if>
@@ -4693,27 +4816,79 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <!-- ================= PARTENAIRES ================= -->
 <!-- ================= À PROPOS ================= -->
 <sc-if value="{{isAbout}}" hint-placeholder-val="{{ false }}">
-  <section style="position: relative; overflow: hidden">
-    <img src="{{about.photo}}" alt="" style="position: absolute; top: 0; right: 0; width: 50%; height: 100%; object-fit: cover; opacity: {{heroOpacity}}">
-    <div class="veilL" style="position: absolute; inset: 0"></div>
-    <div class="wrap" style="position: relative; padding-top: 2rem; padding-bottom: 5rem; max-width: 1280px">
-      <div style="max-width: 680px">
-        <div class="eb" style="margin-bottom: .5rem">{{about.surtitre}}</div>
-        <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem); margin-bottom: 1.5rem">{{about.titre}}</h1>
-        <sc-for list="{{about.paras}}" as="ap" hint-placeholder-count="2"><p style="font-size: 1.1rem; line-height: 1.75; color: var(--text-2); margin: 0 0 1.25rem">{{ap.t}}</p></sc-for>
-        <sc-if value="{{about.hasQuote}}" hint-placeholder-val="{{ true }}"><blockquote style="margin: .75rem 0 2rem; padding-left: 1.5rem; border-left: 3px solid {{accent}}; font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 700; letter-spacing: -.02em; font-size: 2rem; line-height: 1.2; color: var(--ink)">{{about.citation}}</blockquote></sc-if>
-        <div style="display: flex; gap: .6rem; flex-wrap: wrap"><button type="button" class="btn btn-dark" onClick="{{goContact}}">Nous écrire</button><button type="button" class="btn btn-ghost" onClick="{{goNews}}">Lire nos récits</button></div>
+  <article class="ab" aria-labelledby="ab-titre">
+    <header class="ab-hero">
+      <img class="ab-hero-img" src="{{about.photo}}" alt="{{about.photoAlt}}">
+      <div class="ab-hero-veil" aria-hidden="true"></div>
+      <div class="ab-wrap ab-hero-in">
+        <div class="ab-eb">{{about.surtitre}}</div>
+        <h1 id="ab-titre" class="ab-h1">{{about.titre}}</h1>
+        <p class="ab-sub">{{about.soustitre}}</p>
+        <sc-if value="{{about.hasIntro}}" hint-placeholder-val="{{ true }}"><p class="ab-intro">{{about.intro}}</p></sc-if>
+        <button type="button" class="ab-btn ab-btn-w" onClick="{{about.decouvrir}}">Découvrir notre histoire <span aria-hidden="true">↓</span></button>
       </div>
-    </div>
-  </section>
-  <sc-if value="{{about.hasDates}}" hint-placeholder-val="{{ false }}">
-    <section class="wrap" style="max-width: 900px; padding-bottom: 5rem">
-      <h2 class="h2" style="font-size: 2rem; margin: 0 0 1.5rem">{{about.frise}}</h2>
-      <ol style="list-style: none; margin: 0; padding: 0; border-left: 3px solid var(--ink)">
-        <sc-for list="{{about.dates}}" as="ad" hint-placeholder-count="0"><li style="position: relative; padding: 0 0 1.75rem 1.5rem"><span aria-hidden="true" style="position: absolute; left: -9px; top: .35rem; width: 15px; height: 15px; background: var(--acc); border: 3px solid var(--bg)"></span><div class="num" style="font-size: 1.6rem; color: var(--ink)">{{ad.annee}}</div><div class="ttl" style="font-size: 1.35rem; margin: .1rem 0 .35rem">{{ad.titre}}</div><p style="margin: 0; line-height: 1.7; color: var(--text-2)">{{ad.texte}}</p></li></sc-for>
-      </ol>
-    </section>
-  </sc-if>
+    </header>
+
+    <sc-if value="{{about.hasManifeste}}" hint-placeholder-val="{{ true }}">
+      <section class="ab-wrap ab-manif" aria-label="Manifeste">
+        <sc-for list="{{about.manifeste}}" as="am" hint-placeholder-count="2"><p class="ab-lead ab-rv">{{am.t}}</p></sc-for>
+        <sc-if value="{{about.hasQuote}}" hint-placeholder-val="{{ true }}"><blockquote class="ab-quote ab-rv"><p>{{about.citation}}</p></blockquote></sc-if>
+        <sc-if value="{{about.hasManifesteFin}}" hint-placeholder-val="{{ true }}"><p class="ab-fin ab-rv">{{about.manifesteFin}}</p></sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{about.hasEtapes}}" hint-placeholder-val="{{ true }}">
+      <section id="ab-histoire" class="ab-wrap ab-tl-sec" aria-labelledby="ab-frise">
+        <h2 id="ab-frise" class="ab-eb ab-sec-t">{{about.frise}}</h2>
+        <ol class="ab-tl">
+          <sc-for list="{{about.etapes}}" as="ae" hint-placeholder-count="5">
+            <li class="{{ae.side}}">
+              <span class="ab-dot" aria-hidden="true"></span>
+              <div class="ab-step-txt ab-rv">
+                <div class="ab-year">{{ae.annee}}</div>
+                <h3 class="ab-h3">{{ae.titre}}</h3>
+                <sc-for list="{{ae.paras}}" as="ap" hint-placeholder-count="3"><p class="ab-p">{{ap.t}}</p></sc-for>
+              </div>
+              <sc-if value="{{ae.hasPhoto}}" hint-placeholder-val="{{ true }}"><figure class="ab-step-img ab-rv"><img src="{{ae.photo}}" alt="{{ae.alt}}" loading="lazy"></figure></sc-if>
+            </li>
+          </sc-for>
+        </ol>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{about.hasPiliers}}" hint-placeholder-val="{{ true }}">
+      <section class="ab-wrap ab-pil-sec" aria-labelledby="ab-raison">
+        <div class="ab-eb">{{about.raisonSurtitre}}</div>
+        <h2 id="ab-raison" class="ab-h2">{{about.raisonTitre}}</h2>
+        <div class="ab-pils">
+          <sc-for list="{{about.piliers}}" as="pl" hint-placeholder-count="3"><div class="ab-pil ab-rv"><div class="ab-pil-n" aria-hidden="true">{{pl.num}}</div><h3 class="ab-h3">{{pl.titre}}</h3><p class="ab-p">{{pl.texte}}</p></div></sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{about.hasSignature}}" hint-placeholder-val="{{ true }}">
+      <section class="ab-sign" aria-label="{{about.signatureSurtitre}}">
+        <div class="ab-wrap">
+          <div class="ab-eb">{{about.signatureSurtitre}}</div>
+          <p class="ab-sign-t ab-rv">{{about.signature}}</p>
+          <p class="ab-sign-s ab-rv">{{about.signatureSuite}}</p>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{about.hasAppel}}" hint-placeholder-val="{{ true }}">
+      <section class="ab-wrap ab-cta" aria-labelledby="ab-appel">
+        <h2 id="ab-appel" class="ab-h2">{{about.appelTitre}}</h2>
+        <sc-for list="{{about.appel}}" as="ac" hint-placeholder-count="2"><p class="ab-p ab-cta-p">{{ac.t}}</p></sc-for>
+        <p class="ab-cta-fin">{{about.appelFin}}</p>
+        <div class="ab-btns">
+          <button type="button" class="ab-btn ab-btn-w" onClick="{{goNews}}">Découvrir nos récits</button>
+          <button type="button" class="ab-btn ab-btn-o" onClick="{{proposeTopic}}">Proposer une histoire</button>
+          <button type="button" class="ab-btn ab-btn-o" onClick="{{goContact}}">Nous contacter</button>
+        </div>
+      </section>
+    </sc-if>
+  </article>
 </sc-if>
 
 <!-- ================= CONTACT ================= -->
