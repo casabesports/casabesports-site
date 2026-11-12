@@ -179,6 +179,7 @@
     '.cba-img{display:flex;gap:.6rem;align-items:flex-start;flex-wrap:wrap}' +
     '.cba-img img{width:96px;height:72px;object-fit:cover;background:var(--surface-2,#eee);border:1px solid var(--line,#ddd)}' +
     '.cba-img .grow{flex:1 1 220px;min-width:0}' +
+    '.cba-fond-prev{flex:0 0 220px;max-width:100%;aspect-ratio:16/9;background:#222 center/cover no-repeat;filter:grayscale(.6);border:1px solid var(--line,#ddd)}' +
     '.cba-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.7rem}' +
     '.cba-grid figure{margin:0;border:1.5px solid var(--line,#ddd);background:var(--surface,#fff)}' +
     '.cba-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--surface-2,#eee)}' +
@@ -567,6 +568,7 @@
     var v = S.work;
     if (S.key === 'CASA_ARTICLES' && Array.isArray(v)) add(ed, S.art != null ? viewArticleEditor() : viewArticleList());
     else if (S.key === 'CASA_GAZETTE' && Array.isArray(v)) add(ed, viewGazette());
+    else if (S.key === 'CASA_FONDS' && v && typeof v === 'object') add(ed, viewFonds());
     else if (Array.isArray(v) || (v && typeof v === 'object')) add(ed, field({ v: v }, 'v', S.key, S.key, true));
     else add(ed, field(S, 'work', S.key, S.key, true));
     return [E('div', { class: 'cba-bar' },
@@ -585,6 +587,34 @@
       draftNote(S.key, function (v) { S.work = withFields(S.key, v); }),
       gazetteLinks(S.key),
       ed];
+  }
+  // ---------- Fonds de page : une image par page, avec son cadrage ----------
+  var FOND_PAGES = [['accueil', 'Accueil'], ['actualites', 'Actualités et articles'], ['direct', 'Direct'], ['videos', 'Vidéos'], ['disciplines', 'Disciplines'], ['clubs', 'Clubs et carte'], ['joueurs', 'Joueurs'], ['boutique', 'Boutique'], ['abonnements', 'Abonnements'], ['compte', 'Mon espace'], ['quotidien', 'Le quotidien (abonnés)'], ['clubhouse', 'Club House'], ['culture', 'Culture'], ['meteo', 'Météo'], ['partenaires', 'Partenaires'], ['apropos', 'À propos'], ['contact', 'Contact'], ['mentions', 'Mentions légales'], ['application', 'Application'], ['redaction', 'Rédaction']];
+  var FOND_POS = [['center 15%', 'Montrer le haut'], ['center 30%', 'Le tiers haut'], ['center 35%', 'Un peu au-dessus du centre'], ['center 40%', 'Juste au-dessus du centre'], ['center', 'Centre'], ['center 45%', 'Presque au centre'], ['center 65%', 'Un peu en dessous du centre'], ['center 85%', 'Montrer le bas']];
+  function viewFonds() {
+    var v = S.work; if (!v.pages || typeof v.pages !== 'object') v.pages = {};
+    var orig = (A.originalContent && A.originalContent('CASA_FONDS')) || {}; var op = orig.pages || {};
+    var mode = ['aucun', 'photo', 'lieux'].indexOf(v.modeParDefaut) >= 0 ? v.modeParDefaut : 'aucun';
+    var modeSel = E('select', { class: 'cba-in', onchange: function (e) { v.modeParDefaut = e.target.value; mark(); render(); } },
+      [['photo', 'Photos : les images choisies ci-dessous'], ['aucun', 'Fond uni (blanc ou noir), sans image'], ['lieux', 'Illustrations des lieux de légende']].map(function (o) { return E('option', { value: o[0], selected: o[0] === mode || null }, o[1]); }));
+    var cards = FOND_PAGES.map(function (pg) {
+      var id = pg[0], cur = v.pages[id];
+      if (!Array.isArray(cur)) { cur = typeof cur === 'string' ? [cur, 'center'] : ['', 'center']; v.pages[id] = cur; }
+      var def = Array.isArray(op[id]) ? op[id][0] : '';
+      var pos = cur[1] || 'center'; var opts = FOND_POS.slice(); if (!opts.some(function (o) { return o[0] === pos; })) opts.unshift([pos, 'Réglage actuel (' + pos + ')']);
+      var thumb = E('div', { class: 'cba-fond-prev', style: 'background-image:url("' + String(cur[0] || def || '').replace(/"/g, '') + '");background-position:' + pos });
+      var sel = E('select', { class: 'cba-in', onchange: function (e) { cur[1] = e.target.value; thumb.style.backgroundPosition = e.target.value; mark(); } }, opts.map(function (o) { return E('option', { value: o[0], selected: o[0] === pos || null }, o[1]); }));
+      return E('div', { class: 'cba-card', style: 'margin:.6rem 0' },
+        E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('strong', {}, pg[1]),
+          cur[0] ? null : E('span', { style: 'font-size:13px;color:var(--muted)' }, def ? 'Image d’origine utilisée' : 'Pas d’image')),
+        E('div', { class: 'cba-row', style: 'align-items:flex-start;gap:1rem;margin-top:.4rem' }, thumb,
+          E('div', { style: 'flex:1 1 300px;min-width:0' }, imgField(cur, 0, 'orig', function (u) { thumb.style.backgroundImage = 'url("' + String(u || def || '').replace(/"/g, '') + '")'; }), E('label', { class: 'cba-lbl' }, 'Partie de la photo à montrer'), sel)));
+    });
+    return E('div', {},
+      E('div', { class: 'cba-card' }, E('label', { class: 'cba-lbl', style: 'margin-top:0' }, 'Ce que voit un nouveau visiteur'), modeSel,
+        mode !== 'photo' ? E('p', { class: 'cba-sub', style: 'margin:.5rem 0 0' }, 'Pour que vos images de fond s’affichent pour tout le monde, choisissez « Photos ». Chaque visiteur peut ensuite changer dans Mon espace › Apparence.') : null),
+      E('p', { class: 'cba-sub' }, 'Une image par page. Envoyez une photo, prenez-la dans la bibliothèque, puis choisissez la partie à montrer. Une case vide reprend l’image d’origine.'),
+      cards);
   }
   // Champ générique : parent[k]
   function field(parent, k, label, path, top) {
@@ -617,11 +647,11 @@
     inp.addEventListener('input', function (e) { parent[k] = (v === null && e.target.value === '') ? null : e.target.value; mark(); });
     return [lab, inp];
   }
-  function imgField(parent, k, ratio) {
+  function imgField(parent, k, ratio, onSet) {
     ratio = ratio || (S.key === 'CASA_ARTICLES' ? '16:9' : null);
     var prev = E('img', { alt: '', src: parent[k] || null });
     var inp = E('input', { class: 'cba-in', value: parent[k] || '', placeholder: 'assets/… ou adresse d’une image envoyée', oninput: function (e) { parent[k] = e.target.value; prev.src = e.target.value; cropBtn.style.display = e.target.value ? '' : 'none'; mark(); } });
-    var set = function (url) { parent[k] = url; inp.value = url; prev.src = url; cropBtn.style.display = url ? '' : 'none'; mark(); };
+    var set = function (url) { parent[k] = url; inp.value = url; prev.src = url; cropBtn.style.display = url ? '' : 'none'; mark(); if (onSet) onSet(url); };
     var busy = function (on, b, label) { b.disabled = on || null; b.textContent = on ? 'Envoi…' : label; };
     var send = function (f, b, label) { busy(true, b, label); return uploadFile(f).then(function (u) { set(u); busy(false, b, label); toast('Photo enregistrée : pensez à « Enregistrer et publier »'); }, function (er) { busy(false, b, label); err(er); }); };
     var file = E('input', { type: 'file', accept: 'image/*', style: 'display:none', onchange: function (e) { var f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return; cropImage(f, { file: f, ratio: ratio }).then(function (x) { if (x) send(x, upBtn, 'Envoyer une photo'); }); } });

@@ -1576,7 +1576,10 @@ class Component extends DCLogic {
     const pageOfView = { home: 'accueil', news: 'actualites', article: 'actualites', live: 'direct', videos: 'videos', video: 'videos', disciplines: 'disciplines', discipline: 'disciplines', clubs: 'clubs', club: 'clubs', map: 'clubs', players: 'joueurs', player: 'joueurs',
       shop: 'boutique', product: 'boutique', order: 'boutique', checkout: 'boutique', offers: 'abonnements', account: 'compte', cv: 'compte', private: 'quotidien', clubhouse: 'clubhouse', culture: 'culture', meteo: 'meteo', partners: 'partenaires', olisto: 'partenaires',
       about: 'apropos', contact: 'contact', legal: 'mentions', app: 'application', studio: 'redaction' };
-    const phEntry = FP[pageOfView[s.view]];
+    const fondOrig = (window.CasaAuth && CasaAuth.originalContent && (CasaAuth.originalContent('CASA_FONDS') || {}).pages) || {};
+    let phEntry = FP[pageOfView[s.view]];
+    if (Array.isArray(phEntry) && !phEntry[0]) phEntry = fondOrig[pageOfView[s.view]] ? [fondOrig[pageOfView[s.view]][0], phEntry[1] || 'center'] : null;
+    if (phEntry === '') phEntry = fondOrig[pageOfView[s.view]] || null;
     const PH = { cur: Array.isArray(phEntry) ? phEntry : (typeof phEntry === 'string' ? [phEntry, 'center'] : null) };
     const bgMode = ['photo', 'lieux', 'aucun'].indexOf(s.bgMode) >= 0 ? s.bgMode : (['photo', 'lieux'].indexOf(FD.modeParDefaut) >= 0 ? FD.modeParDefaut : 'aucun');
     const phKey = PH.cur ? 'cur' : null;
@@ -2534,7 +2537,9 @@ class Component extends DCLogic {
       themeSavedNote: s.loggedIn ? 'Enregistré sur cet appareil et dans votre profil.' : 'Enregistré sur cet appareil. Connectez-vous pour le retrouver partout.',
       weather, showWeather: s.dSport === 'Football' || s.dSport === 'Rugby' || s.dSport === 'Trail',
       about: (() => {
-        const A = window.CASA_APROPOS || {}; const en = window.CasaLang && window.CasaLang.lang === 'en';
+        let A = window.CASA_APROPOS || {}; const en = window.CasaLang && window.CasaLang.lang === 'en';
+        // Une ancienne version enregistrée en ligne (sans chronologie « etapes ») ne doit pas masquer l'histoire du fichier
+        if (!(A.etapes && A.etapes.length) && window.CasaAuth && CasaAuth.originalContent) { const O = CasaAuth.originalContent('CASA_APROPOS'); if (O && O.etapes && O.etapes.length) A = O; }
         const has = (v) => Array.isArray(v) ? v.length > 0 : !!v;
         const pick = (k) => (en && has(A[k + 'En'])) ? A[k + 'En'] : A[k];
         const arr = (k) => (pick(k) || []).filter(Boolean).map((t) => ({ t }));

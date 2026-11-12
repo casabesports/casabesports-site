@@ -2188,7 +2188,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     if (n.querySelectorAll) list = list.concat([].slice.call(n.querySelectorAll('img[src^="assets/"],[style*="assets/"]')));
     list.forEach(function (e) {
       var s = e.getAttribute('src'); if (s && s.indexOf('assets/') === 0) { var d = window.ASSET_DATA[s.slice(7)]; if (d) e.setAttribute('src', d); }
-      var st = e.getAttribute('style'); if (st && st.indexOf('assets/') >= 0) e.setAttribute('style', st.replace(/assets\/([A-Za-z0-9_.\-]+)/g, function (m, f) { return window.ASSET_DATA[f] || m; }));
+      var st = e.getAttribute('style'); if (st && st.indexOf('assets/') >= 0) { var st2 = st.replace(/assets\/([A-Za-z0-9_.\-]+)/g, function (m, f) { return window.ASSET_DATA[f] || m; }); if (st2 !== st) e.setAttribute('style', st2); }
     });
   }
   new MutationObserver(function (ms) { ms.forEach(function (m) { if (m.type === 'attributes') fix(m.target); else m.addedNodes.forEach(fix); }); }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'style'] });
