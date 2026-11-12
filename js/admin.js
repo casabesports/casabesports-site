@@ -609,7 +609,7 @@
     });
     var imgs = v.images.map(function (r, i) {
       var th = function (src, cap) { return E('figure', { style: 'margin:0;text-align:center' }, E('img', { src: src || null, alt: '', style: 'width:150px;height:100px;object-fit:cover;background:#ddd;display:block' }), E('figcaption', { style: 'font-size:12px;color:var(--muted)' }, cap)); };
-      var taille = { plein: 'Pleine largeur', entiere: 'Image entière' }[r.taille] || 'Taille prévue par la page';
+      var taille = { plein: 'Pleine largeur', fond: 'Pleine largeur, image entière', entiere: 'Image entière' }[r.taille] || 'Taille prévue par la page';
       return E('div', { class: 'cba-card', style: 'margin:.5rem 0' },
         E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('span', { class: 'cba-tag' }, where(r)), E('span', { class: 'cba-row' },
           r.source ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { r.apres = r.source; delete r.source; mark(); render(); } }, 'Revenir à la photo non rognée') : null,

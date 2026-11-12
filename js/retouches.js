@@ -33,7 +33,7 @@
     });
     R.images.forEach(function (r) {
       if (!r || !normSrc(r.avant)) return;
-      var hasFrame = r.x != null || r.y != null || (Number(r.z) || 1) !== 1 || r.taille === 'plein' || r.taille === 'entiere';
+      var hasFrame = r.x != null || r.y != null || (Number(r.z) || 1) !== 1 || r.taille === 'plein' || r.taille === 'entiere' || r.taille === 'fond';
       if (!normSrc(r.apres) && !hasFrame) return;
       var p = pg(r.page); IM[p] = IM[p] || {};
       var ks = normSrc(r.avant);
@@ -72,7 +72,7 @@
   // Cadrage sans toucher au fichier : point de cadrage (x, y en %) et zoom, appliqués à l'emplacement de l'image
   function frame(el, f) {
     var par = el.parentElement;
-    if (!el.__rtSt) el.__rtSt = { op: el.style.objectPosition, tf: el.style.transform, to: el.style.transformOrigin, po: par ? par.style.overflow : '', of: el.style.objectFit, l: el.style.left, r: el.style.right, w: el.style.width, mw: el.style.maxWidth };
+    if (!el.__rtSt) el.__rtSt = { op: el.style.objectPosition, tf: el.style.transform, to: el.style.transformOrigin, po: par ? par.style.overflow : '', of: el.style.objectFit, bg: el.style.background, l: el.style.left, r: el.style.right, w: el.style.width, mw: el.style.maxWidth };
     var O = el.__rtSt, t = f ? f.taille || '' : '';
     var pos = f ? f.x + '% ' + f.y + '%' : O.op, z = f ? f.z : 1;
     var tf = z > 1 ? 'scale(' + z + ')' : O.tf, to = z > 1 ? pos : O.to;
@@ -80,9 +80,14 @@
     set('objectPosition', pos); set('transform', tf); set('transformOrigin', to);
     // Taille : « plein » = toute la largeur de son bloc (ex. la grande image de l'accueil) ; « entiere » = image entière, sans la couper
     var abs = (el.style.position || getComputedStyle(el).position) === 'absolute';
-    set('objectFit', t === 'entiere' ? 'contain' : O.of);
-    set('left', t === 'plein' && abs ? '0px' : O.l); set('right', t === 'plein' && abs ? '0px' : O.r);
-    set('width', t === 'plein' ? '100%' : O.w); set('maxWidth', t === 'plein' ? '100%' : O.mw);
+    // « fond » = toute la largeur, image entière (sans la couper), et les côtés remplis par la même photo assombrie
+    var wide = t === 'plein' || t === 'fond';
+    set('objectFit', t === 'entiere' || t === 'fond' ? 'contain' : O.of);
+    set('left', wide && abs ? '0px' : O.l); set('right', wide && abs ? '0px' : O.r);
+    set('width', wide ? '100%' : O.w); set('maxWidth', wide ? '100%' : O.mw);
+    var src = el.getAttribute('src') || '';
+    var bgv = t === 'fond' && src ? 'linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)), url("' + src.replace(/"/g, '%22') + '") center / cover no-repeat' : O.bg;
+    if (el.__rtBg !== bgv) { el.__rtBg = bgv; el.style.background = bgv; }
     var po = z > 1 ? 'hidden' : O.po;
     if (par && par.style.overflow !== po) par.style.overflow = po;
   }
@@ -350,7 +355,7 @@
       } }, ['Rogner le fichier (' + ratio + ')']);
       var grid = E('div', { class: 'rt-grid' });
       var taille = E('select', { class: 'rt-in', onchange: function () { F.taille = taille.value; save(false); } },
-        [['', 'Comme prévu par la page'], ['plein', 'Pleine largeur (sur toute la largeur du bloc)'], ['entiere', 'Image entière, sans la couper']].map(function (o) { return E('option', { value: o[0], selected: o[0] === F.taille ? 'selected' : null }, [o[1]]); }));
+        [['', 'Comme prévu par la page'], ['plein', 'Pleine largeur (sur toute la largeur du bloc)'], ['fond', 'Pleine largeur, image entière (sans la couper)'], ['entiere', 'Image entière, sans la couper']].map(function (o) { return E('option', { value: o[0], selected: o[0] === F.taille ? 'selected' : null }, [o[1]]); }));
       var srcBtn = E('button', { type: 'button', class: 'rt-b', style: source && normSrc(source) !== normSrc(cur()) ? '' : 'display:none', title: 'Remet la photo telle qu’elle était avant le rognage', onclick: function () { url.value = source; source = ''; F.x = 50; F.y = 50; F.z = 1; zoom.value = '1'; save(false); } }, ['Revenir à la photo non rognée']);
       var lib = E('button', { type: 'button', class: 'rt-b', onclick: function () {
         var A = window.CasaAuth || {}; if (!A.listImages) { say('Bibliothèque indisponible'); return; }
