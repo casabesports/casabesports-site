@@ -27,24 +27,44 @@
         else { var t = window.CasaLang.t(a); if (t !== a) return; to = r.apres; }
       } else to = r.apres;
       if (to == null || norm(to) === '') return;
-      var p = pg(r.page); TX[p] = TX[p] || {};
-      TX[p][a] = String(to);
-      if (EN) { var ta = norm(window.CasaLang.t(a)); if (ta && ta !== a) TX[p][ta] = String(to); }
+      var p = pg(r.page), e = { to: String(to), n: r.n == null || r.n === '' ? null : Number(r.n) }; TX[p] = TX[p] || {};
+      (TX[p][a] = TX[p][a] || []).push(e);
+      if (EN) { var ta = norm(window.CasaLang.t(a)); if (ta && ta !== a) (TX[p][ta] = TX[p][ta] || []).push(e); }
     });
     R.images.forEach(function (r) {
       if (!r || !normSrc(r.avant)) return;
       var hasFrame = r.x != null || r.y != null || (Number(r.z) || 1) !== 1;
       if (!normSrc(r.apres) && !hasFrame) return;
       var p = pg(r.page); IM[p] = IM[p] || {};
-      IM[p][normSrc(r.avant)] = { src: normSrc(r.apres) ? String(r.apres).trim() : null, x: r.x == null ? 50 : Number(r.x), y: r.y == null ? 50 : Number(r.y), z: Number(r.z) || 1, frame: hasFrame };
+      var ks = normSrc(r.avant);
+      (IM[p][ks] = IM[p][ks] || []).push({ src: normSrc(r.apres) ? String(r.apres).trim() : null, x: r.x == null ? 50 : Number(r.x), y: r.y == null ? 50 : Number(r.y), z: Number(r.z) || 1, frame: hasFrame, n: r.n == null || r.n === '' ? null : Number(r.n) });
     });
   }
-  function look(M, k) { var v = view(); var a = M[v] && M[v][k]; if (a != null) return a; return M['*'] ? M['*'][k] : undefined; }
+  // Une retouche vaut pour un emplacement précis (n = rang de ce texte ou de cette image parmi les identiques de la page),
+  // pour toute la page, ou pour tout le site. La plus précise l'emporte.
+  function look(M, k, idxFn) {
+    var v = view(), L = (M[v] && M[v][k]) || [], G = (M['*'] && M['*'][k]) || [];
+    if (!L.length && !G.length) return undefined;
+    var hasN = L.some(function (e) { return e.n != null; }) || G.some(function (e) { return e.n != null; });
+    var ix = hasN ? idxFn() : -1, i;
+    for (i = 0; i < L.length; i++) if (L[i].n != null && L[i].n === ix) return L[i];
+    for (i = 0; i < L.length; i++) if (L[i].n == null) return L[i];
+    for (i = 0; i < G.length; i++) if (G[i].n == null) return G[i];
+    return undefined;
+  }
+  function origText(n) { return n.__rtSet != null && n.nodeValue === n.__rtSet ? n.__rtOrig : n.nodeValue; }
+  function origSrc(el) { return normSrc(el.__rtOrig != null && el.getAttribute('src') === el.__rtSet ? el.__rtOrig : el.getAttribute('src')); }
+  function textIdx(node) {
+    var key = norm(origText(node)), c = 0, w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = w.nextNode())) { if (n === node) return c; if (!inUi(n) && norm(origText(n)) === key) c++; }
+    return c;
+  }
+  function imgIdx(el) { var key = origSrc(el); return Array.prototype.filter.call(document.querySelectorAll('img'), function (x) { return !inUi(x) && origSrc(x) === key; }).indexOf(el); }
   function inUi(n) { var e = n.nodeType === 1 ? n : n.parentNode; return !!(e && e.closest && e.closest('#cba, .rt-ui')); }
   function doText(n) {
     var v = n.nodeValue; if (!v || !/[A-Za-zÀ-ÿ0-9]/.test(v)) return;
     if (n.__rtSet != null && v === n.__rtSet) return;
-    var r = look(TX, norm(v)); if (r == null) return;
+    var e = look(TX, norm(v), function () { return textIdx(n); }); if (e == null) return; var r = e.to;
     var lead = v.match(/^\s*/)[0], trail = v.match(/\s*$/)[0], nv = lead + r + trail;
     if (nv === v) return;
     n.__rtOrig = v; n.__rtSet = nv; n.nodeValue = nv; touched.push(n);
@@ -65,7 +85,7 @@
     if (el.tagName !== 'IMG') return;
     var s = el.getAttribute('src'); if (!s) return;
     if (el.__rtSet != null && s === el.__rtSet) { if (el.__rtR && el.__rtR.frame) frame(el, el.__rtR); return; }
-    var r = look(IM, normSrc(s)); if (r == null) return;
+    var r = look(IM, normSrc(s), function () { return imgIdx(el); }); if (r == null) return;
     var to = r.src || s;
     el.__rtOrig = s; el.__rtSet = to; el.__rtR = r; if (to !== s) el.setAttribute('src', to);
     if (r.frame) frame(el, r);
@@ -216,8 +236,21 @@
     }, { capture: true, passive: false });
   });
 
-  function findT(list, avant, page) { for (var i = 0; i < list.length; i++) if (norm(list[i].avant) === avant && pg(list[i].page) === pg(page)) return i; return -1; }
-  function anyT(list, avant) { var v = view(); var i = findT(list, avant, v); return i >= 0 ? i : findT(list, avant, '*'); }
+  var nOf = function (r) { return r.n == null || r.n === '' ? null : Number(r.n); };
+  function findT(list, avant, page, n) { for (var i = 0; i < list.length; i++) if (norm(list[i].avant) === norm(avant) && pg(list[i].page) === pg(page) && nOf(list[i]) === (n == null ? null : n)) return i; return -1; }
+  // la retouche qui s'applique à cet emplacement : d'abord « ici », puis « cette page », puis « tout le site »
+  function findE(list, avant, idx) { var v = view(), i = findT(list, avant, v, idx); if (i < 0) i = findT(list, avant, v, null); if (i < 0) i = findT(list, avant, '*', null); return i; }
+  function scopeSel(r, v, idx, whole) {
+    var sel = E('select', { class: 'rt-in' }, [E('option', { value: 'ici', text: 'Seulement cet emplacement' }), E('option', { value: v, text: 'Partout sur cette page (' + v + ')' }), E('option', { value: '*', text: whole })]);
+    sel.value = !r ? 'ici' : nOf(r) != null ? 'ici' : pg(r.page) === '*' ? '*' : v;
+    return sel;
+  }
+  function scopeVal(sel, v, idx) { return sel.value === 'ici' ? { page: v, n: idx } : sel.value === '*' ? { page: '', n: null } : { page: v, n: null }; }
+  function putE(list, cur, avant, sc, obj) {
+    if (cur >= 0) list.splice(cur, 1);
+    var d = findT(list, avant, sc.page || '*', sc.n); if (d >= 0) list.splice(d, 1);
+    if (obj) { obj.avant = avant; obj.page = sc.page; if (sc.n != null) obj.n = sc.n; list.push(obj); }
+  }
   var side = 'right';
   function closePanel() { if (panel) { panel.remove(); panel = null; } }
   function openPanel(e) {
@@ -235,12 +268,11 @@
     var kids = [E('div', { class: 'rt-h' }, [E('strong', { text: 'Retoucher' }), E('span', { class: 'rt-row', style: 'margin:0' }, [E('button', { type: 'button', class: 'rt-b', title: 'Mettre le volet de l’autre côté pour voir la page', onclick: function () { side = side === 'left' ? 'right' : 'left'; if (panel) panel.className = 'rt-ui rt-panel' + (side === 'left' ? ' rt-left' : ''); } }, ['⇆ Côté']), E('button', { type: 'button', class: 'rt-b', onclick: closePanel }, ['Fermer ✕'])])]),
       E('p', { class: 'rt-note', text: 'Le changement s’affiche tout de suite sur le site (aperçu). Rien n’est visible des visiteurs avant « Publier » dans la barre noire.' })];
     texts.forEach(function (n) {
-      var orig = norm(n.__rtOrig != null && n.nodeValue === n.__rtSet ? n.__rtOrig : n.nodeValue);
-      var i = anyT(W.textes, orig), r = i >= 0 ? W.textes[i] : null;
+      var orig = norm(origText(n)), idx = textIdx(n);
+      var i = findE(W.textes, orig, idx), r = i >= 0 ? W.textes[i] : null;
       var ta = E('textarea', { class: 'rt-in', value: r ? r.apres : orig });
       var en = E('input', { class: 'rt-in', value: r ? (r.apresEn || '') : '', placeholder: 'Facultatif' });
-      var scope = E('select', { class: 'rt-in' }, [E('option', { value: v, text: 'Cette page seulement (' + v + ')' }), E('option', { value: '*', text: 'Partout sur le site' })]);
-      scope.value = r ? pg(r.page) : v;
+      var scope = scopeSel(r, v, idx, 'Partout sur le site');
       kids.push(E('div', { class: 'rt-card' }, [
         E('span', { class: 'rt-lbl', text: 'Texte d’origine' }), E('div', { class: 'rt-orig', text: orig }),
         E('span', { class: 'rt-lbl', text: 'Nouveau texte' }), ta,
@@ -248,17 +280,17 @@
         E('span', { class: 'rt-lbl', text: 'Où' }), scope,
         E('div', { class: 'rt-row' }, [
           E('button', { type: 'button', class: 'rt-b pri', onclick: function () {
-            var j = anyT(W.textes, orig); if (j >= 0) W.textes.splice(j, 1);
-            if (norm(ta.value) !== orig || norm(en.value)) W.textes.push({ avant: orig, apres: ta.value.trim(), apresEn: en.value.trim(), page: scope.value === '*' ? '' : scope.value });
+            var j = findE(W.textes, orig, idx);
+            putE(W.textes, j, orig, scopeVal(scope, v, idx), (norm(ta.value) !== orig || norm(en.value)) ? { apres: ta.value.trim(), apresEn: en.value.trim() } : null);
             live(); say('Aperçu mis à jour');
           } }, ['Appliquer']),
-          r ? E('button', { type: 'button', class: 'rt-b dan', onclick: function () { var j = anyT(W.textes, orig); if (j >= 0) W.textes.splice(j, 1); live(); closePanel(); } }, ['Rétablir l’original']) : null
+          r ? E('button', { type: 'button', class: 'rt-b dan', onclick: function () { var j = findE(W.textes, orig, idx); if (j >= 0) W.textes.splice(j, 1); live(); closePanel(); } }, ['Rétablir l’original']) : null
         ])
       ]));
     });
     imgs.forEach(function (im) {
-      var orig = normSrc(im.__rtOrig != null && im.getAttribute('src') === im.__rtSet ? im.__rtOrig : im.getAttribute('src'));
-      var i = (function () { var k = findT(W.images, orig, v); return k >= 0 ? k : findT(W.images, orig, '*'); })(), r = i >= 0 ? W.images[i] : null;
+      var orig = origSrc(im), idx = imgIdx(im);
+      var i = findE(W.images, orig, idx), r = i >= 0 ? W.images[i] : null;
       var F = { x: r && r.x != null ? Number(r.x) : 50, y: r && r.y != null ? Number(r.y) : 50, z: r && r.z ? Number(r.z) : 1 };
       // format de l'emplacement sur la page → format de rognage le plus proche
       var bx = im.getBoundingClientRect(), ar = bx.height ? bx.width / bx.height : 16 / 9;
@@ -270,17 +302,17 @@
       var box = E('div', { class: 'rt-fr' }, [thumb, dot]);
       var zoom = E('input', { type: 'range', min: '1', max: '3', step: '0.05', value: String(F.z), 'aria-label': 'Zoom dans l’emplacement' });
       var url = E('input', { class: 'rt-in', value: r ? (r.apres || '') : '', placeholder: 'assets/… ou adresse d’une image' });
-      var scope = E('select', { class: 'rt-in' }, [E('option', { value: v, text: 'Cette page seulement (' + v + ')' }), E('option', { value: '*', text: 'Partout où cette image apparaît' })]);
-      scope.value = r ? pg(r.page) : v;
-      var same = function () { return Array.prototype.filter.call(document.querySelectorAll('img'), function (x) { return !skipEl(x) && normSrc(x.__rtOrig != null && x.getAttribute('src') === x.__rtSet ? x.__rtOrig : x.getAttribute('src')) === orig; }); };
+      var scope = scopeSel(r, v, idx, 'Partout où cette image apparaît sur le site');
+      var same = function () { return Array.prototype.filter.call(document.querySelectorAll('img'), function (x) { return !skipEl(x) && origSrc(x) === orig; }); };
       var paint = function () {
         dot.style.left = F.x + '%'; dot.style.top = F.y + '%';
-        same().forEach(function (x) { frame(x, F); });
+        same().forEach(function (x) { if (scope.value !== 'ici' || x === im) frame(x, F); });
       };
+      scope.addEventListener('change', function () { save(true); });
       var save = function (quiet) {
-        var k = findT(W.images, orig, scope.value); if (k < 0) k = findT(W.images, orig, scope.value === '*' ? v : '*'); if (k >= 0) W.images.splice(k, 1);
+        var k = findE(W.images, orig, idx);
         var changed = normSrc(url.value) && normSrc(url.value) !== orig, framed = F.x !== 50 || F.y !== 50 || F.z !== 1;
-        if (changed || framed) W.images.push({ avant: orig, apres: changed ? url.value.trim() : '', page: scope.value === '*' ? '' : scope.value, x: Math.round(F.x), y: Math.round(F.y), z: Math.round(F.z * 100) / 100 });
+        putE(W.images, k, orig, scopeVal(scope, v, idx), (changed || framed) ? { apres: changed ? url.value.trim() : '', x: Math.round(F.x), y: Math.round(F.y), z: Math.round(F.z * 100) / 100 } : null);
         thumb.src = cur(); live(); paint(); if (!quiet) say('Aperçu mis à jour');
       };
       var apply = function () { save(false); };
@@ -329,7 +361,7 @@
         E('span', { class: 'rt-lbl', text: 'Nouvelle image' }), url,
         E('span', { class: 'rt-lbl', text: 'Où' }), scope,
         E('div', { class: 'rt-row' }, [up, lib, E('button', { type: 'button', class: 'rt-b', onclick: apply }, ['Appliquer']), file,
-          r ? E('button', { type: 'button', class: 'rt-b dan', onclick: function () { var k = findT(W.images, orig, pg(r.page)); if (k >= 0) W.images.splice(k, 1); live(); closePanel(); } }, ['Rétablir l’original']) : null]),
+          r ? E('button', { type: 'button', class: 'rt-b dan', onclick: function () { var k = findE(W.images, orig, idx); if (k >= 0) W.images.splice(k, 1); live(); closePanel(); } }, ['Rétablir l’original']) : null]),
         grid
       ]));
       setTimeout(paint, 0);
