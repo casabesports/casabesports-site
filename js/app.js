@@ -2314,7 +2314,7 @@ class Component extends DCLogic {
     // ---------- application & immersion ----------
     const appUrl = (typeof window !== 'undefined' && window.CASA_APP_URL) || 'https://claude.ai/artifact/3Z1QbNeNwNDmCizUsTPHJ6';
     const inApp = typeof window !== 'undefined' && !!window.CASA_APP;
-    const arModes = [['lineup', 'Réalité augmentée', 'Ma compo en AR', 'Choisissez le système, nommez vos onze, posez le terrain sur votre table et proposez la compo au Club House.'],
+    const arModes = [['lineup', 'Réalité augmentée', 'Ma compo en AR', 'Neuf disciplines, votre équipe sur le vrai terrain, à son vrai emplacement (photos aériennes, bâtiments, soleil réel), avec le ballon et le règlement. Posez-le sur votre table et proposez la compo au Club House.'],
       ['score', 'Réalité augmentée', 'Tableau d’affichage', 'Le score du direct flotte dans votre salon, à prendre en photo.'],
       ['phare', '3D', 'Phare de Gatteville', 'Le géant de granit de la pointe de Barfleur et son faisceau.'],
       ['photo', 'Caméra', 'Photo supporter', 'Un selfie avec l’écharpe Casa Besports, prêt pour vos réseaux.']].map(([id, tag, title, text]) => ({ tag, title, text, open: () => this.openAR(id) }));

@@ -1067,7 +1067,7 @@ window.CASA_EN = {
   "Numéro de membre": "Membership number",
   "Numéro du certificat": "Certificate number",
   "Vous êtes dans l’application.": "You are in the app.",
-  "Choisissez le système, nommez vos onze, posez le terrain sur votre table et proposez la compo au Club House.": "Choose the formation, name your eleven, place the pitch on your table and share the line-up in the Club House.",
+  "Neuf disciplines, votre équipe sur le vrai terrain, à son vrai emplacement (photos aériennes, bâtiments, soleil réel), avec le ballon et le règlement. Posez-le sur votre table et proposez la compo au Club House.": "Nine sports, your team on the real pitch at its real location (aerial photos, buildings, real sun), with the ball and the rules. Place it on your table and share the line-up in the Club House.",
   "Le score du direct flotte dans votre salon, à prendre en photo.": "The live score floats in your living room, ready for a photo.",
   "Le géant de granit de la pointe de Barfleur et son faisceau.": "The granite giant of the Barfleur headland and its beam.",
   "Un selfie avec l’écharpe Casa Besports, prêt pour vos réseaux.": "A selfie with the Casa Besports scarf, ready for your socials.",
