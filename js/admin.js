@@ -14,6 +14,13 @@
   // ---------- sections modifiables ----------
   var SECTIONS = [
     { key: 'CASA_ARTICLES', label: 'Articles', desc: 'Les articles publiés (Actualités, accueil). Le plus récent en premier.', item: 'title' },
+    { key: 'CASA_CLUBS', label: 'Clubs', desc: 'Les clubs suivis : nom, discipline, ville, photo (pages Clubs, Disciplines, Territoire).', item: 'name' },
+    { key: 'CASA_JOUEURS', label: 'Joueurs', desc: 'Joueurs, entraîneurs et arbitres : nom, numéro, poste, club, photo.', item: 'name' },
+    { key: 'CASA_PARTENAIRES', label: 'Partenaires', desc: 'Les partenaires affichés sur la page Partenaires : nom, secteur, avantage offert.', item: 'name' },
+    { key: 'CASA_ABONNEMENTS', label: 'Abonnements', desc: 'Les formules Casa B+ et La Gazette : nom, prix au mois et à l’année, avantages.', item: 'name' },
+    { key: 'CASA_CLUBHOUSE', label: 'Club House', desc: 'Le message de bienvenue et le sondage de la semaine (question vide = pas de sondage).' },
+    { key: 'CASA_REGLEMENTS', label: 'Règlements des sports', desc: 'Les règles expliquées de chaque discipline (réalité augmentée et pages sport).' },
+    { key: 'CASA_STADES', label: 'Stades (réalité augmentée)', desc: 'Les communes et stades utilisés par « Ma compo en AR ».' },
     { key: 'CASA_GAZETTE_NUMERO', label: 'Gazette : le numéro', desc: 'Couverture, numéro, date, accroche et image de La Gazette du Cotentin.' },
     { key: 'CASA_GAZETTE', label: 'Gazette : les pages', desc: 'Les pages du magazine, dans l’ordre (modèles : article, portrait, number, choc, humeur).', item: 'title' },
     { key: 'CASA_LIEUX', label: 'Lieux', desc: 'Les lieux du territoire : textes et vraies photos (champ « Photo »).', item: 'name' },
@@ -33,6 +40,10 @@
     CASA_LIEUX: { id: '', name: '', short: '', where: '', year: '', img: '', photo: '', hook: '', desc: '', moment: '', sport: '' },
     CASA_PRODUITS: { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: '', gallery: [], colors: ['marine'], sizes: ['S', 'M', 'L', 'XL'], flag: '', isNew: false, desc: '' },
     CASA_VIDEOS: { id: '', tag: '', date: '', img: '', alt: '', title: '', dek: '', url: '', dur: '' },
+    CASA_CLUBS: { id: '', name: '', sport: 'Football', city: '', img: '' },
+    CASA_JOUEURS: { id: '', num: '', name: '', role: 'Attaquant', club: '', clubLabel: '', img: '' },
+    CASA_PARTENAIRES: { id: '', name: '', mono: '', sector: '', city: '', tier: 'Partenaire', color: '#163a5f', since: 2026, perk: '', desc: '', real: true },
+    CASA_ABONNEMENTS: { id: '', name: '', mois: 0, an: 0, perks: [''], casab: false, gazette: '', paper: false },
     CASA_CULTURE: { salle: '3', title: '', author: '', year: '', technique: '', img: '', alt: '', text: '' }
   };
   // Modèle d'un élément ajouté dans une sous-liste vide
@@ -46,6 +57,10 @@
     salle: 'Salle (1 tableau, 2 lieux, 3 photo, 4 textile)', technique: 'Technique', text: 'Texte', texte: 'Texte', surtitre: 'Surtitre', accroche: 'Accroche', avantages: 'Avantages', note: 'Note', collections: 'Collections',
     numero: 'Numéro', mention: 'Mention', legende: 'Légende', sec: 'Cahier', kind: 'Modèle de page', rubric: 'Rubrique', script: 'Sous-titre', kicker: 'Chapeau', paras: 'Paragraphes', t: 'Paragraphe',
     imgCap: 'Légende de l’image', quote: 'Citation', quoteBy: 'Auteur de la citation', modeParDefaut: 'Fond par défaut (aucun, photo, lieux)', pages: 'Pages', paragraphes: 'Paragraphes', paragraphesEn: 'Paragraphes (anglais)',
+    city: 'Ville', num: 'Numéro de maillot', role: 'Poste ou fonction', club: 'Club (identifiant, voir la section Clubs)', clubLabel: 'Nom du club affiché (facultatif)', sector: 'Secteur d’activité', tier: 'Niveau de partenariat',
+    color: 'Couleur du logo (#xxxxxx)', since: 'Partenaire depuis (année)', perk: 'Avantage offert', real: 'Vrai partenaire (affiché)', mois: 'Prix par mois (€)', an: 'Prix par an (€)', perks: 'Avantages', casab: 'Donne accès à Casa B+',
+    gazette: 'Gazette incluse (num, pap, duo ou vide)', paper: 'Envoi papier', bienvenue: 'Message de bienvenue (épinglé)', sondage: 'Sondage de la semaine', question: 'Question (vide = pas de sondage)', options: 'Réponses possibles',
+    intro: 'Introduction', cles: 'Chiffres clés', source: 'Source', lien: 'Texte du lien', lieux: 'Communes', equipes: 'Équipes', exacts: 'Stades précis', lat: 'Latitude', lon: 'Longitude', cherche: 'Mot du nom du stade',
     citation: 'Citation', citationEn: 'Citation (anglais)', dates: 'Frise des dates', annee: 'Année', sections: 'Sections', src: 'Source', why: 'Pourquoi ça compte', big: 'Chiffre', l: 'Unité'
   };
   var LONG = /^(body|bodyEn|desc|texte|text|dek|dekEn|hook|moment|t|kicker|accroche|motif|message|why|citation|citationEn|note)$/;
@@ -127,7 +142,7 @@
     '.cba-msg{white-space:pre-wrap;line-height:1.55;margin:.8rem 0;padding:.9rem;background:var(--surface-2,#f6f6f6)}' +
     '.cba-kv{display:grid;grid-template-columns:110px 1fr;gap:.2rem .8rem;font-size:14px}.cba-kv dt{color:var(--muted,#666)}.cba-kv dd{margin:0;overflow-wrap:anywhere}' +
     '.cba-secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem}' +
-    '.cba-tag{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;padding:.1rem .4rem;background:var(--gold-text,#b8860b);color:#fff;margin-left:.3rem}' +
+    '.cba-tag{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;padding:.1rem .4rem;background:#8a5a00;color:#fff;margin-left:.3rem;vertical-align:middle}' +
     '.cba-ed details{border:1.5px solid var(--line,#ddd);margin:.5rem 0;background:var(--surface,#fff)}' +
     '.cba-ed summary{cursor:pointer;padding:.6rem .8rem;font-weight:800;display:flex;gap:.5rem;align-items:center;list-style:none}' +
     '.cba-ed summary::-webkit-details-marker{display:none}' +
@@ -454,7 +469,7 @@
     var arr = parent[k];
     var rerender = function () { mark(); render(); };
     var root0 = path === S.key;
-    var prims = arr.length ? arr.every(function (x) { return x == null || typeof x !== 'object'; }) : (!root0 && /^(points|paragraphes|paragraphesEn|avantages|gallery|colors|sizes|clubs)$/.test(String(k)));
+    var prims = arr.length ? arr.every(function (x) { return x == null || typeof x !== 'object'; }) : (!root0 && /^(points|paragraphes|paragraphesEn|avantages|gallery|colors|sizes|clubs|perks|options)$/.test(String(k)));
     var tools = function (i) {
       var mv = function (d) { var j = i + d; if (j < 0 || j >= arr.length) return; var t = arr[i]; arr[i] = arr[j]; arr[j] = t; rerender(); };
       return E('span', { class: 'cba-tools' },

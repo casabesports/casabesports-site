@@ -47,6 +47,8 @@ Bon à savoir :
 
 - Ce que vous modifiez ici passe **avant** les fichiers `contenus/` du dépôt. Pour une section modifiée ici, continuez de la modifier ici.
 - Exception utile : les nouveaux articles écrits par la tâche « Rédaction quotidienne » s'affichent quand même, en plus des vôtres.
+- **Clubs**, **Joueurs**, **Partenaires**, **Abonnements** (prix et avantages), **Club House** (message de bienvenue, sondage de la semaine), **Règlements des sports** et **Stades** (réalité augmentée) se gèrent aussi ici (fichiers `contenus/clubs.js`, `joueurs.js`, `partenaires.js`, `abonnements.js`, `clubhouse.js`, `reglements.js`, `stades.js`).
+- Les classements et résultats se saisissent dans l'onglet **Résultats**.
 - **Lieux** : le champ « Photo réelle » remplace l'illustration dessinée par votre vraie photo.
 - **Boutique : présentation** : le bandeau et les affiches de chaque collection (images de présentation).
 - **Gazette** : « le numéro » (couverture) et « les pages » (une page par élément, champ « Modèle de page » : article, portrait, number, choc, humeur).

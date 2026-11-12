@@ -304,7 +304,11 @@ var CasaRedac = (function () {
       { id: 'pg-pg1-2', n: 2, rubric: 'Le mot du club', status: 'afaire', locked: false, inherit: null, els: [{ id: nid('el'), kind: 'article', ref: 'post:p4', x: 0, y: 0, w: 4, h: 3, tpl: 'p-mot', title: '', corps: 9.5 }, { id: nid('el'), kind: 'pub', ref: 'Partenaire [à confirmer]', x: 0, y: 3, w: 4, h: 3, tpl: 'p-pub', title: '', corps: 9.5 }] },
       { id: 'pg-pg1-3', n: 3, rubric: 'Classement', status: 'afaire', locked: false, inherit: null, els: [{ id: nid('el'), kind: 'fixe', ref: 'classement-r2', x: 0, y: 0, w: 2, h: 4, tpl: 'p-fixe', title: '', corps: 9.5 }, { id: nid('el'), kind: 'fixe', ref: 'agenda', x: 2, y: 0, w: 2, h: 4, tpl: 'p-fixe', title: '', corps: 9.5 }, { id: nid('el'), kind: 'fixe', ref: 'meteo', x: 0, y: 4, w: 2, h: 2, tpl: 'p-fixe', title: '', corps: 9.5 }] }
     ] };
-    return { titles: titles, fixes: fixes, editions: [n0, n1, pg], gz: 2 }; // gz 2 : Gazette en trente pages, édition « Le bandeau »
+    // Pas de numéros d'exemple : un N°1 vierge à préparer (les anciens numéros de démonstration sont retirés)
+    void n1; void pg;
+    var vierge = { id: 'e-gz-1', title: 't-gazette', num: 1, label: 'N°1', date: new Date().toISOString().slice(0, 10), status: 'prep', livraisons: {},
+      pages: n0.pages.map(function (p) { return { id: p.id.replace('n0', 'n1'), n: p.n, rubric: p.rubric, status: 'afaire', els: [], inherit: null, locked: false }; }) };
+    return { titles: titles, fixes: fixes, editions: [vierge], gz: 2 }; // gz 2 : Gazette en trente pages, édition « Le bandeau »
   }
   var titleOf = function (prod, id) { return prod.titles.find(function (t) { return t.id === id; }) || prod.titles[0]; };
   var edOf = function (prod, id) { return prod.editions.find(function (e) { return e.id === id; }); };
@@ -499,9 +503,7 @@ var CasaRedac = (function () {
     return lib.concat(vids);
   }
   function defaultFil() {
-    return { active: false, demo: true, partners: [{ id: 'demo', name: 'Rédaction partenaire (démo)', url: 'https://partenaire.exemple', etat: 'Démonstration' }],
-      inbox: [{ id: 'fil-demo-1', from: 'Rédaction partenaire (démo)', at: '2026-10-12T16:40:00.000Z', kind: 'article', title: '[Exemple] Article brut reçu par le Fil', dek: 'Démonstration : un article arrive avec son titre, son chapeau, son texte, son crédit et les droits de sa photo. Rien n’est publié sans votre relecture.', body: 'Ce texte de démonstration montre le format d’échange du Fil entre rédactions.\n\n## Ce qui arrive\n\n- le titre et le chapeau\n- le texte brut, avec ses intertitres\n- le crédit et les droits de la photo\n\nReprenez-le en brouillon : il suit ensuite le circuit normal de relecture.', credit: 'Rédaction partenaire (démo)', photo: null, status: 'nouveau' }],
-      outbox: [] };
+    return { active: false, demo: false, partners: [], inbox: [], outbox: [] };
   }
   R.data = function (self, c) {
     var s = self.state;
