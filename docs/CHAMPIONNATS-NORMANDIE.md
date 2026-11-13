@@ -8,7 +8,7 @@ sans oublier aucun club. Rien n'est inventé : chaque classement et chaque score
 | Discipline | Source officielle | Couverture | État |
 |---|---|---|---|
 | Handball | ffhandball.fr (pages publiques, autorisées par la fédération) | Manche, Ligue de Normandie, Calvados, Orne, Eure, Seine-Maritime, national (clubs normands) | **Branché** : `outils/import_handball.py` |
-| Volley-ball | ffvbbeach.org (résultats FFVolley) | Ligue de Normandie, Manche | Site lisible, à brancher |
+| Volley-ball | ffvbbeach.org (résultats FFVolley) | Comités de la Manche (PTLB50) et du Calvados (PTLB14) | **Branché** : `outils/import_volley.py`. Codes de la Ligue et des autres comités normands à trouver (à ajouter dans `COMITES`) |
 | Rugby | competitions.ffr.fr / monclubhouse.ffr.fr | Normandie | Le site interdit la lecture automatique des pages clubs (robots.txt) : pages compétitions seulement, à étudier |
 | Football | epreuves.fff.fr, District de la Manche | — | **Refus** des accès automatiques (erreur 403), robots.txt de la Ligue de Normandie interdit |
 | Basket | competitions.ffbb.com | — | **Refus** (pare-feu) |

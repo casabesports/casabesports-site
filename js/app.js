@@ -1525,7 +1525,7 @@ class Component extends DCLogic {
       openBoard: () => this.go('live', { dSport: dName, dComp: firstComp(dName), dTab: 'results' }), openShop: () => this.go('shop') };
 
     // ---------- clubs ----------
-    const clubSports = ['Tous', 'Football', 'Basketball', 'Handball', 'Water-polo', 'Multisport'].filter((sp) => ['Tous', 'Football', 'Basketball', 'Water-polo', 'Multisport'].indexOf(sp) >= 0 || D.clubs.some((c) => c.sport === sp));
+    const clubSports = ['Tous', 'Football', 'Basketball', 'Handball', 'Volley-ball', 'Rugby', 'Water-polo', 'Multisport'].filter((sp) => ['Tous', 'Football', 'Basketball', 'Water-polo', 'Multisport'].indexOf(sp) >= 0 || D.clubs.some((c) => c.sport === sp));
     const clubChips = clubSports.map((c) => Object.assign(pill(c === s.clubSport), { label: c, pick: () => this.setState({ clubSport: c }) }));
     const clubList = D.clubs.filter((c) => s.clubSport === 'Tous' || c.sport === s.clubSport).map((c) => clubV(c));
     const curC = clubById(s.clubId) || D.clubs[0] || { id: '', name: 'Aucun club', sport: '', city: '', img: null };
