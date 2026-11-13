@@ -2175,6 +2175,13 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   .gz-tt { display: block; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 26px; line-height: 1.05; margin-bottom: .6rem; }
   .gz-tx { display: block; font-family: 'Source Serif 4', Georgia, serif; font-size: 13px; line-height: 1.5; text-align: justify; hyphens: auto; columns: 2; column-gap: 1rem; column-rule: 1px solid var(--line); }
 }
+/* Clubs : logo dans le rond, infos clés de la carte */
+.club-rond { overflow: hidden; }
+.club-rond img { width: 100%; height: 100%; object-fit: contain; background: #ffffff; padding: 12%; box-sizing: border-box; display: block; }
+.club-infos { display: flex; flex-direction: column; gap: .15rem; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.club-infos .club-niv { font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--text); }
+.club-infos-l { flex-direction: row; flex-wrap: wrap; gap: .3rem 1rem; margin: 0 0 .4rem; font-size: 14px; }
+.club-infos-l:empty { display: none; }
 .art-by { font-size: 13px; color: var(--muted); margin: 0 0 1.5rem; letter-spacing: .01em; }
 .art-by strong { color: var(--text); font-weight: 700; }
 .art-cap { font-size: 12px; line-height: 1.45; color: var(--muted); margin-top: .5rem; }
@@ -3012,7 +3019,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <h2 class="h2" style="font-size: 2rem; margin-bottom: 1.25rem">Clubs</h2>
       <div class="grid4">
         <sc-for list="{{disc.clubs}}" as="c" hint-placeholder-count="4">
-          <button type="button" onClick="{{c.open}}" class="card" style="text-align: left; cursor: pointer; padding: 1rem; display: flex; gap: .9rem; align-items: center"><span class="cond" style="width: 52px; height: 52px; border-radius: 50%; background: {{c.mono}}; color: #fdf6df; display: flex; align-items: center; justify-content: center; font-size: 18px; flex: none; letter-spacing: 0">{{c.initials}}</span><span><span class="ttl" style="display: block; font-size: 20px">{{c.name}}</span><span style="font-size: 13px; color: var(--muted)">{{c.city}}</span></span></button>
+          <button type="button" onClick="{{c.open}}" class="card" style="text-align: left; cursor: pointer; padding: 1rem; display: flex; gap: .9rem; align-items: center"><span class="cond club-rond" style="width: 52px; height: 52px; border-radius: 50%; background: {{c.mono}}; color: #fdf6df; display: flex; align-items: center; justify-content: center; font-size: 18px; flex: none; letter-spacing: 0"><sc-if value="{{c.hasLogo}}" hint-placeholder-val="{{ false }}"><img src="{{c.logo}}" alt="Logo {{c.name}}" loading="lazy"></sc-if><sc-if value="{{c.noLogo}}" hint-placeholder-val="{{ true }}">{{c.initials}}</sc-if></span><span><span class="ttl" style="display: block; font-size: 20px">{{c.name}}</span><span style="font-size: 13px; color: var(--muted)">{{c.city}}</span></span></button>
         </sc-for>
       </div>
     </sc-if>
@@ -3034,9 +3041,9 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <sc-for list="{{clubList}}" as="c" hint-placeholder-count="8">
         <div class="card" style="display: flex; flex-direction: column">
           <button type="button" class="hit" onClick="{{c.open}}" style="padding: 1.2rem 1.2rem .8rem; gap: .8rem">
-            <span class="cond" style="width: 60px; height: 60px; border-radius: 50%; background: {{c.mono}}; color: #fdf6df; display: flex; align-items: center; justify-content: center; font-size: 20px; letter-spacing: 0">{{c.initials}}</span>
+            <span class="cond club-rond" style="width: 60px; height: 60px; border-radius: 50%; background: {{c.mono}}; color: #fdf6df; display: flex; align-items: center; justify-content: center; font-size: 20px; letter-spacing: 0"><sc-if value="{{c.hasLogo}}" hint-placeholder-val="{{ false }}"><img src="{{c.logo}}" alt="Logo {{c.name}}" loading="lazy"></sc-if><sc-if value="{{c.noLogo}}" hint-placeholder-val="{{ true }}">{{c.initials}}</sc-if></span>
             <span class="ttl" style="font-size: 22px">{{c.name}}</span>
-            <span style="font-size: 13px; color: var(--muted)">{{c.sport}} · {{c.city}}</span>
+            <span class="club-infos"><sc-if value="{{c.hasNiveau}}" hint-placeholder-val="{{ false }}"><span class="club-niv">{{c.niveau}}</span></sc-if><span>{{c.lieu}}</span><sc-if value="{{c.hasFondation}}" hint-placeholder-val="{{ false }}"><span>{{c.fondation}}</span></sc-if></span>
           </button>
           <div style="padding: 0 1.2rem 1.2rem"><button type="button" onClick="{{c.toggleFollow}}" class="cond" style="width: 100%; min-height: 44px; border: 1.5px solid var(--ink); border-radius: 0; cursor: pointer; font-size: 15px; background: {{c.fBg}}; color: {{c.fFg}}">{{c.fLabel}}</button></div>
         </div>
@@ -3051,10 +3058,11 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     <sc-if value="{{club.hasImg}}" hint-placeholder-val="{{ false }}"><img class="hero-img" src="{{club.img}}" alt="" style="position: absolute; top: 0; right: 0; width: 60%; height: 100%; object-fit: cover; opacity: {{heroOpacity}}"></sc-if>
     <div class="veilL" style="position: absolute; inset: 0"></div>
     <div class="wrap" style="position: relative; padding-top: 2.5rem; padding-bottom: 3rem; display: flex; flex-wrap: wrap; gap: 1.75rem; align-items: center">
-      <span class="cond" style="width: 110px; height: 110px; border-radius: 50%; background: {{club.mono}}; color: #fdf6df; display: flex; align-items: center; justify-content: center; font-size: 36px; letter-spacing: 0; flex: none">{{club.initials}}</span>
+      <span class="cond club-rond" style="width: 110px; height: 110px; border-radius: 50%; background: {{club.mono}}; color: #fdf6df; display: flex; align-items: center; justify-content: center; font-size: 36px; letter-spacing: 0; flex: none"><sc-if value="{{club.hasLogo}}" hint-placeholder-val="{{ false }}"><img src="{{club.logo}}" alt="Logo {{club.name}}" loading="lazy"></sc-if><sc-if value="{{club.noLogo}}" hint-placeholder-val="{{ true }}">{{club.initials}}</sc-if></span>
       <div style="flex: 1 1 360px">
         <button type="button" class="cond" onClick="{{club.openSport}}" style="font-size: 14px; background: var(--surface-2); border: 0; padding: .5rem .8rem; border-radius: 0; cursor: pointer; color: var(--gold-text); margin-bottom: .6rem; min-height: 36px">{{club.sport}}</button>
         <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem); margin-bottom: .5rem">{{club.name}}</h1>
+        <p class="club-infos club-infos-l"><sc-if value="{{club.hasNiveau}}" hint-placeholder-val="{{ false }}"><span class="club-niv">{{club.niveau}}</span></sc-if><sc-if value="{{club.hasFondation}}" hint-placeholder-val="{{ false }}"><span>{{club.fondation}}</span></sc-if><sc-if value="{{club.hasStade}}" hint-placeholder-val="{{ false }}"><span>{{club.stade}}</span></sc-if></p>
         <button type="button" onClick="{{club.openCity}}" style="background: none; border: 0; padding: 0; cursor: pointer; color: var(--text-2); font-size: 1.05rem; display: inline-flex; align-items: center; gap: .35rem; min-height: 44px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="10" r="3"></circle><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"></path></svg>{{club.city}}</button>
       </div>
       <div style="display: flex; gap: .6rem; flex-wrap: wrap">
@@ -3221,7 +3229,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
             <div style="display: flex; flex-direction: column; gap: .6rem">
           <sc-for list="{{cityClubs}}" as="c" hint-placeholder-count="3">
             <div style="display: flex; border: 1px solid var(--line); border-radius: 0; overflow: hidden">
-              <button type="button" onClick="{{c.open}}" style="flex: 1; display: flex; gap: .8rem; align-items: center; text-align: left; background: var(--surface); border: 0; padding: .7rem .9rem; cursor: pointer"><span class="cond" style="width: 44px; height: 44px; border-radius: 50%; background: {{c.mono}}; color: #fdf6df; display: flex; align-items: center; justify-content: center; font-size: 15px; letter-spacing: 0; flex: none">{{c.initials}}</span><span><span class="ttl" style="display: block; font-size: 19px">{{c.name}}</span><span style="font-size: 13px; color: var(--muted)">{{c.sport}}</span></span></button>
+              <button type="button" onClick="{{c.open}}" style="flex: 1; display: flex; gap: .8rem; align-items: center; text-align: left; background: var(--surface); border: 0; padding: .7rem .9rem; cursor: pointer"><span class="cond club-rond" style="width: 44px; height: 44px; border-radius: 50%; background: {{c.mono}}; color: #fdf6df; display: flex; align-items: center; justify-content: center; font-size: 15px; letter-spacing: 0; flex: none"><sc-if value="{{c.hasLogo}}" hint-placeholder-val="{{ false }}"><img src="{{c.logo}}" alt="Logo {{c.name}}" loading="lazy"></sc-if><sc-if value="{{c.noLogo}}" hint-placeholder-val="{{ true }}">{{c.initials}}</sc-if></span><span><span class="ttl" style="display: block; font-size: 19px">{{c.name}}</span><span style="font-size: 13px; color: var(--muted)">{{c.sport}}</span></span></button>
               <button type="button" onClick="{{c.toggleFollow}}" class="cond" style="border: 0; border-left: 1px solid var(--line); padding: 0 1rem; cursor: pointer; font-size: 14px; background: {{c.fBg}}; color: {{c.fFg}}">{{c.fLabel}}</button>
             </div>
           </sc-for>

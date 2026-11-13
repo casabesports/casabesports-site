@@ -14,7 +14,7 @@
   // ---------- sections modifiables ----------
   var SECTIONS = [
     { key: 'CASA_ARTICLES', label: 'Articles', desc: 'Les articles publiés (Actualités, accueil). Le plus récent en premier.', item: 'title' },
-    { key: 'CASA_CLUBS', label: 'Clubs', desc: 'Les clubs suivis : nom, discipline, ville, photo (pages Clubs, Disciplines, Territoire).', item: 'name' },
+    { key: 'CASA_CLUBS', label: 'Clubs', desc: 'Les clubs suivis : nom, discipline, ville, niveau, année de création, stade, logo (dans le rond) et photo (pages Clubs, Disciplines, Territoire).', item: 'name' },
     { key: 'CASA_JOUEURS', label: 'Joueurs', desc: 'Joueurs, entraîneurs et arbitres : nom, numéro, poste, club, photo.', item: 'name' },
     { key: 'CASA_PARTENAIRES', label: 'Partenaires', desc: 'Les partenaires affichés sur la page Partenaires : nom, secteur, avantage offert.', item: 'name' },
     { key: 'CASA_ABONNEMENTS', label: 'Abonnements', desc: 'Les formules Casa B+ et La Gazette : nom, prix au mois et à l’année, avantages.', item: 'name' },
@@ -43,7 +43,7 @@
     CASA_LIEUX: { id: '', name: '', short: '', where: '', year: '', img: '', photo: '', hook: '', desc: '', moment: '', sport: '' },
     CASA_PRODUITS: { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: '', gallery: [], colors: ['marine'], sizes: ['S', 'M', 'L', 'XL'], flag: '', isNew: false, desc: '' },
     CASA_VIDEOS: { id: '', tag: '', date: '', img: '', alt: '', title: '', dek: '', url: '', dur: '' },
-    CASA_CLUBS: { id: '', name: '', sport: 'Football', city: '', img: '' },
+    CASA_CLUBS: { id: '', name: '', sport: 'Football', city: '', niveau: '', fondation: '', stade: '', logo: '', img: '' },
     CASA_JOUEURS: { id: '', num: '', name: '', role: 'Attaquant', club: '', clubLabel: '', img: '' },
     CASA_ENCARTS: { id: '', nom: '', img: '', site: '', texte: '', actif: true },
     CASA_PARTENAIRES: { id: '', name: '', mono: '', sector: '', city: '', tier: 'Partenaire', color: '#163a5f', since: 2026, perk: '', desc: '', site: '', app: '', real: true },
@@ -78,6 +78,7 @@
     sec: [['À la une', 'À la une'], ['Le terrain', 'Le terrain'], ['Les gens', 'Les gens'], ['Le territoire', 'Le territoire'], ['La pause', 'La pause']]
   };
   var LABELS = {
+    logo: 'Logo du club (affiché dans le rond, image carrée de préférence)', niveau: 'Niveau / championnat (ex. Régional 2, Nationale 3)', fondation: 'Année de création', stade: 'Stade ou salle',
     instagram: 'Instagram : adresse de la page (https://www.instagram.com/…)', youtube: 'YouTube : adresse de la chaîne (https://www.youtube.com/@…)', tiktok: 'TikTok : adresse du compte (https://www.tiktok.com/@…)', facebook: 'Facebook : adresse de la page (https://www.facebook.com/…)', x: 'X (Twitter) : adresse du compte (https://x.com/…)', linkedin: 'LinkedIn : adresse de la page (https://www.linkedin.com/company/…)',
     id: 'Identifiant (unique, sans espace ni accent)', title: 'Titre', titre: 'Titre', titleEn: 'Titre (anglais)', titreEn: 'Titre (anglais)', dek: 'Chapeau', dekEn: 'Chapeau (anglais)',
     body: 'Texte de l’article (## intertitre, > citation, ![légende](image))', bodyEn: 'Texte (anglais)', tag: 'Rubrique', tagEn: 'Rubrique (anglais)', sport: 'Discipline', date: 'Date affichée', read: 'Temps de lecture',
