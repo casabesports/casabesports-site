@@ -1039,7 +1039,7 @@
 
     var world = new THREE.Group(); S.root.add(world);
     var env = Env(S, K); S.env = env; var geo = Geo(S, K, world);
-    var W, H, u = 100, stad = null, tokens = [], ball = null, place = null, token = 0, dioOn = false, y0u = 0;
+    var W, H, u = 100, catcher = null, stad = null, tokens = [], ball = null, place = null, token = 0, dioOn = false, y0u = 0;
     var placeChip = el('div', { class: 'cbar-place' }, ''), attr = el('div', { class: 'cbar-attr' }, ''); stage.appendChild(placeChip); stage.appendChild(attr);
     function fitOf() { return sp().fit || 0.94; }
     function toPos(pct) { var f = fitOf(); return new THREE.Vector3((pct[0] / 100 - 0.5) * W * f, y0u, (pct[1] / 100 - 0.5) * H * f); }
@@ -1061,11 +1061,15 @@
       u = cur.len / 1.05; H = 1.05; W = H * cur.wid / cur.len; world.scale.setScalar(1 / u);
       stad = buildStadium(K, cur, { style: L.style, surface: L.surface, kit: KITS[L.kit], title: (L.team || 'CASA BESPORTS').toUpperCase(), osm: place && place.found && (cur.kind === 'salle' || cur.kind === 'piscine') ? { len: place.len, wid: place.wid } : null });
       world.add(stad.group); y0u = stad.y0 / u;
+      // en mode caméra, l'image réelle (table, sol) devient la plateforme : une ombre douce y pose le terrain
+      if (catcher) { world.remove(catcher); dispose(catcher); }
+      catcher = new THREE.Mesh(new THREE.PlaneGeometry(stad.extent * 2.4, stad.extent * 2.4), new THREE.ShadowMaterial({ opacity: 0.4, depthWrite: false }));
+      catcher.rotation.x = -Math.PI / 2; catcher.position.y = 0.005; catcher.receiveShadow = true; catcher.visible = dioOn; world.add(catcher);
       env.setExtent(stad.extent / u);
       S.view.dist = cur.kind === 'stade' ? 1.55 : cur.kind === 'tennis' ? 1.6 : 1.85; S.placeCam();
       ambience();
     }
-    function loadMap() { if (!place) return; geo.load(place, sp(), L.map, stad.foot, function (a) { attr.textContent = a; }); geo.setDiorama(dioOn); }
+    function loadMap() { if (!place) return; geo.load(place, sp(), L.map, stad.foot, function (a) { attr.textContent = a; }); geo.group.visible = !dioOn; }
     function locate() {
       var my = ++token, b = base(), spec = teamLieu(); place = null; renderChip(); geo.clear(); attr.textContent = '';
       resolvePlace(spec, b).then(function (P) { if (my !== token) return; place = P; buildField(); build(); loadMap(); });
@@ -1111,7 +1115,7 @@
       env.tick(); if (stad) stad.ticks.forEach(function (f) { f(t); });
       if (bounceT) { var k = (performance.now() - bounceT.t0) / 700; if (k > 1) { bounceT.g.position.y = y0u; bounceT = null; } else bounceT.g.position.y = y0u + Math.abs(Math.sin(k * Math.PI * 2.5)) * (1 - k) * 0.03; }
     };
-    S.onCamera = function (on) { dioOn = on; geo.setDiorama(on); env.setDiorama(on); };
+    S.onCamera = function (on) { dioOn = on; geo.group.visible = !on; env.setDiorama(on); if (catcher) catcher.visible = on; setHint(on ? 'Le terrain est posé sur ce que filme votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); };
     function sel(label, opts, cur0, fn) { var s = el('select', { 'aria-label': label, title: label }); opts.forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (String(o[0]) === String(cur0)) op.selected = true; s.appendChild(op); }); s.onchange = function () { fn(s.value); }; return s; }
     function compoText(sep) { var x = sp(), N = names(), C = cap(); return L.team + ' · ' + x.label + ' (' + form() + ')' + sep + N.map(function (n, i) { return (sep === '\n' ? (i + 1) + '. ' : '') + n + (i === C ? ' (C)' : ''); }).join(sep === '\n' ? '\n' : ', '); }
     function setView(p, d, y) { S.view.pitch = p; S.view.dist = d; if (y != null) S.view.yaw = y; S.placeCam(); }
