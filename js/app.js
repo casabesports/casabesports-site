@@ -1658,7 +1658,7 @@ class Component extends DCLogic {
     const imgOf = (id) => (X.products.find((p) => p.id === id) || {}).img;
     const lineStat = (k) => { const ps = X.products.filter((p) => p.line === k); return ps.length ? ps.length + ' pièces · dès ' + eur0(Math.min.apply(null, ps.map((p) => p.price))) : 'Bientôt disponible'; };
     const BQ = window.CASA_BOUTIQUE || {};
-    const shopPres = { surtitre: BQ.surtitre || '', titre: BQ.titre || '', texte: BQ.texte || '', avantages: (BQ.avantages || []).map((t) => ({ t })), note: BQ.note || '', image: BQ.image || 'assets/ph_kit_runes.jpg', imageAlt: BQ.imageAlt || '' };
+    const shopPres = { surtitre: BQ.surtitre || '', titre: BQ.titre || '', texte: BQ.texte || '', avantages: (BQ.avantages || []).map((t) => ({ t: String(t).replace(/Casa B\+/g, 'BE+') })), note: BQ.note || '', image: BQ.image || 'assets/ph_kit_runes.jpg', imageAlt: BQ.imageAlt || '' };
     const shopPosters = [
       ...(BQ.collections || []).map((c) => ({ line: c.nom, kick: c.accroche || '', title: c.titre || c.nom, tag: c.texte || '', img: c.image || (X.products.find((p) => p.line === c.ligne) || {}).img || 'assets/hero.jpg', credits: lineStat(c.ligne) }))
     ].map((d) => Object.assign({ pressed: s.shopLine === d.line ? 'true' : 'false', aria: d.title + ' : afficher la collection ' + d.line, cta: s.shopLine === d.line ? 'Collection affichée' : 'Voir la collection', pick: () => this.setState({ shopLine: s.shopLine === d.line ? 'Tout' : d.line }) }, d));
