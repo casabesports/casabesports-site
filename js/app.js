@@ -35,7 +35,7 @@ function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(lo
 
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
 const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
-const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
 // Lien vers le site d'un partenaire, marqué « vient de Casa Besports » (paramètres utm_ lus par Google Analytics, Matomo, HubSpot…)
 function cbPartnerLink(url, id, kind) {
   const u0 = String(url || '').trim(); if (!u0) return '';
@@ -48,7 +48,25 @@ function cbPartnerLink(url, id, kind) {
   } catch (e) { return ''; }
 }
 function cbRouteOf(st) { const k = CB_ROUTE_ID[st.view]; return '#/' + st.view + (k && st[k] != null ? '/' + encodeURIComponent(st[k]) : ''); }
+// Adresses lisibles (pour Google et le partage) : /actualites/mon-article, /clubs/fceh, /a-propos…
+// Le site reste piloté par les adresses « #/… » ; ces adresses-là ouvrent simplement la bonne page.
+const CB_PATHS = { news: 'actualites', article: 'actualites', videos: 'videos', video: 'videos', clubs: 'clubs', club: 'clubs', players: 'joueurs', player: 'joueurs', shop: 'boutique', product: 'boutique',
+  disciplines: 'disciplines', discipline: 'disciplines', about: 'a-propos', contact: 'contact', partners: 'partenaires', offers: 'abonnements', live: 'le-terrain', clubhouse: 'club-house', culture: 'culture',
+  map: 'territoire', meteo: 'meteo', legal: 'mentions-legales', work: 'travailler-avec-nous' };
+const CB_PATH_DETAIL = { actualites: 'article', videos: 'video', clubs: 'club', joueurs: 'player', boutique: 'product', disciplines: 'discipline' };
+function cbPathOf(st) {
+  const base = CB_PATHS[st.view]; if (!base) return '/';
+  const k = CB_ROUTE_ID[st.view]; return '/' + base + (k && st[k] != null ? '/' + encodeURIComponent(st[k]) : '');
+}
+function cbSite() { try { const u = window.CASA_SITE_URL; return u && /^https?:/.test(u) ? u.replace(/\/$/, '') : location.origin; } catch (e) { return ''; } }
+function cbUrlOf(st) { return cbSite() + cbPathOf(st); }
+function cbParsePath(p) {
+  const m = String(p || '').replace(/\/+$/, '').match(/^\/([a-z-]+)(?:\/([^/]+))?$/); if (!m) return null;
+  if (m[2]) { const v = CB_PATH_DETAIL[m[1]]; if (!v) return null; return { view: v, [CB_ROUTE_ID[v]]: decodeURIComponent(m[2]) }; }
+  const v = Object.keys(CB_PATHS).find((x) => CB_PATHS[x] === m[1] && !CB_ROUTE_ID[x]); return v ? { view: v } : null;
+}
 function cbParseRoute(h) {
+  if (!h || h === '#' || h === '#/') { try { if (location.pathname && location.pathname !== '/' && location.pathname !== '/index.html') return cbParsePath(location.pathname); } catch (e) {} }
   const m = String(h || '').match(/^#\/([a-z]+)(?:\/(.+))?$/); if (!m) return null;
   const r = { view: m[1] }; const k = CB_ROUTE_ID[m[1]]; if (k && m[2]) r[k] = decodeURIComponent(m[2]);
   return r;
@@ -194,7 +212,7 @@ class Component extends DCLogic {
     const markPos = { tee: [62, 9], hoodie: [70, 9], pull: [70, 8], cap: [60, 9], bob: [56, 8], scarf: [64, 8], tote: [84, 9], mug: [72, 10], bottle: [74, 9], stickers: [56, 9], keys: [0, 1], gift: [0, 1], poster: [0, 1] };
 
     // Matchs
-    const M = (id, sport, comp, date, time, home, away, hs, as, status, o) => Object.assign({ id, sport, comp, date, time, home, away, hs, as, status, verified: false, venue: '[Stade]', minute: 0, article: null }, o || {});
+    const M = (id, sport, comp, date, time, home, away, hs, as, status, o) => Object.assign({ id, sport, comp, date, time, home, away, hs, as, status, verified: false, venue: '', minute: 0, article: null }, o || {});
     // Matchs et résultats : contenus/sport.js (onglet Résultats de l'espace administrateur)
     const matches = [];
     // Compétitions affichées dans Le Terrain : toutes dans contenus/sport.js (modifiables ou supprimables dans Espace admin › Résultats)
@@ -580,6 +598,7 @@ class Component extends DCLogic {
       const ci = cities.find((c) => q.includes(n(c).replace(/-/g, ' ').split(' ')[0]));
       const city = ci ? (ci === 'Saint-Lo' ? 'Saint-Lô' : ci) : this.state.wxCity || 'Cherbourg';
       const Wc = (this.state.wxLive || {})[city] || this.wxDemo(city);
+      if (!Wc.live) { this.fetchWeather(city); return { text: 'Les prévisions pour ' + city + ' ne sont pas encore chargées. Réessayez dans un instant.', actions: [act('Ouvrir la météo', () => this.go('meteo'))] }; }
       const [lab] = this.wxIcon(Wc.cur.code); const d1 = Wc.days[1]; const [lab1] = this.wxIcon(d1.code);
       return { text: 'Météo à ' + city + (Wc.live ? '' : ' (estimation)') + ' : ' + lab.toLowerCase() + ', ' + Wc.cur.t + '°, vent ' + Wc.cur.wind + ' km/h.\nDemain : ' + lab1.toLowerCase() + ', ' + d1.min + '° à ' + d1.max + '°, pluie ' + d1.pp + ' %.', actions: [act('Prévisions détaillées', () => { this.setState({ wxCity: city }); this.go('meteo'); })] };
     }
@@ -706,7 +725,7 @@ class Component extends DCLogic {
     return { id: p.id, sport: p.sport, tag: p.tag, date: '6 oct.', read: Math.max(1, Math.round(words / 200)) + ' min', premium: p.premium, img: p.img, alt: p.alt || p.title, title: p.title, dek: p.dek, clubs: p.clubs, points: this.sentences(this.textOf(p.body)).slice(0, 3), body: p.body, author: p.author, fromStudio: true, video: p.video && p.video.url ? p.video : null, related: p.related || [], date: p.online && p.online.at ? (typeof CasaRedac !== 'undefined' ? CasaRedac.fmtDate(p.online.at).replace(/ \d{4}$/, '') : '6 oct.') : '6 oct.' };
   }
 
-  loadTheme() { try { const t = window.localStorage.getItem('cb-theme'); return ['auto', 'light', 'dark', 'noir', 'paper'].indexOf(t) >= 0 ? t : 'auto'; } catch (e) { return 'auto'; } }
+  loadTheme() { try { const t = window.localStorage.getItem('cb-theme'); return ['auto', 'light', 'dark', 'noir', 'paper'].indexOf(t) >= 0 ? t : 'dark'; } catch (e) { return 'dark'; } }
   sysDark() { try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) { return false; } }
   profileKey() { const s = this.state; return s.role ? 'role-' + s.role : (s.email.trim().toLowerCase() || 'compte'); }
   setTheme(id, opts) {
@@ -1076,8 +1095,21 @@ class Component extends DCLogic {
     this.saveCrm(C);
   }
 
+  // Carte de Normandie : téléchargée seulement à l'ouverture de la page Territoire
+  chargeCarte() {
+    if (typeof window === 'undefined' || window.CasaCarte || this._carteLoad || !window.CasaCharge) return;
+    this._carteLoad = true;
+    window.CasaCharge(window.CASA_LIBS.carte).then(() => this.setState({ tick: (this.state.tick || 0) + 1 })).catch(() => { this._carteLoad = false; this.say('La carte n’a pas pu se charger. Vérifiez votre connexion.'); });
+  }
   openAR(mode) {
     const s = this.state;
+    // 3D et réalité augmentée : téléchargées seulement quand on les ouvre
+    if (typeof window !== 'undefined' && !window.CasaAR && window.CasaCharge && !this._arLoad) {
+      this._arLoad = true; this.say('Chargement de la 3D…');
+      window.CasaCharge(window.CASA_LIBS.ar).then(() => { this._arLoad = false; this.openAR(mode); }).catch(() => { this._arLoad = false; this.say('La 3D n’a pas pu se charger. Vérifiez votre connexion.'); });
+      return;
+    }
+    if (this._arLoad) return;
     if (typeof window !== 'undefined' && window.CasaAR && window.CasaAR.open) {
       const all = this.more().matches || [];
       const live = all.find((m) => m.status === 'live') || all.find((m) => m.status === 'done' && m.hs != null);
@@ -1178,7 +1210,9 @@ class Component extends DCLogic {
   syncRoute(st, replace) {
     try {
       const h = st.view === 'home' ? '#/' : cbRouteOf(st);
-      if (location.hash !== h && !(h === '#/' && !location.hash)) history[replace ? 'replaceState' : 'pushState'](null, '', h);
+      // Arrivée par une adresse lisible (/actualites/…) : on la garde telle quelle dans la barre d'adresse
+      if (!location.hash && location.pathname !== '/' && location.pathname.replace(/\/+$/, '') === cbPathOf(st)) return;
+      if (location.hash !== h && !(h === '#/' && !location.hash)) history[replace ? 'replaceState' : 'pushState'](null, '', (location.pathname !== '/' ? '/' : '') + h);
     } catch (e) {}
     this.setTitle(st);
   }
@@ -1201,6 +1235,15 @@ class Component extends DCLogic {
         const A = window.CASA_APROPOS || {};
         md.setAttribute('content', st.view === 'about' ? ((en ? 'Our story: ' : 'Notre histoire : ') + ((en && A.soustitreEn) || A.soustitre || '')) : this._metaDesc);
       }
+      // Adresse officielle et aperçu de partage de la page affichée
+      const a0 = st.view === 'article' ? (this.allArticles() || []).find((a) => a.id === st.articleId) : null;
+      if (a0 && a0.dek && md) md.setAttribute('content', a0.dek);
+      const setMeta = (sel, attr, val) => { const el = document.querySelector(sel); if (el && val) { if (!el.dataset.orig) el.dataset.orig = el.getAttribute(attr) || ''; el.setAttribute(attr, val); } else if (el && el.dataset.orig != null) el.setAttribute(attr, el.dataset.orig); };
+      const can = st.view === 'home' ? '' : cbUrlOf(st);
+      setMeta('link[rel="canonical"]', 'href', can);
+      setMeta('meta[property="og:url"]', 'content', can);
+      setMeta('meta[property="og:title"]', 'content', st.view === 'home' ? '' : document.title);
+      setMeta('meta[property="og:image"]', 'content', a0 && a0.img ? new URL(a0.img, cbSite() + '/').href : '');
     } catch (e) {}
   }
   back() {
@@ -1252,13 +1295,19 @@ class Component extends DCLogic {
     const dateLabel = (iso) => { const d = pd(iso); return d ? DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] : 'Date à confirmer'; };
 
     // ---------- articles / clubs / joueurs ----------
+    const fmtLong = (iso) => { try { return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
     const art = (a) => {
       const saved = s.saved.indexOf(a.id) >= 0;
+      const pubIso = (a.publierLe && new Date(a.publierLe) <= new Date() ? a.publierLe : '') || a.creeLe || '';
+      const modIso = a.modifieLe && (!pubIso || String(a.modifieLe).slice(0, 10) > String(pubIso).slice(0, 10)) ? a.modifieLe : '';
       return Object.assign({}, a, {
         open: () => this.go('article', { articleId: a.id }),
         toggleSave: () => this.toggleIn('saved', a.id, 'Ajouté à vos favoris', 'Retiré de vos favoris'),
         saveFill: saved ? 'currentColor' : 'none', saveColor: saved ? 'var(--gold-text)' : 'var(--text)', saveLabel: saved ? 'Retirer des favoris' : 'Ajouter aux favoris',
-        hasBody: !!a.body, noBody: !a.body, blocks: a.body ? this.blocksOf(a.body) : [], author: a.author || 'la rédaction'
+        hasBody: !!a.body, noBody: !a.body, blocks: a.body ? this.blocksOf(a.body) : [], author: a.author || 'la rédaction',
+        pubLabel: pubIso ? fmtLong(pubIso) : (a.date || ''), hasPub: !!(pubIso || a.date), pubIso: pubIso || '',
+        modLabel: modIso ? fmtLong(modIso) : '', hasMod: !!modIso, credit: a.credit || '', hasCredit: !!a.credit, hasCaption: !!(a.credit || a.alt),
+        teaser: (String(a.body || '').split(/\n\s*\n/).map((x) => x.trim()).find((x) => x && !/^(#|>|!\[|-)/.test(x)) || a.dek || '').slice(0, 320)
       });
     };
     const clubV = (c, i) => {
@@ -1322,7 +1371,7 @@ class Component extends DCLogic {
     const menuGroups = [
       { titre: 'Le sport', items: [['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', 'Tous les sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Météo', 'meteo', 'Prévisions et conditions de jeu']] },
       { titre: 'Vos services', items: [['Abonnements', 'offers', 'Casa B+ et La Gazette'], ['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents']] },
-      { titre: 'La maison', items: [['Partenaires', 'partners', 'Offres entreprises, OlistO et projet immobilier'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
+      { titre: 'La maison', items: [['Travailler avec nous', 'work', 'Clubs, entreprises, organisateurs, sportifs'], ['Partenaires', 'partners', 'Offres entreprises, OlistO et projet immobilier'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
     menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
@@ -1800,7 +1849,7 @@ class Component extends DCLogic {
     const aiTools = [['titles', 'Titres'], ['dek', 'Chapeau'], ['proof', 'Relecture'], ['seo', 'Référencement']].map(([id, label]) => ({ label, run: () => this.setState({ aiOutKind: id }) }));
     const staffRole = isAdmin ? 'admin' : (s.staffRole || 'redacteur');
     const W0 = (s.wxLive || {})[s.wxCity || 'Cherbourg'] || this.wxDemo(s.wxCity || 'Cherbourg');
-    const wxText = (W0.days || []).slice(1, 4).map((d) => new Date(d.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long' }) + ' ' + d.max + '° / ' + d.min + '°, pluie ' + d.pp + ' %').join(' · ') + ' (' + (s.wxCity || 'Cherbourg') + ')';
+    const wxText = !W0.live ? '' : (W0.days || []).slice(1, 4).map((d) => new Date(d.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long' }) + ' ' + d.max + '° / ' + d.min + '°, pluie ' + d.pp + ' %').join(' · ') + ' (' + (s.wxCity || 'Cherbourg') + ')';
     const RXV = typeof CasaRedac !== 'undefined' ? CasaRedac.vals(this, { isAdmin, staffRole, clubRole: s.role === 'club', posts, ARTS, G: this.gazette(), libImgs, videos: D.videos, edRaw, upd, edLocked, checksOf: (p) => this.checksOf(p), blocksOf: (b) => this.blocksOf(b), clubById,
       openEditById: (id) => { const p = this.posts().find((x) => x.id === id); if (p) openEdit(p, 'write'); }, go: (v, x) => this.go(v, x), table: X.tables.r2, matches: allM, wxText }) : { ed: {}, list: { rows: [] }, badges: {}, aide: {}, dlg: {}, wf: {} };
     RXV.crumb = (studioTabs.find((t) => t[0] === s.studioTab) || ['', s.studioTab === 'edit' || s.studioTab === 'cedit' ? 'Éditeur' : 'Tableau de bord'])[1];
@@ -1844,17 +1893,28 @@ class Component extends DCLogic {
     const quick = [['Scores en direct', 'Le Terrain', () => this.go('live', { dTab: 'live' })], ['Classement Régional 2', 'Le Terrain', () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' })], ['Maillot personnalisé', 'Boutique', () => this.go('product', { productId: 'maillot-retro', color: 0, size: null, qty: 1 })], ['La Gazette du Cotentin', 'Abonnement', () => this.go('offers', { offerTab: 'La Gazette' })], ['Pointe-Hague défie Goliath', 'Article', () => this.go('article', { articleId: 'pointe-hague' })], ['Carte des clubs', 'Territoire', () => this.go('map')]].map(([label, kind, go]) => ({ label, kind, go }));
 
     // ---------- fil d'Ariane ----------
-    const labelOf = { news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
+    const labelOf = { news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', work: 'Travailler avec nous', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
     const crumbsRaw = [['Accueil', () => this.go('home')]];
     if (labelOf[activeSec] && activeSec !== 'home') crumbsRaw.push([labelOf[activeSec], () => this.go(activeSec)]);
     const leaf = { article: curA.tag, video: curV.title, discipline: dName, club: curC.name, player: curP.name, checkout: sp.name, product: curPr.name, order: 'Commande', live: s.dSport, cv: 'Mon CV' }[s.view];
     if (leaf) crumbsRaw.push([leaf, null]);
     const crumbs = crumbsRaw.map(([label, go], i) => ({ label, go: go || (() => {}), sep: i < crumbsRaw.length - 1 ? '›' : '' }));
 
+    // ---------- Travailler avec Casa Besports : un seul formulaire (Contact), pré-rempli selon le bouton choisi ----------
+    const toContact = (subject, profile) => () => this.go('contact', { contactSent: false, subject, profile, formError: '' });
+    const workVals = {
+      cols: [
+        { titre: 'Pour les clubs', items: ['Reportages', 'Vidéos de présentation', 'Interviews', 'Résumés de rencontres', 'Formules de couverture médiatique', 'Prestations audiovisuelles'], cta: 'Demander un devis', go: toContact('Demande de devis · club', 'Club') },
+        { titre: 'Pour les entreprises', items: ['Sponsoring', 'Publicité', 'Partenariats', 'Vidéos promotionnelles', 'Communication audiovisuelle', 'Visibilité auprès des communautés sportives locales'], cta: 'Devenir partenaire', go: toContact('Devenir partenaire', 'Entreprise') },
+        { titre: 'Pour les organisateurs', items: ['Couverture d’événements', 'Interviews', 'Captation vidéo', 'Production de contenus'], cta: 'Demander un devis', go: toContact('Demande de devis · événement', 'Autre') },
+        { titre: 'Pour les sportifs', items: ['Portraits', 'Présentations de parcours', 'Interviews', 'Mise en lumière des projets'], cta: 'Proposer une histoire', go: toContact('Proposer une histoire', 'Joueur') }
+      ].map((c) => Object.assign(c, { items: c.items.map((t) => ({ t })) })),
+      devis: toContact('Demande de devis', ''), partenaire: toContact('Devenir partenaire', 'Entreprise'), histoire: toContact('Proposer une histoire', ''), redaction: toContact('Message à la rédaction', '')
+    };
     const footCols = [
       { title: 'Suivre', links: [['Le Terrain', 'live'], ['Actualités', 'news'], ['Vidéos', 'videos'], ['Disciplines', 'disciplines'], ['Clubs', 'clubs'], ['Joueurs', 'players'], ['Territoire', 'map']] },
       { title: 'Boutique & mag', links: [['Boutique', 'shop'], ['Cherwood × Casa', 'shop'], ['Abonnements', 'offers'], ['La Gazette du Cotentin', 'offers']] },
-      { title: 'Casa Besports', links: [['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']] }
+      { title: 'Casa Besports', links: [['Travailler avec nous', 'work'], ['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']] }
     ].map((c) => ({ title: c.title, links: c.links.map(([label, v]) => ({ label, go: () => this.go(v, label === 'Cherwood × Casa' ? { shopLine: 'Cherwood × Casa' } : label === 'La Gazette du Cotentin' ? { offerTab: 'La Gazette' } : {}) })) }));
 
     const progress = { home: 8, news: 20, article: 45, video: 45, videos: 20, disciplines: 20, discipline: 40, clubs: 20, club: 45, players: 20, player: 60, map: 30, offers: 30, checkout: 30 + s.step * 17, partners: 40, about: 40, contact: 50, account: 50, live: 35, shop: 25, product: 55, order: 85, studio: 50, legal: 40, meteo: 30, private: 45, culture: 35, clubhouse: 40, olisto: 45, app: 30, cv: 60, verifier: 40 }[s.view] || 10;
@@ -1867,7 +1927,7 @@ class Component extends DCLogic {
       ['noir', 'Noir absolu', 'Noir', 'Contraste maximal', 'Noir pur et blanc pur : le contraste le plus fort, idéal sur écran OLED.', { bg: '#000000', bar: '#000000', card: '#0a0a0a', line: '#333333', text: '#ffffff', acc: '#ffffff', split: '0%' }],
       ['paper', 'Papier journal', 'Papier', 'Encre et papier', 'Papier grisé, encre noire et texte à empattements, comme un quotidien imprimé.', { bg: '#f1eee7', bar: '#111111', card: '#f8f6f1', line: '#bdb6a7', text: '#111111', acc: '#111111', split: '0%' }]
     ];
-    const curTheme = THEME_DEFS.find((t) => t[0] === s.theme) ? s.theme : 'auto';
+    const curTheme = THEME_DEFS.find((t) => t[0] === s.theme) ? s.theme : 'dark';
     const themes = THEME_DEFS.map(([id, name, short, desc, long, sw]) => {
       const on = id === curTheme;
       return Object.assign({}, sw, { id, name, short, desc, long, checked: on ? 'true' : 'false', isOn: on,
@@ -1920,12 +1980,20 @@ class Component extends DCLogic {
       source: W.live ? 'Prévisions Open-Meteo · en direct' : 'Connexion au service météo…', srcColor: W.live ? 'var(--success)' : 'var(--gold-text)',
       updated: W.live ? 'Mis à jour à ' + new Date(W.at).toTimeString().slice(0, 5) + ' · actualisé toutes les 10 min' : 'Estimation en attendant les données en direct',
       credit: W.live ? 'Données météo : Open-Meteo.com (CC BY 4.0). Vigilance et marées : à relier aux flux officiels Météo-France et SHOM.' : 'Prévisions en cours de chargement depuis Open-Meteo. Si elles n’apparaissent pas, vérifiez votre connexion puis rechargez la page.' };
+    wx.cityTemp = wxCity + (W.live ? ' ' + W.cur.t + '°' : '');
+    // Pas de données en direct : on n'affiche aucun chiffre inventé, seulement des tirets
+    if (!W.live) {
+      const NA = '—';
+      Object.assign(wx, { nowTemp: NA, nowFeels: NA, nowLabel: 'Météo indisponible', nowWind: NA, nowGust: NA, nowHum: NA, nowRain: NA, sunrise: NA, sunset: NA, waves: NA, adviceShort: 'prévisions en cours de chargement',
+        hours: wx.hours.map((h) => Object.assign({}, h, { t: NA, p: NA })), play: play.map((pc) => Object.assign({}, pc, { color: 'var(--muted)', verdict: 'En attente des prévisions' })) });
+      wx.days = days.map((d) => Object.assign({}, d, { max: NA, min: NA, p: NA, w: NA, barL: '0%', barW: '0%' })); wx.next3 = wx.days.slice(1, 4);
+    }
     const wxCities = wxBase.map((c) => Object.assign(pill(c === wxCity), { label: c, pick: () => { this.setState({ wxCity: c }); this.writeLS('cb-wx-city', c); this.fetchWeather(c); } }));
     const wxMine = wxExtra.map((x) => Object.assign(pill(x.name === wxCity), { label: x.name, region: x.region, pick: () => { this.setState({ wxCity: x.name }); this.writeLS('cb-wx-city', x.name); this.fetchWeather(x.name); }, remove: () => this.wxRemove(x.name) }));
     const wxFind = { q: s.wxQ || '', onQ: (e) => { const v = e.target.value; this.setState({ wxQ: v, wxNone: false }); clearTimeout(this._wxT); this._wxT = setTimeout(() => this.wxSearch(v), 350); },
       go: () => this.wxSearch(s.wxQ), busy: !!s.wxSearching, none: !!s.wxNone && !!(s.wxQ || '').trim(), hasRes: (s.wxRes || []).length > 0,
       res: (s.wxRes || []).map((r) => ({ name: r.name, region: r.region, add: () => this.wxAdd(r) })), hasMine: wxMine.length > 0, mine: wxMine };
-    const weather = wxCityNames.slice(0, 4).map((c) => { const Wc = (s.wxLive || {})[c] || this.wxDemo(c); const [label, ico] = this.wxIcon(Wc.cur.code); return { city: c, label, ico, temp: Wc.cur.t + '°', wind: Wc.cur.wind + ' km/h', sun: Wc.cur.code <= 2, cloud: Wc.cur.code === 3 || Wc.cur.code === 45, rain: Wc.cur.code > 45 }; });
+    const weather = wxCityNames.slice(0, 4).map((c) => { const Wc = (s.wxLive || {})[c] || this.wxDemo(c); const [label, ico] = this.wxIcon(Wc.cur.code); return { city: c, label: Wc.live ? label : 'Indisponible', ico, temp: Wc.live ? Wc.cur.t + '°' : '—', wind: Wc.live ? Wc.cur.wind + ' km/h' : '—', sun: Wc.cur.code <= 2, cloud: Wc.cur.code === 3 || Wc.cur.code === 45, rain: Wc.cur.code > 45 }; });
 
     // ---------- accueil modulable ----------
     const MD = this.modDefs();
@@ -1944,6 +2012,9 @@ class Component extends DCLogic {
     const dashProducts = homeProducts.slice(0, 3);
     const dashTable = (X.tables.r2 || []).slice(0, 4).map((r, i) => ({ rank: String(i + 1), team: r.team, pts: String(r.pts) }));
     const dashVideos = videos.slice(0, 2);
+    // Un bloc d'accueil sans contenu réel ne s'affiche pas : il réapparaît dès qu'il y a des matchs, des articles, des produits, un classement ou des vidéos
+    const emptyMod = { live: !dashScores.length, actus: !dashNews.length, shop: !dashProducts.length, table: !dashTable.length, videos: !dashVideos.length };
+    const homeModsShown = homeMods.filter((m) => !emptyMod[m.id] && (m.id !== 'rdv' || m.isRdv));
     const ldj = X.places[now0.getDate() % X.places.length];
     const lieuDuJour = Object.assign({}, ldj, { open: () => this.setState({ placeOpen: true, placeIdx: X.places.indexOf(ldj) }) });
     const quickChips = [['Scores en direct', () => this.go('live', { dTab: 'live' }), '#e03040'], ['Météo', () => this.go('meteo'), '#6aa6c8'], ['Mon quotidien', () => this.go('private'), accent], ['Compo en AR', () => this.openAR('lineup'), '#e03040'], ['Club House', () => this.go('clubhouse'), '#2e9e6b'], ['Culture', () => this.go('culture'), '#b07acc'], ['La Gazette', () => this.setState({ readerOpen: true, page: 0 }), '#9a6410'], ['Boutique', () => this.go('shop'), '#1f3b33']].map(([label, go, dot]) => ({ label, go, dot }));
@@ -2378,6 +2449,7 @@ class Component extends DCLogic {
       setPost: (id, patch, line) => this.setPost(id, patch, line), blocksOf: (b) => this.blocksOf(b), go: (v, x) => this.go(v, x) };
     const CVV = typeof CasaCV !== 'undefined' ? CasaCV.vals(this, rsCtx) : { prof: {}, cv: {}, verif: {}, adm: {}, avatar: '' };
     rsCtx.cvPending = typeof CasaCV !== 'undefined' && canReseau && s.studioTab === 'reseau' ? CasaCV.pending(this) : 0;
+    if (s.view === 'map') this.chargeCarte();
     const RS = typeof CasaReseau !== 'undefined' ? CasaReseau.vals(this, rsCtx) : { carte: {}, com: {}, club: {}, adm: {}, fiche: { has: false, lignes: [] } };
     return {
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
@@ -2394,13 +2466,13 @@ class Component extends DCLogic {
       isHome: V === 'home', isNews: V === 'news', isArticle: V === 'article', isVideos: V === 'videos', isVideo: V === 'video',
       isDisciplines: V === 'disciplines', isDiscipline: V === 'discipline', isClubs: V === 'clubs', isClub: V === 'club',
       isPlayers: V === 'players', isPlayer: V === 'player', isMap: V === 'map', isOffers: V === 'offers', isCheckout: V === 'checkout',
-      isPartners: V === 'partners', isAbout: V === 'about', isContact: V === 'contact', isAccount: V === 'account',
+      isPartners: V === 'partners', isAbout: V === 'about', isWork: V === 'work', work: workVals, isContact: V === 'contact', isAccount: V === 'account',
       isLive: V === 'live', isShop: V === 'shop', isProduct: V === 'product', isOrder: V === 'order',
       showCrumbs: V !== 'home', crumbs, back: () => this.back(),
       goHome: () => this.go('home'), goNews: () => this.go('news'), goVideos: () => this.go('videos'), goClubs: () => this.go('clubs'),
       goPlayers: () => this.go('players'), goMap: () => this.go('map'), goOffers: () => this.go('offers'), goPartners: () => this.go('partners'),
       goLive: () => this.go('live'), goShop: () => this.go('shop'), goGazette: () => this.go('offers', { offerTab: 'La Gazette' }),
-      goContact: () => this.go('contact', { contactSent: false }), goAccount: () => (s.loggedIn ? this.go('account') : this.setState({ loginOpen: true, linkSent: false })),
+      goContact: () => this.go('contact', { contactSent: false }), goWork: () => this.go('work'), goAccount: () => (s.loggedIn ? this.go('account') : this.setState({ loginOpen: true, linkSent: false })),
       goCheckout: () => this.go('checkout', { subPlan: 'casab', step: 1 }),
       openFeatured: () => this.go('article', { articleId: 'pointe-hague' }),
       openESPH: () => this.go('club', { clubId: 'esph', clubTab: 'matchs' }), openAvranches: () => this.go('club', { clubId: 'us-avranches', clubTab: 'matchs' }),
@@ -2422,7 +2494,12 @@ class Component extends DCLogic {
       toggleSummary: () => this.setState({ summary: !s.summary }), summaryOpen: s.summary, summaryPressed: s.summary ? 'true' : 'false', sumBg: s.summary ? 'var(--inv-bg)' : 'var(--surface)', sumFg: s.summary ? 'var(--on-inv)' : 'var(--ink)',
       toggleListen: () => this.setState({ listening: !s.listening }), listening: s.listening, listenPressed: s.listening ? 'true' : 'false', lisBg: s.listening ? 'var(--inv-bg)' : 'var(--surface)', lisFg: s.listening ? 'var(--on-inv)' : 'var(--ink)', listenLabel: s.listening ? 'En écoute' : 'Écouter',
       reactions,
-      share: () => { try { navigator.clipboard.writeText('https://casabesports.fr/'); } catch (e) {} this.say('Lien copié'); },
+      share: () => {
+        // Partage de la page affichée, avec son adresse lisible (/actualites/…)
+        const url = cbUrlOf(s); const title = document.title;
+        if (navigator.share) { navigator.share({ title, url }).catch(() => {}); return; }
+        try { navigator.clipboard.writeText(url).then(() => this.say('Lien copié'), () => this.say(url)); } catch (e) { this.say(url); }
+      },
       vid: curV, otherVideos: videos.filter((v) => v.id !== curV.id), playing: s.playing, notPlaying: !s.playing, togglePlay: () => this.setState({ playing: !s.playing }),
       playLabel: s.playing ? 'Pause' : 'Lire la vidéo', playState: s.playing ? 'Lecture en cours' : 'Prêt à lire', vidDim: s.playing ? 0.9 : 0.75,
       disciplines, disc, clubChips, clubList, club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs',
@@ -2636,7 +2713,7 @@ class Component extends DCLogic {
       isLegal: V === 'legal', legal, legalTabs, legalLinks, legalMaj: 'Dernière mise à jour : ' + ((window.CASA_LEGAL_MAJ) || '—') + ' · Les passages entre [crochets] sont à compléter.',
       weather, wx, wxCities, wxFind, isMeteo: V === 'meteo', goMeteo: () => this.go('meteo'), goPrivate: () => this.go('private'), goTable: () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' }),
       isHomeDash: V === 'home' && s.homeLayout !== 'magazine', isHomeMag: V === 'home' && s.homeLayout === 'magazine', toMagazine: () => this.setLayout('magazine'), toDashboard: () => this.setLayout('dashboard'),
-      homeMods, noModules: homeMods.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
+      homeMods: homeModsShown, noModules: homeModsShown.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
       une, dashScores, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
       isPrivate: V === 'private', pv, pf: pfm, pvTabs, tabBar,
       isApp: V === 'app', appUrl, arModes, installSteps, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: inApp ? 'Vous êtes dans l’application.' : 'Lien privé tant que vous ne l’avez pas partagé. Fonctionne sur téléphone, tablette et ordinateur.',

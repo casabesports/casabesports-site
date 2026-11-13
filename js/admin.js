@@ -36,7 +36,7 @@
   ];
   // Modèle d'un nouvel élément quand la liste est vide
   var TEMPLATES = {
-    CASA_ARTICLES: { id: '', sport: 'Football', tag: '', date: '', read: '3 min', premium: false, img: '', alt: '', title: '', dek: '', clubs: [], points: ['', ''], author: 'La rédaction', body: '', titleEn: '', dekEn: '', bodyEn: '', tagEn: '' },
+    CASA_ARTICLES: { id: '', sport: 'Football', tag: '', date: '', read: '3 min', premium: false, img: '', alt: '', title: '', dek: '', clubs: [], points: ['', ''], author: 'La rédaction', credit: '', body: '', titleEn: '', dekEn: '', bodyEn: '', tagEn: '' },
     CASA_GAZETTE: { id: '', sec: 'À la une', kind: 'article', rubric: '', title: '', script: '', kicker: '', img: '', imgCap: '', imgFormat: 'auto', mise: 'auto', paras: [{ t: '' }], colonnes: 'auto', quote: '', quoteBy: '' },
     CASA_LIEUX: { id: '', name: '', short: '', where: '', year: '', img: '', photo: '', hook: '', desc: '', moment: '', sport: '' },
     CASA_PRODUITS: { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: '', gallery: [], colors: ['marine'], sizes: ['S', 'M', 'L', 'XL'], flag: '', isNew: false, desc: '' },
@@ -78,7 +78,7 @@
     id: 'Identifiant (unique, sans espace ni accent)', title: 'Titre', titre: 'Titre', titleEn: 'Titre (anglais)', titreEn: 'Titre (anglais)', dek: 'Chapeau', dekEn: 'Chapeau (anglais)',
     body: 'Texte de l’article (## intertitre, > citation, ![légende](image))', bodyEn: 'Texte (anglais)', tag: 'Rubrique', tagEn: 'Rubrique (anglais)', sport: 'Discipline', date: 'Date affichée', read: 'Temps de lecture',
     premium: 'Réservé aux abonnés Casa B+', img: 'Image', image: 'Image', photo: 'Photo réelle (remplace l’illustration)', alt: 'Description de l’image', imageAlt: 'Description de l’image', clubs: 'Clubs liés (identifiants)', points: 'Points clés',
-    author: 'Auteur', name: 'Nom', nom: 'Nom', short: 'Nom court / sous-titre', where: 'Lieu', year: 'Année', hook: 'Accroche', desc: 'Description', moment: 'Moment d’histoire', price: 'Prix (€)', type: 'Type',
+    author: 'Auteur', credit: 'Crédit photo', creeLe: 'Créé le (automatique)', modifieLe: 'Mis à jour le (automatique)', name: 'Nom', nom: 'Nom', short: 'Nom court / sous-titre', where: 'Lieu', year: 'Année', hook: 'Accroche', desc: 'Description', moment: 'Moment d’histoire', price: 'Prix (€)', type: 'Type',
     line: 'Collection (clé)', ligne: 'Collection (clé)', gallery: 'Galerie de photos', colors: 'Couleurs', sizes: 'Tailles', flag: 'Pastille', isNew: 'Nouveauté', url: 'Adresse de la vidéo', dur: 'Durée',
     salle: 'Salle (1 tableau, 2 lieux, 3 photo, 4 textile)', technique: 'Technique', text: 'Texte', texte: 'Texte', surtitre: 'Surtitre', accroche: 'Accroche', avantages: 'Avantages', note: 'Note', collections: 'Collections',
     numero: 'Numéro', mention: 'Mention', legende: 'Légende', sec: 'Cahier', kind: 'Carton (modèle de page)', rubric: 'Rubrique', script: 'Sous-titre', kicker: 'Chapeau', paras: 'Paragraphes', t: 'Paragraphe',
@@ -429,6 +429,16 @@
       v.forEach(function (x) { if (x && typeof x === 'object' && !Array.isArray(x) && 'id' in x) { if (!x.id) { var base = x.title || x.name || x.titre || ''; x.id = slug(base) + (k === 'CASA_ARTICLES' ? '-' + new Date().toISOString().slice(0, 10) : ''); if (!base) miss = true; } if (ids[x.id]) dup = x.id; ids[x.id] = 1; } });
       if (miss) { toast('Un élément n’a ni titre ni identifiant', true); render(); return; }
       if (dup) { toast('Identifiant en double : ' + dup, true); render(); return; }
+    }
+    // Articles : date de création et date de mise à jour (affichées sur la page de l'article et lues par Google)
+    if (k === 'CASA_ARTICLES' && Array.isArray(v)) {
+      var now = new Date().toISOString(), before = {};
+      (Array.isArray(window[k]) ? window[k] : []).forEach(function (x) { if (x && x.id) before[x.id] = JSON.stringify(Object.assign({}, x, { modifieLe: '' })); });
+      v.forEach(function (x) {
+        if (!x || typeof x !== 'object') return;
+        if (!x.creeLe) x.creeLe = now;
+        if (before[x.id] && before[x.id] !== JSON.stringify(Object.assign({}, x, { modifieLe: '' })) && !x.brouillon) x.modifieLe = now;
+      });
     }
     S.busy = true; render();
     A.saveContent(k, v).then(function () { draftDel(k); S.busy = false; S.dirty = false; S.work = withFields(k, clone(window[k])); render(); toast('Publié : visible par tous les visiteurs'); }, function (e) { S.busy = false; render(); err(e); });
@@ -1013,7 +1023,7 @@
           E('div', {}, txt(a, 'date', 'Date affichée', { ph: dayLabel() })),
           E('div', {}, txt(a, 'author', 'Auteur'))),
         E('label', { class: 'cba-radio', style: 'margin-top:.7rem' }, E('input', { type: 'checkbox', checked: a.premium || null, onchange: function (e) { a.premium = e.target.checked; mark(); } }), 'Réservé aux abonnés Casa B+')),
-      E('div', { class: 'cba-card' }, E('div', { class: 'cba-lbl', style: 'margin-top:0' }, 'Photo principale'), imgField(a, 'img', '16:9'), txt(a, 'alt', 'Description de la photo (pour les malvoyants et Google)')),
+      E('div', { class: 'cba-card' }, E('div', { class: 'cba-lbl', style: 'margin-top:0' }, 'Photo principale'), imgField(a, 'img', '16:9'), txt(a, 'alt', 'Description de la photo (pour les malvoyants et Google)'), txt(a, 'credit', 'Crédit photo', { ph: 'Nom du photographe ou Casa Besports' })),
       E('div', { class: 'cba-card' }, E('label', { class: 'cba-lbl', style: 'margin-top:0' }, 'Texte de l’article', bodyInfo), bar, ta, assist,
         E('p', { style: 'margin:.4rem 0 0;font-size:13px;color:var(--muted,#666)' }, 'Sélectionnez un mot puis cliquez « Intertitre » ou « Citation » pour le transformer. Vous pouvez coller un texte depuis Word ou une page web : la mise en forme est reprise.')),
       E('div', { class: 'cba-card' }, E('div', { class: 'cba-lbl', style: 'margin-top:0' }, 'Points clés (2 ou 3, affichés en encadré)'), pts),

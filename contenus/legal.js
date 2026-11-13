@@ -9,7 +9,7 @@ window.CASA_LEGAL = {
     ['Éditeur du site', 'Casa Besports, SASU au capital de 1 000 €, immatriculée sous le numéro [SIRET]. Siège : hybride. Directeur de la publication : Kader Allou. Contact : kader.allou.pro@outlook.fr.'],
     ['Hébergement', 'Le site est hébergé par Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis (www.cloudflare.com). Les comptes abonnés sont gérés par Supabase, Inc. ; les données sont stockées dans l’Union européenne (Irlande).'],
     ['Propriété intellectuelle', 'Les textes, photographies, vidéos, illustrations, logos et la charte graphique de Casa Besports sont protégés. Toute reproduction sans autorisation écrite est interdite.'],
-    ['Crédits', 'Photographies : Casa Besports et contributeurs. Données météo : Open-Meteo.com (CC BY 4.0). Fonds de carte : © les contributeurs d’OpenStreetMap. Polices : Google Fonts.']] },
+    ['Crédits', 'Photographies : Casa Besports et contributeurs. Données météo : Open-Meteo.com (CC BY 4.0). Fonds de carte : © les contributeurs d’OpenStreetMap. Polices : Mulish, League Spartan et autres polices libres (SIL Open Font License), hébergées sur ce site.']] },
   confidentialite: { title: 'Politique de confidentialité', sections: [
     ['Responsable du traitement', 'Casa Besports, joignable à kader.allou.pro@outlook.fr.'],
     ['Données collectées', 'Compte abonné : nom, e-mail ou numéro de mobile, mot de passe (chiffré, jamais lisible par Casa Besports). Carte membre : prénom, numéro de membre et date d’inscription. Messages envoyés par les formulaires (contact, partenaires, newsletter, commandes). Préférences d’affichage enregistrées dans votre navigateur.'],

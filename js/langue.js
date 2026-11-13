@@ -3,7 +3,7 @@
  * Le site est écrit en français ; en anglais, chaque texte affiché est remplacé à la volée
  * par sa traduction trouvée dans contenus/anglais.js (window.CASA_EN).
  * Un texte absent du dictionnaire reste en français.
- * Langue choisie : ?lang=en dans l'adresse, sinon le choix du visiteur (bouton FR / EN), sinon la langue du navigateur.
+ * Langue choisie : ?lang=en dans l'adresse, sinon le choix du visiteur (bouton FR / EN), sinon le français.
  */
 (function () {
   var KEY = 'cb-lang';
@@ -11,8 +11,8 @@
   function pick() {
     try { var q = new URLSearchParams(location.search).get('lang'); if (q === 'en' || q === 'fr') return q; } catch (e) {}
     var s = read(); if (s === 'en' || s === 'fr') return s;
-    var n = (navigator.language || 'fr').toLowerCase();
-    return n.indexOf('fr') === 0 ? 'fr' : 'en';
+    // Français par défaut pour tout le monde (et pour les moteurs de recherche) ; l'anglais se choisit avec le bouton EN ou ?lang=en
+    return 'fr';
   }
   var lang = pick();
   var L = window.CasaLang = {

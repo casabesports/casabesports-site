@@ -1,0 +1,10 @@
+# Anciennes adresses de casabesports.fr → nouvelles adresses (redirections définitives, voir docs/MIGRATION-CASABESPORTS-FR.md)
+# Les anciennes fiches clubs et joueurs sont redirigées par functions/[[path]].js.
+/offres            /abonnements       301
+/cgu               /mentions-legales  301
+/cgv               /mentions-legales  301
+/confidentialite   /mentions-legales  301
+/cookies           /mentions-legales  301
+/recherche         /                  301
+/connexion         /#/account         302
+/compte            /#/account         302
