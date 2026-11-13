@@ -2484,7 +2484,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
           <sc-if value="{{hm.isOeuvre}}" hint-placeholder-val="{{ false }}">
             <button type="button" onClick="{{oeuvre.open}}" class="b-card" style="text-align: left; cursor: zoom-in; padding: 0; overflow: hidden">
               <span class="{{oeuvre.scope}}" style="display: block; height: 130px; background: {{oeuvre.bg}}; overflow: hidden"><img src="{{oeuvre.img}}" alt="{{oeuvre.alt}}" style="width: 100%; height: 100%; object-fit: {{oeuvre.fit}}"></span>
-              <span style="display: block; padding: .75rem 1rem 1rem; border-left: 3px solid var(--acc); margin: .6rem 0 0 1rem"><span class="cond" style="font-size: 11px; color: var(--gold-text)">Œuvre du jour · salle {{oeuvre.room}}</span><span class="ttl" style="display: block; font-size: 19px; font-style: italic">{{oeuvre.title}}</span><span style="font-size: 12.5px; color: var(--muted)">{{oeuvre.author}}</span></span>
+              <span style="display: block; padding: .75rem 1rem 1rem; border-left: 3px solid var(--acc); margin: .6rem 0 0 1rem"><span class="cond" style="font-size: 11px; color: var(--gold-text)">Œuvre du jour · salle {{oeuvre.room}}</span><span class="ttl" style="display: block; font-size: 19px">{{oeuvre.title}}</span><span style="font-size: 12.5px; color: var(--muted)">{{oeuvre.author}}</span></span>
             </button>
           </sc-if>
           <!-- Culture & sorties -->
@@ -5555,7 +5555,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <!-- ================= CULTURE : ART, MÉMOIRE ET SPORT ================= -->
 <sc-if value="{{isCulture}}" hint-placeholder-val="{{ false }}">
   <section style="position: relative; overflow: hidden; border-bottom: 1px solid var(--line)">
-    <img src="assets/hero.jpg" alt="" style="position: absolute; top: 0; right: 0; width: 58%; height: 100%; object-fit: cover; object-position: center 35%; opacity: {{heroOpacity}}; filter: var(--img-filter)">
+    <img src="assets/hero.jpg?bandeau-culture" alt="" style="position: absolute; top: 0; right: 0; width: 58%; height: 100%; object-fit: cover; object-position: center 35%; opacity: {{heroOpacity}}; filter: var(--img-filter)">
     <div class="veilL" style="position: absolute; inset: 0"></div>
     <div class="wrap" style="position: relative; padding-top: 2rem; padding-bottom: 2.5rem">
       <div class="eb" style="margin-bottom: .5rem">Culture</div>
@@ -5584,7 +5584,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
                   <span class="{{wk.scope}}" style="display: block; aspect-ratio: {{wk.ratio}}; overflow: hidden; background: {{wk.bg}}"><img class="zimg" src="{{wk.img}}" alt="{{wk.alt}}" style="object-fit: {{wk.fit}}"></span>
                 </button>
                 <figcaption style="margin-top: .8rem; border-left: 2px solid var(--acc); padding-left: .75rem">
-                  <span class="ttl" style="display: block; font-size: 19px; font-style: italic">{{wk.title}}</span>
+                  <span class="ttl" style="display: block; font-size: 19px">{{wk.title}}</span>
                   <span style="display: block; font-size: 13px; color: var(--muted)">{{wk.author}} · {{wk.year}}</span>
                   <span class="cond" style="display: block; font-size: 11px; color: var(--gold-text); margin-top: .2rem">{{wk.technique}}</span>
                 </figcaption>
@@ -5660,7 +5660,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
           <figure style="margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 0; overflow: hidden">
             <div style="position: relative; aspect-ratio: 4 / 3; overflow: hidden"><img class="zimg" src="{{en.img}}" alt="{{en.title}}"><sc-if value="{{en.isTop}}" hint-placeholder-val="{{ false }}"><span class="cond" style="position: absolute; top: 10px; left: 10px; font-size: 11px; background: var(--acc); color: var(--on-acc); padding: .3rem .55rem">En tête</span></sc-if></div>
             <figcaption style="padding: .8rem 1rem 1rem; display: flex; gap: .75rem; align-items: center">
-              <span style="flex: 1"><span class="ttl" style="display: block; font-size: 19px; font-style: italic">{{en.title}}</span><span style="font-size: 13px; color: var(--muted)">{{en.author}}</span></span>
+              <span style="flex: 1"><span class="ttl" style="display: block; font-size: 19px">{{en.title}}</span><span style="font-size: 13px; color: var(--muted)">{{en.author}}</span></span>
               <button type="button" onClick="{{en.vote}}" aria-pressed="{{en.pressed}}" aria-label="{{en.aria}}" style="display: inline-flex; align-items: center; gap: .35rem; min-height: 40px; padding: 0 .75rem; border-radius: 0; cursor: pointer; font-weight: 800; background: {{en.bg}}; color: {{en.fg}}; border: 1.5px solid {{en.border}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="{{en.fill}}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg><span class="num">{{en.votes}}</span></button>
             </figcaption>
           </figure>
@@ -6458,7 +6458,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     <div class="{{wo.scope}}" style="flex: 1 1 520px; max-width: 900px; display: flex; justify-content: center"><img src="{{wo.img}}" alt="{{wo.alt}}" style="max-width: 100%; max-height: 80vh; object-fit: contain; background: {{wo.bg}}; box-shadow: 0 30px 80px rgba(0,0,0,.6)"></div>
     <aside style="flex: 0 1 340px; color: #e9e2d2">
       <div class="cond" style="font-size: 12px; color: #ffffff">Salle {{wo.room}} · œuvre {{wo.pos}}</div>
-      <h2 class="ttl" style="font-size: 34px; color: #fff; font-style: italic; margin: .3rem 0 .4rem">{{wo.title}}</h2>
+      <h2 class="ttl" style="font-size: 34px; color: #fff; margin: .3rem 0 .4rem">{{wo.title}}</h2>
       <div style="font-size: 14px; color: #c9c0ae">{{wo.author}} · {{wo.year}}</div>
       <div class="cond" style="font-size: 12px; color: #d0d0d0; margin: .3rem 0 1rem">{{wo.technique}}</div>
       <p style="line-height: 1.7; margin: 0 0 1.25rem">{{wo.text}}</p>

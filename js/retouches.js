@@ -33,6 +33,9 @@
     });
     R.images.forEach(function (r) {
       if (!r || !normSrc(r.avant)) return;
+      // Page Culture : le bandeau du haut a sa propre adresse ; une ancienne retouche du 1er emplacement « hero.jpg » vise le bandeau, pas le tableau de la salle 1
+      if (pg(r.page) === 'culture' && normSrc(r.avant) === 'assets/hero.jpg' && (r.n == null || r.n === '' || Number(r.n) === 0)) r = Object.assign({}, r, { avant: 'assets/hero.jpg?bandeau-culture', n: null });
+      else if (pg(r.page) === 'culture' && normSrc(r.avant) === 'assets/hero.jpg' && Number(r.n) === 1) r = Object.assign({}, r, { n: 0 });
       var hasFrame = r.x != null || r.y != null || (Number(r.z) || 1) !== 1 || r.taille === 'plein' || r.taille === 'entiere' || r.taille === 'fond';
       if (!normSrc(r.apres) && !hasFrame) return;
       var p = pg(r.page); IM[p] = IM[p] || {};
