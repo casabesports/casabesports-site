@@ -180,7 +180,7 @@ button{font-family:inherit}
 .pulse{animation:cbpulse 1.6s ease-in-out infinite}
 @keyframes cbpulse{0%,100%{opacity:1}50%{opacity:.35}}
 .nav{display:flex}.burger{display:none}
-@media (max-width:1060px){.nav{display:none}.burger{display:inline-flex}.hidesm{display:none !important}.veilL{background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 55%,transparent) 0%,var(--bg) 70%)}}
+@media (max-width:1060px){.hero-img{width:100% !important;left:0 !important}.nav{display:none}.burger{display:inline-flex}.hidesm{display:none !important}.veilL{background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 55%,transparent) 0%,var(--bg) 70%)}}
 @media (prefers-reduced-motion:reduce){.pulse,.run,.float-in{animation:none}html{scroll-behavior:auto}}
 html{scroll-behavior:smooth}
 .fab{position:fixed;z-index:50;border:0;cursor:pointer;box-shadow:0 14px 34px -10px rgba(8,15,26,.45);transition:transform .2s ease}
@@ -2526,7 +2526,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <!-- ================= ACCUEIL ================= -->
 <sc-if value="{{isHomeMag}}" hint-placeholder-val="{{ false }}">
   <section style="position: relative; overflow: hidden; border-bottom: 1px solid var(--line)">
-    <img src="assets/hero.jpg" alt="" style="position: absolute; top: 0; right: 0; width: 62%; height: 100%; object-fit: cover; object-position: center 40%; opacity: {{heroOpacity}}">
+    <img class="hero-img" src="assets/hero.jpg" alt="" style="position: absolute; top: 0; right: 0; width: 62%; height: 100%; object-fit: cover; object-position: center 40%; opacity: {{heroOpacity}}">
     <div class="veilL" style="position: absolute; inset: 0"></div>
     <div class="wrap" style="position: relative; padding-top: 4.5rem; padding-bottom: 3.5rem">
       <div style="max-width: 640px">
@@ -2961,7 +2961,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <!-- ================= CLUB ================= -->
 <sc-if value="{{isClub}}" hint-placeholder-val="{{ false }}">
   <section style="position: relative; overflow: hidden; border-bottom: 1px solid var(--line)">
-    <sc-if value="{{club.hasImg}}" hint-placeholder-val="{{ false }}"><img src="{{club.img}}" alt="" style="position: absolute; top: 0; right: 0; width: 60%; height: 100%; object-fit: cover; opacity: {{heroOpacity}}"></sc-if>
+    <sc-if value="{{club.hasImg}}" hint-placeholder-val="{{ false }}"><img class="hero-img" src="{{club.img}}" alt="" style="position: absolute; top: 0; right: 0; width: 60%; height: 100%; object-fit: cover; opacity: {{heroOpacity}}"></sc-if>
     <div class="veilL" style="position: absolute; inset: 0"></div>
     <div class="wrap" style="position: relative; padding-top: 2.5rem; padding-bottom: 3rem; display: flex; flex-wrap: wrap; gap: 1.75rem; align-items: center">
       <span class="cond" style="width: 110px; height: 110px; border-radius: 50%; background: {{club.mono}}; color: #fdf6df; display: flex; align-items: center; justify-content: center; font-size: 36px; letter-spacing: 0; flex: none">{{club.initials}}</span>
@@ -5555,7 +5555,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <!-- ================= CULTURE : ART, MÉMOIRE ET SPORT ================= -->
 <sc-if value="{{isCulture}}" hint-placeholder-val="{{ false }}">
   <section style="position: relative; overflow: hidden; border-bottom: 1px solid var(--line)">
-    <img src="assets/hero.jpg?bandeau-culture" alt="" style="position: absolute; top: 0; right: 0; width: 58%; height: 100%; object-fit: cover; object-position: center 35%; opacity: {{heroOpacity}}; filter: var(--img-filter)">
+    <img class="hero-img" src="assets/hero.jpg?bandeau-culture" alt="" style="position: absolute; top: 0; right: 0; width: 58%; height: 100%; object-fit: cover; object-position: center 35%; opacity: {{heroOpacity}}; filter: var(--img-filter)">
     <div class="veilL" style="position: absolute; inset: 0"></div>
     <div class="wrap" style="position: relative; padding-top: 2rem; padding-bottom: 2.5rem">
       <div class="eb" style="margin-bottom: .5rem">Culture</div>
@@ -5685,7 +5685,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 <!-- ================= CLUB HOUSE ================= -->
 <sc-if value="{{isClubhouse}}" hint-placeholder-val="{{ false }}">
   <section style="position: relative; overflow: hidden; border-bottom: 1px solid var(--line)">
-    <img src="assets/gz_scarf.jpg" alt="" style="position: absolute; top: 0; right: 0; width: 58%; height: 100%; object-fit: cover; opacity: {{heroOpacity}}; filter: var(--img-filter)">
+    <img class="hero-img" src="assets/gz_scarf.jpg" alt="" style="position: absolute; top: 0; right: 0; width: 58%; height: 100%; object-fit: cover; opacity: {{heroOpacity}}; filter: var(--img-filter)">
     <div class="veilL" style="position: absolute; inset: 0"></div>
     <div class="wrap" style="position: relative; padding-top: 2rem; padding-bottom: 2rem">
       <div class="eb" style="margin-bottom: .5rem">Club House</div>
