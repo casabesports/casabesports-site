@@ -133,6 +133,9 @@ html[data-cb-theme], body { background: var(--bg, #ffffff); }
   [data-cb-theme="auto"] .cb-deep { --inv-bg: #000000; --inv-bg-2: #171717; --inv-line: #2e2e2e; --on-inv: #ffffff; --on-inv-2: #c4c4c4; --gold-on-inv: #ffffff; }
 }
 
+.lv-filtre { display: flex; gap: .35rem; flex-wrap: wrap; margin-bottom: .6rem; align-items: center }
+.lv-filtre-t { font-size: 12px; color: var(--muted); margin-right: .3rem; min-width: 4.2em }
+.lv-filtre button { min-height: 34px; padding: 0 .75rem; border-radius: 0; cursor: pointer; font-weight: 700; font-size: 12.5px }
 </style>
 <style>
 /* Casa Besports — styles globaux (utilisent les variables de theme.css) */
@@ -3375,6 +3378,22 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         <button type="button" role="tab" aria-selected="{{s.pressed}}" class="chip" onClick="{{s.pick}}" style="background: {{s.bg}}; color: {{s.fg}}; border: 1.5px solid {{s.border}}; display: inline-flex; align-items: center; gap: .45rem">{{s.label}}<sc-if value="{{s.hasLive}}" hint-placeholder-val="{{ false }}"><span class="pulse" style="width: 7px; height: 7px; border-radius: 50%; background: #e03040"></span></sc-if></button>
       </sc-for>
     </div>
+    <sc-if value="{{hasZones}}" hint-placeholder-val="{{ false }}">
+      <div class="lv-filtre" role="group" aria-label="Zone">
+        <span class="cond lv-filtre-t">Zone</span>
+        <sc-for list="{{dZones}}" as="z" hint-placeholder-count="3">
+          <button type="button" onClick="{{z.pick}}" aria-pressed="{{z.pressed}}" style="background: {{z.bg}}; color: {{z.fg}}; border: 1.5px solid {{z.border}}">{{z.label}}</button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{hasNivs}}" hint-placeholder-val="{{ false }}">
+      <div class="lv-filtre" role="group" aria-label="Niveau">
+        <span class="cond lv-filtre-t">Niveau</span>
+        <sc-for list="{{dNivs}}" as="z" hint-placeholder-count="2">
+          <button type="button" onClick="{{z.pick}}" aria-pressed="{{z.pressed}}" style="background: {{z.bg}}; color: {{z.fg}}; border: 1.5px solid {{z.border}}">{{z.label}}</button>
+        </sc-for>
+      </div>
+    </sc-if>
     <sc-if value="{{hasComps}}" hint-placeholder-val="{{ true }}">
       <div style="display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: center">
         <span class="cond" style="font-size: 13px; color: var(--muted); margin-right: .3rem">Compétition</span>
@@ -3508,7 +3527,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
               </x-tbody>
             </x-table>
           </div>
-          <p style="font-size: 13px; color: var(--muted); margin-top: .75rem">Victoire 3 pts · nul 1 pt · défaite 0 pt. Les montées / descentes suivent le règlement de la ligue.</p>
+          <p style="font-size: 13px; color: var(--muted); margin-top: .75rem">{{ptsRule}} Les montées et descentes suivent le règlement de la ligue.</p>
         </sc-if>
         <sc-if value="{{noTable}}" hint-placeholder-val="{{ false }}"><p style="color: var(--text-2)">Compétition à élimination directe : pas de classement. Consultez les résultats et l’agenda.</p></sc-if>
       </sc-if>
@@ -7272,6 +7291,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="js/config.js?v=__VERSION__"></script>
 <script src="contenus/equipe.js?v=__VERSION__"></script>
 <script src="contenus/sport.js?v=__VERSION__"></script>
+<script src="contenus/sport-federations.js?v=__VERSION__"></script>
 <script src="contenus/clubs.js?v=__VERSION__"></script>
 <script src="contenus/joueurs.js?v=__VERSION__"></script>
 <script src="contenus/partenaires.js?v=__VERSION__"></script>

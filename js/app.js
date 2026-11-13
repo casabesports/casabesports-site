@@ -182,7 +182,7 @@ class Component extends DCLogic {
     // Joueurs : contenus/joueurs.js (modifiable dans l'espace administrateur)
     const players = ((typeof window !== 'undefined' && Array.isArray(window.CASA_JOUEURS)) ? window.CASA_JOUEURS : []).filter((p) => p && p.id && p.name).map((p) => P(p.id, String(p.num == null ? '' : p.num), p.name, p.role || '', p.club || null, p.clubLabel || ((clubs.find((c) => c.id === p.club) || {}).name) || '', p.img || null));
     const cities = { 'Cherbourg': [49.639, -1.616], 'Tourlaville': [49.638, -1.565], 'Équeurdreville': [49.655, -1.68], 'Beaumont-Hague': [49.664, -1.84], 'Urville-Nacqueville': [49.674, -1.74], 'Gréville-Hague': [49.677, -1.80], 'Digosville': [49.632, -1.525], 'Tollevast': [49.575, -1.628], 'Bricquebec': [49.47, -1.633], 'Valognes': [49.509, -1.47], 'Barfleur': [49.671, -1.264], 'Barneville-Carteret': [49.383, -1.75], 'Carentan': [49.303, -1.248], 'Saint-Lô': [49.116, -1.09], 'Avranches': [48.684, -1.357], 'Bayeux': [49.276, -0.703], 'Flers': [48.75, -0.57], 'Mondeville': [49.175, -0.32] };
-    const sports = ['Football', 'Basketball', 'Rugby', 'Water-polo', 'Trail', 'Natation', 'Pétanque', 'Roller', 'Équitation', 'Ping-pong', 'Kitesurf', 'Karting', 'Judo', 'Volley-ball', 'Tennis', 'Golf', 'Wing foil', 'Hockey', 'Boxe'];
+    const sports = ['Football', 'Basketball', 'Handball', 'Rugby', 'Water-polo', 'Trail', 'Natation', 'Pétanque', 'Roller', 'Équitation', 'Ping-pong', 'Kitesurf', 'Karting', 'Judo', 'Volley-ball', 'Tennis', 'Golf', 'Wing foil', 'Hockey', 'Boxe'];
     // Articles ajoutés par la rédaction ou l'automatisation : contenus/articles.js (les plus récents en premier)
     const extra = (typeof window !== 'undefined' && Array.isArray(window.CASA_ARTICLES) ? window.CASA_ARTICLES : [])
       // brouillon : jamais affiché ; publierLe (date ISO) : affiché à partir de cette date
@@ -194,6 +194,13 @@ class Component extends DCLogic {
     // Clubs supplémentaires : contenus/sport.js
     const SP = (typeof window !== 'undefined' && window.CASA_SPORT) || {};
     (SP.clubs || []).forEach((c) => { if (c && c.id && !clubs.some((x) => x.id === c.id)) clubs.push(C(c.id, c.name, c.sport || 'Football', c.city || '', c.img || null)); });
+    // Clubs lus sur les sites des fédérations : contenus/sport-federations.js (ajoutés s'ils ne sont pas déjà dans la liste)
+    const AUTO = (typeof window !== 'undefined' && window.CASA_SPORT_AUTO) || {};
+    const normN = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    Object.keys(AUTO).forEach((sp) => ((AUTO[sp] || {}).clubs || []).forEach((c) => {
+      if (!c || !c.id || clubs.some((x) => x.id === c.id || (x.sport === (c.sport || sp) && normN(x.name) === normN(c.name)))) return;
+      clubs.push(Object.assign(C(c.id, c.name, c.sport || sp, c.city || '', c.img || null), { logo: c.logo || '', niveau: c.niveau || '', fondation: c.fondation || '', stade: c.stade || '', zone: c.zone || '' }));
+    }));
     this._d = { articles: allArts, videos, clubs, players, cities, sports };
     return this._d;
   }
@@ -242,9 +249,26 @@ class Component extends DCLogic {
     Object.keys(SP.tables || {}).forEach((k) => { tables[k] = (SP.tables[k] || []).map((r) => T(r.team, r.j || 0, r.g || 0, r.n || 0, r.p || 0, r.diff == null ? '' : String(r.diff), r.pts || 0, r.form || '')); });
     (SP.matches || []).forEach((m) => { if (m && m.id && !matches.some((x) => x.id === m.id)) matches.push(M(m.id, m.sport, m.comp, m.date || null, m.time || '', m.home, m.away, m.hs == null ? null : m.hs, m.as == null ? null : m.as, m.status || (m.hs == null ? 'up' : 'done'), { verified: true, venue: m.venue || '', source: m.source || '' })); });
     Object.keys(SP.comps || {}).forEach((sp) => { comps[sp] = (comps[sp] || []).filter((c) => !(SP.comps[sp] || []).some((n) => n.id === c.id)).concat(SP.comps[sp] || []); });
+    // Championnats lus automatiquement sur les sites des fédérations (contenus/sport-federations.js) :
+    // ce qui est saisi dans Espace admin › Résultats reste prioritaire (même id de compétition ou de match).
+    const AUTO = (typeof window !== 'undefined' && window.CASA_SPORT_AUTO) || {};
+    const autoTeamClub = {};
+    Object.keys(AUTO).forEach((sp) => {
+      const A = AUTO[sp] || {};
+      const known = comps[sp] || [];
+      comps[sp] = known.concat((A.comps || []).filter((c) => c && c.id && !known.some((k) => k.id === c.id)));
+      Object.keys(A.tables || {}).forEach((k) => { if (!tables[k]) tables[k] = (A.tables[k] || []).map((r) => T(r.team, r.j || 0, r.g || 0, r.n || 0, r.p || 0, r.diff == null ? '' : String(r.diff), r.pts || 0, r.form || '')); });
+      const srcOf = {}; (A.comps || []).forEach((c) => { if (c && c.id) srcOf[c.id] = c.source || ''; });
+      const seen = {}; matches.forEach((x) => { seen[x.id] = 1; });
+      (A.matches || []).forEach((m) => { if (m && m.id && !seen[m.id]) { seen[m.id] = 1; matches.push(M(m.id, m.sport || sp, m.comp, m.date || null, m.time || '', m.home, m.away, m.hs == null ? null : m.hs, m.as == null ? null : m.as, m.status || (m.hs == null ? 'up' : 'done'), { verified: true, venue: m.venue || '', source: m.source || srcOf[m.comp] || '' })); } });
+      Object.assign(autoTeamClub, A.teamClub || {});
+    });
     const teamClubBase = { 'FCEH': 'fceh', 'AS Tourlaville Football': 'as-tourlaville', 'CS Carentan Football': 'cs-carentan', 'US Côte des Isles': 'us-cote-isles', 'SC Douve Divette': 'sc-douve', 'UC Briquebec': 'uc-briquebec', 'ES Pointe Hague': 'esph', 'US Avranches MSM': 'us-avranches', 'USON Mondeville FC': 'uson-mondeville', 'AS Cherbourg Football': 'as-cherbourg', 'Les Marais Cherbourg Basketball': 'marais-basket', 'UST Basket': 'ust-basket', 'PL Tourlaville Basket': 'pl-tourlaville', 'La Valognaise Basket': 'valognaise', 'Basket Club de la Hague': 'bc-hague', 'Les Redoutables': 'redoutables' };
     const clubNames = {}; this.data().clubs.forEach((c) => { clubNames[c.name] = c.id; });
-    const teamClub = Object.assign({}, teamClubBase, clubNames, SP.teamClub || {});
+    // une équipe lue chez la fédération dont le club existait déjà sur le site pointe vers la fiche existante
+    const dClubs = this.data().clubs, nrm = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    Object.keys(autoTeamClub).forEach((t) => { if (!dClubs.some((c) => c.id === autoTeamClub[t])) { const base = nrm(t).replace(/ (\d|[a-h])$/, ''); const hit = dClubs.find((c) => nrm(c.name) === base); if (hit) autoTeamClub[t] = hit.id; else delete autoTeamClub[t]; } });
+    const teamClub = Object.assign({}, teamClubBase, autoTeamClub, clubNames, SP.teamClub || {});
     // Formules d'abonnement : contenus/abonnements.js (modifiable dans l'espace administrateur)
     const subPlans = {};
     ((typeof window !== 'undefined' && window.CASA_ABONNEMENTS) || []).forEach((f) => { if (f && f.id) subPlans[f.id] = Object.assign({ name: f.id, mois: 0, an: 0, perks: [], casab: false, gazette: null, paper: false }, f, { gazette: f.gazette || null, perks: (f.perks || []).filter(Boolean) }); });
@@ -1501,7 +1525,7 @@ class Component extends DCLogic {
       openBoard: () => this.go('live', { dSport: dName, dComp: firstComp(dName), dTab: 'results' }), openShop: () => this.go('shop') };
 
     // ---------- clubs ----------
-    const clubSports = ['Tous', 'Football', 'Basketball', 'Water-polo', 'Multisport'];
+    const clubSports = ['Tous', 'Football', 'Basketball', 'Handball', 'Water-polo', 'Multisport'].filter((sp) => ['Tous', 'Football', 'Basketball', 'Water-polo', 'Multisport'].indexOf(sp) >= 0 || D.clubs.some((c) => c.sport === sp));
     const clubChips = clubSports.map((c) => Object.assign(pill(c === s.clubSport), { label: c, pick: () => this.setState({ clubSport: c }) }));
     const clubList = D.clubs.filter((c) => s.clubSport === 'Tous' || c.sport === s.clubSport).map((c) => clubV(c));
     const curC = clubById(s.clubId) || D.clubs[0] || { id: '', name: 'Aucun club', sport: '', city: '', img: null };
@@ -1545,10 +1569,21 @@ class Component extends DCLogic {
     const cityClubs = D.clubs.filter((c) => c.city === s.city).map((c) => clubV(c));
 
     // ---------- TERRAIN ----------
-    const boardSports = ['Football', 'Basketball', 'Water-polo', 'Rugby', 'Trail', 'Natation', 'Judo', 'Tennis'];
+    const boardSports = ['Football', 'Basketball', 'Handball', 'Water-polo', 'Rugby', 'Volley-ball', 'Trail', 'Natation', 'Judo', 'Tennis'].filter((sp, i, a) => a.indexOf(sp) === i && (['Football', 'Basketball', 'Water-polo', 'Rugby', 'Trail', 'Natation', 'Judo', 'Tennis'].indexOf(sp) >= 0 || (X.comps[sp] || []).length));
     const dSports = boardSports.map((sp) => Object.assign(pill(sp === s.dSport), { label: sp, hasLive: allM.some((m) => m.sport === sp && m.status === 'live'),
-      pick: () => this.setState({ dSport: sp, dComp: firstComp(sp), matchId: null }) }));
-    const compsHere = X.comps[s.dSport] || [];
+      pick: () => this.setState({ dSport: sp, dComp: firstComp(sp), dZone: '', dNiv: '', matchId: null }) }));
+    // championnats des fédérations : filtres par zone (Manche d'abord, puis le reste de la Normandie) et par niveau
+    const compsAll = X.comps[s.dSport] || [];
+    const spAuto = ((typeof window !== 'undefined' && window.CASA_SPORT_AUTO) || {})[s.dSport] || {};
+    const spMaj = spAuto.maj || (window.CASA_SPORT || {}).maj;
+    const zonesHere = compsAll.map((c) => c.zone).filter((z, i, a) => z && a.indexOf(z) === i);
+    const dZoneId = zonesHere.indexOf(s.dZone) >= 0 ? s.dZone : (zonesHere[0] || '');
+    const inZone = compsAll.filter((c) => !zonesHere.length || (c.zone || '') === dZoneId);
+    const nivsHere = inZone.map((c) => c.niveau).filter((z, i, a) => z && a.indexOf(z) === i);
+    const dNivId = nivsHere.indexOf(s.dNiv) >= 0 ? s.dNiv : (nivsHere.indexOf('Seniors') >= 0 ? 'Seniors' : (nivsHere[0] || ''));
+    const compsHere = inZone.filter((c) => nivsHere.length < 2 || (c.niveau || '') === dNivId);
+    const dZones = zonesHere.length > 1 ? zonesHere.map((z) => Object.assign(pill(z === dZoneId), { label: z, pick: () => this.setState({ dZone: z, dNiv: '', dComp: null }) })) : [];
+    const dNivs = nivsHere.length > 1 ? nivsHere.map((z) => Object.assign(pill(z === dNivId), { label: z, pick: () => this.setState({ dNiv: z, dComp: null }) })) : [];
     const dCompId = compsHere.some((c) => c.id === s.dComp) ? s.dComp : (compsHere[0] || {}).id;
     const dComps = compsHere.map((c) => Object.assign(pill(c.id === dCompId), { label: c.label, pick: () => this.setState({ dComp: c.id }) }));
     const inComp = allM.filter((m) => m.sport === s.dSport && m.compId === dCompId);
@@ -2577,8 +2612,9 @@ class Component extends DCLogic {
       disciplines, disc, clubChips, clubList, club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs',
       roleChips, playerList, pl, cityName: s.city, cityClubs,
       // terrain
-      dSports, dComps, hasComps: dComps.length > 0, dSportName: s.dSport, dTabs, sportEmpty: !sportHasData, sportHasData,
-      isDemo: sportHasData, srcLabel: ((window.CASA_SPORT || {}).maj ? 'Données officielles · mise à jour ' + new Date(window.CASA_SPORT.maj).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : 'Résultats vérifiés par la rédaction'), srcColor: 'var(--gold-text)', updatedAgo: (window.CASA_SPORT || {}).maj ? new Date(window.CASA_SPORT.maj).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—',
+      dSports, dComps, hasComps: dComps.length > 0, dZones, hasZones: dZones.length > 0, dNivs, hasNivs: dNivs.length > 0, dSportName: s.dSport, dTabs, sportEmpty: !sportHasData, sportHasData,
+      isDemo: sportHasData, srcLabel: (spMaj ? 'Données officielles' + (spAuto.source ? ' (' + spAuto.source.replace(/\s*\(.*\)$/, '') + ')' : '') + ' · mise à jour ' + new Date(spMaj).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : 'Résultats vérifiés par la rédaction'), srcColor: 'var(--gold-text)', updatedAgo: spMaj ? new Date(spMaj).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—',
+      ptsRule: ({ Handball: 'Victoire 3 pts · nul 2 pts · défaite 1 pt (barème de la FFHandball, pénalités déduites).', Basketball: 'Victoire 2 pts · défaite 1 pt.', Rugby: 'Victoire 4 pts · nul 2 pts · défaite 0 pt, plus les points de bonus.', 'Volley-ball': 'Points selon le score en sets (barème FFVolley).' })[s.dSport] || 'Victoire 3 pts · nul 1 pt · défaite 0 pt.',
       tabLive: s.dTab === 'live', tabResults: s.dTab === 'results', tabAgenda: s.dTab === 'agenda', tabCal: s.dTab === 'cal', tabTable: s.dTab === 'table', tabPronos: s.dTab === 'pronos',
       liveCards, noLive: liveM.length === 0, resultRows, noResults: resultRows.length === 0, agendaRows, noAgenda: agendaRows.length === 0,
       hasTable: !!tbl, noTable: !tbl, tableRows,
