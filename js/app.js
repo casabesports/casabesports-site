@@ -35,7 +35,7 @@ function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(lo
 
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
 const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
-const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
 // Lien vers le site d'un partenaire, marqué « vient de Casa Besports » (paramètres utm_ lus par Google Analytics, Matomo, HubSpot…)
 function cbPartnerLink(url, id, kind) {
   const u0 = String(url || '').trim(); if (!u0) return '';
@@ -1371,7 +1371,7 @@ class Component extends DCLogic {
     const menuGroups = [
       { titre: 'Le sport', items: [['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', 'Tous les sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Météo', 'meteo', 'Prévisions et conditions de jeu']] },
       { titre: 'Vos services', items: [['Abonnements', 'offers', 'Casa B+ et La Gazette'], ['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents']] },
-      { titre: 'La maison', items: [['Partenaires', 'partners', 'Offres entreprises, OlistO et projet immobilier'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
+      { titre: 'La maison', items: [['Travailler avec nous', 'work', 'Clubs, entreprises, organisateurs, sportifs'], ['Partenaires', 'partners', 'Offres entreprises, OlistO et projet immobilier'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
     menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
@@ -1893,17 +1893,28 @@ class Component extends DCLogic {
     const quick = [['Scores en direct', 'Le Terrain', () => this.go('live', { dTab: 'live' })], ['Classement Régional 2', 'Le Terrain', () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' })], ['Maillot personnalisé', 'Boutique', () => this.go('product', { productId: 'maillot-retro', color: 0, size: null, qty: 1 })], ['La Gazette du Cotentin', 'Abonnement', () => this.go('offers', { offerTab: 'La Gazette' })], ['Pointe-Hague défie Goliath', 'Article', () => this.go('article', { articleId: 'pointe-hague' })], ['Carte des clubs', 'Territoire', () => this.go('map')]].map(([label, kind, go]) => ({ label, kind, go }));
 
     // ---------- fil d'Ariane ----------
-    const labelOf = { news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
+    const labelOf = { news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', work: 'Travailler avec nous', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
     const crumbsRaw = [['Accueil', () => this.go('home')]];
     if (labelOf[activeSec] && activeSec !== 'home') crumbsRaw.push([labelOf[activeSec], () => this.go(activeSec)]);
     const leaf = { article: curA.tag, video: curV.title, discipline: dName, club: curC.name, player: curP.name, checkout: sp.name, product: curPr.name, order: 'Commande', live: s.dSport, cv: 'Mon CV' }[s.view];
     if (leaf) crumbsRaw.push([leaf, null]);
     const crumbs = crumbsRaw.map(([label, go], i) => ({ label, go: go || (() => {}), sep: i < crumbsRaw.length - 1 ? '›' : '' }));
 
+    // ---------- Travailler avec Casa Besports : un seul formulaire (Contact), pré-rempli selon le bouton choisi ----------
+    const toContact = (subject, profile) => () => this.go('contact', { contactSent: false, subject, profile, formError: '' });
+    const workVals = {
+      cols: [
+        { titre: 'Pour les clubs', items: ['Reportages', 'Vidéos de présentation', 'Interviews', 'Résumés de rencontres', 'Formules de couverture médiatique', 'Prestations audiovisuelles'], cta: 'Demander un devis', go: toContact('Demande de devis · club', 'Club') },
+        { titre: 'Pour les entreprises', items: ['Sponsoring', 'Publicité', 'Partenariats', 'Vidéos promotionnelles', 'Communication audiovisuelle', 'Visibilité auprès des communautés sportives locales'], cta: 'Devenir partenaire', go: toContact('Devenir partenaire', 'Entreprise') },
+        { titre: 'Pour les organisateurs', items: ['Couverture d’événements', 'Interviews', 'Captation vidéo', 'Production de contenus'], cta: 'Demander un devis', go: toContact('Demande de devis · événement', 'Autre') },
+        { titre: 'Pour les sportifs', items: ['Portraits', 'Présentations de parcours', 'Interviews', 'Mise en lumière des projets'], cta: 'Proposer une histoire', go: toContact('Proposer une histoire', 'Joueur') }
+      ].map((c) => Object.assign(c, { items: c.items.map((t) => ({ t })) })),
+      devis: toContact('Demande de devis', ''), partenaire: toContact('Devenir partenaire', 'Entreprise'), histoire: toContact('Proposer une histoire', ''), redaction: toContact('Message à la rédaction', '')
+    };
     const footCols = [
       { title: 'Suivre', links: [['Le Terrain', 'live'], ['Actualités', 'news'], ['Vidéos', 'videos'], ['Disciplines', 'disciplines'], ['Clubs', 'clubs'], ['Joueurs', 'players'], ['Territoire', 'map']] },
       { title: 'Boutique & mag', links: [['Boutique', 'shop'], ['Cherwood × Casa', 'shop'], ['Abonnements', 'offers'], ['La Gazette du Cotentin', 'offers']] },
-      { title: 'Casa Besports', links: [['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']] }
+      { title: 'Casa Besports', links: [['Travailler avec nous', 'work'], ['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']] }
     ].map((c) => ({ title: c.title, links: c.links.map(([label, v]) => ({ label, go: () => this.go(v, label === 'Cherwood × Casa' ? { shopLine: 'Cherwood × Casa' } : label === 'La Gazette du Cotentin' ? { offerTab: 'La Gazette' } : {}) })) }));
 
     const progress = { home: 8, news: 20, article: 45, video: 45, videos: 20, disciplines: 20, discipline: 40, clubs: 20, club: 45, players: 20, player: 60, map: 30, offers: 30, checkout: 30 + s.step * 17, partners: 40, about: 40, contact: 50, account: 50, live: 35, shop: 25, product: 55, order: 85, studio: 50, legal: 40, meteo: 30, private: 45, culture: 35, clubhouse: 40, olisto: 45, app: 30, cv: 60, verifier: 40 }[s.view] || 10;
@@ -2455,13 +2466,13 @@ class Component extends DCLogic {
       isHome: V === 'home', isNews: V === 'news', isArticle: V === 'article', isVideos: V === 'videos', isVideo: V === 'video',
       isDisciplines: V === 'disciplines', isDiscipline: V === 'discipline', isClubs: V === 'clubs', isClub: V === 'club',
       isPlayers: V === 'players', isPlayer: V === 'player', isMap: V === 'map', isOffers: V === 'offers', isCheckout: V === 'checkout',
-      isPartners: V === 'partners', isAbout: V === 'about', isContact: V === 'contact', isAccount: V === 'account',
+      isPartners: V === 'partners', isAbout: V === 'about', isWork: V === 'work', work: workVals, isContact: V === 'contact', isAccount: V === 'account',
       isLive: V === 'live', isShop: V === 'shop', isProduct: V === 'product', isOrder: V === 'order',
       showCrumbs: V !== 'home', crumbs, back: () => this.back(),
       goHome: () => this.go('home'), goNews: () => this.go('news'), goVideos: () => this.go('videos'), goClubs: () => this.go('clubs'),
       goPlayers: () => this.go('players'), goMap: () => this.go('map'), goOffers: () => this.go('offers'), goPartners: () => this.go('partners'),
       goLive: () => this.go('live'), goShop: () => this.go('shop'), goGazette: () => this.go('offers', { offerTab: 'La Gazette' }),
-      goContact: () => this.go('contact', { contactSent: false }), goAccount: () => (s.loggedIn ? this.go('account') : this.setState({ loginOpen: true, linkSent: false })),
+      goContact: () => this.go('contact', { contactSent: false }), goWork: () => this.go('work'), goAccount: () => (s.loggedIn ? this.go('account') : this.setState({ loginOpen: true, linkSent: false })),
       goCheckout: () => this.go('checkout', { subPlan: 'casab', step: 1 }),
       openFeatured: () => this.go('article', { articleId: 'pointe-hague' }),
       openESPH: () => this.go('club', { clubId: 'esph', clubTab: 'matchs' }), openAvranches: () => this.go('club', { clubId: 'us-avranches', clubTab: 'matchs' }),

@@ -2106,6 +2106,21 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
     .fab-lieu .fab-lieu-txt{display:none}
     .fab-ia{width:52px!important;height:52px!important}
   }
+.bn-qui { font-size: 13px; line-height: 1.45; color: var(--muted); margin: .6rem 0 0; max-width: 62ch; }
+.bn-qui .lnk { display: inline; min-height: 0; font-size: 13px; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--text); text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; padding: 0; cursor: pointer; font-family: var(--font-body); }
+.wk-intro { font-size: 14px; line-height: 1.5; color: var(--text-2); max-width: 60ch; margin: 0 0 2rem; }
+.wk-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+@media (max-width: 1060px) { .wk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .wk-grid { grid-template-columns: 1fr; } }
+.wk-col { border: 1px solid var(--line); background: var(--surface); padding: 1.25rem 1.2rem; display: flex; flex-direction: column; }
+.wk-h { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 15px; letter-spacing: .02em; margin: 0 0 .8rem; color: var(--ink); }
+.wk-list { list-style: none; margin: 0 0 1.1rem; padding: 0; font-size: 13.5px; line-height: 1.45; color: var(--text-2); flex: 1; }
+.wk-list li { padding: .32rem 0; border-bottom: 1px solid var(--line); }
+.wk-list li:last-child { border-bottom: 0; }
+.wk-btn { width: 100%; min-height: 44px; font-size: 13px; }
+.wk-cta { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; }
+.wk-cta-b { display: flex; flex-wrap: wrap; gap: .5rem; }
+.wk-cta-b .btn { min-height: 42px; font-size: 13px; }
 .art-by { font-size: 13px; color: var(--muted); margin: 0 0 1.5rem; letter-spacing: .01em; }
 .art-by strong { color: var(--text); font-weight: 700; }
 .art-cap { font-size: 12px; line-height: 1.45; color: var(--muted); margin-top: .5rem; }
@@ -2355,6 +2370,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
       <div>
         <div class="cond" style="font-size: 13px; color: var(--muted)">{{todayLabel}} · {{wx.cityTemp}}</div>
         <h1 class="h1 bn-bh"><span class="sr">Casa Besports, le média du sport dans le Cotentin et la Manche. </span><span class="bn-bandeau">{{greeting}}</span></h1>
+        <p class="bn-qui">Média sportif indépendant né à Cherbourg en 2024 : actualités, portraits, vidéos et clubs du Cotentin et de la Manche. <button type="button" class="lnk" onClick="{{goWork}}">Travailler avec nous</button></p>
       </div>
       <div class="bn-accueil-act">
         <button type="button" class="btn btn-ghost" onClick="{{openCustomize}}" style="min-height: 44px; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Personnaliser</button>
@@ -4923,6 +4939,33 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 </sc-if>
 
 <!-- ================= CONTACT ================= -->
+<!-- ================= TRAVAILLER AVEC CASA BESPORTS ================= -->
+<sc-if value="{{isWork}}" hint-placeholder-val="{{ false }}">
+  <section class="wrap wk" style="padding-top: 2rem; padding-bottom: 5rem">
+    <div class="eb" style="margin-bottom: .5rem">Travailler avec nous</div>
+    <h1 class="h1" style="font-size: clamp(2.2rem, 5vw, 3.6rem); margin-bottom: .9rem">Travailler avec Casa Besports</h1>
+    <p class="wk-intro">Clubs, entreprises, organisateurs, sportifs : Casa Besports raconte le sport du Cotentin et de la Manche. Dites-nous ce que vous préparez, nous vous répondons avec une proposition adaptée.</p>
+    <div class="wk-grid">
+      <sc-for list="{{work.cols}}" as="c" hint-placeholder-count="4">
+        <div class="wk-col">
+          <h2 class="wk-h">{{c.titre}}</h2>
+          <ul class="wk-list"><sc-for list="{{c.items}}" as="it" hint-placeholder-count="5"><li>{{it.t}}</li></sc-for></ul>
+          <button type="button" class="btn btn-dark wk-btn" onClick="{{c.go}}">{{c.cta}}</button>
+        </div>
+      </sc-for>
+    </div>
+    <div class="wk-cta">
+      <div><div class="eb" style="margin-bottom: .35rem">Un projet, une idée, une question</div><p style="margin: 0; font-size: 14px; color: var(--text-2)">Chaque demande arrive directement à la rédaction.</p></div>
+      <div class="wk-cta-b">
+        <button type="button" class="btn btn-dark" onClick="{{work.devis}}">Demander un devis</button>
+        <button type="button" class="btn btn-ghost" onClick="{{work.partenaire}}">Devenir partenaire</button>
+        <button type="button" class="btn btn-ghost" onClick="{{work.histoire}}">Proposer une histoire</button>
+        <button type="button" class="btn btn-ghost" onClick="{{work.redaction}}">Contacter la rédaction</button>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
 <sc-if value="{{isContact}}" hint-placeholder-val="{{ false }}">
   <section class="wrap" style="max-width: 760px; padding-top: 2rem; padding-bottom: 5rem">
     <div class="eb" style="margin-bottom: .5rem">Contact</div>
