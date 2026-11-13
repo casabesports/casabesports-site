@@ -6,6 +6,7 @@
 # 2. Remplace __SITE_URL__ par l'adresse du site (balises de partage, plan du site).
 #    Adresse utilisée : variable SITE_URL si elle existe, sinon https://casabesports.fr
 # 3. Ajoute un numéro de version aux scripts : chaque mise en ligne force les navigateurs à recharger js/ et contenus/.
+# 4. Prépare le référencement (contenus/seo.json et _routes.json, voir functions/[[path]].js).
 set -e
 cd "$(dirname "$0")/.."
 OUT=_site
@@ -27,4 +28,12 @@ VER=$(printf '%s' "$REF" | cut -c1-8)
 sed -i "s#__VERSION__#$VER#g" "$OUT/index.html"
 TODAY=$(date +%Y-%m-%d)
 sed -i "s#<changefreq>#<lastmod>$TODAY</lastmod><changefreq>#" "$OUT/sitemap.xml"
+# 4. Référencement : données lues par la fonction Cloudflare (functions/[[path]].js) et liste des adresses qu'elle traite
+if command -v node >/dev/null 2>&1; then node outils/seo-donnees.js "$OUT/contenus/seo.json" || echo "seo-donnees : ignoré"; fi
+SECTIONS="actualites videos clubs joueurs boutique disciplines a-propos contact partenaires abonnements le-terrain club-house culture territoire meteo mentions-legales travailler-avec-nous"
+{
+  printf '{"version":1,"include":["/sitemap.xml"'
+  for s in $SECTIONS; do printf ',"/%s","/%s/*"' "$s" "$s"; done
+  printf '],"exclude":[]}\n'
+} > "$OUT/_routes.json"
 echo "Site prêt dans $OUT/ · adresse $SITE · version $VER"

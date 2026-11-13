@@ -48,7 +48,25 @@ function cbPartnerLink(url, id, kind) {
   } catch (e) { return ''; }
 }
 function cbRouteOf(st) { const k = CB_ROUTE_ID[st.view]; return '#/' + st.view + (k && st[k] != null ? '/' + encodeURIComponent(st[k]) : ''); }
+// Adresses lisibles (pour Google et le partage) : /actualites/mon-article, /clubs/fceh, /a-propos…
+// Le site reste piloté par les adresses « #/… » ; ces adresses-là ouvrent simplement la bonne page.
+const CB_PATHS = { news: 'actualites', article: 'actualites', videos: 'videos', video: 'videos', clubs: 'clubs', club: 'clubs', players: 'joueurs', player: 'joueurs', shop: 'boutique', product: 'boutique',
+  disciplines: 'disciplines', discipline: 'disciplines', about: 'a-propos', contact: 'contact', partners: 'partenaires', offers: 'abonnements', live: 'le-terrain', clubhouse: 'club-house', culture: 'culture',
+  map: 'territoire', meteo: 'meteo', legal: 'mentions-legales', work: 'travailler-avec-nous' };
+const CB_PATH_DETAIL = { actualites: 'article', videos: 'video', clubs: 'club', joueurs: 'player', boutique: 'product', disciplines: 'discipline' };
+function cbPathOf(st) {
+  const base = CB_PATHS[st.view]; if (!base) return '/';
+  const k = CB_ROUTE_ID[st.view]; return '/' + base + (k && st[k] != null ? '/' + encodeURIComponent(st[k]) : '');
+}
+function cbSite() { try { const u = window.CASA_SITE_URL; return u && /^https?:/.test(u) ? u.replace(/\/$/, '') : location.origin; } catch (e) { return ''; } }
+function cbUrlOf(st) { return cbSite() + cbPathOf(st); }
+function cbParsePath(p) {
+  const m = String(p || '').replace(/\/+$/, '').match(/^\/([a-z-]+)(?:\/([^/]+))?$/); if (!m) return null;
+  if (m[2]) { const v = CB_PATH_DETAIL[m[1]]; if (!v) return null; return { view: v, [CB_ROUTE_ID[v]]: decodeURIComponent(m[2]) }; }
+  const v = Object.keys(CB_PATHS).find((x) => CB_PATHS[x] === m[1] && !CB_ROUTE_ID[x]); return v ? { view: v } : null;
+}
 function cbParseRoute(h) {
+  if (!h || h === '#' || h === '#/') { try { if (location.pathname && location.pathname !== '/' && location.pathname !== '/index.html') return cbParsePath(location.pathname); } catch (e) {} }
   const m = String(h || '').match(/^#\/([a-z]+)(?:\/(.+))?$/); if (!m) return null;
   const r = { view: m[1] }; const k = CB_ROUTE_ID[m[1]]; if (k && m[2]) r[k] = decodeURIComponent(m[2]);
   return r;
@@ -194,7 +212,7 @@ class Component extends DCLogic {
     const markPos = { tee: [62, 9], hoodie: [70, 9], pull: [70, 8], cap: [60, 9], bob: [56, 8], scarf: [64, 8], tote: [84, 9], mug: [72, 10], bottle: [74, 9], stickers: [56, 9], keys: [0, 1], gift: [0, 1], poster: [0, 1] };
 
     // Matchs
-    const M = (id, sport, comp, date, time, home, away, hs, as, status, o) => Object.assign({ id, sport, comp, date, time, home, away, hs, as, status, verified: false, venue: '[Stade]', minute: 0, article: null }, o || {});
+    const M = (id, sport, comp, date, time, home, away, hs, as, status, o) => Object.assign({ id, sport, comp, date, time, home, away, hs, as, status, verified: false, venue: '', minute: 0, article: null }, o || {});
     // Matchs et résultats : contenus/sport.js (onglet Résultats de l'espace administrateur)
     const matches = [];
     // Compétitions affichées dans Le Terrain : toutes dans contenus/sport.js (modifiables ou supprimables dans Espace admin › Résultats)
@@ -1192,7 +1210,9 @@ class Component extends DCLogic {
   syncRoute(st, replace) {
     try {
       const h = st.view === 'home' ? '#/' : cbRouteOf(st);
-      if (location.hash !== h && !(h === '#/' && !location.hash)) history[replace ? 'replaceState' : 'pushState'](null, '', h);
+      // Arrivée par une adresse lisible (/actualites/…) : on la garde telle quelle dans la barre d'adresse
+      if (!location.hash && location.pathname !== '/' && location.pathname.replace(/\/+$/, '') === cbPathOf(st)) return;
+      if (location.hash !== h && !(h === '#/' && !location.hash)) history[replace ? 'replaceState' : 'pushState'](null, '', (location.pathname !== '/' ? '/' : '') + h);
     } catch (e) {}
     this.setTitle(st);
   }
@@ -1215,6 +1235,15 @@ class Component extends DCLogic {
         const A = window.CASA_APROPOS || {};
         md.setAttribute('content', st.view === 'about' ? ((en ? 'Our story: ' : 'Notre histoire : ') + ((en && A.soustitreEn) || A.soustitre || '')) : this._metaDesc);
       }
+      // Adresse officielle et aperçu de partage de la page affichée
+      const a0 = st.view === 'article' ? (this.allArticles() || []).find((a) => a.id === st.articleId) : null;
+      if (a0 && a0.dek && md) md.setAttribute('content', a0.dek);
+      const setMeta = (sel, attr, val) => { const el = document.querySelector(sel); if (el && val) { if (!el.dataset.orig) el.dataset.orig = el.getAttribute(attr) || ''; el.setAttribute(attr, val); } else if (el && el.dataset.orig != null) el.setAttribute(attr, el.dataset.orig); };
+      const can = st.view === 'home' ? '' : cbUrlOf(st);
+      setMeta('link[rel="canonical"]', 'href', can);
+      setMeta('meta[property="og:url"]', 'content', can);
+      setMeta('meta[property="og:title"]', 'content', st.view === 'home' ? '' : document.title);
+      setMeta('meta[property="og:image"]', 'content', a0 && a0.img ? new URL(a0.img, cbSite() + '/').href : '');
     } catch (e) {}
   }
   back() {
@@ -1266,13 +1295,19 @@ class Component extends DCLogic {
     const dateLabel = (iso) => { const d = pd(iso); return d ? DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] : 'Date à confirmer'; };
 
     // ---------- articles / clubs / joueurs ----------
+    const fmtLong = (iso) => { try { return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
     const art = (a) => {
       const saved = s.saved.indexOf(a.id) >= 0;
+      const pubIso = (a.publierLe && new Date(a.publierLe) <= new Date() ? a.publierLe : '') || a.creeLe || '';
+      const modIso = a.modifieLe && (!pubIso || String(a.modifieLe).slice(0, 10) > String(pubIso).slice(0, 10)) ? a.modifieLe : '';
       return Object.assign({}, a, {
         open: () => this.go('article', { articleId: a.id }),
         toggleSave: () => this.toggleIn('saved', a.id, 'Ajouté à vos favoris', 'Retiré de vos favoris'),
         saveFill: saved ? 'currentColor' : 'none', saveColor: saved ? 'var(--gold-text)' : 'var(--text)', saveLabel: saved ? 'Retirer des favoris' : 'Ajouter aux favoris',
-        hasBody: !!a.body, noBody: !a.body, blocks: a.body ? this.blocksOf(a.body) : [], author: a.author || 'la rédaction'
+        hasBody: !!a.body, noBody: !a.body, blocks: a.body ? this.blocksOf(a.body) : [], author: a.author || 'la rédaction',
+        pubLabel: pubIso ? fmtLong(pubIso) : (a.date || ''), hasPub: !!(pubIso || a.date), pubIso: pubIso || '',
+        modLabel: modIso ? fmtLong(modIso) : '', hasMod: !!modIso, credit: a.credit || '', hasCredit: !!a.credit, hasCaption: !!(a.credit || a.alt),
+        teaser: (String(a.body || '').split(/\n\s*\n/).map((x) => x.trim()).find((x) => x && !/^(#|>|!\[|-)/.test(x)) || a.dek || '').slice(0, 320)
       });
     };
     const clubV = (c, i) => {
@@ -2448,7 +2483,12 @@ class Component extends DCLogic {
       toggleSummary: () => this.setState({ summary: !s.summary }), summaryOpen: s.summary, summaryPressed: s.summary ? 'true' : 'false', sumBg: s.summary ? 'var(--inv-bg)' : 'var(--surface)', sumFg: s.summary ? 'var(--on-inv)' : 'var(--ink)',
       toggleListen: () => this.setState({ listening: !s.listening }), listening: s.listening, listenPressed: s.listening ? 'true' : 'false', lisBg: s.listening ? 'var(--inv-bg)' : 'var(--surface)', lisFg: s.listening ? 'var(--on-inv)' : 'var(--ink)', listenLabel: s.listening ? 'En écoute' : 'Écouter',
       reactions,
-      share: () => { try { navigator.clipboard.writeText('https://casabesports.fr/'); } catch (e) {} this.say('Lien copié'); },
+      share: () => {
+        // Partage de la page affichée, avec son adresse lisible (/actualites/…)
+        const url = cbUrlOf(s); const title = document.title;
+        if (navigator.share) { navigator.share({ title, url }).catch(() => {}); return; }
+        try { navigator.clipboard.writeText(url).then(() => this.say('Lien copié'), () => this.say(url)); } catch (e) { this.say(url); }
+      },
       vid: curV, otherVideos: videos.filter((v) => v.id !== curV.id), playing: s.playing, notPlaying: !s.playing, togglePlay: () => this.setState({ playing: !s.playing }),
       playLabel: s.playing ? 'Pause' : 'Lire la vidéo', playState: s.playing ? 'Lecture en cours' : 'Prêt à lire', vidDim: s.playing ? 0.9 : 0.75,
       disciplines, disc, clubChips, clubList, club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs',
