@@ -177,7 +177,7 @@ class Component extends DCLogic {
     const videos = ((typeof window !== 'undefined' && window.CASA_VIDEOS) || []).slice();
     const C = (id, name, sport, city, img) => ({ id, name, sport, city, img: img || null });
     // Clubs : contenus/clubs.js (modifiable dans l'espace administrateur)
-    const clubs = ((typeof window !== 'undefined' && Array.isArray(window.CASA_CLUBS)) ? window.CASA_CLUBS : []).filter((c) => c && c.id && c.name).map((c) => C(c.id, c.name, c.sport || 'Football', c.city || '', c.img || null));
+    const clubs = ((typeof window !== 'undefined' && Array.isArray(window.CASA_CLUBS)) ? window.CASA_CLUBS : []).filter((c) => c && c.id && c.name).map((c) => Object.assign(C(c.id, c.name, c.sport || 'Football', c.city || '', c.img || null), { logo: c.logo || '', niveau: c.niveau || '', fondation: c.fondation || '', stade: c.stade || '' }));
     const P = (id, num, name, role, club, clubLabel, img) => ({ id, num, name, role, club, clubLabel, img: img || null });
     // Joueurs : contenus/joueurs.js (modifiable dans l'espace administrateur)
     const players = ((typeof window !== 'undefined' && Array.isArray(window.CASA_JOUEURS)) ? window.CASA_JOUEURS : []).filter((p) => p && p.id && p.name).map((p) => P(p.id, String(p.num == null ? '' : p.num), p.name, p.role || '', p.club || null, p.clubLabel || ((clubs.find((c) => c.id === p.club) || {}).name) || '', p.img || null));
@@ -1363,6 +1363,10 @@ class Component extends DCLogic {
       const f = s.follows.indexOf(c.id) >= 0;
       return Object.assign({}, c, {
         initials: initials(c.name), mono: monoColors[(i ?? D.clubs.indexOf(c)) % monoColors.length],
+        // Logo dans le rond (sinon les initiales) et infos clés de la carte : niveau, création, stade
+        hasLogo: !!c.logo, noLogo: !c.logo, logo: c.logo || '',
+        niveau: c.niveau || '', hasNiveau: !!c.niveau, fondation: c.fondation ? 'Fondé en ' + c.fondation : '', hasFondation: !!c.fondation, stade: c.stade || '', hasStade: !!c.stade,
+        lieu: [c.sport, c.city].filter(Boolean).join(' · '),
         open: () => this.go('club', { clubId: c.id, clubTab: 'articles' }),
         toggleFollow: () => this.toggleIn('follows', c.id, 'Vous suivez ' + c.name, 'Vous ne suivez plus ' + c.name),
         fLabel: f ? 'Suivi ✓' : 'Suivre', fBg: f ? 'var(--inv-bg)' : 'var(--surface)', fFg: f ? 'var(--on-inv)' : 'var(--ink)'
