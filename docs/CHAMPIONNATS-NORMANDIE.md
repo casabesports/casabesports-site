@@ -11,9 +11,12 @@ sans oublier aucun club. Rien n'est inventé : chaque classement et chaque score
 | Volley-ball | ffvbbeach.org (résultats FFVolley) | Comités de la Manche (PTLB50) et du Calvados (PTLB14) | **Branché** : `outils/import_volley.py`. Codes de la Ligue et des autres comités normands à trouver (à ajouter dans `COMITES`) |
 | Rugby | competitions.ffr.fr / monclubhouse.ffr.fr | Normandie | Le site interdit la lecture automatique des pages clubs (robots.txt) : pages compétitions seulement, à étudier |
 | Football | epreuves.fff.fr, District de la Manche | — | **Refus** des accès automatiques (erreur 403), robots.txt de la Ligue de Normandie interdit |
+| Tennis de table | monclub.fftt.com (données via l'API de la FFTT) | — | L'API officielle « Smartping » est gratuite mais demande un identifiant à obtenir auprès de la FFTT (demande à faire par Casa Besports) |
+| Badminton (interclubs) | icbad.ffbad.org | — | **Interdit** : le robots.txt bloque tous les robots sauf Google et Bing |
+| Water-polo | ffn.extranat.fr | — | Page des résultats en travaux (vide) ; la Coupe de la Manche n'y figure pas : saisie dans l'admin |
 | Basket | competitions.ffbb.com | — | **Refus** (pare-feu) |
 
-Football et basket : la saisie se fait dans Espace admin › Résultats. Pour un import automatique, il faut un accès
+Football : liguesdefoot.fr publie toutes les divisions de la Manche, mais son règlement demande une clé d'accès (gratuite pour un club qui publie ses propres résultats, payante pour un média). Football et basket : la saisie se fait dans Espace admin › Résultats. Pour un import automatique, il faut un accès
 officiel : demander au District de la Manche de football et au Comité de la Manche de basket un export ou un flux
 (beaucoup de comités le fournissent aux médias locaux).
 
