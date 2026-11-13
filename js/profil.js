@@ -205,7 +205,7 @@ var CasaCV = (function () {
     var draw = function (photo, logo) {
       g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
       g.fillStyle = BK; g.fillRect(0, 0, W, 120); if (v.or) { g.fillStyle = GOLD; g.fillRect(0, 120, W, 8); }
-      if (logo && !v.or) g.drawImage(logo, M, 30, 60 * 1044 / 179, 60); else { g.font = '800 40px ' + SP; g.fillStyle = FG; g.fillText('CASA BESPORTS +', M, 76); }
+      if (logo && !v.or) g.drawImage(logo, M, 30, 60 * 300 / 179, 60); else { g.font = '800 40px ' + SP; g.fillStyle = FG; g.fillText('BE+', M, 76); }
       g.font = '700 22px ' + SP; g.fillStyle = FG; g.textAlign = 'right'; g.fillText('CURRICULUM VITÆ', W - M, 70); g.textAlign = 'left';
       var y = 210, x0 = M;
       if (photo) { var ps = 250; g.drawImage(photo, M, 170, ps, ps); x0 = M + ps + 44; }
@@ -215,7 +215,7 @@ var CasaCV = (function () {
       if (v.certOk) { /* tampon rond, légèrement penché */
         var cx = W - M - 105, cy = 265, R0 = 100; g.save(); g.translate(cx, cy); g.rotate(-12 * Math.PI / 180); g.globalAlpha = .9; g.strokeStyle = INK; g.fillStyle = INK;
         g.lineWidth = 6; g.beginPath(); g.arc(0, 0, R0, 0, 2 * Math.PI); g.stroke(); g.lineWidth = 2; g.beginPath(); g.arc(0, 0, R0 - 12, 0, 2 * Math.PI); g.stroke();
-        g.textAlign = 'center'; g.font = '800 15px ' + SP; g.fillText('CASA BESPORTS +', 0, -38); g.fillRect(-72, -24, 144, 3); g.font = '800 30px ' + SP; g.fillText('CERTIFIÉ', 0, 10); g.fillRect(-72, 20, 144, 3);
+        g.textAlign = 'center'; g.font = '800 15px ' + SP; g.fillText('BE+', 0, -38); g.fillRect(-72, -24, 144, 3); g.font = '800 30px ' + SP; g.fillText('CERTIFIÉ', 0, 10); g.fillRect(-72, 20, 144, 3);
         g.font = '700 13px ' + SP; g.fillText(String(v.sceauSub || '').toUpperCase(), 0, 44); g.font = '700 13px ' + SP; g.fillText(v.cert.id, 0, 64); g.restore(); g.textAlign = 'left'; }
       y = Math.max(y, photo ? 460 : y) + 26;
       if (v.accroche) { y = wrap(v.accroche, M, y, W - 2 * M, 32, '600 23px ' + BODY, '#222') + 18; }
@@ -426,7 +426,7 @@ var CasaCV = (function () {
       demo: demo, sceauSub: 'Parcours vérifié',
       pied: ok ? 'Certifié Casa Besports · n° ' + showId(cert.id) + ' · émis le ' + fmtDate(cert.emisLe) + (url ? ' · vérification : ' + url.replace(/^https?:\/\//, '') : ' · vérification sur le site Casa Besports, rubrique « Vérifier un certificat »')
         : certState === 'modifie' ? 'CV modifié depuis sa certification n° ' + cert.id + ' : la certification doit être renouvelée.' : 'CV établi sur Casa Besports +, le média du sport dans la Manche. Non certifié.',
-      logo: (window.ASSET_DATA && window.ASSET_DATA['logo-casabesports.svg']) || 'assets/logo-casabesports.svg'
+      logo: (window.ASSET_DATA && window.ASSET_DATA['logo-be.svg']) || 'assets/logo-be.svg'
     };
   }
 
