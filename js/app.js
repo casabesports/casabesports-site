@@ -529,6 +529,7 @@ class Component extends DCLogic {
         }
       });
     });
+    out.forEach((b) => { b.cls = ''; }); const p1 = out.find((b) => b.isP); if (p1) p1.cls = 'art-p1';
     return out;
   }
   textOf(body) { return (body || '').replace(/^!\[[^\]]*\]\([^)]*\)\s*$/gm, '').replace(/^##\s+|^>\s*|^[-•]\s+/gm, '').replace(/\*\*/g, ''); }
@@ -1449,6 +1450,9 @@ class Component extends DCLogic {
     const curA = ARTS.find((a) => a.id === s.articleId) || ARTS[0] || EMPTY_ART;
     const artObj = art(curA);
     artObj.openSport = () => this.go('discipline', { discId: curA.sport });
+    // Décor de lecture choisi dans l'admin (gazette d'époque, papier clair) : appliqué à toute la page
+    const decor = s.view === 'article' && /^(gazette|papier)$/.test(curA.decor || '') ? curA.decor : '';
+    try { if ((document.documentElement.getAttribute('data-decor') || '') !== decor) { if (decor) document.documentElement.setAttribute('data-decor', decor); else document.documentElement.removeAttribute('data-decor'); } } catch (e) {}
     artObj.points = cbResume(curA).map((t) => ({ t }));
     artObj.hasPoints = artObj.points.length > 0;
     artObj.clubs = curA.clubs.map((id) => clubById(id)).filter(Boolean).map((c) => clubV(c));

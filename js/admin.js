@@ -37,7 +37,7 @@
   ];
   // Modèle d'un nouvel élément quand la liste est vide
   var TEMPLATES = {
-    CASA_ARTICLES: { id: '', sport: 'Football', tag: '', date: '', read: '3 min', premium: false, img: '', alt: '', title: '', dek: '', clubs: [], points: ['', ''], author: 'La rédaction', credit: '', body: '', titleEn: '', dekEn: '', bodyEn: '', tagEn: '' },
+    CASA_ARTICLES: { id: '', sport: 'Football', tag: '', date: '', read: '3 min', premium: false, img: '', alt: '', title: '', dek: '', clubs: [], points: ['', ''], author: 'La rédaction', credit: '', decor: '', body: '', titleEn: '', dekEn: '', bodyEn: '', tagEn: '' },
     CASA_GAZETTE: { id: '', sec: 'À la une', kind: 'article', rubric: '', title: '', script: '', kicker: '', img: '', imgCap: '', imgFormat: 'auto', mise: 'auto', paras: [{ t: '' }], colonnes: 'auto', quote: '', quoteBy: '' },
     CASA_LIEUX: { id: '', name: '', short: '', where: '', year: '', img: '', photo: '', hook: '', desc: '', moment: '', sport: '' },
     CASA_PRODUITS: { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: '', gallery: [], colors: ['marine'], sizes: ['S', 'M', 'L', 'XL'], flag: '', isNew: false, desc: '' },
@@ -1011,6 +1011,8 @@
 
     var sportSel = E('select', { class: 'cba-in', onchange: function (e) { a.sport = e.target.value; mark(); } }, SPORTS.concat(SPORTS.indexOf(a.sport) < 0 && a.sport ? [a.sport] : []).map(function (s) { return E('option', { value: s, selected: a.sport === s || null }, s); }));
     var fmtSel = E('select', { class: 'cba-in', onchange: function (e) { a.format = e.target.value; mark(); } }, FORMATS.map(function (f) { return E('option', { value: f[0], selected: (a.format || 'article') === f[0] || null }, f[1]); }));
+    var DECORS = [['', 'Noir du site (par défaut)'], ['gazette', 'Gazette d’époque (papier jauni, typographie journal)'], ['papier', 'Papier clair']];
+    var decorSel = E('select', { class: 'cba-in', onchange: function (e) { a.decor = e.target.value; mark(); } }, DECORS.map(function (d) { return E('option', { value: d[0], selected: (a.decor || '') === d[0] || null }, d[1]); }));
     var pts = E('div', {}, a.points.map(function (p, i) { return E('div', { class: 'cba-row', style: 'margin:.3rem 0' }, E('input', { class: 'cba-in', style: 'flex:1 1 240px', value: p || '', oninput: function (e) { a.points[i] = e.target.value; mark(); } }), E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { a.points.splice(i, 1); mark(); render(); } }, 'Retirer')); }),
       a.points.length < 4 ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { a.points.push(''); mark(); render(); } }, '+ Point clé') : null);
 
@@ -1023,7 +1025,8 @@
           E('div', {}, E('label', { class: 'cba-lbl' }, 'Discipline'), sportSel),
           E('div', {}, txt(a, 'tag', 'Rubrique / compétition', { ph: 'Régional 2, Coupe de France…' })),
           E('div', {}, txt(a, 'date', 'Date affichée', { ph: dayLabel() })),
-          E('div', {}, txt(a, 'author', 'Auteur'))),
+          E('div', {}, txt(a, 'author', 'Auteur')),
+          E('div', {}, E('label', { class: 'cba-lbl' }, 'Décor de lecture'), decorSel)),
         E('label', { class: 'cba-radio', style: 'margin-top:.7rem' }, E('input', { type: 'checkbox', checked: a.premium || null, onchange: function (e) { a.premium = e.target.checked; mark(); } }), 'Réservé aux abonnés Casa B+')),
       E('div', { class: 'cba-card' }, E('div', { class: 'cba-lbl', style: 'margin-top:0' }, 'Photo principale'), imgField(a, 'img', '16:9'), txt(a, 'alt', 'Description de la photo (pour les malvoyants et Google)'), txt(a, 'credit', 'Crédit photo', { ph: 'Nom du photographe ou Casa Besports' })),
       E('div', { class: 'cba-card' }, E('label', { class: 'cba-lbl', style: 'margin-top:0' }, 'Texte de l’article', bodyInfo), bar, ta, assist,
