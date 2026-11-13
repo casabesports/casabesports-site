@@ -771,7 +771,7 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .bn-shop-hero .sh-perks span { display: inline-flex; align-items: center; font-family: var(--bn-font); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 13px; line-height: 1; color: var(--bn-blanc); border: 1.5px solid #5a5a5a; padding: .6em .75em .45em; }
 .bn-shop-hero .sh-note { margin: 1.1rem 0 0; font-size: 13px; color: var(--bn-gris); max-width: 40rem; }
 .cw-lock { display: flex; align-items: center; gap: .9rem; margin: 0 0 1.4rem }
-.cw-lock img { height: 56px; width: auto; display: block; outline: 1px solid #3a3a3a }
+.cw-casa { font-family: var(--bn-font); font-weight: 800; font-size: clamp(1.6rem, 3.4vw, 2.4rem); letter-spacing: .08em; text-transform: uppercase; color: #000; background: #fbfaf7; padding: .3em .5em .2em; line-height: 1 }
 .cw-x { font-family: var(--bn-font); font-weight: 800; font-size: 2.2rem; line-height: 1; color: #e8a830 }
 .cw-mark { font-family: var(--bn-font); font-weight: 800; font-size: clamp(1.6rem, 3.4vw, 2.4rem); letter-spacing: .08em; text-transform: uppercase; color: #fbfaf7; border: 2px solid #2f8f5b; padding: .28em .5em .18em; line-height: 1 }
 .cw-cta { margin-top: 1.4rem }
@@ -779,7 +779,7 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .cw-hero-img img { display: block; width: 100%; height: auto; transition: transform .5s ease }
 .cw-hero-img:hover img { transform: scale(1.03) }
 .cw-hero-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: .7rem .9rem; background: rgba(0,0,0,.72); color: #fbfaf7; font-family: var(--bn-font); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; text-align: left }
-@media (max-width: 860px) { .cw-hero-img { order: -1 } .cw-lock img { height: 44px } }
+@media (max-width: 860px) { .cw-hero-img { order: -1 } }
 .bn-cadre { position: relative; display: block; margin: 0; background: var(--bn-blanc); padding: clamp(8px, 1.2vw, 12px); }
 .bn-cadre > img { display: block; width: 100%; height: auto; }
 .bn-cadre figcaption { position: absolute; left: clamp(8px, 1.2vw, 12px); bottom: clamp(8px, 1.2vw, 12px); }
@@ -3652,7 +3652,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   <section class="bn-scope bn-shop-hero" aria-label="Boutique officielle Casa Besports">
     <div class="wrap bn-shop-hero-in">
       <div>
-        <div class="cw-lock" role="img" aria-label="BE+ × Cherwood"><img src="assets/logo-be.svg" alt="" width="94" height="56"><span class="cw-x" aria-hidden="true">×</span><span class="cw-mark" aria-hidden="true">Cherwood</span></div>
+        <div class="cw-lock" role="img" aria-label="Casa × Cherwood"><span class="cw-casa" aria-hidden="true">Casa</span><span class="cw-x" aria-hidden="true">×</span><span class="cw-mark" aria-hidden="true">Cherwood</span></div>
         <span class="bn-etiq">{{shopPres.surtitre}}</span>
         <h1 class="bn-titre">{{shopPres.titre}}</h1>
         <p class="sh-tag">{{shopPres.texte}}</p>
