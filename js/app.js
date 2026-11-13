@@ -2047,11 +2047,8 @@ class Component extends DCLogic {
     const RSX = window.CASA_RESEAUX || {};
     const reseaux = [['instagram', 'Instagram'], ['youtube', 'YouTube'], ['tiktok', 'TikTok'], ['facebook', 'Facebook'], ['x', 'X'], ['linkedin', 'LinkedIn']]
       .filter(([k]) => /^https:\/\/\S+$/.test(String(RSX[k] || '').trim())).map(([k, label]) => ({ label, href: String(RSX[k]).trim() }));
-    const footCols = [
-      { title: 'Suivre', links: [['Le Terrain', 'live'], ['Actualités', 'news'], ['Vidéos', 'videos'], ['Disciplines', 'disciplines'], ['Clubs', 'clubs'], ['Joueurs', 'players'], ['Territoire', 'map']] },
-      { title: 'Boutique & mag', links: [['Boutique', 'shop'], ['Cherwood × Casa', 'shop'], ['Abonnements', 'offers'], ['La Gazette du Cotentin', 'offers']] },
-      { title: 'La maison', links: [['Casa PRO', 'work'], ['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']] }
-    ].map((c) => ({ title: c.title, links: c.links.map(([label, v]) => ({ label, go: () => this.go(v, label === 'Cherwood × Casa' ? { shopLine: 'Cherwood × Casa' } : label === 'La Gazette du Cotentin' ? { offerTab: 'La Gazette' } : {}) })) }));
+    // Pied de page : seulement les liens qu'on ne retrouve pas dans « Toutes les rubriques »
+    const footLinks = [['Casa PRO', 'work'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']].map(([label, v]) => ({ label, go: () => this.go(v) }));
 
     const progress = { home: 8, news: 20, article: 45, video: 45, videos: 20, disciplines: 20, discipline: 40, clubs: 20, club: 45, players: 20, player: 60, map: 30, offers: 30, checkout: 30 + s.step * 17, partners: 40, about: 40, contact: 50, account: 50, live: 35, shop: 25, product: 55, order: 85, studio: 50, legal: 40, meteo: 30, private: 45, culture: 35, clubhouse: 40, olisto: 45, app: 30, cv: 60, verifier: 40 }[s.view] || 10;
 
@@ -2813,7 +2810,7 @@ class Component extends DCLogic {
       doLogin: () => { this.setState({ loggedIn: true, loginOpen: false }); this.applyProfileTheme(s.email.trim().toLowerCase() || 'compte'); this.say('Connecté. Bienvenue !'); },
       searchOpen: s.searchOpen, openSearch: () => this.setState({ searchOpen: true, sq: '', menuOpen: false, moreOpen: false }), closeSearch: () => this.setState({ searchOpen: false }),
       sq: s.sq, onSq: (e) => this.setState({ sq: e.target.value }), noSq: !sq, sResults, sEmpty: !!sq && sResults.length === 0, quick,
-      footCols, reseaux, hasToast: !!s.toast, toast: s.toast,
+      footLinks, reseaux, hasToast: !!s.toast, toast: s.toast,
       themeAttr: curTheme, themingClass: s.themeAnim ? 'cb-theming' : '', themes, themeName, themeMenuOpen: s.themeMenuOpen, themeMenuExp: s.themeMenuOpen ? 'true' : 'false',
       toggleThemeMenu: () => this.setState({ themeMenuOpen: !s.themeMenuOpen, moreOpen: false }),
       openThemeFromFooter: () => { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} this.setState({ themeMenuOpen: true, hdrY: '0' }); },
