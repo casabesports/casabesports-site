@@ -609,7 +609,7 @@
     });
     var imgs = v.images.map(function (r, i) {
       var th = function (src, cap) { return E('figure', { style: 'margin:0;text-align:center' }, E('img', { src: src || null, alt: '', style: 'width:150px;height:100px;object-fit:cover;background:#ddd;display:block' }), E('figcaption', { style: 'font-size:12px;color:var(--muted)' }, cap)); };
-      var taille = { plein: 'Pleine largeur', fond: 'Pleine largeur, image entière', entiere: 'Image entière' }[r.taille] || 'Taille prévue par la page';
+      var taille = ({ plein: 'Pleine largeur', fond: 'Pleine largeur, image entière', entiere: 'Image entière' }[r.taille] || 'Taille prévue par la page') + (r.video ? ' · vidéo en arrière-plan' : '');
       return E('div', { class: 'cba-card', style: 'margin:.5rem 0' },
         E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('span', { class: 'cba-tag' }, where(r)), E('span', { class: 'cba-row' },
           r.source ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { r.apres = r.source; delete r.source; mark(); render(); } }, 'Revenir à la photo non rognée') : null,
@@ -1051,6 +1051,21 @@
       return A.uploadImage(b, path).then(function (u) { S.images = []; S.loaded.img = false; return u; });
     });
   }
+  // Vidéos d'arrière-plan : envoyées telles quelles (pas de redimensionnement), dossier videos/
+  function uploadVideo(file) {
+    if (!A.uploadImage) return Promise.reject(new Error('Stockage non configuré'));
+    if (!/^video\//.test(file.type || '') && !/\.(mp4|webm|mov)$/i.test(file.name || '')) return Promise.reject(new Error('Choisissez un fichier vidéo (.mp4)'));
+    if (file.size > 50 * 1024 * 1024) return Promise.reject(new Error('Vidéo trop lourde (50 Mo maximum) : raccourcissez-la ou exportez-la en 1080p'));
+    var ext = (/\.(mp4|webm|mov)$/i.exec(file.name || '') || [0, 'mp4'])[1].toLowerCase();
+    var d = new Date(), stamp = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+    var path = 'videos/' + stamp + '-' + slug(file.name.replace(/\.[^.]+$/, '')) + '-' + Math.random().toString(36).slice(2, 6) + '.' + ext;
+    var blob = file.type ? file : new Blob([file], { type: ext === 'webm' ? 'video/webm' : ext === 'mov' ? 'video/quicktime' : 'video/mp4' });
+    return A.uploadImage(blob, path).catch(function (e) {
+      var m = String((e && e.message) || e);
+      if (/mime|type|size|large|exceed/i.test(m)) throw new Error('Le stockage refuse les vidéos : lancez une fois le fichier supabase/videos.sql dans Supabase (voir docs/ESPACE-ADMIN.md)');
+      throw e;
+    });
+  }
   // Images encore utilisées dans un article ou une page : on ne supprime pas le fichier, on le retire seulement de la bibliothèque
   function hiddenImgs() { try { return JSON.parse(localStorage.getItem('cba-img-masquees') || '[]') || []; } catch (e) { return []; } }
   function usedIn(im) {
@@ -1304,5 +1319,5 @@
         P('Seules les personnes listées dans Équipe et accès voient l’espace rédaction. Un abonné peut vous envoyer une demande depuis Mon espace ; vous l’acceptez ou la refusez en un clic.'))];
   }
 
-  window.CasaAdmin = { open: open, close: close, uploadFile: uploadFile, ensureCss: function () { if (!document.getElementById('cba-css')) document.head.appendChild(E('style', { id: 'cba-css', text: CSS })); }, editGazette: editGazette, editSection: function (k, i) { if (!S.open) open(); editSection(k, i == null ? null : i); }, wantOpen: wantOpen, cropImage: cropImage, isOpen: function () { return S.open; } };
+  window.CasaAdmin = { open: open, close: close, uploadFile: uploadFile, uploadVideo: uploadVideo, ensureCss: function () { if (!document.getElementById('cba-css')) document.head.appendChild(E('style', { id: 'cba-css', text: CSS })); }, editGazette: editGazette, editSection: function (k, i) { if (!S.open) open(); editSection(k, i == null ? null : i); }, wantOpen: wantOpen, cropImage: cropImage, isOpen: function () { return S.open; } };
 })();

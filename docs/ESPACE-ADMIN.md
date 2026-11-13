@@ -107,3 +107,12 @@ Les sites des fédérations (FFF, FFBB…) refusent la lecture automatique : la 
 4. « Enregistrer et publier » : visible tout de suite dans « Le Terrain ».
 
 Ce qui est publié ici remplace le fichier `contenus/sport.js` du dépôt (y compris ce que l'automatisation y écrit) tant que vous ne cliquez pas sur « Version d'origine ». Les équipes dont le nom correspond exactement à une fiche club sont reliées automatiquement à leur club.
+
+
+## Vidéos en arrière-plan
+
+Sur le site, bouton « ✎ Retoucher », cliquez sur une grande image (par exemple en haut de l’accueil ou de la page Culture), puis « Envoyer une vidéo ». La vidéo remplace l’image à cet endroit : sans le son, en boucle, lancée toute seule, aussi sur iPhone. L’image reste visible le temps du chargement et pour les visiteurs qui ont demandé moins d’animations.
+
+Conseils : fichier .mp4, moins de 15 secondes, 1080p au plus, 50 Mo maximum (idéalement moins de 10 Mo pour un chargement rapide).
+
+À faire une seule fois avant le premier envoi : Supabase › SQL Editor › New query, collez le contenu de `supabase/videos.sql`, puis « Run ». Sans cette étape, le stockage refuse les vidéos. Vous pouvez aussi coller l’adresse d’une vidéo .mp4 déjà en ligne.

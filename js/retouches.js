@@ -37,10 +37,11 @@
       if (pg(r.page) === 'culture' && normSrc(r.avant) === 'assets/hero.jpg' && (r.n == null || r.n === '' || Number(r.n) === 0)) r = Object.assign({}, r, { avant: 'assets/hero.jpg?bandeau-culture', n: null });
       else if (pg(r.page) === 'culture' && normSrc(r.avant) === 'assets/hero.jpg' && Number(r.n) === 1) r = Object.assign({}, r, { n: 0 });
       var hasFrame = r.x != null || r.y != null || (Number(r.z) || 1) !== 1 || r.taille === 'plein' || r.taille === 'entiere' || r.taille === 'fond';
-      if (!normSrc(r.apres) && !hasFrame) return;
+      var vidUrl = String(r.video || '').trim();
+      if (!normSrc(r.apres) && !hasFrame && !vidUrl) return;
       var p = pg(r.page); IM[p] = IM[p] || {};
       var ks = normSrc(r.avant);
-      (IM[p][ks] = IM[p][ks] || []).push({ src: normSrc(r.apres) ? String(r.apres).trim() : null, x: r.x == null ? 50 : Number(r.x), y: r.y == null ? 50 : Number(r.y), z: Number(r.z) || 1, taille: r.taille || '', frame: hasFrame, n: r.n == null || r.n === '' ? null : Number(r.n) });
+      (IM[p][ks] = IM[p][ks] || []).push({ src: normSrc(r.apres) ? String(r.apres).trim() : null, x: r.x == null ? 50 : Number(r.x), y: r.y == null ? 50 : Number(r.y), z: Number(r.z) || 1, taille: r.taille || '', video: vidUrl, frame: hasFrame, n: r.n == null || r.n === '' ? null : Number(r.n) });
     });
   }
   // Une retouche vaut pour un emplacement précis (n = rang de ce texte ou de cette image parmi les identiques de la page),
@@ -95,14 +96,35 @@
     if (par && par.style.overflow !== po) par.style.overflow = po;
   }
   function unframe(el) { if (!el.__rtSt) return; frame(el, null); el.__rtSt = null; }
+  // Vidéo en arrière-plan à la place d'une image : muette, en boucle, lecture automatique (iPhone : playsinline).
+  // L'image reste en place (cachée) et sert d'affiche pendant le chargement ; « mouvement réduit » garde l'image.
+  var calme = false; try { calme = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) {}
+  function vid(el, url) {
+    var v = el.__rtVid;
+    if (!url || calme) { if (v) { v.remove(); el.__rtVid = null; if (el.style.display === 'none') el.style.display = el.__rtDisp || ''; } return; }
+    if (!v) {
+      v = document.createElement('video'); v.className = 'rt-vid'; v.__rtImg = el;
+      v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+      v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.setAttribute('aria-hidden', 'true'); v.setAttribute('preload', 'auto'); v.setAttribute('disablepictureinpicture', '');
+      el.__rtVid = v; el.__rtDisp = el.style.display;
+    }
+    if (v.getAttribute('src') !== url) { v.setAttribute('src', url); v.setAttribute('poster', el.getAttribute('src') || ''); }
+    var css = el.style.cssText.replace(/display:\s*none;?/g, '');
+    if (v.__css !== css) { v.__css = css; v.style.cssText = css; if (!/object-fit/.test(css)) v.style.objectFit = 'cover'; }
+    var cls = String(el.className || '').replace(/\brt-hl\b/g, '').trim() + ' rt-vid'; if (v.className !== cls) v.className = cls;
+    if (v.previousSibling !== el && el.parentNode) el.parentNode.insertBefore(v, el.nextSibling);
+    if (el.style.display !== 'none') el.style.display = 'none';
+    if (v.paused) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+  }
   function doImg(el) {
     if (el.tagName !== 'IMG') return;
     var s = el.getAttribute('src'); if (!s) return;
-    if (el.__rtSet != null && s === el.__rtSet) { if (el.__rtR && el.__rtR.frame) frame(el, el.__rtR); return; }
+    if (el.__rtSet != null && s === el.__rtSet) { if (el.__rtR && el.__rtR.frame) frame(el, el.__rtR); if (el.__rtR) vid(el, el.__rtR.video); return; }
     var r = look(IM, normSrc(s), function () { return imgIdx(el); }); if (r == null) return;
     var to = r.src || s;
     el.__rtOrig = s; el.__rtSet = to; el.__rtR = r; if (to !== s) el.setAttribute('src', to);
     if (r.frame) frame(el, r);
+    vid(el, r.video);
     touched.push(el);
   }
   function walk(root) {
@@ -121,7 +143,7 @@
   function restore() {
     touched.forEach(function (n) {
       if (n.nodeType === 3) { if (n.nodeValue === n.__rtSet) n.nodeValue = n.__rtOrig; }
-      else { if (n.getAttribute('src') === n.__rtSet && n.__rtOrig !== n.__rtSet) n.setAttribute('src', n.__rtOrig); unframe(n); n.__rtR = null; }
+      else { if (n.getAttribute('src') === n.__rtSet && n.__rtOrig !== n.__rtSet) n.setAttribute('src', n.__rtOrig); unframe(n); vid(n, ''); n.__rtR = null; }
       n.__rtSet = null; n.__rtOrig = null;
     });
     touched = [];
@@ -237,7 +259,7 @@
   }
   function unhl() { if (hoverEl) { hoverEl.classList.remove('rt-hl'); hoverEl = null; } }
   function ownText(el) { for (var c = el.firstChild; c; c = c.nextSibling) if (c.nodeType === 3 && norm(c.nodeValue)) return true; return false; }
-  function cand(el) { while (el && el !== document.body) { if (el.tagName === 'IMG' || ownText(el)) return el; el = el.parentElement; } return null; }
+  function cand(el) { while (el && el !== document.body) { if (el.__rtImg) return el.__rtImg; if (el.tagName === 'IMG' || ownText(el)) return el; el = el.parentElement; } return null; }
   function skipEl(el) { return !el || !el.closest || !!el.closest('.rt-ui, #cba, .cba-modal, .cba-toast, .cba-pvbar'); }
   document.addEventListener('mouseover', function (e) {
     if (!on || skipEl(e.target)) return; var c = cand(e.target); if (c === hoverEl) return; unhl(); if (c) { hoverEl = c; c.classList.add('rt-hl'); }
@@ -274,7 +296,7 @@
       var w = document.createTreeWalker(target, NodeFilter.SHOW_TEXT, null), n;
       while ((n = w.nextNode()) && texts.length < 8) { if (!norm(n.nodeValue) || (n.parentElement && /^(SCRIPT|STYLE)$/.test(n.parentElement.tagName))) continue; texts.push(n); }
     }
-    try { (document.elementsFromPoint(e.clientX, e.clientY) || []).forEach(function (el) { if (el.tagName === 'IMG' && !skipEl(el) && imgs.indexOf(el) < 0 && imgs.length < 2) imgs.push(el); }); } catch (x) {}
+    try { (document.elementsFromPoint(e.clientX, e.clientY) || []).forEach(function (el) { if (el.__rtImg) el = el.__rtImg; if (el.tagName === 'IMG' && !skipEl(el) && imgs.indexOf(el) < 0 && imgs.length < 2) imgs.push(el); }); } catch (x) {}
     if (target && target.tagName === 'IMG' && imgs.indexOf(target) < 0) imgs.unshift(target);
     if (!texts.length && !imgs.length) { say('Rien de modifiable ici : cliquez sur un texte ou une image.'); return; }
     closePanel(); addCss();
@@ -307,6 +329,7 @@
       var i = findE(W.images, orig, idx), r = i >= 0 ? W.images[i] : null;
       var F = { x: r && r.x != null ? Number(r.x) : 50, y: r && r.y != null ? Number(r.y) : 50, z: r && r.z ? Number(r.z) : 1, taille: (r && r.taille) || '' };
       var source = (r && r.source) || '';
+      var vurl = E('input', { class: 'rt-in', value: (r && r.video) || '', placeholder: 'Adresse d’une vidéo .mp4 (facultatif)' });
       // format de l'emplacement sur la page → format de rognage le plus proche
       var bx = im.getBoundingClientRect(), ar = bx.height ? bx.width / bx.height : 16 / 9;
       var RT = [['16:9', 16 / 9], ['4:3', 4 / 3], ['3:2', 1.5], ['1:1', 1], ['4:5', 0.8], ['3:4', 0.75], ['9:16', 9 / 16]];
@@ -321,13 +344,13 @@
       var same = function () { return Array.prototype.filter.call(document.querySelectorAll('img'), function (x) { return !skipEl(x) && origSrc(x) === orig; }); };
       var paint = function () {
         dot.style.left = F.x + '%'; dot.style.top = F.y + '%';
-        same().forEach(function (x) { if (scope.value !== 'ici' || x === im) frame(x, F); });
+        same().forEach(function (x) { if (scope.value !== 'ici' || x === im) { frame(x, F); if (x.__rtVid) vid(x, x.__rtVid.getAttribute('src')); } });
       };
       scope.addEventListener('change', function () { save(true); });
       var save = function (quiet) {
         var k = findE(W.images, orig, idx);
-        var changed = normSrc(url.value) && normSrc(url.value) !== orig, framed = F.x !== 50 || F.y !== 50 || F.z !== 1 || !!F.taille;
-        putE(W.images, k, orig, scopeVal(scope, v, idx), (changed || framed) ? Object.assign({ apres: changed ? url.value.trim() : '', x: Math.round(F.x), y: Math.round(F.y), z: Math.round(F.z * 100) / 100 }, F.taille ? { taille: F.taille } : {}, source && changed ? { source: source } : {}) : null);
+        var changed = normSrc(url.value) && normSrc(url.value) !== orig, framed = F.x !== 50 || F.y !== 50 || F.z !== 1 || !!F.taille || !!vurl.value.trim();
+        putE(W.images, k, orig, scopeVal(scope, v, idx), (changed || framed) ? Object.assign({ apres: changed ? url.value.trim() : '', x: Math.round(F.x), y: Math.round(F.y), z: Math.round(F.z * 100) / 100 }, F.taille ? { taille: F.taille } : {}, source && changed ? { source: source } : {}, vurl.value.trim() ? { video: vurl.value.trim() } : {}) : null);
         thumb.src = cur(); live(); paint(); srcBtn.style.display = source && normSrc(source) !== normSrc(cur()) ? '' : 'none'; if (!quiet) say('Aperçu mis à jour');
       };
       var apply = function () { save(false); };
@@ -357,6 +380,14 @@
         var before = source || cur(); c.cropImage(before, { ratio: ratio }).then(function (x) { if (x) { source = before; return upload(x, cropBtn, 'Rogner le fichier (' + ratio + ')'); } });
       } }, ['Rogner le fichier (' + ratio + ')']);
       var grid = E('div', { class: 'rt-grid' });
+      var vfile = E('input', { type: 'file', accept: 'video/mp4,video/webm,video/quicktime', style: 'display:none', onchange: function (ev) {
+        var f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!f) return;
+        var c = CA(); if (!c.uploadVideo) { say('Envoi indisponible'); return; }
+        vup.disabled = true; vup.textContent = 'Envoi de la vidéo…';
+        c.uploadVideo(f).then(function (u) { vurl.value = u; vup.disabled = false; vup.textContent = 'Envoyer une vidéo'; save(false); },
+          function (er) { vup.disabled = false; vup.textContent = 'Envoyer une vidéo'; say('Envoi impossible : ' + ((er && er.message) || 'erreur')); });
+      } });
+      var vup = E('button', { type: 'button', class: 'rt-b pri', onclick: function () { vfile.click(); } }, ['Envoyer une vidéo']);
       var taille = E('select', { class: 'rt-in', onchange: function () { F.taille = taille.value; save(false); } },
         [['', 'Comme prévu par la page'], ['plein', 'Pleine largeur (sur toute la largeur du bloc)'], ['fond', 'Pleine largeur, image entière (sans la couper)'], ['entiere', 'Image entière, sans la couper']].map(function (o) { return E('option', { value: o[0], selected: o[0] === F.taille ? 'selected' : null }, [o[1]]); }));
       var srcBtn = E('button', { type: 'button', class: 'rt-b', style: source && normSrc(source) !== normSrc(cur()) ? '' : 'display:none', title: 'Remet la photo telle qu’elle était avant le rognage', onclick: function () { url.value = source; source = ''; F.x = 50; F.y = 50; F.z = 1; zoom.value = '1'; save(false); } }, ['Revenir à la photo non rognée']);
@@ -376,6 +407,11 @@
         E('label', { class: 'rt-zoom' }, ['Zoom ', zoom]),
         E('div', { class: 'rt-row' }, [E('button', { type: 'button', class: 'rt-b', onclick: function () { F.x = 50; F.y = 50; F.z = 1; zoom.value = '1'; save(false); } }, ['Recentrer']), cropBtn]),
         E('span', { class: 'rt-lbl', text: 'Taille dans la page' }), taille,
+        E('span', { class: 'rt-lbl', text: 'Vidéo en arrière-plan (comme sur les sites de mode)' }),
+        E('p', { class: 'rt-note', text: 'La vidéo remplace l’image à cet endroit : sans le son, en boucle, lancée toute seule, aussi sur téléphone. L’image reste affichée le temps du chargement. Format .mp4, 50 Mo maximum, idéalement moins de 15 secondes.' }),
+        vurl, vfile,
+        E('div', { class: 'rt-row' }, [vup, E('button', { type: 'button', class: 'rt-b', onclick: function () { save(false); } }, ['Appliquer la vidéo']),
+          E('button', { type: 'button', class: 'rt-b', onclick: function () { vurl.value = ''; save(false); } }, ['Retirer la vidéo'])]),
         E('div', { class: 'rt-row' }, [srcBtn]),
         E('div', { class: 'rt-orig', text: 'Origine : ' + orig }),
         E('span', { class: 'rt-lbl', text: 'Nouvelle image' }), url,
