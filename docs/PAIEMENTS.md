@@ -69,6 +69,14 @@ C'est ce qui active l'abonnement après le paiement.
 Stripe › **Paramètres** › **Facturation** › **Portail client** (Customer portal) :
 activez « Annuler les abonnements », « Mettre à jour les moyens de paiement » et « Historique des factures », puis **Enregistrer**.
 
+## Étape facultative · E-mail de bienvenue aux nouveaux abonnés
+
+À chaque nouvel abonné (ou abonnement offert), la fonction `stripe-webhook` envoie un e-mail de bienvenue chaleureux
+(prénom, formule, avantages, lien vers Mon espace), via **Brevo**. Une copie apparaît dans la messagerie (« Envoyés »).
+Il suffit d'ajouter dans Supabase › Edge Functions › Secrets les mêmes secrets que pour la messagerie (`docs/ESPACE-ADMIN.md`) :
+`BREVO_API_KEY`, `EXPEDITEUR_EMAIL`, et si vous voulez `EXPEDITEUR_NOM` et `REPONSE_EMAIL`.
+Sans ces secrets, aucun e-mail ne part et tout le reste fonctionne normalement.
+
 ## Essai (mode test)
 
 1. Sur le site, connectez-vous, ouvrez **Abonnements**, choisissez Casa B+, allez jusqu'à **Payer**.
