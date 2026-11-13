@@ -11,6 +11,15 @@ des équipes du Cotentin et de la Manche, à partir de sources publiques et grat
 - Volley-ball : https://www.ffvbbeach.org/ffvbapp/resu/ ; Water-polo / natation : https://ffn.extranat.fr.
 - En secours : sites officiels des clubs. Pas de sites de paris, pas de données payantes, pas de contournement de connexion.
 
+## Handball : import automatique (à lancer en premier)
+- Lance `python3 outils/import_handball.py` (10 à 20 minutes, sources : pages publiques de ffhandball.fr).
+  Il lit, dans cet ordre, la Manche, la Ligue de Normandie, le Calvados, l'Orne, l'Eure, la Seine-Maritime,
+  puis les championnats nationaux où joue un club normand, et réécrit `contenus/sport-federations.js`
+  (`window.CASA_SPORT_AUTO.Handball` : compétitions, classements complets, résultats et matchs à ±14 jours, clubs).
+- Ne modifie pas ce fichier à la main et ne recopie pas le handball dans `contenus/sport.js`.
+- S'il s'arrête avec un message d'erreur, le fichier n'est pas modifié : signale-le dans le compte rendu.
+- `node --check contenus/sport-federations.js` doit passer avant le commit.
+
 ## Ce qu'il faut couvrir
 - Toutes les compétitions où joue au moins une équipe première (seniors) d'un club listé dans `js/app.js` (`clubs`) ou dans `CASA_SPORT.clubs`.
 - Pour chacune : classement complet (`tables[idComp]`), derniers résultats (14 jours) et prochains matchs (14 jours) dans `matches`.
