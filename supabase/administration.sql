@@ -137,8 +137,8 @@ create policy "admin modifie les contenus" on public.site_contenu for all to aut
 
 -- ========== 5. Images : dossier public « site » (seul l'administrateur y dépose) ==========
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('site', 'site', true, 8388608, array['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-on conflict (id) do update set public = true, file_size_limit = 8388608, allowed_mime_types = excluded.allowed_mime_types;
+values ('site', 'site', true, 52428800, array['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'video/quicktime'])
+on conflict (id) do update set public = true, file_size_limit = 52428800, allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "admin depose des images" on storage.objects;
 create policy "admin depose des images" on storage.objects for insert to authenticated with check (bucket_id = 'site' and public.est_admin());
