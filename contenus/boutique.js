@@ -29,7 +29,7 @@ window.CASA_BOUTIQUE = {
   surtitre: 'Casa Besports · la boutique officielle',
   titre: 'Portez le sport du Cotentin',
   texte: 'Collection Casa Besports et capsule Cherwood × Casa Besports, dessinée, floquée et brodée à Cherbourg.',
-  avantages: ['Livraison offerte dès 60 €', 'Retrait gratuit chez Cherwood, Cherbourg', 'Abonnés Casa B+ : −10 %'],
+  avantages: ['Livraison offerte dès 60 €', 'Retrait gratuit chez Cherwood, Cherbourg', 'Abonnés BE+ : −10 %'],
   note: 'Dessinés dans le Cotentin, floqués et brodés à Cherbourg par l’atelier Cherwood.',
   image: 'assets/ph_kit_runes.jpg',
   imageAlt: 'Maillot Casa Besports',

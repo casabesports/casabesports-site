@@ -200,7 +200,7 @@ window.CASA_EN = {
   "Collection Casa Besports et capsule Cherwood × Casa Besports, dessinée, floquée et brodée à Cherbourg.": "The Casa Besports collection and the Cherwood × Casa Besports capsule, designed, printed and embroidered in Cherbourg.",
   "Livraison offerte dès {{freeShip}}": "Free delivery from {{freeShip}}",
   "Retrait gratuit chez Cherwood, Cherbourg": "Free collection at Cherwood, Cherbourg",
-  "Abonnés Casa B+ : −10 %": "Casa B+ subscribers: −10%",
+  "Abonnés BE+ : −10 %": "BE+ subscribers: −10%",
   "Dessinés dans le Cotentin, floqués et brodés à Cherbourg par l’atelier Cherwood.": "Designed in the Cotentin, printed and embroidered in Cherbourg by the Cherwood workshop.",
   "Les collections": "The collections",
   "Choisissez une collection pour l’afficher": "Choose a collection to display it",

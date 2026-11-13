@@ -764,12 +764,22 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 
 /* ---------- Boutique ---------- */
 .bn-shop-hero { border-bottom: 1px solid var(--bn-bord-noir); }
-.bn-shop-hero-in { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); align-items: center; gap: 2rem clamp(1.5rem, 4vw, 4rem); padding-top: clamp(2.4rem, 6vh, 4rem); padding-bottom: clamp(2.6rem, 6vh, 4rem); }
+.bn-shop-hero-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 2rem clamp(1.5rem, 4vw, 4rem); padding-top: clamp(2.4rem, 6vh, 4rem); padding-bottom: clamp(2.6rem, 6vh, 4rem); }
 .bn-shop-hero .bn-titre { display: block; margin: 1rem 0 1.1rem; font-size: clamp(2.5rem, 5.6vw, 5rem); color: var(--bn-blanc); max-width: 13ch; }
 .bn-shop-hero .sh-tag { font-size: 1.08rem; line-height: 1.6; max-width: 36rem; margin: 0 0 1.2rem; color: #e6e6e6; }
 .bn-shop-hero .sh-perks { display: flex; flex-wrap: wrap; gap: .5rem; }
 .bn-shop-hero .sh-perks span { display: inline-flex; align-items: center; font-family: var(--bn-font); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 13px; line-height: 1; color: var(--bn-blanc); border: 1.5px solid #5a5a5a; padding: .6em .75em .45em; }
 .bn-shop-hero .sh-note { margin: 1.1rem 0 0; font-size: 13px; color: var(--bn-gris); max-width: 40rem; }
+.cw-lock { display: flex; align-items: center; gap: .9rem; margin: 0 0 1.4rem }
+.cw-lock img { height: 56px; width: auto; display: block; outline: 1px solid #3a3a3a }
+.cw-x { font-family: var(--bn-font); font-weight: 800; font-size: 2.2rem; line-height: 1; color: #e8a830 }
+.cw-mark { font-family: var(--bn-font); font-weight: 800; font-size: clamp(1.6rem, 3.4vw, 2.4rem); letter-spacing: .08em; text-transform: uppercase; color: #fbfaf7; border: 2px solid #2f8f5b; padding: .28em .5em .18em; line-height: 1 }
+.cw-cta { margin-top: 1.4rem }
+.cw-hero-img { position: relative; display: block; padding: 0; border: 2px solid #2f8f5b; background: #0e2a1d; cursor: pointer; overflow: hidden; width: 100% }
+.cw-hero-img img { display: block; width: 100%; height: auto; transition: transform .5s ease }
+.cw-hero-img:hover img { transform: scale(1.03) }
+.cw-hero-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: .7rem .9rem; background: rgba(0,0,0,.72); color: #fbfaf7; font-family: var(--bn-font); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; text-align: left }
+@media (max-width: 860px) { .cw-hero-img { order: -1 } .cw-lock img { height: 44px } }
 .bn-cadre { position: relative; display: block; margin: 0; background: var(--bn-blanc); padding: clamp(8px, 1.2vw, 12px); }
 .bn-cadre > img { display: block; width: 100%; height: auto; }
 .bn-cadre figcaption { position: absolute; left: clamp(8px, 1.2vw, 12px); bottom: clamp(8px, 1.2vw, 12px); }
@@ -3642,20 +3652,18 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   <section class="bn-scope bn-shop-hero" aria-label="Boutique officielle Casa Besports">
     <div class="wrap bn-shop-hero-in">
       <div>
+        <div class="cw-lock" role="img" aria-label="BE+ × Cherwood"><img src="assets/logo-be.svg" alt="" width="94" height="56"><span class="cw-x" aria-hidden="true">×</span><span class="cw-mark" aria-hidden="true">Cherwood</span></div>
         <span class="bn-etiq">{{shopPres.surtitre}}</span>
         <h1 class="bn-titre">{{shopPres.titre}}</h1>
         <p class="sh-tag">{{shopPres.texte}}</p>
         <div class="sh-perks"><sc-for list="{{shopPres.avantages}}" as="av" hint-placeholder-count="3"><span>{{av.t}}</span></sc-for></div>
         <p class="sh-note">{{shopPres.note}}</p>
+        <button type="button" class="btn btn-gold cw-cta" onClick="{{cherwood.go}}">Voir la capsule Casa × Cherwood</button>
       </div>
-      <figure class="bn-cadre"><img src="{{shopPres.image}}" alt="{{shopPres.imageAlt}}" width="1000" height="1000"></figure>
+      <button type="button" class="cw-hero-img" onClick="{{cherwood.go}}" aria-label="Voir la capsule Casa × Cherwood"><img src="{{cherwood.img}}" alt="{{cherwood.alt}}" width="1600" height="1000"><span class="cw-hero-cap">Capsule Casa × Cherwood · Napoléon, Plage Verte</span></button>
     </div>
   </section>
   <section class="wrap" style="padding-top: 2.25rem; padding-bottom: 5rem">
-    <button type="button" class="cw-band cw-hit" style="margin-bottom: 2rem" onClick="{{cherwood.go}}" aria-label="Voir la capsule Cherwood × Casa">
-      <img class="cw-img" src="{{cherwood.img}}" alt="{{cherwood.alt}}" width="1600" height="1000" loading="lazy">
-      <span class="cw-txt"><span class="pro-eb">Collaboration</span><span class="pro-h2">Casa × Cherwood</span><span class="cw-p">Napoléon montre la mer, la Plage Verte s’étend à ses pieds : la capsule dessinée, floquée et brodée à Cherbourg.</span><span class="btn btn-gold cw-btn">Voir la capsule</span></span>
-    </button>
     <!-- Les collections -->
     <div class="bn-sect"><span class="bn-etiq">Les collections</span><span style="font-size: 13px; color: var(--muted)">Choisissez une collection pour l’afficher</span></div>
     <div class="bn-colls">
