@@ -30,6 +30,7 @@
     { key: 'CASA_CULTURE', label: 'Culture', desc: 'Œuvres et photographies des salles Culture.', item: 'title' },
     { key: 'CASA_FONDS', label: 'Fonds de page', desc: 'L’image derrière chaque page du site.' },
     { key: 'CASA_APROPOS', label: 'À propos', desc: 'L’histoire de Casa Besports : ouverture, manifeste, étapes, piliers, conviction et appel final.' },
+    { key: 'CASA_RESEAUX', label: 'Réseaux sociaux', desc: 'Les liens Instagram, YouTube, TikTok, Facebook, X et LinkedIn en bas de chaque page. Collez l’adresse complète de votre page (https://…). Laissez vide pour masquer un réseau.' },
     { key: 'CASA_LEGAL', label: 'Pages légales', desc: 'Mentions légales, confidentialité, CGV, CGU.' },
     { key: 'CASA_RETOUCHES', label: 'Retouches des pages', desc: 'Textes et images changés directement sur le site (bouton « ✎ Retoucher » en bas à gauche du site). Ici : les revoir, les corriger ou les supprimer.' },
     { key: 'CASA_LEGAL_MAJ', hide: true, label: 'Pages légales · date de mise à jour', desc: 'Date de dernière mise à jour affichée.' }
@@ -75,6 +76,7 @@
     sec: [['À la une', 'À la une'], ['Le terrain', 'Le terrain'], ['Les gens', 'Les gens'], ['Le territoire', 'Le territoire'], ['La pause', 'La pause']]
   };
   var LABELS = {
+    instagram: 'Instagram : adresse de la page (https://www.instagram.com/…)', youtube: 'YouTube : adresse de la chaîne (https://www.youtube.com/@…)', tiktok: 'TikTok : adresse du compte (https://www.tiktok.com/@…)', facebook: 'Facebook : adresse de la page (https://www.facebook.com/…)', x: 'X (Twitter) : adresse du compte (https://x.com/…)', linkedin: 'LinkedIn : adresse de la page (https://www.linkedin.com/company/…)',
     id: 'Identifiant (unique, sans espace ni accent)', title: 'Titre', titre: 'Titre', titleEn: 'Titre (anglais)', titreEn: 'Titre (anglais)', dek: 'Chapeau', dekEn: 'Chapeau (anglais)',
     body: 'Texte de l’article (## intertitre, > citation, ![légende](image))', bodyEn: 'Texte (anglais)', tag: 'Rubrique', tagEn: 'Rubrique (anglais)', sport: 'Discipline', date: 'Date affichée', read: 'Temps de lecture',
     premium: 'Réservé aux abonnés Casa B+', img: 'Image', image: 'Image', photo: 'Photo réelle (remplace l’illustration)', alt: 'Description de l’image', imageAlt: 'Description de l’image', clubs: 'Clubs liés (identifiants)', points: 'Points clés',
@@ -540,7 +542,7 @@
 
   // ---------- Aperçu sur le site, avant publication ----------
   var PV = null, pvBar = null;
-  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home' };
+  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home', CASA_RESEAUX: 'home' };
   function openCardIdx(k) { if (k === 'CASA_GAZETTE' && S.gzSel != null) return S.gzSel; var m = null; Object.keys(S.openCards || {}).forEach(function (p) { var r = p.match(new RegExp('^' + k + '\\[(\\d+)\\]$')); if (r && S.openCards[p]) m = Number(r[1]); }); return m; }
   function startPreview(k, value) {
     var site = window.CasaSite; if (!site || PV) return;

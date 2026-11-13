@@ -1911,6 +1911,10 @@ class Component extends DCLogic {
       ].map((c) => Object.assign(c, { items: c.items.map((t) => ({ t })) })),
       devis: toContact('Demande de devis', ''), partenaire: toContact('Devenir partenaire', 'Entreprise'), histoire: toContact('Proposer une histoire', ''), redaction: toContact('Message à la rédaction', '')
     };
+    // Réseaux sociaux du pied de page (contenus/reseaux.js, modifiables dans l'admin) : un réseau sans adresse est masqué
+    const RSX = window.CASA_RESEAUX || {};
+    const reseaux = [['instagram', 'Instagram'], ['youtube', 'YouTube'], ['tiktok', 'TikTok'], ['facebook', 'Facebook'], ['x', 'X'], ['linkedin', 'LinkedIn']]
+      .filter(([k]) => /^https:\/\/\S+$/.test(String(RSX[k] || '').trim())).map(([k, label]) => ({ label, href: String(RSX[k]).trim() }));
     const footCols = [
       { title: 'Suivre', links: [['Le Terrain', 'live'], ['Actualités', 'news'], ['Vidéos', 'videos'], ['Disciplines', 'disciplines'], ['Clubs', 'clubs'], ['Joueurs', 'players'], ['Territoire', 'map']] },
       { title: 'Boutique & mag', links: [['Boutique', 'shop'], ['Cherwood × Casa', 'shop'], ['Abonnements', 'offers'], ['La Gazette du Cotentin', 'offers']] },
@@ -2672,7 +2676,7 @@ class Component extends DCLogic {
       doLogin: () => { this.setState({ loggedIn: true, loginOpen: false }); this.applyProfileTheme(s.email.trim().toLowerCase() || 'compte'); this.say('Connecté. Bienvenue !'); },
       searchOpen: s.searchOpen, openSearch: () => this.setState({ searchOpen: true, sq: '', menuOpen: false, moreOpen: false }), closeSearch: () => this.setState({ searchOpen: false }),
       sq: s.sq, onSq: (e) => this.setState({ sq: e.target.value }), noSq: !sq, sResults, sEmpty: !!sq && sResults.length === 0, quick,
-      footCols, hasToast: !!s.toast, toast: s.toast,
+      footCols, reseaux, hasToast: !!s.toast, toast: s.toast,
       themeAttr: curTheme, themingClass: s.themeAnim ? 'cb-theming' : '', themes, themeName, themeMenuOpen: s.themeMenuOpen, themeMenuExp: s.themeMenuOpen ? 'true' : 'false',
       toggleThemeMenu: () => this.setState({ themeMenuOpen: !s.themeMenuOpen, moreOpen: false }),
       openThemeFromFooter: () => { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} this.setState({ themeMenuOpen: true, hdrY: '0' }); },
