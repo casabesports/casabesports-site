@@ -1077,8 +1077,21 @@ class Component extends DCLogic {
     this.saveCrm(C);
   }
 
+  // Carte de Normandie : téléchargée seulement à l'ouverture de la page Territoire
+  chargeCarte() {
+    if (typeof window === 'undefined' || window.CasaCarte || this._carteLoad || !window.CasaCharge) return;
+    this._carteLoad = true;
+    window.CasaCharge(window.CASA_LIBS.carte).then(() => this.setState({ tick: (this.state.tick || 0) + 1 })).catch(() => { this._carteLoad = false; this.say('La carte n’a pas pu se charger. Vérifiez votre connexion.'); });
+  }
   openAR(mode) {
     const s = this.state;
+    // 3D et réalité augmentée : téléchargées seulement quand on les ouvre
+    if (typeof window !== 'undefined' && !window.CasaAR && window.CasaCharge && !this._arLoad) {
+      this._arLoad = true; this.say('Chargement de la 3D…');
+      window.CasaCharge(window.CASA_LIBS.ar).then(() => { this._arLoad = false; this.openAR(mode); }).catch(() => { this._arLoad = false; this.say('La 3D n’a pas pu se charger. Vérifiez votre connexion.'); });
+      return;
+    }
+    if (this._arLoad) return;
     if (typeof window !== 'undefined' && window.CasaAR && window.CasaAR.open) {
       const all = this.more().matches || [];
       const live = all.find((m) => m.status === 'live') || all.find((m) => m.status === 'done' && m.hs != null);
@@ -2390,6 +2403,7 @@ class Component extends DCLogic {
       setPost: (id, patch, line) => this.setPost(id, patch, line), blocksOf: (b) => this.blocksOf(b), go: (v, x) => this.go(v, x) };
     const CVV = typeof CasaCV !== 'undefined' ? CasaCV.vals(this, rsCtx) : { prof: {}, cv: {}, verif: {}, adm: {}, avatar: '' };
     rsCtx.cvPending = typeof CasaCV !== 'undefined' && canReseau && s.studioTab === 'reseau' ? CasaCV.pending(this) : 0;
+    if (s.view === 'map') this.chargeCarte();
     const RS = typeof CasaReseau !== 'undefined' ? CasaReseau.vals(this, rsCtx) : { carte: {}, com: {}, club: {}, adm: {}, fiche: { has: false, lignes: [] } };
     return {
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',

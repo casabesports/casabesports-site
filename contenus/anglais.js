@@ -292,6 +292,8 @@ window.CASA_EN = {
   "Météo indisponible": "Weather unavailable",
   "En attente des prévisions": "Waiting for the forecast",
   "Indisponible": "Unavailable",
+  "Chargement de la carte…": "Loading the map…",
+  "Chargement de la 3D…": "Loading 3D…",
   "Votre objectif": "Your goal",
   "Être recontacté": "Get a call back",
   "Notre histoire": "Our story",
