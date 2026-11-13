@@ -580,6 +580,7 @@ class Component extends DCLogic {
       const ci = cities.find((c) => q.includes(n(c).replace(/-/g, ' ').split(' ')[0]));
       const city = ci ? (ci === 'Saint-Lo' ? 'Saint-Lô' : ci) : this.state.wxCity || 'Cherbourg';
       const Wc = (this.state.wxLive || {})[city] || this.wxDemo(city);
+      if (!Wc.live) { this.fetchWeather(city); return { text: 'Les prévisions pour ' + city + ' ne sont pas encore chargées. Réessayez dans un instant.', actions: [act('Ouvrir la météo', () => this.go('meteo'))] }; }
       const [lab] = this.wxIcon(Wc.cur.code); const d1 = Wc.days[1]; const [lab1] = this.wxIcon(d1.code);
       return { text: 'Météo à ' + city + (Wc.live ? '' : ' (estimation)') + ' : ' + lab.toLowerCase() + ', ' + Wc.cur.t + '°, vent ' + Wc.cur.wind + ' km/h.\nDemain : ' + lab1.toLowerCase() + ', ' + d1.min + '° à ' + d1.max + '°, pluie ' + d1.pp + ' %.', actions: [act('Prévisions détaillées', () => { this.setState({ wxCity: city }); this.go('meteo'); })] };
     }
@@ -706,7 +707,7 @@ class Component extends DCLogic {
     return { id: p.id, sport: p.sport, tag: p.tag, date: '6 oct.', read: Math.max(1, Math.round(words / 200)) + ' min', premium: p.premium, img: p.img, alt: p.alt || p.title, title: p.title, dek: p.dek, clubs: p.clubs, points: this.sentences(this.textOf(p.body)).slice(0, 3), body: p.body, author: p.author, fromStudio: true, video: p.video && p.video.url ? p.video : null, related: p.related || [], date: p.online && p.online.at ? (typeof CasaRedac !== 'undefined' ? CasaRedac.fmtDate(p.online.at).replace(/ \d{4}$/, '') : '6 oct.') : '6 oct.' };
   }
 
-  loadTheme() { try { const t = window.localStorage.getItem('cb-theme'); return ['auto', 'light', 'dark', 'noir', 'paper'].indexOf(t) >= 0 ? t : 'auto'; } catch (e) { return 'auto'; } }
+  loadTheme() { try { const t = window.localStorage.getItem('cb-theme'); return ['auto', 'light', 'dark', 'noir', 'paper'].indexOf(t) >= 0 ? t : 'dark'; } catch (e) { return 'dark'; } }
   sysDark() { try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) { return false; } }
   profileKey() { const s = this.state; return s.role ? 'role-' + s.role : (s.email.trim().toLowerCase() || 'compte'); }
   setTheme(id, opts) {
@@ -1800,7 +1801,7 @@ class Component extends DCLogic {
     const aiTools = [['titles', 'Titres'], ['dek', 'Chapeau'], ['proof', 'Relecture'], ['seo', 'Référencement']].map(([id, label]) => ({ label, run: () => this.setState({ aiOutKind: id }) }));
     const staffRole = isAdmin ? 'admin' : (s.staffRole || 'redacteur');
     const W0 = (s.wxLive || {})[s.wxCity || 'Cherbourg'] || this.wxDemo(s.wxCity || 'Cherbourg');
-    const wxText = (W0.days || []).slice(1, 4).map((d) => new Date(d.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long' }) + ' ' + d.max + '° / ' + d.min + '°, pluie ' + d.pp + ' %').join(' · ') + ' (' + (s.wxCity || 'Cherbourg') + ')';
+    const wxText = !W0.live ? '' : (W0.days || []).slice(1, 4).map((d) => new Date(d.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long' }) + ' ' + d.max + '° / ' + d.min + '°, pluie ' + d.pp + ' %').join(' · ') + ' (' + (s.wxCity || 'Cherbourg') + ')';
     const RXV = typeof CasaRedac !== 'undefined' ? CasaRedac.vals(this, { isAdmin, staffRole, clubRole: s.role === 'club', posts, ARTS, G: this.gazette(), libImgs, videos: D.videos, edRaw, upd, edLocked, checksOf: (p) => this.checksOf(p), blocksOf: (b) => this.blocksOf(b), clubById,
       openEditById: (id) => { const p = this.posts().find((x) => x.id === id); if (p) openEdit(p, 'write'); }, go: (v, x) => this.go(v, x), table: X.tables.r2, matches: allM, wxText }) : { ed: {}, list: { rows: [] }, badges: {}, aide: {}, dlg: {}, wf: {} };
     RXV.crumb = (studioTabs.find((t) => t[0] === s.studioTab) || ['', s.studioTab === 'edit' || s.studioTab === 'cedit' ? 'Éditeur' : 'Tableau de bord'])[1];
@@ -1867,7 +1868,7 @@ class Component extends DCLogic {
       ['noir', 'Noir absolu', 'Noir', 'Contraste maximal', 'Noir pur et blanc pur : le contraste le plus fort, idéal sur écran OLED.', { bg: '#000000', bar: '#000000', card: '#0a0a0a', line: '#333333', text: '#ffffff', acc: '#ffffff', split: '0%' }],
       ['paper', 'Papier journal', 'Papier', 'Encre et papier', 'Papier grisé, encre noire et texte à empattements, comme un quotidien imprimé.', { bg: '#f1eee7', bar: '#111111', card: '#f8f6f1', line: '#bdb6a7', text: '#111111', acc: '#111111', split: '0%' }]
     ];
-    const curTheme = THEME_DEFS.find((t) => t[0] === s.theme) ? s.theme : 'auto';
+    const curTheme = THEME_DEFS.find((t) => t[0] === s.theme) ? s.theme : 'dark';
     const themes = THEME_DEFS.map(([id, name, short, desc, long, sw]) => {
       const on = id === curTheme;
       return Object.assign({}, sw, { id, name, short, desc, long, checked: on ? 'true' : 'false', isOn: on,
@@ -1920,12 +1921,20 @@ class Component extends DCLogic {
       source: W.live ? 'Prévisions Open-Meteo · en direct' : 'Connexion au service météo…', srcColor: W.live ? 'var(--success)' : 'var(--gold-text)',
       updated: W.live ? 'Mis à jour à ' + new Date(W.at).toTimeString().slice(0, 5) + ' · actualisé toutes les 10 min' : 'Estimation en attendant les données en direct',
       credit: W.live ? 'Données météo : Open-Meteo.com (CC BY 4.0). Vigilance et marées : à relier aux flux officiels Météo-France et SHOM.' : 'Prévisions en cours de chargement depuis Open-Meteo. Si elles n’apparaissent pas, vérifiez votre connexion puis rechargez la page.' };
+    wx.cityTemp = wxCity + (W.live ? ' ' + W.cur.t + '°' : '');
+    // Pas de données en direct : on n'affiche aucun chiffre inventé, seulement des tirets
+    if (!W.live) {
+      const NA = '—';
+      Object.assign(wx, { nowTemp: NA, nowFeels: NA, nowLabel: 'Météo indisponible', nowWind: NA, nowGust: NA, nowHum: NA, nowRain: NA, sunrise: NA, sunset: NA, waves: NA, adviceShort: 'prévisions en cours de chargement',
+        hours: wx.hours.map((h) => Object.assign({}, h, { t: NA, p: NA })), play: play.map((pc) => Object.assign({}, pc, { color: 'var(--muted)', verdict: 'En attente des prévisions' })) });
+      wx.days = days.map((d) => Object.assign({}, d, { max: NA, min: NA, p: NA, w: NA, barL: '0%', barW: '0%' })); wx.next3 = wx.days.slice(1, 4);
+    }
     const wxCities = wxBase.map((c) => Object.assign(pill(c === wxCity), { label: c, pick: () => { this.setState({ wxCity: c }); this.writeLS('cb-wx-city', c); this.fetchWeather(c); } }));
     const wxMine = wxExtra.map((x) => Object.assign(pill(x.name === wxCity), { label: x.name, region: x.region, pick: () => { this.setState({ wxCity: x.name }); this.writeLS('cb-wx-city', x.name); this.fetchWeather(x.name); }, remove: () => this.wxRemove(x.name) }));
     const wxFind = { q: s.wxQ || '', onQ: (e) => { const v = e.target.value; this.setState({ wxQ: v, wxNone: false }); clearTimeout(this._wxT); this._wxT = setTimeout(() => this.wxSearch(v), 350); },
       go: () => this.wxSearch(s.wxQ), busy: !!s.wxSearching, none: !!s.wxNone && !!(s.wxQ || '').trim(), hasRes: (s.wxRes || []).length > 0,
       res: (s.wxRes || []).map((r) => ({ name: r.name, region: r.region, add: () => this.wxAdd(r) })), hasMine: wxMine.length > 0, mine: wxMine };
-    const weather = wxCityNames.slice(0, 4).map((c) => { const Wc = (s.wxLive || {})[c] || this.wxDemo(c); const [label, ico] = this.wxIcon(Wc.cur.code); return { city: c, label, ico, temp: Wc.cur.t + '°', wind: Wc.cur.wind + ' km/h', sun: Wc.cur.code <= 2, cloud: Wc.cur.code === 3 || Wc.cur.code === 45, rain: Wc.cur.code > 45 }; });
+    const weather = wxCityNames.slice(0, 4).map((c) => { const Wc = (s.wxLive || {})[c] || this.wxDemo(c); const [label, ico] = this.wxIcon(Wc.cur.code); return { city: c, label: Wc.live ? label : 'Indisponible', ico, temp: Wc.live ? Wc.cur.t + '°' : '—', wind: Wc.live ? Wc.cur.wind + ' km/h' : '—', sun: Wc.cur.code <= 2, cloud: Wc.cur.code === 3 || Wc.cur.code === 45, rain: Wc.cur.code > 45 }; });
 
     // ---------- accueil modulable ----------
     const MD = this.modDefs();
@@ -1944,6 +1953,9 @@ class Component extends DCLogic {
     const dashProducts = homeProducts.slice(0, 3);
     const dashTable = (X.tables.r2 || []).slice(0, 4).map((r, i) => ({ rank: String(i + 1), team: r.team, pts: String(r.pts) }));
     const dashVideos = videos.slice(0, 2);
+    // Un bloc d'accueil sans contenu réel ne s'affiche pas : il réapparaît dès qu'il y a des matchs, des articles, des produits, un classement ou des vidéos
+    const emptyMod = { live: !dashScores.length, actus: !dashNews.length, shop: !dashProducts.length, table: !dashTable.length, videos: !dashVideos.length };
+    const homeModsShown = homeMods.filter((m) => !emptyMod[m.id] && (m.id !== 'rdv' || m.isRdv));
     const ldj = X.places[now0.getDate() % X.places.length];
     const lieuDuJour = Object.assign({}, ldj, { open: () => this.setState({ placeOpen: true, placeIdx: X.places.indexOf(ldj) }) });
     const quickChips = [['Scores en direct', () => this.go('live', { dTab: 'live' }), '#e03040'], ['Météo', () => this.go('meteo'), '#6aa6c8'], ['Mon quotidien', () => this.go('private'), accent], ['Compo en AR', () => this.openAR('lineup'), '#e03040'], ['Club House', () => this.go('clubhouse'), '#2e9e6b'], ['Culture', () => this.go('culture'), '#b07acc'], ['La Gazette', () => this.setState({ readerOpen: true, page: 0 }), '#9a6410'], ['Boutique', () => this.go('shop'), '#1f3b33']].map(([label, go, dot]) => ({ label, go, dot }));
@@ -2636,7 +2648,7 @@ class Component extends DCLogic {
       isLegal: V === 'legal', legal, legalTabs, legalLinks, legalMaj: 'Dernière mise à jour : ' + ((window.CASA_LEGAL_MAJ) || '—') + ' · Les passages entre [crochets] sont à compléter.',
       weather, wx, wxCities, wxFind, isMeteo: V === 'meteo', goMeteo: () => this.go('meteo'), goPrivate: () => this.go('private'), goTable: () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' }),
       isHomeDash: V === 'home' && s.homeLayout !== 'magazine', isHomeMag: V === 'home' && s.homeLayout === 'magazine', toMagazine: () => this.setLayout('magazine'), toDashboard: () => this.setLayout('dashboard'),
-      homeMods, noModules: homeMods.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
+      homeMods: homeModsShown, noModules: homeModsShown.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
       une, dashScores, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
       isPrivate: V === 'private', pv, pf: pfm, pvTabs, tabBar,
       isApp: V === 'app', appUrl, arModes, installSteps, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: inApp ? 'Vous êtes dans l’application.' : 'Lien privé tant que vous ne l’avez pas partagé. Fonctionne sur téléphone, tablette et ordinateur.',

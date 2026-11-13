@@ -24,14 +24,14 @@
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAwIDEwMDAiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhc2EgQmVzcG9ydHMiPjx0aXRsZT5DYXNhIEJlc3BvcnRzPC90aXRsZT48cmVjdCB3aWR0aD0iMTAwMCIgaGVpZ2h0PSIxMDAwIiBmaWxsPSIjMDAwMDAwIi8+PHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAwIDMxNi4xKSBzY2FsZSgwLjI3ODY1KSIgZmlsbD0iI0ZGRkZGRiIgZD0iTTAgMEg0NTNRNTY2IDAgNjYyLjUgMzFRNzU5IDYyIDgxOC41IDEzMi41UTg3OCAyMDMgODc4IDMyM1E4NzggNDAyIDg0OC41IDQ2NFE4MTkgNTI2IDc3MC41IDU2NS41UTcyMiA2MDUgNjY1IDYxOFE3MTUgNjI0IDc2Mi41IDY0Ni41UTgxMCA2NjkgODQ4LjUgNzA4LjVRODg3IDc0OCA5MDkuNSA4MDYuNVE5MzIgODY1IDkzMiA5NDVROTMyIDEwNTYgODgyLjUgMTE0MC41UTgzMyAxMjI1IDczOC41IDEyNzIuNVE2NDQgMTMyMCA1MDcgMTMyMEgwWk0yOTkgMTA4MUg0MzVRNDk5IDEwODEgNTM5LjUgMTA2MS41UTU4MCAxMDQyIDU5OSAxMDA1LjVRNjE4IDk2OSA2MTggOTE4UTYxOCA4MzggNTY4LjUgODAwLjVRNTE5IDc2MyA0MzAgNzYzSDI5OVpNMjk5IDUyOUg0MjBRNDczIDUyOSA1MDguNSA1MTBRNTQ0IDQ5MSA1NjIuNSA0NTYuNVE1ODEgNDIyIDU4MSAzNzdRNTgxIDI5NiA1MzUgMjY3LjVRNDg5IDIzOSA0MDkgMjM5SDI5OVogTTEwMzQgMEgxODc3VjI2MkgxMzMyVjUzMUgxODcyVjc4NUgxMzMyVjEwNThIMTg3N1YxMzIwSDEwMzRaIE0yNTg1IDc3OVYxMDY3SDIzMzhWNzc5SDIwNTBWNTM0SDIzMzhWMjQ2SDI1ODVWNTM0SDI4NzFWNzc5WiIvPjwvc3ZnPgo=" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <script>
-  /* Thème appliqué avant le premier affichage (évite le flash de couleurs). Défaut : automatique. */
+  /* Thème appliqué avant le premier affichage (évite le flash de couleurs). Défaut : sombre (fond noir, identité Casa Besports). */
   (function () {
-    var t = 'auto';
+    var t = 'dark';
     try { var s = localStorage.getItem('cb-theme'); if (['auto', 'light', 'dark', 'noir', 'paper'].indexOf(s) >= 0) t = s; } catch (e) {}
     document.documentElement.setAttribute('data-cb-theme', t);
   })();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:wght@500;600;700&family=Caveat:wght@500;600;700&family=Cinzel:wght@700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Mulish:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Uncial+Antiqua&family=League+Spartan:wght@500;600;700;800;900&display=swap">
+<link rel="preload" href="assets/polices/league-spartan-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/polices/mulish-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="assets/polices/polices.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -44,6 +44,7 @@
     var q = new URLSearchParams(location.search);
     var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
     if (true) { window.CASA_APP = true; document.documentElement.classList.add('cb-app'); }
+    if (standalone) document.documentElement.classList.add('cb-standalone');
   })();
 </script>
 <style>
@@ -616,8 +617,8 @@ button.b-card:hover{transform:translateY(-3px);box-shadow:0 20px 40px -26px var(
 .bn-scope .btn-ghost:hover { color: var(--bn-noir); }
 .lnk { font-family: var(--bn-font); letter-spacing: .03em; border-bottom-width: 3px; }
 .chip { font-family: var(--bn-font); font-weight: 600; letter-spacing: .03em; border-radius: 0; }
-.navb { font-family: var(--bn-font); font-weight: 600; letter-spacing: .04em; font-size: 15.5px; }
-@media (max-width: 1360px) { .navb { font-size: 14.5px; } }
+.navb { font-family: var(--bn-font); font-weight: 600; letter-spacing: .04em; font-size: 14px; }
+@media (max-width: 1360px) { .navb { font-size: 13.5px; } }
 .field { border-radius: 0; }
 .field:focus { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
 :focus-visible { outline-color: var(--ink); }
@@ -2089,7 +2090,20 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
   html.cb-app .tabbar{display:flex!important;position:fixed;left:50%;transform:translateX(-50%);width:min(520px,calc(100% - 16px));right:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:45;border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 40px -18px var(--shadow);padding:2px 4px}
   html.cb-app .cb-root{padding-bottom:96px}
   html.cb-app .lift16{bottom:94px!important}html.cb-app .lift22{bottom:100px!important}html.cb-app .lift90{bottom:166px!important}
-  html.cb-app footer{display:none}
+  /* Pied de page masqué seulement dans l'application installée (sur le site, il porte les liens légaux) */
+  html.cb-standalone footer.bn-pied{display:none}
+  /* Ordinateur : le menu du haut suffit, pas de barre d'onglets en bas */
+  @media (min-width: 900px){
+    html.cb-app .tabbar, html.cb-app .tabbar.bn-scope{display:none!important}
+    html.cb-app .cb-root{padding-bottom:0}
+    html.cb-app .lift16{bottom:16px!important}html.cb-app .lift22{bottom:22px!important}html.cb-app .lift90{bottom:90px!important}
+  }
+  /* Téléphone : boutons flottants plus discrets pour ne pas couvrir les textes et formulaires */
+  @media (max-width: 760px){
+    .fab-lieu{padding:0 .3rem!important;min-height:44px!important;border-radius:50%!important;width:44px;justify-content:center}
+    .fab-lieu .fab-lieu-txt{display:none}
+    .fab-ia{width:52px!important;height:52px!important}
+  }
 </style>
 <style>
 /* ---------- Page À propos : récit documentaire, fond noir ---------- */
@@ -2334,8 +2348,8 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
   <section class="wrap" style="padding-top: 1.75rem; padding-bottom: 1rem">
     <div class="bn-accueil">
       <div>
-        <div class="cond" style="font-size: 13px; color: var(--muted)">{{todayLabel}} · {{wx.city}} {{wx.nowTemp}}</div>
-        <h1 class="h1 bn-bh"><span class="bn-bandeau">{{greeting}}</span></h1>
+        <div class="cond" style="font-size: 13px; color: var(--muted)">{{todayLabel}} · {{wx.cityTemp}}</div>
+        <h1 class="h1 bn-bh"><span class="sr">Casa Besports, le média du sport dans le Cotentin et la Manche. </span><span class="bn-bandeau">{{greeting}}</span></h1>
       </div>
       <div class="bn-accueil-act">
         <button type="button" class="btn btn-ghost" onClick="{{openCustomize}}" style="min-height: 44px; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Personnaliser</button>
@@ -3812,7 +3826,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
       <p style="color: var(--text-2); font-size: 1.05rem; line-height: 1.65; margin: 0 0 1.5rem">Visibilité sur le site, dans La Gazette, sur les maillots et pendant les directs du Terrain. Formules Club, Or et Platinum sur mesure.</p>
       <div style="display: flex; gap: 2.5rem; flex-wrap: wrap">
         <div><div class="num" style="font-size: 40px; color: var(--ink)">25+</div><div class="eb" style="font-size: 13px; color: var(--muted)">Clubs suivis</div></div>
-        <div><div class="num" style="font-size: 40px; color: var(--ink)">[AUDIENCE]</div><div class="eb" style="font-size: 13px; color: var(--muted)">Visiteurs / mois</div></div>
+        <!-- Audience : à afficher seulement avec un chiffre réel mesuré -->
       </div>
     </div>
     <div style="flex: 1 1 380px; border: 1px solid var(--line); border-radius: 0; padding: 2rem; background: var(--surface)">
@@ -6498,14 +6512,14 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 
 
 <!-- ================= BOUTONS FLOTTANTS ================= -->
-<button type="button" class="fab glass lift16" onClick="{{togglePlace}}" aria-label="Lieu en arrière-plan : {{place.name}}" style="left: 16px; bottom: 16px; border-radius: 0; min-height: 48px; padding: 0 1rem 0 .5rem; display: flex; align-items: center; gap: .6rem; border: 1px solid var(--line); color: var(--text)">
+<button type="button" class="fab glass lift16 fab-lieu" onClick="{{togglePlace}}" aria-label="Lieu en arrière-plan : {{place.name}}" style="left: 16px; bottom: 16px; border-radius: 0; min-height: 48px; padding: 0 1rem 0 .5rem; display: flex; align-items: center; gap: .6rem; border: 1px solid var(--line); color: var(--text)">
   <span style="width: 34px; height: 34px; border-radius: 50%; overflow: hidden; flex: none; border: 2px solid var(--surface)"><img src="{{place.img}}" alt="" style="width: 100%; height: 100%; object-fit: cover"></span>
-  <span style="text-align: left; line-height: 1.1"><span class="cond" style="display: block; font-size: 11px; color: var(--gold-text)">Lieu · {{place.year}}</span><span style="font-weight: 800; font-size: 13.5px">{{place.short}}</span></span>
+  <span class="fab-lieu-txt" style="text-align: left; line-height: 1.1"><span class="cond" style="display: block; font-size: 11px; color: var(--gold-text)">Lieu · {{place.year}}</span><span style="font-weight: 800; font-size: 13.5px">{{place.short}}</span></span>
 </button>
 <sc-if value="{{showToTop}}" hint-placeholder-val="{{ false }}">
   <button type="button" class="fab lift22" onClick="{{toTop}}" aria-label="Revenir en haut" style="right: 92px; bottom: 22px; width: 48px; height: 48px; border-radius: 50%; background: var(--surface); color: var(--text); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
 </sc-if>
-<button type="button" class="fab cb-deep lift16" onClick="{{toggleAi}}" aria-label="{{aiAria}}" style="right: 16px; bottom: 16px; width: 66px; height: 66px; border-radius: 50%; background: #000; color: {{accent}}; display: flex; align-items: center; justify-content: center; padding: 0; overflow: hidden; box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #000000">
+<button type="button" class="fab cb-deep lift16 fab-ia" onClick="{{toggleAi}}" aria-label="{{aiAria}}" style="right: 16px; bottom: 16px; width: 66px; height: 66px; border-radius: 50%; background: #000; color: {{accent}}; display: flex; align-items: center; justify-content: center; padding: 0; overflow: hidden; box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #000000">
   <sc-if value="{{aiClosed}}" hint-placeholder-val="{{ true }}"><img src="assets/ia_viking.jpg" alt="" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.05)"></sc-if>
   <sc-if value="{{aiOpen}}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></sc-if>
 </button>
