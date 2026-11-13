@@ -1455,9 +1455,15 @@ class Component extends DCLogic {
     try { if ((document.documentElement.getAttribute('data-decor') || '') !== decor) { if (decor) document.documentElement.setAttribute('data-decor', decor); else document.documentElement.removeAttribute('data-decor'); } } catch (e) {}
     // Gazette : sur grand écran, d'autres articles du site apparaissent floutés dans les marges, comme sur une page de journal
     const gzAutres = decor === 'gazette' ? ARTS.filter((a) => a.id !== curA.id && !a.brouillon).slice(0, 6).map((a) => ({
-      tag: a.tag || a.sport || '', title: a.title, txt: cbTexte(a.dek ? a.dek + ' ' + (a.body || '') : a.body).slice(0, 520) + '…',
+      isArt: true, isPub: false, tag: a.tag || a.sport || '', title: a.title, img: a.img || '', hasImg: !!a.img,
+      txt: cbTexte(a.dek ? a.dek + ' ' + (a.body || '') : a.body).slice(0, 420) + '…',
       open: () => this.go('article', { articleId: a.id }) })) : [];
-    const gzSide = { on: gzAutres.length > 0, gauche: gzAutres.filter((x, i) => i % 2 === 0), droite: gzAutres.filter((x, i) => i % 2 === 1) };
+    // Encarts sponsors (contenus/encarts.js, section « Encarts sponsors » de l'admin), affichés nets ; sans sponsor : un emplacement à vendre
+    const pubs = (window.CASA_ENCARTS || []).filter((e) => e && e.actif !== false && e.nom).map((e) => ({ isPub: true, isArt: false, kicker: 'Partenaire', nom: e.nom, texte: e.texte || '', img: e.img || '', hasImg: !!e.img, lien: e.site || e.lien || '#', target: (e.site || e.lien) ? '_blank' : '_self' }));
+    if (!pubs.length) pubs.push({ isPub: true, isArt: false, kicker: 'Espace partenaire', nom: 'Votre marque ici', texte: 'Associez votre entreprise aux histoires du sport local.', img: '', hasImg: false, lien: '/travailler-avec-nous', target: '_self' });
+    const gzG = gzAutres.filter((x, i) => i % 2 === 0), gzD = gzAutres.filter((x, i) => i % 2 === 1);
+    if (gzAutres.length) { gzG.splice(1, 0, pubs[0]); if (pubs[1] || gzD.length) gzD.splice(1, 0, pubs[1] || pubs[0]); }
+    const gzSide = { on: gzAutres.length > 0, gauche: gzG, droite: gzD };
     artObj.points = cbResume(curA).map((t) => ({ t }));
     artObj.hasPoints = artObj.points.length > 0;
     artObj.clubs = curA.clubs.map((id) => clubById(id)).filter(Boolean).map((c) => clubV(c));
