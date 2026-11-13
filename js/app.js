@@ -1453,6 +1453,11 @@ class Component extends DCLogic {
     // Décor de lecture choisi dans l'admin (gazette d'époque, papier clair) : appliqué à toute la page
     const decor = s.view === 'article' && /^(gazette|papier)$/.test(curA.decor || '') ? curA.decor : '';
     try { if ((document.documentElement.getAttribute('data-decor') || '') !== decor) { if (decor) document.documentElement.setAttribute('data-decor', decor); else document.documentElement.removeAttribute('data-decor'); } } catch (e) {}
+    // Gazette : sur grand écran, d'autres articles du site apparaissent floutés dans les marges, comme sur une page de journal
+    const gzAutres = decor === 'gazette' ? ARTS.filter((a) => a.id !== curA.id && !a.brouillon).slice(0, 6).map((a) => ({
+      tag: a.tag || a.sport || '', title: a.title, txt: cbTexte(a.dek ? a.dek + ' ' + (a.body || '') : a.body).slice(0, 520) + '…',
+      open: () => this.go('article', { articleId: a.id }) })) : [];
+    const gzSide = { on: gzAutres.length > 0, gauche: gzAutres.filter((x, i) => i % 2 === 0), droite: gzAutres.filter((x, i) => i % 2 === 1) };
     artObj.points = cbResume(curA).map((t) => ({ t }));
     artObj.hasPoints = artObj.points.length > 0;
     artObj.clubs = curA.clubs.map((id) => clubById(id)).filter(Boolean).map((c) => clubV(c));
@@ -2546,7 +2551,7 @@ class Component extends DCLogic {
       proposePlayer: () => this.go('contact', { subject: 'Faire briller un talent', profile: 'Joueur', contactSent: false }),
       submitResult: () => this.go('contact', { subject: 'Transmettre un résultat — ' + s.dSport, profile: 'Club', contactSent: false }),
       orderRecap: () => this.go('contact', { subject: 'Devis résumé de match (290 €)' + (s.view === 'club' ? ' — ' + curC.name : ''), profile: 'Club', contactSent: false }),
-      art: artObj, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
+      art: artObj, gzSide, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
       fontUp: () => this.setState({ fontStep: Math.min(3, s.fontStep + 1) }), fontDown: () => this.setState({ fontStep: Math.max(0, s.fontStep - 1) }),
       toggleSummary: () => this.setState({ summary: !s.summary }), summaryOpen: s.summary, summaryPressed: s.summary ? 'true' : 'false', sumBg: s.summary ? 'var(--inv-bg)' : 'var(--surface)', sumFg: s.summary ? 'var(--on-inv)' : 'var(--ink)',
       toggleListen: () => this.ecouter(curA, locked), listening: s.listening, voixPct: s.voixPct || '0%', listenPressed: s.listening ? 'true' : 'false', lisBg: s.listening ? 'var(--inv-bg)' : 'var(--surface)', lisFg: s.listening ? 'var(--on-inv)' : 'var(--ink)', listenLabel: s.listening ? 'En écoute' : 'Écouter',
