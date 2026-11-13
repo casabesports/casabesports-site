@@ -10,7 +10,7 @@
 - **Un stade réaliste** : tribune couverte avec sièges et public, main courante, bancs de touche, pylônes d'éclairage, buts avec filets. Pour le basket, le hand, le volley et le roller : un gymnase vu en coupe, avec gradins. Pour le water-polo : une piscine avec bassin, bouées et buts flottants. Option « Grand stade 4 tribunes ».
 - **Le ballon ou la balle** de chaque sport (palet pour le roller hockey, poids pour l'athlétisme), déplaçable au doigt.
 - **Le règlement** de chaque discipline (bouton « Règlement », et carte « Règlements » du menu).
-- **Sur téléphone** : bouton « Caméra » ou « Placer sur une surface (AR) » : le terrain apparaît sur une maquette ronde, découpée dans la carte, posée sur votre table.
+- **Sur téléphone** : bouton « Caméra » ou « Placer sur une surface (AR) » : la carte disparaît, et le terrain, les joueurs et le ballon se posent directement sur ce que filme la caméra (votre table, le sol), avec leur ombre.
 
 ## Ce que vous pouvez modifier
 

@@ -115,21 +115,39 @@
     stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
     stage.addEventListener('wheel', function (e) { e.preventDefault(); S.view.dist = clampD(S.view.dist * (e.deltaY > 0 ? 1.08 : 0.92)); S.placeCam(); }, { passive: false });
   }
-  function gyro(S) {
-    var base = null, Lm = S.limits;
+  // iPhone : l'autorisation des capteurs de mouvement doit être demandée pendant le toucher du bouton
+  function askMotion() {
+    try { if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') return DeviceOrientationEvent.requestPermission().catch(function () { return 'denied'; }); } catch (e) {}
+    return Promise.resolve('granted');
+  }
+  function gyro(S, perm) {
+    var base = null, Lm = S.limits, off = false;
     function on(e) { if (e.beta == null) return; if (!base) base = { b: e.beta, g: e.gamma }; S.view.pitch = Math.max(Lm.pmin, Math.min(Lm.pmax, 0.9 + (e.beta - base.b) * -0.012)); S.view.yaw = (e.gamma - base.g) * 0.012; S.placeCam(); }
-    try {
-      if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') DeviceOrientationEvent.requestPermission().then(function (r) { if (r === 'granted') window.addEventListener('deviceorientation', on); }).catch(function () {});
-      else window.addEventListener('deviceorientation', on);
-    } catch (e) {}
-    return function () { window.removeEventListener('deviceorientation', on); };
+    (perm || askMotion()).then(function (r) { if (r === 'granted' && !off) window.addEventListener('deviceorientation', on); });
+    return function () { off = true; window.removeEventListener('deviceorientation', on); };
   }
   function startCamera(stage, facing) {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.reject(new Error('Caméra indisponible'));
-    return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing || 'environment' }, audio: false }).then(function (stream) {
-      var v = el('video', { playsinline: '', muted: '', autoplay: '' }); v.muted = true; v.srcObject = stream; if (facing === 'user') v.style.transform = 'scaleX(-1)'; stage.insertBefore(v, stage.firstChild);
-      st.stream = stream; st.video = v; return v.play().catch(function () {}).then(function () { return v; });
-    });
+    if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { var e0 = new Error('Caméra indisponible'); e0.name = 'NoMediaDevices'; return Promise.reject(e0); }
+    // la vidéo est préparée tout de suite (Safari exige « playsinline » et « muted » pour l'afficher dans la page)
+    var v = document.createElement('video'); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.setAttribute('muted', ''); v.setAttribute('autoplay', ''); v.muted = true; v.playsInline = true; v.autoplay = true;
+    var md = navigator.mediaDevices;
+    return md.getUserMedia({ video: { facingMode: { ideal: facing || 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
+      .catch(function (err) { if (err && (err.name === 'OverconstrainedError' || err.name === 'NotFoundError' || err.name === 'TypeError')) return md.getUserMedia({ video: true, audio: false }); throw err; })
+      .then(function (stream) {
+        v.srcObject = stream; if (facing === 'user') v.style.transform = 'scaleX(-1)'; stage.insertBefore(v, stage.firstChild);
+        st.stream = stream; st.video = v; return v.play().catch(function () {}).then(function () { return v; });
+      });
+  }
+  function cameraMessage(err) {
+    var n = err && err.name, ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    if (n === 'NoMediaDevices' || n === 'NotSupportedError') return 'Ce navigateur ne donne pas accès à la caméra. ' + (ios ? 'Ouvrez le site directement dans Safari (bouton Partager › « Ouvrir dans Safari »), pas depuis une autre application.' : 'Ouvrez le site dans Chrome ou Safari.');
+    if (n === 'NotAllowedError' || n === 'SecurityError' || n === 'PermissionDeniedError') return 'L’accès à la caméra a été refusé. ' + (ios ? 'Dans Safari : touchez « aA » dans la barre d’adresse › Réglages du site web › Caméra › Autoriser. Ou : Réglages de l’iPhone › Apps › Safari › Caméra › Autoriser. Puis rechargez la page.' : 'Autorisez la caméra pour ce site dans les réglages du navigateur, puis rechargez la page.');
+    if (n === 'NotReadableError' || n === 'AbortError') return 'La caméra est déjà utilisée par une autre application. Fermez-la puis réessayez.';
+    return 'La caméra n’a pas pu démarrer. Réessayez, ou ouvrez le site dans Safari ou Chrome.';
+  }
+  function notice(stage, msg) {
+    var o = el('div', { role: 'alert', style: 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;max-width:min(92%,420px);background:rgba(5,9,15,.94);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:1rem;font-size:14.5px;line-height:1.5;text-align:center' }, esc(msg));
+    var r = el('div', { style: 'margin-top:.7rem' }); r.appendChild(btn('Compris', function () { o.remove(); }, true)); o.appendChild(r); stage.appendChild(o);
   }
   function texFromCanvas(THREE, c, srgb) { var t = new THREE.CanvasTexture(c); t.anisotropy = 8; if (srgb) t.encoding = THREE.sRGBEncoding; return t; }
   function labelCanvas(num, name, kit) {
@@ -1039,7 +1057,7 @@
 
     var world = new THREE.Group(); S.root.add(world);
     var env = Env(S, K); S.env = env; var geo = Geo(S, K, world);
-    var W, H, u = 100, stad = null, tokens = [], ball = null, place = null, token = 0, dioOn = false, y0u = 0;
+    var W, H, u = 100, catcher = null, stad = null, tokens = [], ball = null, place = null, token = 0, dioOn = false, y0u = 0;
     var placeChip = el('div', { class: 'cbar-place' }, ''), attr = el('div', { class: 'cbar-attr' }, ''); stage.appendChild(placeChip); stage.appendChild(attr);
     function fitOf() { return sp().fit || 0.94; }
     function toPos(pct) { var f = fitOf(); return new THREE.Vector3((pct[0] / 100 - 0.5) * W * f, y0u, (pct[1] / 100 - 0.5) * H * f); }
@@ -1061,11 +1079,15 @@
       u = cur.len / 1.05; H = 1.05; W = H * cur.wid / cur.len; world.scale.setScalar(1 / u);
       stad = buildStadium(K, cur, { style: L.style, surface: L.surface, kit: KITS[L.kit], title: (L.team || 'CASA BESPORTS').toUpperCase(), osm: place && place.found && (cur.kind === 'salle' || cur.kind === 'piscine') ? { len: place.len, wid: place.wid } : null });
       world.add(stad.group); y0u = stad.y0 / u;
+      // en mode caméra, l'image réelle (table, sol) devient la plateforme : une ombre douce y pose le terrain
+      if (catcher) { world.remove(catcher); dispose(catcher); }
+      catcher = new THREE.Mesh(new THREE.PlaneGeometry(stad.extent * 2.4, stad.extent * 2.4), new THREE.ShadowMaterial({ opacity: 0.4, depthWrite: false }));
+      catcher.rotation.x = -Math.PI / 2; catcher.position.y = 0.005; catcher.receiveShadow = true; catcher.visible = dioOn; world.add(catcher);
       env.setExtent(stad.extent / u);
       S.view.dist = cur.kind === 'stade' ? 1.55 : cur.kind === 'tennis' ? 1.6 : 1.85; S.placeCam();
       ambience();
     }
-    function loadMap() { if (!place) return; geo.load(place, sp(), L.map, stad.foot, function (a) { attr.textContent = a; }); geo.setDiorama(dioOn); }
+    function loadMap() { if (!place) return; geo.load(place, sp(), L.map, stad.foot, function (a) { attr.textContent = a; }); geo.group.visible = !dioOn; }
     function locate() {
       var my = ++token, b = base(), spec = teamLieu(); place = null; renderChip(); geo.clear(); attr.textContent = '';
       resolvePlace(spec, b).then(function (P) { if (my !== token) return; place = P; buildField(); build(); loadMap(); });
@@ -1111,7 +1133,7 @@
       env.tick(); if (stad) stad.ticks.forEach(function (f) { f(t); });
       if (bounceT) { var k = (performance.now() - bounceT.t0) / 700; if (k > 1) { bounceT.g.position.y = y0u; bounceT = null; } else bounceT.g.position.y = y0u + Math.abs(Math.sin(k * Math.PI * 2.5)) * (1 - k) * 0.03; }
     };
-    S.onCamera = function (on) { dioOn = on; geo.setDiorama(on); env.setDiorama(on); };
+    S.onCamera = function (on) { dioOn = on; geo.group.visible = !on; env.setDiorama(on); if (catcher) catcher.visible = on; placeChip.style.display = attr.style.display = on ? 'none' : ''; setHint(on ? 'Le terrain est posé sur ce que filme votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); };
     function sel(label, opts, cur0, fn) { var s = el('select', { 'aria-label': label, title: label }); opts.forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (String(o[0]) === String(cur0)) op.selected = true; s.appendChild(op); }); s.onchange = function () { fn(s.value); }; return s; }
     function compoText(sep) { var x = sp(), N = names(), C = cap(); return L.team + ' · ' + x.label + ' (' + form() + ')' + sep + N.map(function (n, i) { return (sep === '\n' ? (i + 1) + '. ' : '') + n + (i === C ? ' (C)' : ''); }).join(sep === '\n' ? '\n' : ', '); }
     function setView(p, d, y) { S.view.pitch = p; S.view.dist = d; if (y != null) S.view.yaw = y; S.placeCam(); }
@@ -1231,7 +1253,7 @@
     frame.innerHTML = '<div style="position:absolute;left:0;right:0;bottom:0;height:22%;background:repeating-linear-gradient(90deg,#0f2236 0 60px,#e8a830 60px 120px);opacity:.92;display:flex;align-items:center;justify-content:center"><span style="background:#0f2236;color:#f6f0e1;padding:.4rem 1rem;font:700 20px Barlow Condensed,sans-serif;letter-spacing:.2em">CASA BESPORTS · COTENTIN</span></div><div style="position:absolute;top:12px;right:12px;background:#e8a830;color:#0f2236;border-radius:999px;padding:.4rem .8rem;font:900 16px Mulish,sans-serif">SUPPORTER</div>';
     stage.appendChild(frame);
     var facing = 'user';
-    function go() { if (st.stream) { st.stream.getTracks().forEach(function (t) { t.stop(); }); if (st.video) st.video.remove(); } startCamera(stage, facing).catch(function () { stage.insertBefore(el('div', { style: 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem;color:#c9d6e3' }, 'Caméra indisponible : autorisez l’accès à la caméra ou ouvrez l’application sur votre téléphone.'), stage.firstChild); }); }
+    function go() { if (st.stream) { st.stream.getTracks().forEach(function (t) { t.stop(); }); if (st.video) st.video.remove(); } startCamera(stage, facing).catch(function (err) { stage.insertBefore(el('div', { style: 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem;color:#c9d6e3' }, esc(cameraMessage(err))), stage.firstChild); }); }
     go();
     panel.innerHTML = '';
     var r = el('div', { class: 'cbar-row' });
@@ -1341,7 +1363,8 @@
     var modes = el('div', { class: 'cbar-row', style: 'position:absolute;left:12px;top:56px;z-index:3' });
     var bCam = btn('Caméra', function () {
       if (st.video) { st.stream.getTracks().forEach(function (t) { t.stop(); }); st.video.remove(); st.video = null; st.stream = null; if (st.stopGyro) st.stopGyro(); st.stopGyro = null; bCam.setAttribute('aria-pressed', 'false'); if (S.onCamera) S.onCamera(false); return; }
-      startCamera(stage, 'environment').then(function () { bCam.setAttribute('aria-pressed', 'true'); if (S.onCamera) S.onCamera(true); st.stopGyro = gyro(S); setHint('Inclinez le téléphone pour regarder autour'); }).catch(function () { toast('Caméra indisponible ici : mode 3D'); });
+      var perm = askMotion();
+      startCamera(stage, 'environment').then(function () { bCam.setAttribute('aria-pressed', 'true'); if (S.onCamera) S.onCamera(true); st.stopGyro = gyro(S, perm); setHint('Le terrain est posé sur ce que filme votre caméra · inclinez le téléphone'); }).catch(function (err) { notice(stage, cameraMessage(err)); });
     });
     bCam.setAttribute('aria-pressed', 'false'); modes.appendChild(bCam); stage.appendChild(modes);
     tryWebXR(S, stage, setHint);
