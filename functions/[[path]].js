@@ -37,7 +37,7 @@ const SECTIONS = {
   'territoire': { t: 'Territoire', d: 'La carte des clubs et des communes de Normandie.' },
   'meteo': { t: 'Météo', d: 'Prévisions météo et conditions de jeu dans le Cotentin.' },
   'mentions-legales': { t: 'Informations légales', d: 'Mentions légales, confidentialité, conditions générales de vente et d’utilisation de Casa Besports.' },
-  'travailler-avec-nous': { t: 'Travailler avec Casa Besports', d: 'Clubs, entreprises, organisateurs, sportifs : reportages, vidéos, interviews, partenariats et visibilité avec Casa Besports.' }
+  'pro': { t: 'Casa PRO : accès professionnels', d: 'Clubs, marques, collectivités, organisateurs, sportifs et médias : l’accès professionnel de Casa Besports, le média sport du Cotentin et de la Manche.' },
 };
 const DETAIL = { actualites: 'article', videos: 'video', clubs: 'club', joueurs: 'player', disciplines: 'discipline' };
 

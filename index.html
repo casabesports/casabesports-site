@@ -136,6 +136,53 @@ html[data-cb-theme], body { background: var(--bg, #ffffff); }
 .lv-filtre { display: flex; gap: .35rem; flex-wrap: wrap; margin-bottom: .6rem; align-items: center }
 .lv-filtre-t { font-size: 12px; color: var(--muted); margin-right: .3rem; min-width: 4.2em }
 .lv-filtre button { min-height: 34px; padding: 0 .75rem; border-radius: 0; cursor: pointer; font-weight: 700; font-size: 12.5px }
+
+/* ---------- Casa PRO ---------- */
+.hdr-pro { min-height: 34px; padding: 0 .7rem; border: 1.5px solid var(--gold, #e8a830); background: transparent; color: var(--gold-text, #e8a830); font-size: 12.5px; font-weight: 800; letter-spacing: .12em; cursor: pointer }
+.hdr-pro:hover { background: var(--gold, #e8a830); color: #080f1a }
+.pro { padding-bottom: 4rem }
+.pro-hero { padding-top: 2.4rem; padding-bottom: 2.4rem; border-bottom: 1px solid var(--line) }
+.pro-eb { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-text, #e8a830); display: flex; align-items: center; gap: .5rem; margin-bottom: .7rem }
+.pro-eb2 { margin-top: 2.6rem }
+.pro-dot { width: 8px; height: 8px; border-radius: 50%; background: #e8a830; box-shadow: 0 0 0 4px rgba(232,168,48,.18) }
+.pro-h1 { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 900; font-size: clamp(2.3rem, 6.4vw, 5.2rem); line-height: .95; letter-spacing: -.02em; text-transform: uppercase; margin: 0 0 1rem; max-width: 14ch }
+.pro-h1 span, .pro-h2 span { color: var(--gold-text, #e8a830) }
+.pro-lead { font-size: 14px; color: var(--text-2); max-width: 60ch; margin: 0 0 1.3rem }
+.pro-cta { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center }
+.pro-pub { font-size: 12.5px }
+.pro-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 2rem }
+.pro-stat { background: var(--bg, #0b0b0b); padding: 1rem 1.1rem }
+.pro-n { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1; color: var(--ink) }
+.pro-l { font-size: 12px; color: var(--muted); margin-top: .35rem }
+.pro-src { font-size: 11.5px; color: var(--muted); margin: .6rem 0 0 }
+.pro-tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1rem }
+.pro-tab { min-height: 38px; padding: 0 .85rem; border: 1.5px solid var(--line-2); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: .5rem }
+.pro-tab.on { background: var(--ink); color: var(--bg, #0b0b0b); border-color: var(--ink) }
+.pro-num { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 12px; color: var(--gold-text, #e8a830) }
+.pro-tab.on .pro-num { color: inherit; opacity: .7 }
+.pro-num-l { font-size: 14px; margin-bottom: .3rem }
+.pro-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; border: 1px solid var(--line); background: var(--surface); padding: 1.6rem }
+.pro-h2 { display: block; font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 900; font-size: clamp(1.5rem, 3.4vw, 2.4rem); line-height: 1; text-transform: uppercase; letter-spacing: -.01em; margin: 0 0 .7rem; color: var(--ink) }
+.pro-prom { font-size: 14px; color: var(--text-2); margin: 0 0 1.1rem }
+.pro-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem }
+.pro-list li { font-size: 13.5px; padding-left: 1.3rem; position: relative; color: var(--text) }
+.pro-list li::before { content: ''; position: absolute; left: 0; top: .45em; width: 8px; height: 8px; background: #e8a830 }
+.pro-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1rem; margin-top: 2.6rem }
+.pro-step { border-top: 2px solid var(--ink); padding-top: .8rem }
+.pro-step h3 { font-size: 15px; margin: .3rem 0 .3rem; color: var(--ink) }
+.pro-step p { font-size: 13px; color: var(--text-2); margin: 0 }
+.cw-band { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); background: #0b1622; border: 1px solid var(--line); margin-top: 2.6rem; text-align: left; width: 100%; padding: 0; color: #fbfaf7 }
+.cw-hit { cursor: pointer; margin-top: 0 }
+.cw-hit:hover .cw-img { filter: saturate(1.15) }
+.cw-img { width: 100%; height: 100%; min-height: 240px; object-fit: cover; object-position: 75% 50%; display: block }
+.cw-txt { padding: 1.6rem; display: flex; flex-direction: column; justify-content: center; gap: .2rem }
+.cw-txt .pro-h2 { color: #fbfaf7 }
+.cw-txt p, .cw-p { font-size: 13.5px; color: #d8c8a0; margin: 0 0 1rem; display: block }
+.cw-btn { align-self: flex-start }
+.pro-end { margin-top: 0; padding-top: 3rem; text-align: left }
+.pro-home { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border: 1px solid var(--line); border-left: 4px solid #e8a830; padding: 1.2rem 1.4rem; background: var(--surface) }
+.pro-home { padding: .8rem 1.1rem } .pro-home .pro-eb { margin-bottom: .3rem } .pro-home .pro-h2 { margin: 0; font-size: clamp(1.05rem, 2.2vw, 1.45rem) }
+@media (max-width: 760px) { .cw-img { aspect-ratio: 16 / 10; height: auto; min-height: 0 } .pro-card, .cw-band { grid-template-columns: 1fr } .pro-card { padding: 1.2rem; gap: 1.2rem } .hdr-pro { min-height: 32px; padding: 0 .5rem } }
 </style>
 <style>
 /* Casa Besports — styles globaux (utilisent les variables de theme.css) */
@@ -769,11 +816,11 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .bn-pied { margin-top: 4rem !important; border-top: 1px solid var(--bn-bord-noir); }
 .bn-pied-logo { padding-top: .5rem; padding-bottom: 2.2rem; }
 .bn-pied-logo img { display: block; width: 100%; height: auto; }
-@media (max-width: 760px) { .bn-pied-logo { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); } }
+@media (max-width: 760px) { .bn-pied { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); } }
 
 /* ---------- Ouverture de l’application : le bandeau se lève sur le logo ---------- */
 .bn-intro { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--bn-noir); color: var(--bn-blanc); cursor: pointer; animation: bnIntroOut .5s ease 2.9s forwards; }
-.bn-intro-in { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1.1rem; width: min(560px, 84vw); }
+.bn-intro-in { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1.1rem; width: min(300px, 60vw); }
 .bn-intro-mot { position: relative; display: block; width: 100%; overflow: hidden; }
 .bn-intro-mot img { display: block; width: 100%; height: auto; clip-path: inset(0 100% 0 0); animation: bnDevoile .7s cubic-bezier(.7, 0, .2, 1) 1.05s forwards; }
 .bn-intro-mot::after { content: ""; position: absolute; top: -6%; bottom: -6%; left: 0; width: 100%; background: var(--bn-blanc); transform: scaleX(0); transform-origin: left center; animation: bnBalaye 1.15s cubic-bezier(.7, 0, .2, 1) .6s forwards; }
@@ -784,7 +831,7 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 @keyframes bnApparait { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes bnIntroOut { to { opacity: 0; visibility: hidden; } }
 /* le symbole BE+ s’affiche d’abord, au centre du futur logo, puis s’efface sous le balayage */
-.bn-intro-sym { position: absolute; left: 50%; top: calc(min(560px, 84vw) * 179 / 2088); width: calc(min(560px, 84vw) * .26); height: calc(min(560px, 84vw) * .26); transform: translate(-50%, -50%); opacity: 0; pointer-events: none; animation: bnSymIn .35s cubic-bezier(.2, .7, .2, 1) .05s forwards, bnSymOut .25s ease .62s forwards; }
+.bn-intro-sym { position: absolute; left: 50%; top: calc(min(300px, 60vw) * 179 / 600); width: calc(min(300px, 60vw) * .5); height: calc(min(300px, 60vw) * .5); transform: translate(-50%, -50%); opacity: 0; pointer-events: none; animation: bnSymIn .35s cubic-bezier(.2, .7, .2, 1) .05s forwards, bnSymOut .25s ease .62s forwards; }
 .bn-intro-sym svg { display: block; width: 100%; height: 100%; }
 @keyframes bnSymIn { from { opacity: 0; transform: translate(-50%, -50%) scale(.86); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 @keyframes bnSymOut { from { opacity: 1; transform: translate(-50%, -50%) scale(1); } to { opacity: 0; transform: translate(-50%, -50%) scale(1.06); } }
@@ -2327,8 +2374,8 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <div class="bn-hdr-wrap" style="transform: translateY({{hdrY}})">
 <header class="bn-hdr bn-scope">
   <div class="hdr-in">
-    <button type="button" class="bn-logo-btn" onClick="{{goHome}}" aria-label="Accueil Casa Besports">
-      <img class="bn-logo" src="assets/logo-casabesports.svg" alt="Casa Besports +" width="234" height="40">
+    <button type="button" class="bn-logo-btn" onClick="{{goHome}}" aria-label="Accueil BE+">
+      <img class="bn-logo" src="assets/logo-be.svg" alt="BE+" width="67" height="40">
     </button>
     <nav class="nav" aria-label="Navigation principale" style="align-items: center; gap: .1rem; position: relative">
       <sc-for list="{{nav}}" as="n" hint-placeholder-count="5">
@@ -2350,6 +2397,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         <sc-if value="{{isAdmin}}" hint-placeholder-val="{{ false }}"><button type="button" class="cond hidesm" onClick="{{openAdmin}}" style="min-height: 40px; padding: 0 .8rem; border-radius: 0; border: 1.5px solid var(--ink); background: var(--surface); cursor: pointer; font-size: 13px; color: var(--ink); display: inline-flex; align-items: center; gap: .4rem">Admin</button></sc-if>
         <button type="button" class="cond hidesm" onClick="{{goStudio}}" style="min-height: 40px; padding: 0 .8rem; border-radius: 0; border: 1.5px solid var(--ink); background: var(--surface); cursor: pointer; font-size: 13px; color: var(--ink); display: inline-flex; align-items: center; gap: .4rem">Rédaction<sc-if value="{{hasPending}}" hint-placeholder-val="{{ false }}"><span class="num" style="min-width: 20px; height: 20px; border-radius: 0; background: var(--danger); color: var(--on-inv); font-size: 12px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px">{{pendingCount}}</span></sc-if></button>
       </sc-if>
+        <button type="button" class="hdr-pro cond" onClick="{{goWork}}" aria-label="Casa PRO : accès professionnels">PRO</button>
         <button type="button" class="hdr-ico cond" onClick="{{toggleLang}}" aria-label="{{langAria}}" title="{{langAria}}" style="width: 44px; height: 44px; border: 1px solid var(--line-2); border-radius: 50%; background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); font-size: 13px; font-weight: 800">{{langLabel}}</button>
             <span style="position: relative; display: inline-flex">
         <button type="button" class="hdr-ico" onClick="{{toggleThemeMenu}}" aria-label="Thème de l’interface : {{themeName}}" aria-haspopup="true" aria-expanded="{{themeMenuExp}}" style="width: 44px; height: 44px; border: 1px solid var(--line-2); border-radius: 50%; background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text)">
@@ -2434,7 +2482,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <div>
         <div class="cond" style="font-size: 13px; color: var(--muted)">{{todayLabel}} · {{wx.cityTemp}}</div>
         <h1 class="h1 bn-bh"><span class="sr">Casa Besports, le média du sport dans le Cotentin et la Manche. </span><span class="bn-bandeau">{{greeting}}</span></h1>
-        <p class="bn-qui">Média sportif indépendant né à Cherbourg en 2024 : actualités, portraits, vidéos et clubs du Cotentin et de la Manche. <button type="button" class="lnk" onClick="{{goWork}}">Travailler avec nous</button></p>
+        <p class="bn-qui">Média sportif indépendant né à Cherbourg en 2024 : actualités, portraits, vidéos et clubs du Cotentin et de la Manche. <button type="button" class="lnk" onClick="{{goWork}}">Espace pro</button></p>
       </div>
       <div class="bn-accueil-act">
         <button type="button" class="btn btn-ghost" onClick="{{openCustomize}}" style="min-height: 44px; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Personnaliser</button>
@@ -2453,6 +2501,13 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     </div>
   </section>
 
+  <!-- Casa PRO -->
+  <section class="wrap" style="margin-top: .5rem; margin-bottom: 1.5rem">
+    <div class="pro-home">
+      <div><div class="pro-eb"><span class="pro-dot" aria-hidden="true"></span>CASA PRO</div><h2 class="pro-h2">Club, marque, collectivité ? <span>Votre accès dédié.</span></h2></div>
+      <button type="button" class="btn btn-gold" onClick="{{goWork}}">Entrer dans l’espace pro</button>
+    </div>
+  </section>
   <section class="wrap" style="padding-bottom: 3rem">
     <div class="bento">
       <sc-for list="{{homeMods}}" as="hm" hint-placeholder-count="10">
@@ -2610,6 +2665,13 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   </section>
 
   <!-- Toutes les rubriques, en accès direct -->
+  <!-- Casa × Cherwood -->
+  <section class="wrap" style="margin-top: 0; margin-bottom: 3rem">
+    <button type="button" class="cw-band cw-hit" onClick="{{cherwood.go}}" aria-label="Voir la capsule Cherwood × Casa">
+      <img class="cw-img" src="{{cherwood.img}}" alt="{{cherwood.alt}}" width="1600" height="1000" loading="lazy">
+      <span class="cw-txt"><span class="pro-eb">Collaboration</span><span class="pro-h2">Casa × Cherwood</span><span class="cw-p">Dessinée et brodée à Cherbourg. La capsule qui habille le Cotentin.</span><span class="btn btn-gold cw-btn">Voir la capsule</span></span>
+    </button>
+  </section>
   <section class="wrap rb" aria-labelledby="rb-td">
     <h2 id="rb-td" class="h2 rb-h">Toutes les rubriques</h2>
     <div class="rb-grid">
@@ -2705,6 +2767,20 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     </div>
   </section>
 
+  <!-- Casa PRO -->
+  <section class="wrap" style="margin-top: 4rem">
+    <div class="pro-home">
+      <div><div class="pro-eb"><span class="pro-dot" aria-hidden="true"></span>CASA PRO</div><h2 class="pro-h2">Club, marque, collectivité ? <span>Votre accès dédié.</span></h2></div>
+      <button type="button" class="btn btn-gold" onClick="{{goWork}}">Entrer dans l’espace pro</button>
+    </div>
+  </section>
+  <!-- Casa × Cherwood -->
+  <section class="wrap" style="margin-top: 2.5rem">
+    <button type="button" class="cw-band cw-hit" onClick="{{cherwood.go}}" aria-label="Voir la capsule Cherwood × Casa">
+      <img class="cw-img" src="{{cherwood.img}}" alt="{{cherwood.alt}}" width="1600" height="1000" loading="lazy">
+      <span class="cw-txt"><span class="pro-eb">Collaboration</span><span class="pro-h2">Casa × Cherwood</span><span class="cw-p">Dessinée et brodée à Cherbourg. La capsule qui habille le Cotentin.</span><span class="btn btn-gold cw-btn">Voir la capsule</span></span>
+    </button>
+  </section>
   <!-- Boutique -->
   <section class="bn-bande" style="margin-top: 4rem">
     <div class="wrap bn-bande-in">
@@ -3576,6 +3652,10 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     </div>
   </section>
   <section class="wrap" style="padding-top: 2.25rem; padding-bottom: 5rem">
+    <button type="button" class="cw-band cw-hit" style="margin-bottom: 2rem" onClick="{{cherwood.go}}" aria-label="Voir la capsule Cherwood × Casa">
+      <img class="cw-img" src="{{cherwood.img}}" alt="{{cherwood.alt}}" width="1600" height="1000" loading="lazy">
+      <span class="cw-txt"><span class="pro-eb">Collaboration</span><span class="pro-h2">Casa × Cherwood</span><span class="cw-p">Napoléon montre la mer, la Plage Verte s’étend à ses pieds : la capsule dessinée, floquée et brodée à Cherbourg.</span><span class="btn btn-gold cw-btn">Voir la capsule</span></span>
+    </button>
     <!-- Les collections -->
     <div class="bn-sect"><span class="bn-etiq">Les collections</span><span style="font-size: 13px; color: var(--muted)">Choisissez une collection pour l’afficher</span></div>
     <div class="bn-colls">
@@ -4105,7 +4185,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
                   <div class="rs-detail">
                     <div class="tr-row" style="justify-content: space-between"><span class="bn-etiq">{{cvv.adm.detail.ref}}</span><button type="button" class="tr-x2" onClick="{{cvv.adm.detail.close}}" aria-label="Fermer">×</button></div>
                     <div class="rs-cvprev"><div class="cv-page" id="cv-page-adm">
-  <header class="cv-top"><img class="cv-logo" src="assets/logo-casabesports.svg" alt="Casa Besports +" width="234" height="40"><span class="cv-kind">Curriculum vitæ</span></header>
+  <header class="cv-top"><img class="cv-logo" src="assets/logo-be.svg" alt="BE+" width="67" height="40"><span class="cv-kind">Curriculum vitæ</span></header>
   <div class="cv-id">
     <sc-if value="{{cvv.adm.detail.r.hasPhoto}}" hint-placeholder-val="{{ false }}"><div class="cv-photo {{cvv.adm.detail.r.photoCls}}"><img src="{{cvv.adm.detail.r.photo}}" alt="Photo de {{cvv.adm.detail.r.fullname}}"></div></sc-if>
     <div class="cv-who">
@@ -4113,7 +4193,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <div class="cv-titre">{{cvv.adm.detail.r.titre}}</div>
       <sc-if value="{{cvv.adm.detail.r.contact}}" hint-placeholder-val="{{ true }}"><ul class="cv-contact"><sc-for list="{{cvv.adm.detail.r.contacts}}" as="ct" hint-placeholder-count="3"><li>{{ct.t}}</li></sc-for></ul></sc-if>
     </div>
-    <sc-if value="{{cvv.adm.detail.r.certOk}}" hint-placeholder-val="{{ false }}"><div class="cv-sceau" role="img" aria-label="Certifié Casa Besports, numéro {{cvv.adm.detail.r.cert.id}}"><span class="cv-sceau-m">Casa Besports +</span><span class="cv-sceau-k">Certifié</span><span class="cv-sceau-s">{{cvv.adm.detail.r.sceauSub}}</span><span class="cv-sceau-n">{{cvv.adm.detail.r.cert.id}}</span></div></sc-if>
+    <sc-if value="{{cvv.adm.detail.r.certOk}}" hint-placeholder-val="{{ false }}"><div class="cv-sceau" role="img" aria-label="Certifié Casa Besports, numéro {{cvv.adm.detail.r.cert.id}}"><span class="cv-sceau-m">BE+</span><span class="cv-sceau-k">Certifié</span><span class="cv-sceau-s">{{cvv.adm.detail.r.sceauSub}}</span><span class="cv-sceau-n">{{cvv.adm.detail.r.cert.id}}</span></div></sc-if>
   </div>
   <sc-if value="{{cvv.adm.detail.r.hasAccroche}}" hint-placeholder-val="{{ true }}"><p class="cv-accroche">{{cvv.adm.detail.r.accroche}}</p></sc-if>
   <div class="cv-cols">
@@ -5023,27 +5103,56 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <!-- ================= CONTACT ================= -->
 <!-- ================= TRAVAILLER AVEC CASA BESPORTS ================= -->
 <sc-if value="{{isWork}}" hint-placeholder-val="{{ false }}">
-  <section class="wrap wk" style="padding-top: 2rem; padding-bottom: 5rem">
-    <div class="eb" style="margin-bottom: .5rem">Travailler avec nous</div>
-    <h1 class="h1" style="font-size: clamp(2.2rem, 5vw, 3.6rem); margin-bottom: .9rem">Travailler avec Casa Besports</h1>
-    <p class="wk-intro">Clubs, entreprises, organisateurs, sportifs : Casa Besports raconte le sport du Cotentin et de la Manche. Dites-nous ce que vous préparez, nous vous répondons avec une proposition adaptée.</p>
-    <div class="wk-grid">
-      <sc-for list="{{work.cols}}" as="c" hint-placeholder-count="4">
-        <div class="wk-col">
-          <h2 class="wk-h">{{c.titre}}</h2>
-          <ul class="wk-list"><sc-for list="{{c.items}}" as="it" hint-placeholder-count="5"><li>{{it.t}}</li></sc-for></ul>
-          <button type="button" class="btn btn-dark wk-btn" onClick="{{c.go}}">{{c.cta}}</button>
-        </div>
-      </sc-for>
-    </div>
-    <div class="wk-cta">
-      <div><div class="eb" style="margin-bottom: .35rem">Un projet, une idée, une question</div><p style="margin: 0; font-size: 14px; color: var(--text-2)">Chaque demande arrive directement à la rédaction.</p></div>
-      <div class="wk-cta-b">
-        <button type="button" class="btn btn-dark" onClick="{{work.devis}}">Demander un devis</button>
-        <button type="button" class="btn btn-ghost" onClick="{{work.partenaire}}">Devenir partenaire</button>
-        <button type="button" class="btn btn-ghost" onClick="{{work.histoire}}">Proposer une histoire</button>
-        <button type="button" class="btn btn-ghost" onClick="{{work.redaction}}">Contacter la rédaction</button>
+  <section class="pro">
+    <div class="wrap pro-hero">
+      <div class="pro-eb"><span class="pro-dot" aria-hidden="true"></span>CASA PRO · accès professionnels</div>
+      <h1 class="pro-h1">Le sport du Cotentin a un public. <span>Rencontrez-le.</span></h1>
+      <p class="pro-lead">Clubs, marques, collectivités, organisateurs, sportifs, médias : un seul accès pour exister là où le Cotentin et la Manche suivent leur sport, chaque jour.</p>
+      <div class="pro-cta">
+        <button type="button" class="btn btn-gold" onClick="{{work.rdv}}">Prendre rendez-vous</button>
+        <button type="button" class="btn btn-ghost" onClick="{{work.voir}}">Voir les accès</button>
+        <button type="button" class="lnk pro-pub" onClick="{{work.public}}">Revenir au site grand public</button>
       </div>
+      <sc-if value="{{work.hasStats}}" hint-placeholder-val="{{ true }}">
+        <div class="pro-stats" aria-label="Chiffres du site, calculés en direct">
+          <sc-for list="{{work.stats}}" as="st" hint-placeholder-count="4"><div class="pro-stat"><div class="pro-n">{{st.n}}</div><div class="pro-l">{{st.l}}</div></div></sc-for>
+        </div>
+        <p class="pro-src">Chiffres calculés en direct à partir des données publiées sur le site (sources officielles des fédérations).</p>
+      </sc-if>
+    </div>
+
+    <div class="wrap" id="pro-offres">
+      <div class="pro-eb pro-eb2">Choisissez votre accès</div>
+      <div class="pro-tabs" role="tablist" aria-label="Profil professionnel">
+        <sc-for list="{{work.offres}}" as="o" hint-placeholder-count="5">
+          <button type="button" role="tab" aria-selected="{{o.on}}" class="{{o.cls}}" onClick="{{o.pick}}"><span class="pro-num">{{o.num}}</span>{{o.titre}}</button>
+        </sc-for>
+      </div>
+      <div class="pro-card" role="tabpanel">
+        <div class="pro-card-l"><div class="pro-num pro-num-l">{{work.cur.num}}</div><h2 class="pro-h2">{{work.cur.titre}}</h2><p class="pro-prom">{{work.cur.promesse}}</p>
+          <button type="button" class="btn btn-gold" onClick="{{work.cur.go}}">{{work.cur.cta}}</button></div>
+        <ul class="pro-list"><sc-for list="{{work.cur.items}}" as="it" hint-placeholder-count="4"><li>{{it.t}}</li></sc-for></ul>
+      </div>
+    </div>
+
+    <div class="wrap pro-steps">
+      <div class="pro-step"><div class="pro-num">1</div><h3>Vous nous écrivez</h3><p>Un message suffit : qui vous êtes, ce que vous préparez.</p></div>
+      <div class="pro-step"><div class="pro-num">2</div><h3>La rédaction vous répond</h3><p>Avec une proposition adaptée à votre club, votre marque ou votre événement.</p></div>
+      <div class="pro-step"><div class="pro-num">3</div><h3>C’est en ligne</h3><p>Sur le site, dans La Gazette du Cotentin et sur nos réseaux.</p></div>
+    </div>
+
+    <div class="wrap">
+      <div class="cw-band">
+        <img class="cw-img" src="{{cherwood.img}}" alt="{{cherwood.alt}}" width="1600" height="1000" loading="lazy">
+        <div class="cw-txt"><div class="pro-eb">Collaboration</div><h2 class="pro-h2">Casa × Cherwood</h2>
+          <p>La marque cherbourgeoise Cherwood dessine ses collections dans le centre-ville de Cherbourg, où son atelier réalise le flocage et la broderie. La capsule Cherwood × Casa habille les sportifs du Cotentin. Votre marque peut être la prochaine.</p>
+          <div class="pro-cta"><button type="button" class="btn btn-gold" onClick="{{cherwood.go}}">Voir la capsule</button><button type="button" class="btn btn-ghost" onClick="{{work.partenaire}}">Créer une collaboration</button></div></div>
+      </div>
+    </div>
+
+    <div class="wrap pro-end">
+      <h2 class="pro-h2">Le terrain est prêt. <span>À vous de jouer.</span></h2>
+      <div class="pro-cta"><button type="button" class="btn btn-gold" onClick="{{work.rdv}}">Prendre rendez-vous</button><button type="button" class="btn btn-ghost" onClick="{{work.redaction}}">Écrire à la rédaction</button></div>
     </div>
   </section>
 </sc-if>
@@ -5242,7 +5351,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       </div>
       <div class="cv-prev {{cvv.cv.segApercu}}">
 <div class="cv-page {{cvv.cv.r.themeCls}}" id="cv-page">
-  <header class="cv-top"><img class="cv-logo" src="assets/logo-casabesports.svg" alt="Casa Besports +" width="234" height="40"><span class="cv-kind">Curriculum vitæ</span></header>
+  <header class="cv-top"><img class="cv-logo" src="assets/logo-be.svg" alt="BE+" width="67" height="40"><span class="cv-kind">Curriculum vitæ</span></header>
   <div class="cv-id">
     <sc-if value="{{cvv.cv.r.hasPhoto}}" hint-placeholder-val="{{ false }}"><div class="cv-photo {{cvv.cv.r.photoCls}}"><img src="{{cvv.cv.r.photo}}" alt="Photo de {{cvv.cv.r.fullname}}"></div></sc-if>
     <div class="cv-who">
@@ -5250,7 +5359,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <div class="cv-titre">{{cvv.cv.r.titre}}</div>
       <sc-if value="{{cvv.cv.r.contact}}" hint-placeholder-val="{{ true }}"><ul class="cv-contact"><sc-for list="{{cvv.cv.r.contacts}}" as="ct" hint-placeholder-count="3"><li>{{ct.t}}</li></sc-for></ul></sc-if>
     </div>
-    <sc-if value="{{cvv.cv.r.certOk}}" hint-placeholder-val="{{ false }}"><div class="cv-sceau" role="img" aria-label="Certifié Casa Besports, numéro {{cvv.cv.r.cert.id}}"><span class="cv-sceau-m">Casa Besports +</span><span class="cv-sceau-k">Certifié</span><span class="cv-sceau-s">{{cvv.cv.r.sceauSub}}</span><span class="cv-sceau-n">{{cvv.cv.r.cert.id}}</span></div></sc-if>
+    <sc-if value="{{cvv.cv.r.certOk}}" hint-placeholder-val="{{ false }}"><div class="cv-sceau" role="img" aria-label="Certifié Casa Besports, numéro {{cvv.cv.r.cert.id}}"><span class="cv-sceau-m">BE+</span><span class="cv-sceau-k">Certifié</span><span class="cv-sceau-s">{{cvv.cv.r.sceauSub}}</span><span class="cv-sceau-n">{{cvv.cv.r.cert.id}}</span></div></sc-if>
   </div>
   <sc-if value="{{cvv.cv.r.hasAccroche}}" hint-placeholder-val="{{ true }}"><p class="cv-accroche">{{cvv.cv.r.accroche}}</p></sc-if>
   <div class="cv-cols">
@@ -6341,7 +6450,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   </div>
   <div class="wrap" style="padding-top: 3rem; padding-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 3rem; justify-content: space-between">
     <div style="flex: 1 1 300px; max-width: 380px">
-      <div class="bn-pied-marque"><svg class="bn-sym" viewBox="0 0 1000 1000" width="64" height="64" role="img" aria-label="Symbole BE+ de Casa Besports"><rect width="1000" height="1000" fill="#000000"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg><div class="cond" style="font-size: 13px; color: var(--on-inv)">Casa Besports +</div></div>
+      <div class="bn-pied-marque"><svg class="bn-sym" viewBox="0 0 1000 1000" width="64" height="64" role="img" aria-label="BE+"><rect width="1000" height="1000" fill="#000000"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></div>
       <p style="line-height: 1.65; margin: .75rem 0 1.25rem">Le média du sport local dans le Nord Cotentin. Résumés, interviews, inside vestiaire.</p>
       <div style="display: flex; flex-wrap: wrap; gap: .5rem">
         <sc-for list="{{reseaux}}" as="rs" hint-placeholder-count="5"><a href="{{rs.href}}" target="_blank" rel="noopener me" style="color: var(--on-inv-2); border: 1px solid var(--inv-line); border-radius: 0; padding: 0 .8rem; font-size: 14px; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center">{{rs.label}}</a></sc-for>
@@ -6357,10 +6466,9 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     </div>
   </div>
   <div class="wrap" style="padding-top: 1.25rem; padding-bottom: 2rem; border-top: 1px solid var(--inv-line); display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; font-size: 13px; color: var(--on-inv-2)">
-    <span>© 2026 Casa Besports. Tous droits réservés.</span>
+    <span>© 2026 BE+. Tous droits réservés.</span>
     <span style="display: flex; flex-wrap: wrap; gap: .25rem 1rem"><sc-for list="{{legalLinks}}" as="lk" hint-placeholder-count="4"><button type="button" onClick="{{lk.go}}" style="background: none; border: 0; padding: .4rem 0; cursor: pointer; color: var(--on-inv-2); font-size: 13px; text-decoration: underline; min-height: 36px">{{lk.label}}</button></sc-for><button type="button" onClick="{{openThemeFromFooter}}" style="background: none; border: 0; padding: .4rem 0; cursor: pointer; color: var(--on-inv-2); font-size: 13px; text-decoration: underline; min-height: 36px">Thème : {{themeName}}</button></span>
   </div>
-  <div class="wrap bn-pied-logo"><img src="assets/logo-casabesports.svg" alt="Casa Besports +" width="1044" height="179" loading="lazy"></div>
 </footer>
 
 <!-- ================= PANIER (tiroir) ================= -->
@@ -6566,10 +6674,10 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 
 <!-- ================= OUVERTURE DE L’APPLICATION : le symbole BE+, puis le bandeau se lève sur le logo ================= -->
 <sc-if value="{{introOn}}" hint-placeholder-val="{{ false }}">
-  <div class="bn-intro" role="dialog" aria-label="Casa Besports" onClick="{{skipIntro}}">
+  <div class="bn-intro" role="dialog" aria-label="BE+" onClick="{{skipIntro}}">
     <div class="bn-intro-in">
       <span class="bn-intro-sym" aria-hidden="true"><svg class="bn-sym" viewBox="0 0 1000 1000" width="112" height="112" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#000000"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></span>
-      <span class="bn-intro-mot"><img src="assets/logo-casabesports.svg" alt="Casa Besports +" width="1044" height="179"></span>
+      <span class="bn-intro-mot"><img src="assets/logo-be.svg" alt="BE+" width="300" height="179"></span>
       <span class="bn-intro-tag">Le sport local mérite une vitrine d’élite</span>
     </div>
     <button type="button" class="ci-skip" onClick="{{skipIntro}}">Passer</button>
@@ -6651,7 +6759,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <sc-if value="{{aiOpen}}" hint-placeholder-val="{{ false }}">
   <div role="dialog" aria-label="Casa IA, assistant" class="glass float-in lift90" style="position: fixed; right: 16px; bottom: 90px; z-index: 56; width: min(420px, calc(100vw - 32px)); height: min(620px, calc(100vh - 130px)); border-radius: 0; border: 1px solid var(--line); box-shadow: 0 30px 80px -20px rgba(8,15,26,.45); display: flex; flex-direction: column; overflow: hidden">
     <div class="cb-deep" style="background: var(--inv-bg); color: var(--on-inv); padding: 1rem 1.1rem; display: flex; align-items: center; gap: .75rem">
-      <img src="assets/logo-be-plus.jpg" alt="Casa IA, l’assistant de Casa Besports +" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 0 2px #ffffff">
+      <img src="assets/logo-be-plus.jpg" alt="Casa IA, l’assistant de BE+" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 0 2px #ffffff">
       <div style="flex: 1"><div class="ttl" style="font-size: 22px; color: var(--on-inv)">Casa IA</div><div style="font-size: 12px; color: var(--on-inv-2)">{{aiMode}}</div></div>
       <button type="button" onClick="{{aiReset}}" class="cond" style="background: var(--inv-bg-2); color: var(--on-inv-2); border: 0; border-radius: 0; min-height: 36px; padding: 0 .7rem; font-size: 12px; cursor: pointer">Nouvelle</button>
     </div>
@@ -6755,7 +6863,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         <sc-if value="{{pg.isCover}}" hint-placeholder-val="{{ true }}">
           <header class="gz-cv-head">
             <h1 class="gz-cv-mast"><span class="gz-band">La Gazette</span><br><span class="gz-band">du Cotentin</span></h1>
-            <div class="gz-cv-side">Le sport <br>selon <br>Casa Besports +</div>
+            <div class="gz-cv-side">Le sport <br>selon <br>BE+</div>
           </header>
           <div class="gz-cv-folio"><span>{{gzCover.numero}}</span><span>{{gzCover.date}}</span><span>{{gzCover.mention}}</span></div>
           <div class="gz-cv-kick"><span class="gz-etiq">{{gzCover.surtitre}}</span></div>
