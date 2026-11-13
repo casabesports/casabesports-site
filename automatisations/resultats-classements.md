@@ -18,6 +18,7 @@ des équipes du Cotentin et de la Manche, à partir de sources publiques et grat
   (`window.CASA_SPORT_AUTO.Handball` : compétitions, classements complets, résultats et matchs à ±14 jours, clubs).
 - Ne modifie pas ce fichier à la main et ne recopie pas le handball dans `contenus/sport.js`.
 - S'il s'arrête avec un message d'erreur, le fichier n'est pas modifié : signale-le dans le compte rendu.
+- Puis lance `python3 outils/import_volley.py` (2 minutes, site de résultats FFVolley : comités de la Manche et du Calvados).
 - `node --check contenus/sport-federations.js` doit passer avant le commit.
 
 ## Ce qu'il faut couvrir
