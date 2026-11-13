@@ -52,7 +52,7 @@ function cbRouteOf(st) { const k = CB_ROUTE_ID[st.view]; return '#/' + st.view +
 // Le site reste piloté par les adresses « #/… » ; ces adresses-là ouvrent simplement la bonne page.
 const CB_PATHS = { news: 'actualites', article: 'actualites', videos: 'videos', video: 'videos', clubs: 'clubs', club: 'clubs', players: 'joueurs', player: 'joueurs', shop: 'boutique', product: 'boutique',
   disciplines: 'disciplines', discipline: 'disciplines', about: 'a-propos', contact: 'contact', partners: 'partenaires', offers: 'abonnements', live: 'le-terrain', clubhouse: 'club-house', culture: 'culture',
-  map: 'territoire', meteo: 'meteo', legal: 'mentions-legales', work: 'travailler-avec-nous' };
+  map: 'territoire', meteo: 'meteo', legal: 'mentions-legales', work: 'pro' };
 const CB_PATH_DETAIL = { actualites: 'article', videos: 'video', clubs: 'club', joueurs: 'player', boutique: 'product', disciplines: 'discipline' };
 // Résumé express : les « points clés » saisis dans l'admin, sinon des phrases reprises telles quelles du texte
 // (chapô, puis la première phrase de chaque partie). Rien n'est inventé.
@@ -102,7 +102,7 @@ class Component extends DCLogic {
       summary: false, listening: false, fontStep: 1, reaction: null, playing: false, goal: 'Visibilité',
       alerts: { matchs: true, articles: true, videos: false }, toast: '',
       dSport: 'Football', dComp: 'r2', dTab: 'live', calMonth: 9, calDay: 10, matchId: null, pronos: {}, reminders: [],
-      shopLine: 'Tout', shopSort: 'pop', color: 0, size: null, qty: 1, persoName: '', persoNum: '', prodError: '', sizeGuide: false,
+      shopLine: 'Tout', proTab: 'clubs', shopSort: 'pop', color: 0, size: null, qty: 1, persoName: '', persoNum: '', prodError: '', sizeGuide: false,
       cart: [], cartOpen: false, ship: 'home', giftWrap: false, orderDone: false, orderNo: '', orders: [], payBusy: false, subPending: false, paidSubs: false, orderPaid: false,
       offerTab: 'Tout', readerOpen: false, page: 0, nlEmail: '', nlDone: false, tick: 0,
       hdrY: '0', scrolled: false, placeOverride: null, placeOpen: false, placeIdx: 0, partnerId: null, claimed: [],
@@ -1448,7 +1448,7 @@ class Component extends DCLogic {
     const menuGroups = [
       { titre: 'Le sport', items: [['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', 'Tous les sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Météo', 'meteo', 'Prévisions et conditions de jeu']] },
       { titre: 'Vos services', items: [['Abonnements', 'offers', 'Casa B+ et La Gazette'], ['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents']] },
-      { titre: 'La maison', items: [['Travailler avec nous', 'work', 'Clubs, entreprises, organisateurs, sportifs'], ['Partenaires', 'partners', 'Offres entreprises, OlistO et projet immobilier'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
+      { titre: 'La maison', items: [['Casa PRO', 'work', 'Clubs, marques, collectivités, sportifs, médias'], ['Partenaires', 'partners', 'Offres entreprises, OlistO et projet immobilier'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
     menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
@@ -1488,7 +1488,7 @@ class Component extends DCLogic {
       open: () => this.go('article', { articleId: a.id }) })) : [];
     // Encarts sponsors (contenus/encarts.js, section « Encarts sponsors » de l'admin), affichés nets ; sans sponsor : un emplacement à vendre
     const pubs = (window.CASA_ENCARTS || []).filter((e) => e && e.actif !== false && e.nom).map((e) => ({ isPub: true, isArt: false, kicker: 'Partenaire', nom: e.nom, texte: e.texte || '', img: e.img || '', hasImg: !!e.img, lien: e.site || e.lien || '#', target: (e.site || e.lien) ? '_blank' : '_self' }));
-    if (!pubs.length) pubs.push({ isPub: true, isArt: false, kicker: 'Espace partenaire', nom: 'Votre marque ici', texte: 'Associez votre entreprise aux histoires du sport local.', img: '', hasImg: false, lien: '/travailler-avec-nous', target: '_self' });
+    if (!pubs.length) pubs.push({ isPub: true, isArt: false, kicker: 'Espace partenaire', nom: 'Votre marque ici', texte: 'Associez votre entreprise aux histoires du sport local.', img: '', hasImg: false, lien: '/pro', target: '_self' });
     const gzG = gzAutres.filter((x, i) => i % 2 === 0), gzD = gzAutres.filter((x, i) => i % 2 === 1);
     if (gzAutres.length) { gzG.splice(1, 0, pubs[0]); if (pubs[1] || gzD.length) gzD.splice(1, 0, pubs[1] || pubs[0]); }
     const gzSide = { on: gzAutres.length > 0, gauche: gzG, droite: gzD };
@@ -1996,7 +1996,7 @@ class Component extends DCLogic {
     const quick = [['Scores en direct', 'Le Terrain', () => this.go('live', { dTab: 'live' })], ['Classement Régional 2', 'Le Terrain', () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' })], ['Maillot personnalisé', 'Boutique', () => this.go('product', { productId: 'maillot-retro', color: 0, size: null, qty: 1 })], ['La Gazette du Cotentin', 'Abonnement', () => this.go('offers', { offerTab: 'La Gazette' })], ['Pointe-Hague défie Goliath', 'Article', () => this.go('article', { articleId: 'pointe-hague' })], ['Carte des clubs', 'Territoire', () => this.go('map')]].map(([label, kind, go]) => ({ label, kind, go }));
 
     // ---------- fil d'Ariane ----------
-    const labelOf = { news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', work: 'Travailler avec nous', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
+    const labelOf = { news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', work: 'Casa PRO', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
     const crumbsRaw = [['Accueil', () => this.go('home')]];
     if (labelOf[activeSec] && activeSec !== 'home') crumbsRaw.push([labelOf[activeSec], () => this.go(activeSec)]);
     const leaf = { article: curA.tag, video: curV.title, discipline: dName, club: curC.name, player: curP.name, checkout: sp.name, product: curPr.name, order: 'Commande', live: s.dSport, cv: 'Mon CV' }[s.view];
@@ -2005,6 +2005,32 @@ class Component extends DCLogic {
 
     // ---------- Travailler avec Casa Besports : un seul formulaire (Contact), pré-rempli selon le bouton choisi ----------
     const toContact = (subject, profile) => () => this.go('contact', { contactSent: false, subject, profile, formError: '' });
+    // ---------- Casa PRO (accès dédié : clubs, marques, collectivités, sportifs, médias) ----------
+    // Les chiffres sont calculés en direct à partir des données publiées sur le site : rien n'est estimé.
+    const nf = (n) => Number(n || 0).toLocaleString('fr-FR');
+    const proComps = Object.keys(X.comps).reduce((t, k) => t + (X.comps[k] || []).length, 0);
+    const proSports = Object.keys(X.comps).filter((k) => (X.comps[k] || []).length).length;
+    const proStats = [
+      { n: nf(D.clubs.length), l: 'clubs référencés' },
+      { n: nf(proComps), l: 'compétitions suivies' },
+      { n: nf(X.matches.length), l: 'matchs (14 jours avant et après)' },
+      { n: nf(proSports), l: 'disciplines avec résultats' }
+    ].filter((x) => x.n !== '0');
+    const proOffre = (id, num, titre, promesse, items, cta, sujet, profil) => ({ id, num, titre, promesse, items: items.map((t) => ({ t })), cta, go: toContact(sujet, profil), sel: s.proTab === id, pick: () => this.setState({ proTab: id }) });
+    const proOffres = [
+      proOffre('clubs', '01', 'Clubs', 'Votre club, visible partout où le Cotentin suit son sport.', ['Fiche club avec logo, niveau, année de création, stade', 'Résultats et classements mis à jour automatiquement (handball, volley)', 'Reportages, interviews, résumés de rencontres', 'Vidéos de présentation et couverture de vos événements'], 'Référencer mon club', 'Casa PRO · club', 'Club'),
+      proOffre('marques', '02', 'Marques & entreprises', 'Associez votre marque aux histoires que les gens d’ici lisent jusqu’au bout.', ['Encarts sponsors nets au cœur des articles (décor gazette)', 'Page partenaire et liens suivis vers votre site', 'Vidéos promotionnelles et contenus de marque', 'Collections et collaborations, comme Cherwood × Casa'], 'Devenir partenaire', 'Casa PRO · partenariat', 'Entreprise'),
+      proOffre('collectivites', '03', 'Collectivités & organisateurs', 'Votre événement raconté avant, pendant et après.', ['Couverture d’événements et captation vidéo', 'Agenda et résultats sur Le Terrain', 'Interviews et contenus pour vos propres canaux', 'Mise en avant du territoire (carte, lieux, culture)'], 'Couvrir mon événement', 'Casa PRO · événement', 'Autre'),
+      proOffre('sportifs', '04', 'Sportifs & éducateurs', 'Votre parcours, mis en forme et certifiable.', ['CV Casa dans la charte du média, certifiable par l’équipe', 'Portrait, interview, présentation de parcours', 'Profil joueur relié à votre club', 'Mise en lumière de vos projets'], 'Proposer mon histoire', 'Casa PRO · sportif', 'Joueur'),
+      proOffre('medias', '05', 'Médias & fédérations', 'Des données locales propres, sourcées, à jour.', ['Classements et résultats repris des sources officielles, avec la source citée', 'Couverture Manche d’abord, puis toute la Normandie', 'Échange de contenus et partenariats éditoriaux', 'Contact direct avec la rédaction'], 'Parler à la rédaction', 'Casa PRO · média', 'Média')
+    ];
+    const proCur = proOffres.find((o) => o.sel) || proOffres[0];
+    proOffres.forEach((o) => { o.on = o === proCur; o.cls = o === proCur ? 'pro-tab on' : 'pro-tab'; });
+    const cherwood = {
+      img: 'assets/casa-x-cherwood-napoleon.png',
+      alt: 'Illustration Casa × Cherwood : la statue équestre de Napoléon face à la mer, à Cherbourg, près de la Plage Verte',
+      go: () => this.go('shop', { shopLine: 'Cherwood × Casa' })
+    };
     const workVals = {
       cols: [
         { titre: 'Pour les clubs', items: ['Reportages', 'Vidéos de présentation', 'Interviews', 'Résumés de rencontres', 'Formules de couverture médiatique', 'Prestations audiovisuelles'], cta: 'Demander un devis', go: toContact('Demande de devis · club', 'Club') },
@@ -2012,7 +2038,10 @@ class Component extends DCLogic {
         { titre: 'Pour les organisateurs', items: ['Couverture d’événements', 'Interviews', 'Captation vidéo', 'Production de contenus'], cta: 'Demander un devis', go: toContact('Demande de devis · événement', 'Autre') },
         { titre: 'Pour les sportifs', items: ['Portraits', 'Présentations de parcours', 'Interviews', 'Mise en lumière des projets'], cta: 'Proposer une histoire', go: toContact('Proposer une histoire', 'Joueur') }
       ].map((c) => Object.assign(c, { items: c.items.map((t) => ({ t })) })),
-      devis: toContact('Demande de devis', ''), partenaire: toContact('Devenir partenaire', 'Entreprise'), histoire: toContact('Proposer une histoire', ''), redaction: toContact('Message à la rédaction', '')
+      devis: toContact('Demande de devis', ''), partenaire: toContact('Devenir partenaire', 'Entreprise'), histoire: toContact('Proposer une histoire', ''), redaction: toContact('Message à la rédaction', ''),
+      stats: proStats, hasStats: proStats.length > 0, offres: proOffres, cur: proCur, rdv: toContact('Casa PRO · rendez-vous', ''),
+      voir: () => { try { const el = document.getElementById('pro-offres'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} },
+      public: () => this.go('home')
     };
     // Réseaux sociaux du pied de page (contenus/reseaux.js, modifiables dans l'admin) : un réseau sans adresse est masqué
     const RSX = window.CASA_RESEAUX || {};
@@ -2021,7 +2050,7 @@ class Component extends DCLogic {
     const footCols = [
       { title: 'Suivre', links: [['Le Terrain', 'live'], ['Actualités', 'news'], ['Vidéos', 'videos'], ['Disciplines', 'disciplines'], ['Clubs', 'clubs'], ['Joueurs', 'players'], ['Territoire', 'map']] },
       { title: 'Boutique & mag', links: [['Boutique', 'shop'], ['Cherwood × Casa', 'shop'], ['Abonnements', 'offers'], ['La Gazette du Cotentin', 'offers']] },
-      { title: 'Casa Besports', links: [['Travailler avec nous', 'work'], ['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']] }
+      { title: 'Casa Besports', links: [['Casa PRO', 'work'], ['Partenaires', 'partners'], ['À propos', 'about'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']] }
     ].map((c) => ({ title: c.title, links: c.links.map(([label, v]) => ({ label, go: () => this.go(v, label === 'Cherwood × Casa' ? { shopLine: 'Cherwood × Casa' } : label === 'La Gazette du Cotentin' ? { offerTab: 'La Gazette' } : {}) })) }));
 
     const progress = { home: 8, news: 20, article: 45, video: 45, videos: 20, disciplines: 20, discipline: 40, clubs: 20, club: 45, players: 20, player: 60, map: 30, offers: 30, checkout: 30 + s.step * 17, partners: 40, about: 40, contact: 50, account: 50, live: 35, shop: 25, product: 55, order: 85, studio: 50, legal: 40, meteo: 30, private: 45, culture: 35, clubhouse: 40, olisto: 45, app: 30, cv: 60, verifier: 40 }[s.view] || 10;
@@ -2114,7 +2143,11 @@ class Component extends DCLogic {
     const homeOrder = uneArts.concat(allA.filter((a) => uneArts.indexOf(a) < 0));
     const uneA = homeOrder[0];
     const une = Object.assign({}, uneA || EMPTY_ART);
-    const dashScores = allM.filter((m) => m.status === 'live').concat(allM.filter((m) => m.status === 'done' && m.hs !== '–').sort((a, b) => (a.date > b.date ? -1 : 1))).slice(0, 5);
+    // Priorité géographique : Cotentin et Manche d'abord, puis la Normandie, puis le national
+    const ZONE_RANG = { Manche: 0, '': 0, National: 1, Normandie: 2, Calvados: 3, Orne: 4, Eure: 5, 'Seine-Maritime': 6 };
+    const zoneRang = (m) => { const c = (X.comps[m.sport] || []).find((x) => x.id === m.compId); const z = (c && c.zone) || ''; return ZONE_RANG[z] != null ? ZONE_RANG[z] : 7; };
+    const recent = (m) => { const d = pd(m.date); return !d || (Date.now() - d.getTime()) < 8 * 864e5; };
+    const dashScores = allM.filter((m) => m.status === 'live').concat(allM.filter((m) => m.status === 'done' && m.hs !== '–' && recent(m)).sort((a, b) => (zoneRang(a) - zoneRang(b)) || (a.date > b.date ? -1 : 1))).slice(0, 5);
     const dashNews = homeOrder.slice(0, 4);
     const dashProducts = homeProducts.slice(0, 3);
     const dashTable = (X.tables.r2 || []).slice(0, 4).map((r, i) => ({ rank: String(i + 1), team: r.team, pts: String(r.pts) }));
@@ -2573,7 +2606,7 @@ class Component extends DCLogic {
       isHome: V === 'home', isNews: V === 'news', isArticle: V === 'article', isVideos: V === 'videos', isVideo: V === 'video',
       isDisciplines: V === 'disciplines', isDiscipline: V === 'discipline', isClubs: V === 'clubs', isClub: V === 'club',
       isPlayers: V === 'players', isPlayer: V === 'player', isMap: V === 'map', isOffers: V === 'offers', isCheckout: V === 'checkout',
-      isPartners: V === 'partners', isAbout: V === 'about', isWork: V === 'work', work: workVals, isContact: V === 'contact', isAccount: V === 'account',
+      isPartners: V === 'partners', isAbout: V === 'about', isWork: V === 'work', work: workVals, cherwood, isContact: V === 'contact', isAccount: V === 'account',
       isLive: V === 'live', isShop: V === 'shop', isProduct: V === 'product', isOrder: V === 'order',
       showCrumbs: V !== 'home', crumbs, back: () => this.back(),
       goHome: () => this.go('home'), goNews: () => this.go('news'), goVideos: () => this.go('videos'), goClubs: () => this.go('clubs'),

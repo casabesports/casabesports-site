@@ -30,7 +30,7 @@ TODAY=$(date +%Y-%m-%d)
 sed -i "s#<changefreq>#<lastmod>$TODAY</lastmod><changefreq>#" "$OUT/sitemap.xml"
 # 4. Référencement : données lues par la fonction Cloudflare (functions/[[path]].js) et liste des adresses qu'elle traite
 if command -v node >/dev/null 2>&1; then node outils/seo-donnees.js "$OUT/contenus/seo.json" || echo "seo-donnees : ignoré"; fi
-SECTIONS="actualites videos clubs joueurs boutique disciplines a-propos contact partenaires abonnements le-terrain club-house culture territoire meteo mentions-legales travailler-avec-nous"
+SECTIONS="actualites videos clubs joueurs boutique disciplines a-propos contact partenaires abonnements le-terrain club-house culture territoire meteo mentions-legales pro"
 {
   printf '{"version":1,"include":["/sitemap.xml"'
   for s in $SECTIONS; do printf ',"/%s","/%s/*"' "$s" "$s"; done
