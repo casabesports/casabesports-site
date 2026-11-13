@@ -54,6 +54,24 @@ const CB_PATHS = { news: 'actualites', article: 'actualites', videos: 'videos', 
   disciplines: 'disciplines', discipline: 'disciplines', about: 'a-propos', contact: 'contact', partners: 'partenaires', offers: 'abonnements', live: 'le-terrain', clubhouse: 'club-house', culture: 'culture',
   map: 'territoire', meteo: 'meteo', legal: 'mentions-legales', work: 'travailler-avec-nous' };
 const CB_PATH_DETAIL = { actualites: 'article', videos: 'video', clubs: 'club', joueurs: 'player', boutique: 'product', disciplines: 'discipline' };
+// Résumé express : les « points clés » saisis dans l'admin, sinon des phrases reprises telles quelles du texte
+// (chapô, puis la première phrase de chaque partie). Rien n'est inventé.
+function cbTexte(md) {
+  return String(md || '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[*_`#>]/g, '').replace(/^\s*-\s+/gm, '').replace(/[ \t]+/g, ' ').trim();
+}
+function cbPhrase(t) { t = cbTexte(t); const ph = t.match(/[^.!?…]+[.!?…]+(?=\s|$)/g) || [t]; return (ph.find((x) => x.trim().length >= 45) || ph[0] || t).trim(); }
+function cbResume(a) {
+  const pts = (a.points || []).map((x) => String(x || '').trim()).filter(Boolean);
+  if (pts.length) return pts;
+  const out = [];
+  if (a.dek) out.push(cbTexte(a.dek));
+  const parts = String(a.body || '').split(/\n(?=##\s)/);
+  parts.forEach((p) => {
+    const paras = p.replace(/^##[^\n]*\n?/, '').split(/\n\s*\n/).map((x) => x.trim()).filter((x) => x && !/^!\[/.test(x) && !/^\s*-\s/.test(x));
+    if (paras[0]) { const f = cbPhrase(paras[0]); if (f && out.indexOf(f) < 0) out.push(f); }
+  });
+  return out.slice(0, 5);
+}
 function cbPathOf(st) {
   const base = CB_PATHS[st.view]; if (!base) return '/';
   const k = CB_ROUTE_ID[st.view]; return '/' + base + (k && st[k] != null ? '/' + encodeURIComponent(st[k]) : '');
@@ -1128,7 +1146,36 @@ class Component extends DCLogic {
     A.verifyMember(num).then((r) => this.setState({ mbRes: r ? (r.statut === 'suspendu' ? 'off' : 'ok') : 'none', mbInfo: r }), () => this.setState({ mbRes: 'format', mbInfo: null }));
   }
 
+  // Lecture audio d'un article avec la voix de synthèse du téléphone ou de l'ordinateur (gratuit, sans serveur)
+  ecouter(a, locked) {
+    const S = window.speechSynthesis;
+    if (!S || typeof window.SpeechSynthesisUtterance !== 'function') { this.say('La lecture audio n’est pas disponible sur ce navigateur.'); return; }
+    if (this.state.listening) { this.stopVoix(); return; }
+    const corps = locked ? cbPhrase(a.body) : String(a.body || '').split(/\n\s*\n/).map((x) => cbTexte(x)).filter(Boolean).join('\n');
+    const texte = [cbTexte(a.title), cbTexte(a.dek), corps].filter(Boolean).map((x) => /[.!?…]$/.test(x) ? x : x + '.').join('\n');
+    // découpé en morceaux : certains navigateurs coupent les textes longs
+    const morceaux = texte.match(/[^.!?…\n]+[.!?…]*\s*/g) || [texte];
+    const total = texte.length || 1; let lu = 0;
+    const voix = (S.getVoices() || []).filter((v) => /^fr/i.test(v.lang));
+    const v = voix.find((x) => /fr-FR/i.test(x.lang) && /google|natural|premium|enhanced|amelie|thomas|audrey/i.test(x.name)) || voix.find((x) => /fr-FR/i.test(x.lang)) || voix[0];
+    S.cancel();
+    this._voix = (this._voix || 0) + 1; const tour = this._voix;
+    morceaux.forEach((m, i) => {
+      const u = new SpeechSynthesisUtterance(m); u.lang = 'fr-FR'; if (v) u.voice = v; u.rate = 1;
+      u.onstart = () => { if (tour === this._voix) this.setState({ voixPct: Math.round(lu / total * 100) + '%' }); };
+      u.onend = () => { lu += m.length; if (tour !== this._voix) return; if (i === morceaux.length - 1) this.setState({ listening: false, voixPct: '0%' }); else this.setState({ voixPct: Math.round(lu / total * 100) + '%' }); };
+      u.onerror = () => { if (tour === this._voix && i === morceaux.length - 1) this.setState({ listening: false }); };
+      S.speak(u);
+    });
+    this.setState({ listening: true, voixPct: '0%' });
+  }
+  stopVoix() {
+    this._voix = (this._voix || 0) + 1;
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+    if (this.state.listening) this.setState({ listening: false, voixPct: '0%' });
+  }
   go(view, extra) {
+    if (this.state.listening) this.stopVoix();
     if (view === 'admin') {
       if (this.state.role === 'admin' && window.CasaAdmin) { window.CasaAdmin.open(); return; }
       if (window.CasaAdmin && window.CasaAdmin.wantOpen) window.CasaAdmin.wantOpen();
@@ -1249,6 +1296,7 @@ class Component extends DCLogic {
   back() {
     const h = this.state.hist.slice();
     const prev = h.pop() || { view: 'home' };
+    if (this.state.listening) this.stopVoix();
     this.setState(Object.assign({ hist: h, summary: false, listening: false, playing: false, formError: '' }, prev));
     try { window.scrollTo(0, 0); } catch (e) {}
     this.syncRoute(Object.assign({}, this.state, prev), true);
@@ -1401,7 +1449,8 @@ class Component extends DCLogic {
     const curA = ARTS.find((a) => a.id === s.articleId) || ARTS[0] || EMPTY_ART;
     const artObj = art(curA);
     artObj.openSport = () => this.go('discipline', { discId: curA.sport });
-    artObj.points = curA.points.map((t) => ({ t }));
+    artObj.points = cbResume(curA).map((t) => ({ t }));
+    artObj.hasPoints = artObj.points.length > 0;
     artObj.clubs = curA.clubs.map((id) => clubById(id)).filter(Boolean).map((c) => clubV(c));
     artObj.hasClubs = artObj.clubs.length > 0;
     artObj.hasVideo = !!(curA.video && curA.video.url); artObj.videoUrl = curA.video ? curA.video.url : ''; artObj.videoDur = curA.video ? curA.video.duree || '' : ''; artObj.hasVideoDur = !!artObj.videoDur;
@@ -2496,7 +2545,7 @@ class Component extends DCLogic {
       art: artObj, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
       fontUp: () => this.setState({ fontStep: Math.min(3, s.fontStep + 1) }), fontDown: () => this.setState({ fontStep: Math.max(0, s.fontStep - 1) }),
       toggleSummary: () => this.setState({ summary: !s.summary }), summaryOpen: s.summary, summaryPressed: s.summary ? 'true' : 'false', sumBg: s.summary ? 'var(--inv-bg)' : 'var(--surface)', sumFg: s.summary ? 'var(--on-inv)' : 'var(--ink)',
-      toggleListen: () => this.setState({ listening: !s.listening }), listening: s.listening, listenPressed: s.listening ? 'true' : 'false', lisBg: s.listening ? 'var(--inv-bg)' : 'var(--surface)', lisFg: s.listening ? 'var(--on-inv)' : 'var(--ink)', listenLabel: s.listening ? 'En écoute' : 'Écouter',
+      toggleListen: () => this.ecouter(curA, locked), listening: s.listening, voixPct: s.voixPct || '0%', listenPressed: s.listening ? 'true' : 'false', lisBg: s.listening ? 'var(--inv-bg)' : 'var(--surface)', lisFg: s.listening ? 'var(--on-inv)' : 'var(--ink)', listenLabel: s.listening ? 'En écoute' : 'Écouter',
       reactions,
       share: () => {
         // Partage de la page affichée, avec son adresse lisible (/actualites/…)

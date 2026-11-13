@@ -2779,8 +2779,8 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 
       <sc-if value="{{listening}}" hint-placeholder-val="{{ false }}">
         <div class="cb-deep" style="background: var(--inv-bg); color: var(--on-inv); border-radius: 0; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem">
-          <button type="button" onClick="{{toggleListen}}" aria-label="Mettre en pause" style="width: 44px; height: 44px; border-radius: 50%; background: {{accent}}; border: 0; cursor: pointer; color: var(--on-acc); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg></button>
-          <div style="flex: 1"><div class="cond" style="font-size: 13px; color: var(--gold-on-inv); margin-bottom: .4rem">Lecture audio · voix de synthèse</div><div style="height: 4px; background: var(--inv-line); border-radius: 0; overflow: hidden"><div class="run" style="height: 4px; background: {{accent}}"></div></div></div>
+          <button type="button" onClick="{{toggleListen}}" aria-label="Arrêter la lecture" style="width: 44px; height: 44px; border-radius: 50%; background: {{accent}}; border: 0; cursor: pointer; color: var(--on-acc); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"></path></svg></button>
+          <div style="flex: 1"><div class="cond" style="font-size: 13px; color: var(--gold-on-inv); margin-bottom: .4rem">Lecture audio · voix de synthèse</div><div style="height: 4px; background: var(--inv-line); border-radius: 0; overflow: hidden"><div style="height: 4px; width: {{voixPct}}; transition: width .6s linear; background: {{accent}}"></div></div></div>
         </div>
       </sc-if>
 
