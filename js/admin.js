@@ -30,6 +30,7 @@
     { key: 'CASA_CULTURE', label: 'Culture', desc: 'Œuvres et photographies des salles Culture.', item: 'title' },
     { key: 'CASA_FONDS', label: 'Fonds de page', desc: 'L’image derrière chaque page du site.' },
     { key: 'CASA_APROPOS', label: 'À propos', desc: 'L’histoire de Casa Besports : ouverture, manifeste, étapes, piliers, conviction et appel final.' },
+    { key: 'CASA_ENCARTS', label: 'Encarts sponsors', desc: 'Les publicités de vos sponsors, affichées nettes dans les marges des articles en décor « Gazette d’époque » (sur ordinateur). Nom, visuel, adresse du site et une phrase.', item: 'nom' },
     { key: 'CASA_RESEAUX', label: 'Réseaux sociaux', desc: 'Les liens Instagram, YouTube, TikTok, Facebook, X et LinkedIn en bas de chaque page. Collez l’adresse complète de votre page (https://…). Laissez vide pour masquer un réseau.' },
     { key: 'CASA_LEGAL', label: 'Pages légales', desc: 'Mentions légales, confidentialité, CGV, CGU.' },
     { key: 'CASA_RETOUCHES', label: 'Retouches des pages', desc: 'Textes et images changés directement sur le site (bouton « ✎ Retoucher » en bas à gauche du site). Ici : les revoir, les corriger ou les supprimer.' },
@@ -37,13 +38,14 @@
   ];
   // Modèle d'un nouvel élément quand la liste est vide
   var TEMPLATES = {
-    CASA_ARTICLES: { id: '', sport: 'Football', tag: '', date: '', read: '3 min', premium: false, img: '', alt: '', title: '', dek: '', clubs: [], points: ['', ''], author: 'La rédaction', credit: '', body: '', titleEn: '', dekEn: '', bodyEn: '', tagEn: '' },
+    CASA_ARTICLES: { id: '', sport: 'Football', tag: '', date: '', read: '3 min', premium: false, img: '', alt: '', title: '', dek: '', clubs: [], points: ['', ''], author: 'La rédaction', credit: '', decor: '', body: '', titleEn: '', dekEn: '', bodyEn: '', tagEn: '' },
     CASA_GAZETTE: { id: '', sec: 'À la une', kind: 'article', rubric: '', title: '', script: '', kicker: '', img: '', imgCap: '', imgFormat: 'auto', mise: 'auto', paras: [{ t: '' }], colonnes: 'auto', quote: '', quoteBy: '' },
     CASA_LIEUX: { id: '', name: '', short: '', where: '', year: '', img: '', photo: '', hook: '', desc: '', moment: '', sport: '' },
     CASA_PRODUITS: { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: '', gallery: [], colors: ['marine'], sizes: ['S', 'M', 'L', 'XL'], flag: '', isNew: false, desc: '' },
     CASA_VIDEOS: { id: '', tag: '', date: '', img: '', alt: '', title: '', dek: '', url: '', dur: '' },
     CASA_CLUBS: { id: '', name: '', sport: 'Football', city: '', img: '' },
     CASA_JOUEURS: { id: '', num: '', name: '', role: 'Attaquant', club: '', clubLabel: '', img: '' },
+    CASA_ENCARTS: { id: '', nom: '', img: '', site: '', texte: '', actif: true },
     CASA_PARTENAIRES: { id: '', name: '', mono: '', sector: '', city: '', tier: 'Partenaire', color: '#163a5f', since: 2026, perk: '', desc: '', site: '', app: '', real: true },
     CASA_ABONNEMENTS: { id: '', name: '', mois: 0, an: 0, perks: [''], casab: false, gazette: '', paper: false },
     CASA_CULTURE: { salle: '3', title: '', author: '', year: '', technique: '', img: '', alt: '', text: '' }
@@ -88,7 +90,7 @@
     city: 'Ville', num: 'Numéro de maillot', role: 'Poste ou fonction', club: 'Club (identifiant, voir la section Clubs)', clubLabel: 'Nom du club affiché (facultatif)', sector: 'Secteur d’activité', tier: 'Niveau de partenariat', site: 'Site internet du partenaire (lien, marqué « vient de Casa Besports »)', app: 'Application du partenaire (lien, facultatif)',
     color: 'Couleur du logo (#xxxxxx)', since: 'Partenaire depuis (année)', perk: 'Avantage offert', real: 'Vrai partenaire (affiché)', mois: 'Prix par mois (€)', an: 'Prix par an (€)', perks: 'Avantages', casab: 'Donne accès à Casa B+',
     gazette: 'Gazette incluse (num, pap, duo ou vide)', paper: 'Envoi papier', bienvenue: 'Message de bienvenue (épinglé)', sondage: 'Sondage de la semaine', question: 'Question (vide = pas de sondage)', options: 'Réponses possibles',
-    intro: 'Introduction', cles: 'Chiffres clés', source: 'Source', lien: 'Texte du lien', lieux: 'Communes', equipes: 'Équipes', exacts: 'Stades précis', lat: 'Latitude', lon: 'Longitude', cherche: 'Mot du nom du stade',
+    actif: 'Affiché sur le site', intro: 'Introduction', cles: 'Chiffres clés', source: 'Source', lien: 'Texte du lien', lieux: 'Communes', equipes: 'Équipes', exacts: 'Stades précis', lat: 'Latitude', lon: 'Longitude', cherche: 'Mot du nom du stade',
     citation: 'Citation', citationEn: 'Citation (anglais)', dates: 'Frise des dates', imgFormat: 'Format de l’image', mise: 'Position de l’image et du texte', colonnes: 'Colonnes du texte', tagline: 'Phrase forte', lead: 'Chapeau', label: 'Ce que mesure le chiffre', cols3: 'Trois repères', h: 'Titre', bigA: 'Grand titre (début)', bigB: 'Grand titre (fin, sur bandeau)', who: 'Qui', whoSub: 'Sa fonction', stats: 'Chiffres', k: 'Chiffre ou clé', why: 'Pourquoi on vous le raconte', aside: 'Encadré', enbref: 'En bref', card: 'Carte d’identité', v: 'Valeur', qs: 'Questions', q: 'Question', a: 'Réponse', pour: 'Pour', contre: 'Contre', pts: 'Arguments', note: 'Note', entries: 'Mots', w: 'Mot', s: 'Prononciation ou catégorie', d: 'Définition', baro: 'Baromètre', dir: 'Tendance', clT: 'Titre du classement', clSub: 'Sous-titre du classement', classement: 'Classement', blocks: 'Résultats', retenir: 'À retenir', solutions: 'Solutions du quiz', ours: 'L’ours (qui fait la Gazette)', n: 'Numéro', textes: 'Textes retouchés', images: 'Images remplacées', avant: 'D’origine (texte ou image)', apres: 'Remplacé par', apresEn: 'Remplacé par (anglais)', page: 'Page (vide = toutes les pages)', annee: 'Année', etapes: 'Étapes de l’histoire', etapesEn: 'Étapes (anglais)', piliers: 'Piliers', piliersEn: 'Piliers (anglais)', manifeste: 'Manifeste (paragraphes)', manifesteEn: 'Manifeste (anglais)', manifesteFin: 'Phrase après la citation', soustitre: 'Sous-titre', intro: 'Phrase d’introduction', photoAlt: 'Description de la photo', alt: 'Description de la photo', raisonSurtitre: 'Surtitre des piliers', raisonTitre: 'Titre des piliers', signature: 'Phrase de conviction', signatureSurtitre: 'Surtitre de la conviction', signatureSuite: 'Suite de la conviction', appel: 'Appel final (paragraphes)', appelTitre: 'Titre de l’appel final', appelFin: 'Dernière phrase', sections: 'Sections', src: 'Source', why: 'Pourquoi ça compte', big: 'Chiffre', l: 'Unité'
   };
   var LONG = /^(body|bodyEn|desc|texte|text|dek|dekEn|hook|moment|t|kicker|accroche|motif|message|why|citation|citationEn|note|lead|a|d|ours|solutions)$/;
@@ -542,7 +544,7 @@
 
   // ---------- Aperçu sur le site, avant publication ----------
   var PV = null, pvBar = null;
-  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home', CASA_RESEAUX: 'home' };
+  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home', CASA_RESEAUX: 'home', CASA_ENCARTS: 'news' };
   function openCardIdx(k) { if (k === 'CASA_GAZETTE' && S.gzSel != null) return S.gzSel; var m = null; Object.keys(S.openCards || {}).forEach(function (p) { var r = p.match(new RegExp('^' + k + '\\[(\\d+)\\]$')); if (r && S.openCards[p]) m = Number(r[1]); }); return m; }
   function startPreview(k, value) {
     var site = window.CasaSite; if (!site || PV) return;
@@ -1011,6 +1013,8 @@
 
     var sportSel = E('select', { class: 'cba-in', onchange: function (e) { a.sport = e.target.value; mark(); } }, SPORTS.concat(SPORTS.indexOf(a.sport) < 0 && a.sport ? [a.sport] : []).map(function (s) { return E('option', { value: s, selected: a.sport === s || null }, s); }));
     var fmtSel = E('select', { class: 'cba-in', onchange: function (e) { a.format = e.target.value; mark(); } }, FORMATS.map(function (f) { return E('option', { value: f[0], selected: (a.format || 'article') === f[0] || null }, f[1]); }));
+    var DECORS = [['', 'Noir du site (par défaut)'], ['gazette', 'Gazette d’époque (papier jauni, typographie journal)'], ['papier', 'Papier clair']];
+    var decorSel = E('select', { class: 'cba-in', onchange: function (e) { a.decor = e.target.value; mark(); } }, DECORS.map(function (d) { return E('option', { value: d[0], selected: (a.decor || '') === d[0] || null }, d[1]); }));
     var pts = E('div', {}, a.points.map(function (p, i) { return E('div', { class: 'cba-row', style: 'margin:.3rem 0' }, E('input', { class: 'cba-in', style: 'flex:1 1 240px', value: p || '', oninput: function (e) { a.points[i] = e.target.value; mark(); } }), E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { a.points.splice(i, 1); mark(); render(); } }, 'Retirer')); }),
       a.points.length < 4 ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { a.points.push(''); mark(); render(); } }, '+ Point clé') : null);
 
@@ -1023,7 +1027,8 @@
           E('div', {}, E('label', { class: 'cba-lbl' }, 'Discipline'), sportSel),
           E('div', {}, txt(a, 'tag', 'Rubrique / compétition', { ph: 'Régional 2, Coupe de France…' })),
           E('div', {}, txt(a, 'date', 'Date affichée', { ph: dayLabel() })),
-          E('div', {}, txt(a, 'author', 'Auteur'))),
+          E('div', {}, txt(a, 'author', 'Auteur')),
+          E('div', {}, E('label', { class: 'cba-lbl' }, 'Décor de lecture'), decorSel)),
         E('label', { class: 'cba-radio', style: 'margin-top:.7rem' }, E('input', { type: 'checkbox', checked: a.premium || null, onchange: function (e) { a.premium = e.target.checked; mark(); } }), 'Réservé aux abonnés Casa B+')),
       E('div', { class: 'cba-card' }, E('div', { class: 'cba-lbl', style: 'margin-top:0' }, 'Photo principale'), imgField(a, 'img', '16:9'), txt(a, 'alt', 'Description de la photo (pour les malvoyants et Google)'), txt(a, 'credit', 'Crédit photo', { ph: 'Nom du photographe ou Casa Besports' })),
       E('div', { class: 'cba-card' }, E('label', { class: 'cba-lbl', style: 'margin-top:0' }, 'Texte de l’article', bodyInfo), bar, ta, assist,

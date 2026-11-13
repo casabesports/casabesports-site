@@ -2121,6 +2121,60 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 .wk-cta { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; }
 .wk-cta-b { display: flex; flex-wrap: wrap; gap: .5rem; }
 .wk-cta-b .btn { min-height: 42px; font-size: 13px; }
+/* ===== Décor de lecture d'un article (champ « Décor » dans l'admin) ===== */
+html[data-decor="papier"], html[data-decor="gazette"], html[data-decor="papier"] .cb-root, html[data-decor="gazette"] .cb-root {
+  color-scheme: light;
+  --bg: #f1eee7; --surface: #f8f6f1; --surface-2: #e7e3d9; --surface-3: #efebe3; --sand: #dfd9cc;
+  --ink: #111111; --text: #1c1c1a; --text-2: #45433d; --muted: #5e5b53; --muted-2: #6b6860;
+  --line: #d6d0c4; --line-2: #bdb6a7; --gold-text: #111111; --acc: #111111; --on-acc: #f8f6f1;
+  --glass: rgba(248,246,241,.96);
+}
+html[data-decor="gazette"], html[data-decor="gazette"] .cb-root {
+  --bg: #ece0c3; --surface: #f3e9d2; --surface-2: #e3d5b4; --surface-3: #eadfc4; --sand: #d9c9a3;
+  --ink: #1d1912; --text: #241f17; --text-2: #4a4133; --muted: #625746; --muted-2: #6f6350;
+  --line: #c9b994; --line-2: #a8966d; --gold-text: #6b2a1a; --acc: #241f17; --on-acc: #f3e9d2;
+  --glass: rgba(243,233,210,.96);
+}
+html[data-decor="gazette"] body, html[data-decor="gazette"] .cb-root {
+  background-color: #ece0c3;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255,250,235,.55), rgba(255,250,235,0) 60%),
+    radial-gradient(ellipse at 100% 100%, rgba(120,85,30,.18), rgba(120,85,30,0) 55%),
+    radial-gradient(ellipse at 0% 100%, rgba(120,85,30,.14), rgba(120,85,30,0) 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .26 0 0 0 0 .12 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+html[data-decor="papier"] body, html[data-decor="papier"] .cb-root { background: #f1eee7; }
+html[data-decor="gazette"] .art-h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; text-transform: none; letter-spacing: -.01em; line-height: 1.05;
+  border-top: 3px double var(--ink); border-bottom: 1px solid var(--ink); padding: .5rem 0 .6rem; }
+html[data-decor="gazette"] .art-txt { font-family: 'Source Serif 4', Georgia, serif; }
+@media (min-width: 700px) { html[data-decor="gazette"] .art-txt p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; } }
+html[data-decor="gazette"] .art-dek { font-family: 'Source Serif 4', Georgia, serif !important; font-style: italic; font-weight: 400 !important; }
+html[data-decor="gazette"] .art-txt h2 { hyphens: none; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; text-transform: none; text-align: left; border-bottom: 1px solid var(--line-2); padding-bottom: .2em; }
+html[data-decor="gazette"] .art-txt p.art-p1::first-letter { float: left; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 3.6em; line-height: .82; padding: .06em .1em 0 0; color: var(--ink); }
+html[data-decor="gazette"] article img { filter: sepia(.28) contrast(1.03) saturate(.9); }
+html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, serif; }
+/* Gazette : autres articles floutés dans les marges (grand écran seulement) ; au survol ils redeviennent lisibles */
+.gz-cote { display: none; }
+@media (min-width: 1360px) {
+  html[data-decor="gazette"] article .wrap { max-width: 860px !important; }
+  html[data-decor="gazette"] .gz-cote { display: flex; flex-direction: column; gap: 1.6rem; position: fixed; top: 140px; bottom: 24px; width: calc((100vw - 860px) / 2 - 64px); max-width: 340px; overflow: hidden; z-index: 2;
+    -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+  html[data-decor="gazette"] .gz-gauche { left: 28px; padding-right: 1.4rem; border-right: 1px solid var(--line-2); }
+  html[data-decor="gazette"] .gz-droite { right: 28px; padding-left: 1.4rem; border-left: 1px solid var(--line-2); }
+  .gz-art { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 0 0 1.4rem; border-bottom: 3px double var(--line-2); color: var(--text); cursor: pointer;
+    filter: blur(2.6px); opacity: .5; font: inherit; }
+  .gz-img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; margin: 0 0 .7rem; filter: sepia(.45) grayscale(.3); }
+  .gz-pub { display: block; flex: none; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: .8rem .9rem 1rem; text-align: center; }
+  .gz-pub:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+  .gz-pub-k { display: block; font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line-2); padding-bottom: .4rem; margin-bottom: .6rem; }
+  .gz-pub img { display: block; width: 100%; max-height: 180px; object-fit: contain; margin: 0 auto .6rem; }
+  .gz-pub-n { display: block; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 24px; line-height: 1.05; margin-bottom: .3rem; }
+  .gz-pub-t { display: block; font-family: 'Source Serif 4', Georgia, serif; font-size: 13px; line-height: 1.45; color: var(--text-2); }
+  .gz-tag { display: block; font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-text); margin-bottom: .35rem; }
+  .gz-tt { display: block; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; font-size: 26px; line-height: 1.05; margin-bottom: .6rem; }
+  .gz-tx { display: block; font-family: 'Source Serif 4', Georgia, serif; font-size: 13px; line-height: 1.5; text-align: justify; hyphens: auto; columns: 2; column-gap: 1rem; column-rule: 1px solid var(--line); }
+}
 .art-by { font-size: 13px; color: var(--muted); margin: 0 0 1.5rem; letter-spacing: .01em; }
 .art-by strong { color: var(--text); font-weight: 700; }
 .art-cap { font-size: 12px; line-height: 1.45; color: var(--muted); margin-top: .5rem; }
@@ -2753,6 +2807,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
 
 <!-- ================= ARTICLE ================= -->
 <sc-if value="{{isArticle}}" hint-placeholder-val="{{ false }}">
+  <sc-if value="{{gzSide.on}}" hint-placeholder-val="{{ false }}"><aside class="gz-cote gz-gauche"><sc-for list="{{gzSide.gauche}}" as="g" hint-placeholder-count="2"><sc-if value="{{g.isPub}}" hint-placeholder-val="{{ false }}"><a class="gz-pub" href="{{g.lien}}" target="{{g.target}}" rel="sponsored noopener"><span class="gz-pub-k">{{g.kicker}}</span><sc-if value="{{g.hasImg}}" hint-placeholder-val="{{ false }}"><img src="{{g.img}}" alt="{{g.nom}}" loading="lazy"></sc-if><span class="gz-pub-n">{{g.nom}}</span><span class="gz-pub-t">{{g.texte}}</span></a></sc-if><sc-if value="{{g.isArt}}" hint-placeholder-val="{{ true }}"><button type="button" class="gz-art" tabindex="-1" aria-hidden="true" onClick="{{g.open}}"><span class="gz-tag">{{g.tag}}</span><span class="gz-tt">{{g.title}}</span><sc-if value="{{g.hasImg}}" hint-placeholder-val="{{ false }}"><img class="gz-img" src="{{g.img}}" alt="" loading="lazy"></sc-if><span class="gz-tx">{{g.txt}}</span></button></sc-if></sc-for></aside><aside class="gz-cote gz-droite"><sc-for list="{{gzSide.droite}}" as="g" hint-placeholder-count="2"><sc-if value="{{g.isPub}}" hint-placeholder-val="{{ false }}"><a class="gz-pub" href="{{g.lien}}" target="{{g.target}}" rel="sponsored noopener"><span class="gz-pub-k">{{g.kicker}}</span><sc-if value="{{g.hasImg}}" hint-placeholder-val="{{ false }}"><img src="{{g.img}}" alt="{{g.nom}}" loading="lazy"></sc-if><span class="gz-pub-n">{{g.nom}}</span><span class="gz-pub-t">{{g.texte}}</span></a></sc-if><sc-if value="{{g.isArt}}" hint-placeholder-val="{{ true }}"><button type="button" class="gz-art" tabindex="-1" aria-hidden="true" onClick="{{g.open}}"><span class="gz-tag">{{g.tag}}</span><span class="gz-tt">{{g.title}}</span><sc-if value="{{g.hasImg}}" hint-placeholder-val="{{ false }}"><img class="gz-img" src="{{g.img}}" alt="" loading="lazy"></sc-if><span class="gz-tx">{{g.txt}}</span></button></sc-if></sc-for></aside></sc-if>
   <article style="padding-bottom: 5rem">
     <div class="wrap" style="max-width: 860px; padding-top: 1.5rem">
       <div style="display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1rem">
@@ -2760,8 +2815,8 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
         <span class="cond" style="font-size: 14px; color: var(--muted)">{{art.tag}} · {{art.date}} · {{art.read}}</span>
         <sc-if value="{{art.premium}}" hint-placeholder-val="{{ false }}"><span class="cond" style="font-size: 12px; background: var(--inv-bg); color: var(--gold-on-inv); padding: .3rem .55rem">Premium</span></sc-if>
       </div>
-      <h1 class="h1 bn-casse" style="font-size: clamp(2.2rem, 5vw, 3.8rem); margin-bottom: 1.25rem">{{art.title}}</h1>
-      <p style="font-size: 1.15rem; line-height: 1.55; color: var(--text-2); margin: 0 0 1rem; font-family: var(--font-body); font-weight: 600">{{art.dek}}</p>
+      <h1 class="h1 bn-casse art-h1" style="font-size: clamp(2.2rem, 5vw, 3.8rem); margin-bottom: 1.25rem">{{art.title}}</h1>
+      <p class="art-dek" style="font-size: 1.15rem; line-height: 1.55; color: var(--text-2); margin: 0 0 1rem; font-family: var(--font-body); font-weight: 600">{{art.dek}}</p>
       <p class="art-by">Par <strong>{{art.author}}</strong><sc-if value="{{art.hasPub}}" hint-placeholder-val="{{ true }}"> · <time datetime="{{art.pubIso}}">{{art.pubLabel}}</time></sc-if><sc-if value="{{art.hasMod}}" hint-placeholder-val="{{ false }}"> · Mis à jour le {{art.modLabel}}</sc-if></p>
 
       <!-- barre d'outils de lecture -->
@@ -2809,13 +2864,13 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
         </div>
       </sc-if>
       <sc-if value="{{unlocked}}" hint-placeholder-val="{{ true }}">
-        <div style="font-size: {{fontSize}}; line-height: 1.8; color: var(--text)">
+        <div class="art-txt" style="font-size: {{fontSize}}; line-height: 1.8; color: var(--text)">
           <sc-if value="{{art.noBody}}" hint-placeholder-val="{{ true }}">
           <div class="bn-signe"><svg class="bn-sym" viewBox="0 0 1000 1000" width="28" height="28" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#000000"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></div>
           </sc-if>
           <sc-if value="{{art.hasBody}}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{art.blocks}}" as="bk" hint-placeholder-count="3">
-              <sc-if value="{{bk.isP}}" hint-placeholder-val="{{ true }}"><p style="margin: 0 0 1.2em">{{bk.t}}</p></sc-if>
+              <sc-if value="{{bk.isP}}" hint-placeholder-val="{{ true }}"><p class="{{bk.cls}}" style="margin: 0 0 1.2em">{{bk.t}}</p></sc-if>
               <sc-if value="{{bk.isH}}" hint-placeholder-val="{{ false }}"><h2 class="ttl" style="font-size: 1.5em; margin: 1.3em 0 .5em">{{bk.t}}</h2></sc-if>
               <sc-if value="{{bk.isQ}}" hint-placeholder-val="{{ false }}"><blockquote style="margin: 1.5rem 0; padding-left: 1.5rem; border-left: 3px solid {{accent}}; font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 700; letter-spacing: -.02em; font-size: 1.5em; line-height: 1.3; color: var(--ink)">{{bk.t}}</blockquote></sc-if>
               <sc-if value="{{bk.isL}}" hint-placeholder-val="{{ false }}"><div style="display: flex; gap: .7rem; margin: 0 0 .5em"><span style="width: 7px; height: 7px; border-radius: 50%; background: {{accent}}; margin-top: .7em; flex: none"></span><span>{{bk.t}}</span></div></sc-if>
@@ -7225,6 +7280,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/legal.js?v=__VERSION__"></script>
 <script src="contenus/apropos.js?v=__VERSION__"></script>
 <script src="contenus/reseaux.js?v=__VERSION__"></script>
+<script src="contenus/encarts.js?v=__VERSION__"></script>
 <script src="contenus/gazette.js?v=__VERSION__"></script>
 <script src="contenus/retouches.js?v=__VERSION__"></script>
 <script>

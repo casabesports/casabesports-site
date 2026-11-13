@@ -529,6 +529,7 @@ class Component extends DCLogic {
         }
       });
     });
+    out.forEach((b) => { b.cls = ''; }); const p1 = out.find((b) => b.isP); if (p1) p1.cls = 'art-p1';
     return out;
   }
   textOf(body) { return (body || '').replace(/^!\[[^\]]*\]\([^)]*\)\s*$/gm, '').replace(/^##\s+|^>\s*|^[-•]\s+/gm, '').replace(/\*\*/g, ''); }
@@ -1449,6 +1450,20 @@ class Component extends DCLogic {
     const curA = ARTS.find((a) => a.id === s.articleId) || ARTS[0] || EMPTY_ART;
     const artObj = art(curA);
     artObj.openSport = () => this.go('discipline', { discId: curA.sport });
+    // Décor de lecture choisi dans l'admin (gazette d'époque, papier clair) : appliqué à toute la page
+    const decor = s.view === 'article' && /^(gazette|papier)$/.test(curA.decor || '') ? curA.decor : '';
+    try { if ((document.documentElement.getAttribute('data-decor') || '') !== decor) { if (decor) document.documentElement.setAttribute('data-decor', decor); else document.documentElement.removeAttribute('data-decor'); } } catch (e) {}
+    // Gazette : sur grand écran, d'autres articles du site apparaissent floutés dans les marges, comme sur une page de journal
+    const gzAutres = decor === 'gazette' ? ARTS.filter((a) => a.id !== curA.id && !a.brouillon).slice(0, 6).map((a) => ({
+      isArt: true, isPub: false, tag: a.tag || a.sport || '', title: a.title, img: a.img || '', hasImg: !!a.img,
+      txt: cbTexte(a.dek ? a.dek + ' ' + (a.body || '') : a.body).slice(0, 420) + '…',
+      open: () => this.go('article', { articleId: a.id }) })) : [];
+    // Encarts sponsors (contenus/encarts.js, section « Encarts sponsors » de l'admin), affichés nets ; sans sponsor : un emplacement à vendre
+    const pubs = (window.CASA_ENCARTS || []).filter((e) => e && e.actif !== false && e.nom).map((e) => ({ isPub: true, isArt: false, kicker: 'Partenaire', nom: e.nom, texte: e.texte || '', img: e.img || '', hasImg: !!e.img, lien: e.site || e.lien || '#', target: (e.site || e.lien) ? '_blank' : '_self' }));
+    if (!pubs.length) pubs.push({ isPub: true, isArt: false, kicker: 'Espace partenaire', nom: 'Votre marque ici', texte: 'Associez votre entreprise aux histoires du sport local.', img: '', hasImg: false, lien: '/travailler-avec-nous', target: '_self' });
+    const gzG = gzAutres.filter((x, i) => i % 2 === 0), gzD = gzAutres.filter((x, i) => i % 2 === 1);
+    if (gzAutres.length) { gzG.splice(1, 0, pubs[0]); if (pubs[1] || gzD.length) gzD.splice(1, 0, pubs[1] || pubs[0]); }
+    const gzSide = { on: gzAutres.length > 0, gauche: gzG, droite: gzD };
     artObj.points = cbResume(curA).map((t) => ({ t }));
     artObj.hasPoints = artObj.points.length > 0;
     artObj.clubs = curA.clubs.map((id) => clubById(id)).filter(Boolean).map((c) => clubV(c));
@@ -2542,7 +2557,7 @@ class Component extends DCLogic {
       proposePlayer: () => this.go('contact', { subject: 'Faire briller un talent', profile: 'Joueur', contactSent: false }),
       submitResult: () => this.go('contact', { subject: 'Transmettre un résultat — ' + s.dSport, profile: 'Club', contactSent: false }),
       orderRecap: () => this.go('contact', { subject: 'Devis résumé de match (290 €)' + (s.view === 'club' ? ' — ' + curC.name : ''), profile: 'Club', contactSent: false }),
-      art: artObj, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
+      art: artObj, gzSide, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
       fontUp: () => this.setState({ fontStep: Math.min(3, s.fontStep + 1) }), fontDown: () => this.setState({ fontStep: Math.max(0, s.fontStep - 1) }),
       toggleSummary: () => this.setState({ summary: !s.summary }), summaryOpen: s.summary, summaryPressed: s.summary ? 'true' : 'false', sumBg: s.summary ? 'var(--inv-bg)' : 'var(--surface)', sumFg: s.summary ? 'var(--on-inv)' : 'var(--ink)',
       toggleListen: () => this.ecouter(curA, locked), listening: s.listening, voixPct: s.voixPct || '0%', listenPressed: s.listening ? 'true' : 'false', lisBg: s.listening ? 'var(--inv-bg)' : 'var(--surface)', lisFg: s.listening ? 'var(--on-inv)' : 'var(--ink)', listenLabel: s.listening ? 'En écoute' : 'Écouter',
