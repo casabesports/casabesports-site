@@ -12,7 +12,7 @@ cd "$(dirname "$0")/.."
 OUT=_site
 rm -rf "$OUT"
 mkdir -p "$OUT"
-for f in index.html icon.svg manifest.webmanifest robots.txt sitemap.xml _headers; do
+for f in index.html icon.svg manifest.webmanifest robots.txt sitemap.xml _headers _redirects; do
   [ -e "$f" ] && cp "$f" "$OUT/"
 done
 for d in assets js contenus; do

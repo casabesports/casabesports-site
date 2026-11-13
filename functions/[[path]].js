@@ -41,6 +41,9 @@ const SECTIONS = {
 };
 const DETAIL = { actualites: 'article', videos: 'video', clubs: 'club', joueurs: 'player', disciplines: 'discipline' };
 
+// Anciennes adresses dont le nom ne suffit pas (faute de frappe sur l'ancien site)
+const ALIAS = { 'clubs/etoile-sportice-pointe-hague': 'esph' };
+const slug = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const clip = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; };
 const abs = (base, u) => { try { return u ? new URL(u, base + '/').href : ''; } catch (e) { return ''; } };
@@ -162,6 +165,15 @@ export async function onRequest(ctx) {
   const kind = DETAIL[m[1]];
   const id = decodeURIComponent(m[2]);
   const D = kind ? await loadData(ctx, origin) : null;
+  // Anciennes adresses de casabesports.fr (ex. /joueurs/bastien-rouleau, /clubs/as-cherbourg-football) :
+  // redirection définitive (301) vers la nouvelle adresse quand le nom correspond exactement
+  if (kind === 'club' || kind === 'player') {
+    const list = kind === 'club' ? D.clubs : D.joueurs;
+    if (!list.some((x) => x.id === id)) {
+      const want = ALIAS[m[1] + '/' + id] || (list.find((x) => slug(x.name) === slug(id)) || {}).id;
+      if (want && list.some((x) => x.id === want)) return Response.redirect(url.origin + '/' + m[1] + '/' + encodeURIComponent(want), 301);
+    }
+  }
   let meta = null;
   if (kind === 'article') {
     const a = D.articles.find((x) => x.id === id);
