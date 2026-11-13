@@ -1515,4 +1515,7 @@ window.CASA_EN = {
   "Gérer ou résilier": "Manage or cancel",
   "Revenir aux abonnements": "Back to subscriptions",
   "Ouverture du paiement sécurisé…": "Opening secure payment…",
+  "Masquer": "Hide",
+  "Afficher le mot de passe": "Show password",
+  "Masquer le mot de passe": "Hide password",
 };

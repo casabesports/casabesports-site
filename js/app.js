@@ -60,7 +60,7 @@ class Component extends DCLogic {
     this.state = {
       view: 'home', hist: [], articleId: null, videoId: null, discId: null, clubId: null, playerId: null, productId: null,
       q: '', cat: 'Tous', premiumOnly: false, savedOnly: false, clubSport: 'Tous', plRole: 'Tous', clubTab: 'articles',
-      city: 'Cherbourg', menuOpen: false, moreOpen: false, searchOpen: false, sq: '', loginOpen: false, linkSent: false, loginMode: 'password', pw: '', pw2: '', loginId: '', pwOpen: false, pwDone: false, resetSent: false, hasPassword: false, phone: '', smsCode: '', codeSent: false, authBusy: false,
+      city: 'Cherbourg', menuOpen: false, moreOpen: false, searchOpen: false, sq: '', pwShow: false, loginOpen: false, linkSent: false, loginMode: 'password', pw: '', pw2: '', loginId: '', pwOpen: false, pwDone: false, resetSent: false, hasPassword: false, phone: '', smsCode: '', codeSent: false, authBusy: false,
       loggedIn: false, subs: { casab: false, gazette: null }, name: '', email: '', address: '', subject: '', profile: '', message: '', contactSent: false,
       formError: '', step: 1, period: 'mois', subPlan: 'casab', isGift: false, saved: [], follows: [], followPlayers: [], remind: false,
       summary: false, listening: false, fontStep: 1, reaction: null, playing: false, goal: 'Visibilité',
@@ -2548,7 +2548,7 @@ class Component extends DCLogic {
       loginPwAria: s.loginMode === 'password' ? 'true' : 'false', loginNewAria: s.loginMode === 'email' || s.loginMode === 'phone' ? 'true' : 'false',
       setLoginPw: () => this.setState({ loginMode: 'password', formError: '', resetSent: false }), setLoginNew: () => this.setState({ loginMode: 'email', formError: '' }),
       setLoginReset: () => this.setState({ loginMode: 'reset', formError: '', resetSent: false, email: s.email || (/@/.test(s.loginId) ? s.loginId : '') }),
-      loginId: s.loginId, onLoginId: (e) => this.setState({ loginId: e.target.value }), pw: s.pw, onPw: (e) => this.setState({ pw: e.target.value }), pw2: s.pw2, onPw2: (e) => this.setState({ pw2: e.target.value }),
+      loginId: s.loginId, onLoginId: (e) => this.setState({ loginId: e.target.value }), pw: s.pw, onPw: (e) => this.setState({ pw: e.target.value }), pwType: s.pwShow ? 'text' : 'password', pwEye: s.pwShow ? 'Masquer' : 'Voir', pwEyeAria: s.pwShow ? 'Masquer le mot de passe' : 'Afficher le mot de passe', pwShown: s.pwShow ? 'true' : 'false', togglePwShow: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ pwShow: !s.pwShow }); }, pw2: s.pw2, onPw2: (e) => this.setState({ pw2: e.target.value }),
       pwLoginLabel: s.authBusy ? 'Connexion…' : 'Se connecter',
       pwLogin: () => {
         if (!s.loginId.trim() || !s.pw) { this.setState({ formError: 'Saisissez votre identifiant et votre mot de passe.' }); return; }
