@@ -1655,7 +1655,7 @@ class Component extends DCLogic {
       const followed = cid && s.follows.indexOf(cid) >= 0;
       return Object.assign({}, r, { rank: String(i + 1), j: String(r.j), g: String(r.g), n: String(r.n), p: String(r.p), pts: String(r.pts), followed: !!followed,
         bg: followed ? 'var(--note-bg)' : 'var(--surface)', rankBg: i === 0 ? accent : i === tbl.length - 1 ? 'var(--danger-bg)' : 'var(--surface-2)', rankFg: i === 0 ? 'var(--on-acc)' : 'var(--ink)',
-        form: r.form.split('').map((l) => ({ l, bg: l === 'V' ? '#18705f' : l === 'N' ? '#8f9aa8' : 'var(--danger)' })), open: openClubByTeam(r.team) });
+        form: String(r.form || '').split('').map((l) => ({ l, bg: l === 'V' ? '#18705f' : l === 'N' ? '#8f9aa8' : 'var(--danger)' })), hasForm: !!r.form, teamN: cbNomEquipe(r.team), diffS: (Number(r.diff) > 0 ? '+' : '') + r.diff, podium: i < 3 ? 'is-top' : '', last: i === tbl.length - 1 && tbl.length > 3 ? 'is-last' : '', open: openClubByTeam(r.team) });
     });
     // calendrier
     const year = 2026, month = s.calMonth;

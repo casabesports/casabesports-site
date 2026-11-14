@@ -274,6 +274,21 @@ html{scroll-behavior:smooth}
 .rs-foot{margin:.4rem 0 0;text-align:right}
 .rs-all{background:none;border:0;padding:0 0 .2rem;cursor:pointer;color:var(--text-2);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:500;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;border-bottom:1px solid var(--line-2)}
 .rs-all:hover{color:var(--ink);border-color:var(--ink)}
+/* Classement : même écriture que les résultats */
+.cl{border-top:1px solid var(--ink)}
+.cl-r{display:grid;grid-template-columns:3.2rem minmax(0,1fr) repeat(5,3rem) 3.6rem;align-items:baseline;gap:0 .5rem;padding:.85rem 0;border-bottom:1px solid var(--line)}
+.cl-hd{padding:.6rem 0;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:500;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.cl-hd>span:nth-child(n+3){text-align:right}
+.cl-rk{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-variant-numeric:lining-nums;font-size:24px;line-height:1;color:var(--muted)}
+.cl-tm{min-width:0;display:flex;align-items:baseline;gap:.6rem}
+.cl-tm button{background:none;border:0;padding:0;cursor:pointer;text-align:left;font-family:'Cormorant Garamond',Georgia,serif;font-variant-numeric:lining-nums;font-size:20px;font-weight:500;line-height:1.2;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cl-tm button:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.cl-suivi{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:var(--gold-text);flex:none}
+.cl-n{text-align:right;font-family:'Cormorant Garamond',Georgia,serif;font-variant-numeric:lining-nums tabular-nums;font-size:18px;color:var(--muted)}
+.cl-pts{text-align:right;font-family:'Cormorant Garamond',Georgia,serif;font-variant-numeric:lining-nums tabular-nums;font-size:24px;font-weight:700;line-height:1;color:var(--ink)}
+.cl-r.is-top .cl-rk{color:var(--ink)}.cl-r.is-top .cl-tm button{font-weight:700;color:var(--ink)}
+.cl-r.is-last .cl-tm button,.cl-r.is-last .cl-pts{opacity:.7}
+@media (max-width:640px){.cl-r{grid-template-columns:2.2rem minmax(0,1fr) 2.2rem 2.8rem}.cl-x{display:none}.cl-tm button{font-size:18px}.cl-rk,.cl-pts{font-size:21px}}
 /* Le Terrain : compétitions et résultats, même écriture que l'accueil */
 .lv-serif{font-family:'Cormorant Garamond',Georgia,serif!important;font-variant-numeric:lining-nums tabular-nums;font-weight:600}
 .lv-comps{margin:0 0 1.6rem}
@@ -3692,20 +3707,16 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <!-- CLASSEMENT -->
       <sc-if value="{{tabTable}}" hint-placeholder-val="{{ false }}">
         <sc-if value="{{hasTable}}" hint-placeholder-val="{{ true }}">
-          <div style="overflow-x: auto; border: 1px solid var(--line); border-radius: 0">
-            <x-table class="tbl">
-              <x-thead><x-tr><x-th>#</x-th><x-th style="text-align: left">Équipe</x-th><x-th>J</x-th><x-th>G</x-th><x-th>N</x-th><x-th>P</x-th><x-th>Diff.</x-th><x-th>Pts</x-th><x-th>Forme</x-th></x-tr></x-thead>
-              <x-tbody>
-                <sc-for list="{{tableRows}}" as="r" hint-placeholder-count="8">
-                  <x-tr style="background: {{r.bg}}">
-                    <x-td><span class="num" style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; align-items: center; justify-content: center; background: {{r.rankBg}}; color: {{r.rankFg}}">{{r.rank}}</span></x-td>
-                    <x-td style="text-align: left"><button type="button" onClick="{{r.open}}" style="background: none; border: 0; padding: .4rem 0; cursor: pointer; font-weight: 800; color: var(--text); text-align: left; min-height: 40px">{{r.team}}</button><sc-if value="{{r.followed}}" hint-placeholder-val="{{ false }}"><span class="cond" style="font-size: 11px; color: var(--gold-text); margin-left: .4rem">Suivi</span></sc-if></x-td>
-                    <x-td>{{r.j}}</x-td><x-td>{{r.g}}</x-td><x-td>{{r.n}}</x-td><x-td>{{r.p}}</x-td><x-td>{{r.diff}}</x-td><x-td class="num" style="font-size: 19px; color: var(--ink)">{{r.pts}}</x-td>
-                    <x-td><span style="display: inline-flex; gap: 3px"><sc-for list="{{r.form}}" as="f" hint-placeholder-count="5"><span class="cond" style="width: 20px; height: 20px; border-radius: 0; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; background: {{f.bg}}; color: var(--on-inv)">{{f.l}}</span></sc-for></span></x-td>
-                  </x-tr>
-                </sc-for>
-              </x-tbody>
-            </x-table>
+          <div class="cl" role="table" aria-label="Classement">
+            <div class="cl-r cl-hd" role="row"><span role="columnheader">Rang</span><span role="columnheader">Équipe</span><span role="columnheader" title="Matchs joués">J</span><span role="columnheader" class="cl-x" title="Gagnés">G</span><span role="columnheader" class="cl-x" title="Nuls">N</span><span role="columnheader" class="cl-x" title="Perdus">P</span><span role="columnheader" class="cl-x">Diff.</span><span role="columnheader">Pts</span></div>
+            <sc-for list="{{tableRows}}" as="r" hint-placeholder-count="8">
+              <div class="cl-r {{r.podium}} {{r.last}}" role="row">
+                <span class="cl-rk" role="cell">{{r.rank}}</span>
+                <span class="cl-tm" role="cell"><button type="button" onClick="{{r.open}}">{{r.teamN}}</button><sc-if value="{{r.followed}}" hint-placeholder-val="{{ false }}"><span class="cl-suivi">suivi</span></sc-if></span>
+                <span class="cl-n" role="cell">{{r.j}}</span><span class="cl-n cl-x" role="cell">{{r.g}}</span><span class="cl-n cl-x" role="cell">{{r.n}}</span><span class="cl-n cl-x" role="cell">{{r.p}}</span><span class="cl-n cl-x" role="cell">{{r.diffS}}</span>
+                <span class="cl-pts" role="cell">{{r.pts}}</span>
+              </div>
+            </sc-for>
           </div>
           <p style="font-size: 13px; color: var(--muted); margin-top: .75rem">{{ptsRule}} Les montées et descentes suivent le règlement de la ligue.</p>
         </sc-if>
