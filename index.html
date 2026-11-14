@@ -255,7 +255,21 @@ html{scroll-behavior:smooth}
 .full{grid-column:1/-1}
 .bento-item.full .bn-une{min-height:clamp(340px,40vw,520px)}
 .ac-fav{margin:.6rem 0 0;font-size:14px;color:var(--text-2)}.ac-fav .cond{font-size:11.5px;color:var(--gold-text);margin-right:.4rem}
-.ac-res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:.5rem}
+.rs{padding:1.6rem 1.6rem 1.2rem!important}
+.rs-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;padding-bottom:1rem;border-bottom:2px solid var(--ink)}
+.rs-k{margin:0 0 .35rem;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:600;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.rs-t{margin:0;font-family:var(--bn-font);font-weight:700;text-transform:uppercase;letter-spacing:-.03em;line-height:.95;font-size:clamp(1.6rem,3.2vw,2.4rem);color:var(--ink)}
+.rs-all{background:none;border:0;padding:.3rem 0;cursor:pointer;color:var(--text-2);font-size:14px;letter-spacing:.01em;border-bottom:1px solid var(--line-2)}
+.rs-all:hover{color:var(--ink);border-color:var(--ink)}
+.rs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));column-gap:2rem}
+.rs-m{display:flex;flex-direction:column;gap:.3rem;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:1rem 0 .9rem;cursor:pointer;color:var(--text);min-width:0}
+.rs-m:hover .rs-n{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.rs-meta{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:600;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem}
+.rs-l{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;color:var(--text-2)}
+.rs-n{font-size:15.5px;font-weight:400;letter-spacing:.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rs-s{font-family:var(--bn-font);font-weight:500;font-size:22px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:var(--text-2);flex:none}
+.rs-l.is-win{color:var(--ink)}.rs-l.is-win .rs-n{font-weight:700}.rs-l.is-win .rs-s{font-weight:800;color:var(--ink)}
+.rs-vide{margin:1rem 0 0;color:var(--text-2);font-size:15px}
 .ac-portes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
 .ac-porte{display:flex;flex-direction:column;align-items:flex-start;gap:.35rem;border:1px solid var(--line);background:var(--surface);padding:1.4rem 1.5rem}
 .ac-porte .pro-eb{margin-bottom:.2rem}.ac-porte .pro-h2{margin:0 0 .2rem;font-size:clamp(1.25rem,2.4vw,1.75rem)}
@@ -265,7 +279,7 @@ html{scroll-behavior:smooth}
 .ac-gz{display:grid!important;grid-template-columns:minmax(120px,200px) minmax(0,1fr);gap:1.4rem;align-items:center;text-align:left;cursor:pointer;color:var(--text)}
 .ac-gz-cov{display:block;aspect-ratio:3/4;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}.ac-gz-cov img{width:100%;height:100%;object-fit:cover;display:block}
 .ac-gz-txt{display:flex;flex-direction:column;gap:.35rem;min-width:0}.ac-gz-txt .pro-h2{margin:0}
-@media (max-width:640px){.ac-portes{grid-template-columns:1fr}.ac-gz{grid-template-columns:96px minmax(0,1fr);gap:1rem}.ac-gz .ac-porte-p{display:none}.ac-res-grid>button:nth-of-type(n+5){display:none!important}}
+@media (max-width:640px){.ac-portes{grid-template-columns:1fr}.ac-gz{grid-template-columns:96px minmax(0,1fr);gap:1rem}.ac-gz .ac-porte-p{display:none}.rs-grid>.rs-m:nth-of-type(n+5){display:none}.rs{padding:1.2rem 1.1rem .8rem!important}}
 .b-card{position:relative;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.2rem;overflow:hidden;display:flex;flex-direction:column;color:var(--text);box-shadow:0 14px 34px -28px var(--shadow);font:inherit;transition:transform .25s ease,box-shadow .25s ease}
 button.b-card{cursor:pointer}
 button.b-card:hover{transform:translateY(-3px);box-shadow:0 20px 40px -26px var(--shadow)}
@@ -2552,24 +2566,26 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
               </span>
             </button>
           </sc-if>
-          <!-- Résultats du week-end -->
+          <!-- Résultats du week-end : présentation éditoriale, façon page résultats d'un quotidien -->
           <sc-if value="{{hm.isResultats}}" hint-placeholder-val="{{ false }}">
-            <div class="b-card ac-res">
-              <div class="b-head"><span class="cond" style="display: flex; align-items: center; gap: .45rem; color: var(--ink)"><span class="pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #e03040"></span>Résultats du week-end</span><button type="button" class="b-more" onClick="{{goLive}}">Scores et classements</button></div>
-              <p class="cond" style="margin: -.3rem 0 .6rem; font-size: 11.5px; color: var(--muted)">{{resNote}}</p>
+            <section class="b-card rs" aria-labelledby="rs-t">
+              <header class="rs-head">
+                <div><p class="rs-k">{{resNote}}</p><h2 id="rs-t" class="rs-t">Les résultats du week‑end</h2></div>
+                <button type="button" class="rs-all" onClick="{{goLive}}">Tous les scores et classements <span aria-hidden="true">→</span></button>
+              </header>
               <sc-if value="{{hasScores}}" hint-placeholder-val="{{ true }}">
-                <div class="ac-res-grid">
+                <div class="rs-grid">
                   <sc-for list="{{dashScores}}" as="m" hint-placeholder-count="6">
-                    <button type="button" onClick="{{m.open}}" style="display: grid; grid-template-columns: 1fr auto; gap: .1rem .6rem; text-align: left; background: var(--surface-3); border: 1px solid var(--line); border-radius: 0; padding: .55rem .7rem; cursor: pointer; color: var(--text)">
-                      <span style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{m.home}}</span><span class="num" style="font-size: 17px; color: var(--ink)">{{m.hs}}</span>
-                      <span style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{m.away}}</span><span class="num" style="font-size: 17px; color: var(--ink)">{{m.as}}</span>
-                      <span class="cond" style="font-size: 11px; color: {{m.stColor}}">{{m.sport}} · {{m.statusLabel}}</span>
+                    <button type="button" class="rs-m" onClick="{{m.open}}">
+                      <span class="rs-meta">{{m.sport}} · {{m.statusLabel}}</span>
+                      <span class="rs-l {{m.homeWin}}"><span class="rs-n">{{m.homeN}}</span><span class="rs-s">{{m.hs}}</span></span>
+                      <span class="rs-l {{m.awayWin}}"><span class="rs-n">{{m.awayN}}</span><span class="rs-s">{{m.as}}</span></span>
                     </button>
                   </sc-for>
                 </div>
               </sc-if>
-              <sc-if value="{{noScores}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; color: var(--text-2); font-size: 14.5px">Les résultats du week-end arrivent ici dès les premiers coups de sifflet. En attendant, l’agenda et les classements sont sur <button type="button" class="lnk" onClick="{{goLive}}" style="font-size: 14.5px">Le Terrain</button>.</p></sc-if>
-            </div>
+              <sc-if value="{{noScores}}" hint-placeholder-val="{{ false }}"><p class="rs-vide">Les résultats du week-end arrivent ici dès les premiers coups de sifflet. En attendant, l’agenda et les classements sont sur <button type="button" class="lnk" onClick="{{goLive}}">Le Terrain</button>.</p></sc-if>
+            </section>
           </sc-if>
           <!-- Les deux portes d'entrée -->
           <sc-if value="{{hm.isPortes}}" hint-placeholder-val="{{ false }}">

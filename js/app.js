@@ -35,6 +35,21 @@ function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(lo
 
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
 const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
+// Nom d'équipe lisible : « AS ISIGNY LE BUAT 1 » → « AS Isigny le Buat 1 » (sigles gardés en capitales)
+const CB_SIGLES = /^(AS|US|CS|JS|FC|SC|HB|HBC|BC|RC|CL|AL|ES|SM|ASPTT|ENT|USM|AJ|AC|OC|UL|ASC|CA|ST|SU|AAJ|CHB|UST|VB|EC|SA|OM|PL|AG|ASL|USO|ESM|UC|SCO)$/;
+function cbNomEquipe(n) {
+  const s = String(n || '').trim();
+  if (!s || s !== s.toUpperCase()) return s;
+  let debut = true; // début de nom (après un sigle, « La Haye » garde sa majuscule)
+  return s.toLowerCase().replace(/[a-zà-ÿ0-9]+/g, (w) => {
+    const up = w.toUpperCase(), d = debut; debut = false;
+    if (up === 'ENT') return 'Ent.';
+    if (/\d/.test(w) || CB_SIGLES.test(up)) { debut = true; return up; }
+    if (!d && /^(le|la|les|de|du|des|en|et|sur|sous|aux|au)$/.test(w)) return w;
+    if (w.length === 1) return up;
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  });
+}
 const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
 // Logos des boutiques de clubs (images hébergées chez les clubs) : si l'un ne charge pas, l'initiale du club reste affichée
 if (typeof document !== 'undefined') document.addEventListener('error', (e) => { const t = e.target; if (t && t.classList && t.classList.contains('mc-img')) t.classList.add('mc-off'); }, true);
@@ -1456,6 +1471,7 @@ class Component extends DCLogic {
         progress: live ? Math.round(minute / (m.sport === 'Basketball' ? 40 : 90) * 100) + '%' : done ? '100%' : '0%',
         vLabel: m.verified ? 'Vérifié' : 'À confirmer', vColor: m.verified ? 'var(--success)' : 'var(--gold-text)',
         homeW: hasScore && m.hs > m.as ? '800' : '600', awayW: hasScore && m.as > m.hs ? '800' : '600',
+        homeN: cbNomEquipe(m.home), awayN: cbNomEquipe(m.away), homeWin: hasScore && +m.hs > +m.as ? 'is-win' : '', awayWin: hasScore && +m.as > +m.hs ? 'is-win' : '',
         open: () => this.setState({ matchId: m.id }),
         upcoming: m.status === 'up', opts: pronoOpts(m),
         rLabel: rem ? 'Rappel activé ✓' : 'Me le rappeler', rBg: rem ? 'var(--inv-bg)' : 'var(--surface)', rFg: rem ? 'var(--on-inv)' : 'var(--ink)',
