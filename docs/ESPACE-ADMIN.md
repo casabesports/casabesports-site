@@ -99,15 +99,31 @@ Dès l'installation, toutes les demandes du site arrivent ici : contact, OlistO,
 
 **Répondre** : tant que l'envoi direct n'est pas activé, le site vous propose « ouvrir dans ma messagerie » (votre Outlook, avec le texte déjà rempli) et garde une trace de la réponse.
 
-### Activer l'envoi direct depuis le site (facultatif, gratuit)
+### Activer l'envoi direct depuis le site (gratuit, 15 minutes)
 
-1. Créez un compte gratuit sur [brevo.com](https://www.brevo.com) (300 e-mails par jour).
-2. Brevo › **Senders, Domains & Dedicated IPs** › ajoutez et validez votre adresse d'envoi (ex. `contact@casabesports.fr`, ou votre adresse actuelle).
-3. Brevo › **SMTP & API** › **API keys** › **Generate a new API key**. Copiez-la (ne l'envoyez à personne, ne la collez pas dans le site).
-4. Supabase › **Edge Functions** › **Secrets** : ajoutez `BREVO_API_KEY` (la clé) et `EXPEDITEUR_EMAIL` (l'adresse validée).
-5. Supabase › **Edge Functions** › **Deploy a new function** › **Via Editor** : nom `envoyer-email`, collez le contenu de `supabase/functions/envoyer-email/index.ts`, **Deploy**.
+**A. Brevo (le service qui envoie les e-mails)**
 
-Le bouton **Envoyer** de la messagerie envoie alors l'e-mail directement.
+1. Créez un compte gratuit sur [brevo.com](https://www.brevo.com) (300 e-mails par jour) et remplissez le profil demandé (nom de l'entreprise, adresse).
+2. En haut à droite, votre nom › **Senders, Domains & Dedicated IPs** › onglet **Senders** › **Add sender**. Nom : `Casa Besports`, e-mail : `kader.allou.pro@outlook.fr`. Brevo envoie un code à 6 chiffres à cette adresse : recopiez-le.
+   (Plus tard, quand le domaine sera à vous, on passera à `contact@casabesports.fr`, mieux reçu par les boîtes.)
+3. Votre nom › **Security** › **Authorized IPs** : cliquez sur **Deactivate blocking**. Sinon Brevo refuse les envois venant de Supabase.
+4. Votre nom › **SMTP & API** › onglet **API keys** › **Generate a new API key**, nom `site`. Copiez la clé (elle commence par `xkeysib-`). Ne l'envoyez à personne, ne la collez pas dans le site ni dans une conversation.
+
+**B. Supabase (le serveur du site)**
+
+5. [supabase.com/dashboard](https://supabase.com/dashboard/project/kexofvitykxrjknnlyvf/functions/secrets) › votre projet › **Edge Functions** › **Secrets**. Ajoutez :
+   - `BREVO_API_KEY` = la clé copiée à l'étape 4
+   - `EXPEDITEUR_EMAIL` = `kader.allou.pro@outlook.fr`
+   - `EXPEDITEUR_NOM` = `Casa Besports`
+   puis **Save**.
+6. **Edge Functions** › **Deploy a new function** › **Via Editor**. Nom : `envoyer-email`. Effacez le code d'exemple, collez tout le contenu de [`supabase/functions/envoyer-email/index.ts`](https://github.com/casabesports/casabesports-site/blob/main/supabase/functions/envoyer-email/index.ts) (bouton « Copy raw file » sur GitHub), puis **Deploy**. Laissez « Verify JWT » activé.
+
+**C. Essai**
+
+7. Sur le site, Admin › Messagerie › Nouveau message, envoyez-vous un e-mail. « Message envoyé » = c'est bon.
+   Si ça échoue, le site affiche maintenant la raison exacte (clé manquante, expéditeur non validé, adresse IP bloquée…).
+
+Les mêmes secrets servent aussi aux e-mails de bienvenue des abonnés (Stripe, voir docs/PAIEMENTS.md).
 
 ### Recevoir les e-mails des adresses que vous ajoutez
 
