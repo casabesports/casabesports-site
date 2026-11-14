@@ -67,6 +67,8 @@
       '#cbar .cbar-keys div{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.5rem .6rem;font-size:13.5px;line-height:1.35}' +
       '#cbar .cbar-keys b{display:block;font:700 11px "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#9fb3c8;margin-bottom:.15rem}' +
       '#cbar .cbar-sheet a{color:#e8a830}' +
+      '#cbar.cbar-full .cbar-top,#cbar.cbar-full .cbar-panel{display:none}' +
+      '#cbar.cbar-full .cbar-stage{padding:env(safe-area-inset-top,0px) 0 0}' +
       '@media (prefers-reduced-motion:reduce){#cbar *{animation:none!important;transition:none!important}}';
     document.head.appendChild(el('style', { id: 'cbar-css' }, css));
   }
@@ -225,9 +227,29 @@
   // usure de l'herbe : zones de but et rond central plus clairs
   function wear(g, pts, k) { pts.forEach(function (p) { var gr = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], p[2]); gr.addColorStop(0, 'rgba(160,140,80,.28)'); gr.addColorStop(1, 'rgba(160,140,80,0)'); g.fillStyle = gr; g.fillRect(p[0] - p[2], p[1] - p[2], p[2] * 2, p[2] * 2); }); }
 
+  // mode caméra : on ne garde que les lignes blanches/colorées du terrain (pas de pelouse, de parquet ni d'eau),
+  // avec un léger contour sombre pour rester lisibles sur une table ou un sol clair
+  function rgbaOf(s) {
+    if (typeof s !== 'string') return null;
+    if (s[0] === '#') { var n = parseInt(s.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255, 1]; }
+    var m = s.match(/rgba?\(([^)]+)\)/); if (!m) return null; var q = m[1].split(',').map(parseFloat); return [q[0], q[1], q[2], q[3] == null ? 1 : q[3]];
+  }
+  function linesOnly(g) {
+    function white(st) { var c = rgbaOf(st); return c && c[3] >= 0.6 && Math.min(c[0], c[1], c[2]) >= 200; }
+    function inked(st) { var c = rgbaOf(st); return c && c[3] >= 0.5; }
+    function halo(fn) { return function () { g.save(); g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 5; g.lineWidth *= 1.7; var r = fn.apply(g, arguments); g.restore(); return r; }; }
+    var fill = halo(g.fill), fillRect = halo(g.fillRect), fillText = halo(g.fillText), stroke = halo(g.stroke), strokeRect = halo(g.strokeRect);
+    g.fill = function () { if (white(g.fillStyle)) fill.apply(g, arguments); };
+    g.fillRect = function () { if (white(g.fillStyle)) fillRect.apply(g, arguments); };
+    g.fillText = function () { if (white(g.fillStyle)) fillText.apply(g, arguments); };
+    g.stroke = function () { if (inked(g.strokeStyle)) stroke.apply(g, arguments); };
+    g.strokeRect = function () { if (inked(g.strokeStyle)) strokeRect.apply(g, arguments); };
+    g.drawImage = g.putImageData = function () {};
+  }
   function surfaceCanvas(sp, opt) {
     var Wm = sp.wid + 2 * sp.mg, Hm = sp.len + 2 * sp.mg, k = Math.min(1800 / Hm, 1200 / Wm, 60);
     var c = document.createElement('canvas'); c.width = Math.round(Wm * k); c.height = Math.round(Hm * k); var g = c.getContext('2d'); var w = c.width, h = c.height;
+    if (opt && opt.linesOnly) linesOnly(g);
     var W = sp.wid, L = sp.len, id = sp.id;
     function M() { g.setTransform(k, 0, 0, k, sp.mg * k, sp.mg * k); }
     function P() { g.setTransform(1, 0, 0, 1, 0, 0); }
@@ -333,6 +355,8 @@
       line(0.05, '#c8282e'); circ(W / 2, 4, 1.8, 0, Math.PI); circ(W / 2, L - 4, 1.8, Math.PI, 2 * Math.PI);
       g.restore(); P(); noise(g, w, h, 8, 14);
     }
+    // mode caméra : les limites du terrain sont toujours tracées (bassin de water-polo, piste de roller…)
+    if (opt && opt.linesOnly && id !== 'athle' && id !== 'tennis') { M(); line(0.1, 'rgba(250,250,245,.95)'); roundRect(g, 0, 0, W, L, id === 'roller' ? 3 : 0.01); g.stroke(); }
     g.setTransform(1, 0, 0, 1, 0, 0);
     return { canvas: c, Wm: Wm, Hm: Hm };
   }
@@ -1057,7 +1081,7 @@
 
     var world = new THREE.Group(); S.root.add(world);
     var env = Env(S, K); S.env = env; var geo = Geo(S, K, world);
-    var W, H, u = 100, catcher = null, stad = null, tokens = [], ball = null, place = null, token = 0, dioOn = false, y0u = 0;
+    var W, H, u = 100, catcher = null, lines = null, stad = null, tokens = [], ball = null, place = null, token = 0, dioOn = false, y0u = 0;
     var placeChip = el('div', { class: 'cbar-place' }, ''), attr = el('div', { class: 'cbar-attr' }, ''); stage.appendChild(placeChip); stage.appendChild(attr);
     function fitOf() { return sp().fit || 0.94; }
     function toPos(pct) { var f = fitOf(); return new THREE.Vector3((pct[0] / 100 - 0.5) * W * f, y0u, (pct[1] / 100 - 0.5) * H * f); }
@@ -1082,7 +1106,13 @@
       // en mode caméra, l'image réelle (table, sol) devient la plateforme : une ombre douce y pose le terrain
       if (catcher) { world.remove(catcher); dispose(catcher); }
       catcher = new THREE.Mesh(new THREE.PlaneGeometry(stad.extent * 2.4, stad.extent * 2.4), new THREE.ShadowMaterial({ opacity: 0.4, depthWrite: false }));
-      catcher.rotation.x = -Math.PI / 2; catcher.position.y = 0.005; catcher.receiveShadow = true; catcher.visible = dioOn; world.add(catcher);
+      catcher.rotation.x = -Math.PI / 2; catcher.position.y = stad.y0 + 0.005; catcher.receiveShadow = true; catcher.visible = dioOn; world.add(catcher);
+      // en mode caméra, seules les lignes du terrain restent : la pelouse, les tribunes et les projecteurs disparaissent
+      if (lines) { world.remove(lines); dispose(lines); }
+      var lc = surfaceCanvas(cur, { surface: L.surface, linesOnly: true });
+      lines = new THREE.Mesh(new THREE.PlaneGeometry(lc.Wm, lc.Hm), new THREE.MeshBasicMaterial({ map: K.tex(lc.canvas), transparent: true, depthWrite: false, toneMapped: false }));
+      lines.rotation.x = -Math.PI / 2; lines.position.y = stad.y0 + 0.03; lines.renderOrder = 1; lines.visible = dioOn; world.add(lines);
+      stad.group.visible = !dioOn;
       env.setExtent(stad.extent / u);
       S.view.dist = cur.kind === 'stade' ? 1.55 : cur.kind === 'tennis' ? 1.6 : 1.85; S.placeCam();
       ambience();
@@ -1093,6 +1123,7 @@
       resolvePlace(spec, b).then(function (P) { if (my !== token) return; place = P; buildField(); build(); loadMap(); });
     }
     function build() {
+      if (sim) { sim = null; setSimBtn(); }
       tokens.forEach(function (t) { S.root.remove(t.g); dispose(t.g); }); tokens = [];
       var x = sp(), kit = KITS[L.kit], F = (L.pos[x.id] && L.pos[x.id].length === x.forms[form()].length) ? L.pos[x.id] : x.forms[form()], N = names(), C = cap(), hs = hScale();
       F.forEach(function (pct, i) {
@@ -1114,7 +1145,7 @@
     buildField(); build(); locate();
     var ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), drag = null;
     function ndc(e) { var r = stage.getBoundingClientRect(); return new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); }
-    function pick(e) { ray.setFromCamera(ndc(e), S.camera); var hits = ray.intersectObjects(tokens.map(function (t) { return t.g; }), true); if (!hits.length) return null; var o = hits[0].object; while (o && o.userData.index == null) o = o.parent; return o; }
+    function pick(e) { if (sim) return null; ray.setFromCamera(ndc(e), S.camera); var hits = ray.intersectObjects(tokens.map(function (t) { return t.g; }), true); if (!hits.length) return null; var o = hits[0].object; while (o && o.userData.index == null) o = o.parent; return o; }
     stage.addEventListener('pointerdown', function (e) { var o = pick(e); if (o) { drag = o; stage.setPointerCapture(e.pointerId); setHint(o.userData.index === 'ball' ? 'Déplacez ' + (BALLS[sp().ball] || {}).label.toLowerCase() : 'Déplacez ' + names()[o.userData.index]); } });
     stage.addEventListener('pointermove', function (e) {
       if (!drag) return; plane.constant = -y0u * S.root.scale.y - S.root.position.y; ray.setFromCamera(ndc(e), S.camera); var p = new THREE.Vector3(); if (!ray.ray.intersectPlane(plane, p)) return; S.root.worldToLocal(p);
@@ -1131,9 +1162,124 @@
     orbitControls(S, stage, function (e) { return !!pick(e); });
     S.tick = function (t) {
       env.tick(); if (stad) stad.ticks.forEach(function (f) { f(t); });
+      if (sim) { simTick(performance.now()); return; }
       if (bounceT) { var k = (performance.now() - bounceT.t0) / 700; if (k > 1) { bounceT.g.position.y = y0u; bounceT = null; } else bounceT.g.position.y = y0u + Math.abs(Math.sin(k * Math.PI * 2.5)) * (1 - k) * 0.03; }
     };
-    S.onCamera = function (on) { dioOn = on; geo.group.visible = !on; env.setDiorama(on); if (catcher) catcher.visible = on; placeChip.style.display = attr.style.display = on ? 'none' : ''; setHint(on ? 'Le terrain est posé sur ce que filme votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); };
+    S.onCamera = function (on) { dioOn = on; geo.group.visible = !on; env.setDiorama(on); if (catcher) catcher.visible = on; if (stad) stad.group.visible = !on; if (lines) lines.visible = on; placeChip.style.display = attr.style.display = on ? 'none' : ''; setHint(on ? 'Joueurs, ballon et lignes du terrain posés sur l’image de votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); };
+    /* ----- Simulation de jeu : joueurs et ballon se déplacent selon le système de jeu choisi ----- */
+    // Positions en % comme les systèmes (y = 0 : en-but / but adverse, en haut). Chaque étape = une phase de jeu.
+    function simSteps(x, F, f) {
+      var id = x.id, n = F.length, N = names(), bp = fromPos(ball.position);
+      function cl(v, a, b) { return Math.max(a, Math.min(b, v)); }
+      function S(label, pos, b, o) { return Object.assign({ label: label, pos: pos.map(function (p) { return p.slice(); }), ball: b ? b.slice() : bp }, o || {}); }
+      function at(p, dy) { return [p[0], p[1] + (dy == null ? -1.5 : dy)]; } // ballon au pied, juste devant le joueur
+      function cp(P) { return P.map(function (p) { return p.slice(); }); }
+      var G = { football: { push: [-8, -18, -28], minY: 9, goal: -4, box: 12 }, hand: { push: [-10, -22, -34], minY: 20, goal: -3, box: 18 },
+        waterpolo: { push: [-10, -22, -34], minY: 10, goal: -3, box: 12 }, roller: { push: [-10, -22, -32], minY: 12, goal: 6, box: 14 },
+        basket: { push: [-18, -34, -48], minY: 8, goal: 3, box: 14 } }[id];
+      if (G) {
+        var gk = x.gk, out = [], i; for (i = 0; i < n; i++) if (i !== gk) out.push(i);
+        var byY = out.slice().sort(function (a, b) { return F[b][1] - F[a][1]; }), t = Math.max(1, Math.round(byY.length / 3));
+        var central = function (l) { return l.slice().sort(function (a, b) { return Math.abs(F[a][0] - 50) - Math.abs(F[b][0] - 50); })[0]; };
+        var wide = function (l) { return l.slice().sort(function (a, b) { return Math.abs(F[b][0] - 50) - Math.abs(F[a][0] - 50); })[0]; };
+        var deep = byY.slice(0, t), front = byY.slice(byY.length - t), mid = byY.slice(t, byY.length - t); if (!mid.length) mid = deep;
+        var p0 = gk >= 0 ? gk : central(deep), p1 = central(deep.filter(function (j) { return j !== p0; })); if (p1 == null) p1 = central(mid);
+        var p2 = central(mid.filter(function (j) { return j !== p1; })); if (p2 == null) p2 = central(mid);
+        var p3 = wide(front.concat(mid).filter(function (j) { return j !== p2; })), p4 = central(front.filter(function (j) { return j !== p3; })); if (p4 == null) p4 = central(mid.filter(function (j) { return j !== p3; })) ; if (p4 == null) p4 = p3;
+        var shift = function (dy, spread, extra) { return F.map(function (p, j) { if (j === gk) return [p[0], cl(p[1] + dy * 0.12, 82, 99)]; var q = [cl(50 + (p[0] - 50) * spread, 3, 97), cl(p[1] + dy, G.minY, 98)]; if (extra && extra[j]) { q[0] = cl(q[0] + extra[j][0], 3, 97); q[1] = cl(q[1] + extra[j][1], G.minY - 8, 98); } return q; }); };
+        var s1 = shift(G.push[0], 1.05), s2 = shift(G.push[1], 1.1), ex = {}; ex[p3] = [F[p3][0] < 50 ? -8 : 8, -10]; var s3 = shift(G.push[2], 1.15, ex);
+        var s4 = cp(s3); s4[p4] = [cl(50 + (F[p4][0] - 50) * 0.35, 32, 68), G.goal + G.box];
+        var back = F.map(function (p, j) { return j === gk ? p.slice() : [50 + (p[0] - 50) * 0.8, cl(p[1] + 4, 0, 98)]; });
+        var goalTxt = id === 'basket' ? 'Panier !' : 'But !';
+        return [
+          S(gk >= 0 ? 'Relance du gardien' : 'Remise en jeu', F, at(F[p0], -2.5)),
+          S('Construction : ' + N[p1] + ' reçoit', s1, at(s1[p1]), { lob: id === 'basket' ? 0 : 0.3 }),
+          S('Le bloc monte · ' + N[p2] + ' oriente le jeu', s2, at(s2[p2])),
+          S('Débordement de ' + N[p3], s3, at(s3[p3]), { lob: 0.4 }),
+          S('Passe décisive pour ' + N[p4], s4, at(s4[p4]), { lob: id === 'football' ? 1 : 0.5 }),
+          S(goalTxt + ' ' + N[p4] + ' conclut', s4, [50, G.goal], { dur: 2200, lob: id === 'basket' ? 1.4 : 0.2 }),
+          S('Repli défensif, le bloc se resserre', back, [50, 48], { dur: 2000 })
+        ];
+      }
+      if (id === 'rugby' && n === 15) {
+        var mv = function (dF, dB, over) { return F.map(function (p, j) { return over && over[j] ? over[j] : [p[0], cl(p[1] + (j < 8 ? dF : dB), -4, 98)]; }); };
+        var r1 = mv(-2, -3), r2 = mv(-4, -8), r3 = mv(-6, -15), r4 = mv(-8, -24), r5 = mv(-10, -28, { 13: [92, -3] });
+        return [
+          S('Mêlée : le ballon est introduit', F, [50, 61]),
+          S(N[8] + ' (demi de mêlée) sort le ballon', r1, at(r1[8], 1)),
+          S('Passe vers l’arrière à ' + N[9] + ' (ouvreur)', r2, at(r2[9], 1), { lob: 0.3 }),
+          S('Passe à ' + N[11] + ' (centre)', r3, at(r3[11], 1), { lob: 0.3 }),
+          S('Passe à ' + N[12] + ', la ligne attaque', r4, at(r4[12], 1), { lob: 0.3 }),
+          S(N[13] + ' (ailier) file à l’essai', r5, at(r5[13], 1), { lob: 0.3, dur: 2200 }),
+          S('Replacement', F, [50, 61], { dur: 2000 })
+        ];
+      }
+      if (id === 'volley' && n === 6) {
+        var v1 = cp(F); v1[0] = [62, 54];
+        var v2 = cp(v1); v2[1] = [80, 62];
+        var v3 = cp(v2); v3[1] = [78, 53]; v3[2] = [55, 56];
+        return [
+          S('Service adverse', F, [50, 3]),
+          S(N[5] + ' (libéro) réceptionne · ' + N[0] + ' file au filet', v1, at(F[5], -3), { lob: 1.2 }),
+          S('Passe haute de ' + N[0], v2, [62, 52], { lob: 1.2 }),
+          S('Attaque de ' + N[1] + ' (pointu)', v3, [78, 51], { lob: 1.4 }),
+          S('Point !', v3, [28, 18], { dur: 1800 }),
+          S('Replacement', F, [50, 3], { dur: 1800 })
+        ];
+      }
+      if (id === 'tennis') {
+        var duo = n > 1, pl = function (x0, y0, bx) { var P = [[x0, y0]]; if (duo) P.push([cl(bx, 32, 68), 63]); return P; };
+        return [
+          S('Service de ' + N[0], pl(F[0][0], F[0][1], 60), [F[0][0] + 2, F[0][1] - 1]),
+          S('Service croisé', pl(50, 86, 40), [36, 24], { lob: 0.5 }),
+          S('Retour adverse', pl(32, 84, 34), [33, 81], { lob: 0.5 }),
+          S('Coup droit croisé', pl(50, 86, 66), [68, 22], { lob: 0.5 }),
+          S('Retour adverse', pl(68, 84, 66), [67, 81], { lob: 0.5 }),
+          S('Revers le long de la ligne : point gagnant', pl(50, 86, 70), [76, 20], { lob: 0.4, dur: 2000 })
+        ];
+      }
+      if (id === 'athle' && f === 'Relais 4×100') {
+        var leg = function (k, d) { return athPct(trackXZ(4, k * 100 + d)); }, out2 = [S('À vos marques', [0, 1, 2, 3].map(function (k) { return leg(k, 0); }), null, { dur: 1200 })];
+        for (var r = 0; r < 4; r++) for (var j = 1; j <= 5; j++) out2.push(S(N[r] + ' · ' + (r === 0 ? '1er' : (r + 1) + 'e') + ' relais' + (j === 5 && r < 3 ? ' : passage du témoin' : ''),
+          [0, 1, 2, 3].map(function (k) { return k < r ? leg(k, 100) : k === r ? leg(k, j * 20) : leg(k, 0); }), null, { dur: 700, lin: true, still: 0 }));
+        out2[out2.length - 1].label = 'Arrivée !'; out2[out2.length - 1].still = 0.6; out2[out2.length - 1].dur = 2200;
+        return out2;
+      }
+      if (id === 'athle') {
+        var fin = athPct([0, -TR.S / 2])[1], sp100 = function (k) { return F.map(function (p, j) { var v = 1 - ((j * 37) % 8) * 0.012; return [p[0], p[1] + (fin - p[1]) * Math.min(1, k * v)]; }); };
+        return [
+          S('À vos marques… Prêts…', F, null, { dur: 1500 }),
+          S('Partez !', sp100(0.35), null, { lin: true, still: 0, dur: 1100 }),
+          S('Mi-course', sp100(0.7), null, { lin: true, still: 0, dur: 1100 }),
+          S('Arrivée !', sp100(1), null, { lin: true, still: 0.5, dur: 1900 }),
+          S('Retour aux blocs', F, null, { dur: 1600 })
+        ];
+      }
+      return null;
+    }
+    var sim = null, simBtn = el('button', { type: 'button', class: 'cbar-btn', onclick: function () { if (sim) stopSim(); else startSim(); } }, '▶ Simuler le jeu');
+    function setSimBtn() { simBtn.innerHTML = sim ? '■ Arrêter' : '▶ Simuler le jeu'; simBtn.setAttribute('aria-pressed', String(!!sim)); }
+    function startSim() {
+      var x = sp(), F = (L.pos[x.id] && L.pos[x.id].length === x.forms[form()].length) ? L.pos[x.id] : x.forms[form()];
+      var steps = simSteps(x, F, form()); if (!steps || steps.length < 2 || !tokens.length) { toast('Simulation indisponible pour cette discipline'); return; }
+      drag = null; bounceT = null; sim = { steps: steps, i: 0, t0: performance.now() }; setSimBtn(); setHint(steps[1].label);
+    }
+    function stopSim() { if (!sim) return; sim = null; setSimBtn(); build(); setHint(dioOn ? 'Joueurs, ballon et lignes du terrain posés sur l’image de votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); }
+    function angTo(a, b, k) { var d = Math.atan2(Math.sin(b - a), Math.cos(b - a)); return a + d * k; }
+    function simTick(now) {
+      var s = sim, n = s.steps.length, k = (now - s.t0) / (s.steps[(s.i + 1) % n].dur || 1600);
+      if (k >= 1) { s.i = (s.i + 1) % n; s.t0 = now; k = 0; setHint(s.steps[(s.i + 1) % n].label); }
+      var A = s.steps[s.i], B = s.steps[(s.i + 1) % n], still = B.still == null ? 0.3 : B.still, m = Math.min(1, k / (1 - still || 1));
+      var e = B.lin ? m : m * m * (3 - 2 * m), moving = m < 1, hs = hScale();
+      tokens.forEach(function (tk, i) {
+        var g = tk.g; if (g === ball || !A.pos[i] || !B.pos[i]) return;
+        var a = toPos(A.pos[i]), b = toPos(B.pos[i]), dx = b.x - a.x, dz = b.z - a.z, run = moving && Math.hypot(dx, dz) > 0.004;
+        g.position.lerpVectors(a, b, e); g.position.y = y0u + (run ? Math.abs(Math.sin(now / 85)) * hs * 0.12 : 0);
+        g.rotation.y = angTo(g.rotation.y, run ? Math.atan2(-dx, -dz) : 0, 0.18);
+      });
+      if (ball) { var ba = toPos(A.ball), bb = toPos(B.ball), d = ba.distanceTo(bb); ball.position.lerpVectors(ba, bb, e); ball.position.y = y0u + Math.sin(Math.PI * Math.min(1, e)) * Math.min(0.08, d * 0.12) * (B.lob == null ? 0.15 : B.lob) * (moving ? 1 : 0); }
+    }
+    S.stageButtons = [simBtn];
     function sel(label, opts, cur0, fn) { var s = el('select', { 'aria-label': label, title: label }); opts.forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (String(o[0]) === String(cur0)) op.selected = true; s.appendChild(op); }); s.onchange = function () { fn(s.value); }; return s; }
     function compoText(sep) { var x = sp(), N = names(), C = cap(); return L.team + ' · ' + x.label + ' (' + form() + ')' + sep + N.map(function (n, i) { return (sep === '\n' ? (i + 1) + '. ' : '') + n + (i === C ? ' (C)' : ''); }).join(sep === '\n' ? '\n' : ', '); }
     function setView(p, d, y) { S.view.pitch = p; S.view.dist = d; if (y != null) S.view.yaw = y; S.placeCam(); }
@@ -1360,13 +1506,27 @@
     st.S = S; loop(S);
     setHint(mode === 'lineup' ? 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer' : 'Faites glisser pour tourner autour');
     // barre de modes : caméra / 3D / AR
-    var modes = el('div', { class: 'cbar-row', style: 'position:absolute;left:12px;top:56px;z-index:3' });
+    var modes = el('div', { class: 'cbar-row', style: 'position:absolute;left:12px;right:12px;top:56px;z-index:3' });
     var bCam = btn('Caméra', function () {
       if (st.video) { st.stream.getTracks().forEach(function (t) { t.stop(); }); st.video.remove(); st.video = null; st.stream = null; if (st.stopGyro) st.stopGyro(); st.stopGyro = null; bCam.setAttribute('aria-pressed', 'false'); if (S.onCamera) S.onCamera(false); return; }
       var perm = askMotion();
       startCamera(stage, 'environment').then(function () { bCam.setAttribute('aria-pressed', 'true'); if (S.onCamera) S.onCamera(true); st.stopGyro = gyro(S, perm); setHint('Le terrain est posé sur ce que filme votre caméra · inclinez le téléphone'); }).catch(function (err) { notice(stage, cameraMessage(err)); });
     });
-    bCam.setAttribute('aria-pressed', 'false'); modes.appendChild(bCam); stage.appendChild(modes);
+    bCam.setAttribute('aria-pressed', 'false'); modes.appendChild(bCam);
+    (S.stageButtons || []).forEach(function (b) { modes.appendChild(b); });
+    // plein écran : on masque les barres et la scène prend tout l'écran (l'iPhone n'a pas le vrai plein écran du navigateur)
+    var bFull = btn('⛶ Plein écran', function () { setFull(!root.classList.contains('cbar-full')); });
+    function setFull(on) {
+      root.classList.toggle('cbar-full', on); bFull.innerHTML = on ? '✕ Quitter le plein écran' : '⛶ Plein écran'; bFull.setAttribute('aria-pressed', String(on));
+      try {
+        if (on && !document.fullscreenElement && !document.webkitFullscreenElement) { var rq = root.requestFullscreen || root.webkitRequestFullscreen; if (rq) { var pr = rq.call(root); if (pr && pr.catch) pr.catch(function () {}); } }
+        if (!on && (document.fullscreenElement || document.webkitFullscreenElement)) { var ex = document.exitFullscreen || document.webkitExitFullscreen; if (ex) { var pe = ex.call(document); if (pe && pe.catch) pe.catch(function () {}); } }
+      } catch (e) {}
+      requestAnimationFrame(function () { S.resize(); setTimeout(S.resize, 300); });
+    }
+    function fsSync() { if (!document.fullscreenElement && !document.webkitFullscreenElement && root.classList.contains('cbar-full') && st && st.root === root) setFull(false); }
+    document.addEventListener('fullscreenchange', fsSync); document.addEventListener('webkitfullscreenchange', fsSync);
+    modes.appendChild(bFull); stage.appendChild(modes);
     tryWebXR(S, stage, setHint);
   }
   window.CasaAR = { open: open, close: close, available: function () { return !!window.THREE; }, diorama: function (on) { if (st && st.S && st.S.onCamera) st.S.onCamera(!!on); } };
