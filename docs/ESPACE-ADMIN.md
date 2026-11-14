@@ -116,3 +116,8 @@ Sur le site, bouton « ✎ Retoucher », cliquez sur une grande image (par exemp
 Conseils : fichier .mp4, moins de 15 secondes, 1080p au plus, 50 Mo maximum (idéalement moins de 10 Mo pour un chargement rapide).
 
 À faire une seule fois avant le premier envoi : Supabase › SQL Editor › New query, collez le contenu de `supabase/videos.sql`, puis « Run ». Sans cette étape, le stockage refuse les vidéos. Vous pouvez aussi coller l’adresse d’une vidéo .mp4 déjà en ligne.
+
+## Accueil épuré et couleurs des fonds
+
+- **Accueil** : 5 blocs essentiels s'affichent pour tout le monde (grand bandeau à la une, résultats du week-end, portes « passionné » / « pro », Casa × Cherwood, Gazette du mois). Les autres rubriques (actus, vidéos, météo, Club House, culture…) sont proposées aux abonnés connectés dans **Personnaliser mon accueil** : sports et clubs favoris (ils passent en tête du bandeau, des résultats et des actus), rubriques à afficher et leur ordre, disposition, arrière-plan. Ces choix sont gardés dans le compte de l'abonné (Supabase, aucune table à créer) et le suivent sur tous ses appareils.
+- **Couleurs des fonds** (Contenus du site › Fonds de page) : photos de fond en noir et blanc ou en couleur, couleur de fond pour tout le site, et couleur propre à une page. Chaque abonné peut aussi choisir sa couleur dans Personnaliser mon accueil ou Mon espace › Apparence. Par défaut : noir et blanc, sans teinte.
