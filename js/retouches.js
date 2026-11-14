@@ -10,8 +10,8 @@
   var norm = function (s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); };
   var normSrc = function (s) { return String(s || '').trim().replace(/^\.\//, '').replace(/^\//, ''); };
   var clone = function (v) { return JSON.parse(JSON.stringify(v == null ? null : v)); };
-  var blank = function () { return { textes: [], images: [], places: [] }; };
-  var fix = function (R) { R = R && typeof R === 'object' ? R : {}; return { textes: Array.isArray(R.textes) ? R.textes : [], images: Array.isArray(R.images) ? R.images : [], places: Array.isArray(R.places) ? R.places : [] }; };
+  var blank = function () { return { textes: [], images: [], places: [], polices: [] }; };
+  var fix = function (R) { R = R && typeof R === 'object' ? R : {}; return { textes: Array.isArray(R.textes) ? R.textes : [], images: Array.isArray(R.images) ? R.images : [], places: Array.isArray(R.places) ? R.places : [], polices: Array.isArray(R.polices) ? R.polices : [] }; };
   function view() { try { return (window.CasaSite && window.CasaSite.state && window.CasaSite.state.view) || 'home'; } catch (e) { return 'home'; } }
   function pg(p) { p = norm(p); return !p || p === '*' || p === 'toutes' ? '*' : p; }
 
@@ -187,8 +187,32 @@
     });
     moved = moved.filter(function (el) { if (keep.indexOf(el) >= 0 || el === dragEl) return true; unplace(el); return false; });
   }
+  // ---------- Polices : police, graisse, italique, capitales et taille d'un élément (mêmes réglages sur ordinateur et téléphone) ----------
+  var POLICES = [['', 'Police d’origine'], ['League Spartan', 'League Spartan (titres de la marque)'], ['Cormorant Garamond', 'Cormorant Garamond (élégante)'], ['Mulish', 'Mulish (texte courant)'], ['Barlow Condensed', 'Barlow Condensed (étroite)'], ['Archivo Black', 'Archivo Black (très grasse)'], ['Source Serif 4', 'Source Serif (journal)'], ['Cinzel', 'Cinzel (capitales classiques)'], ['Caveat', 'Caveat (manuscrite)']];
+  var SECOURS = { 'League Spartan': "'Arial Black', sans-serif", 'Cormorant Garamond': 'Georgia, serif', 'Mulish': 'system-ui, sans-serif', 'Barlow Condensed': "'Arial Narrow', sans-serif", 'Archivo Black': "'Arial Black', sans-serif", 'Source Serif 4': 'Georgia, serif', 'Cinzel': 'Georgia, serif', 'Caveat': 'cursive' };
+  var styled = [];
+  function styleEl(el, f) {
+    if (!el.__rtFo) el.__rtFo = { ff: el.style.fontFamily, fw: el.style.fontWeight, fs: el.style.fontStyle, tt: el.style.textTransform, sz: el.style.fontSize, ls: el.style.letterSpacing, base: parseFloat(getComputedStyle(el).fontSize) || 16 };
+    var O = el.__rtFo;
+    el.style.fontFamily = f.police ? "'" + f.police + "', " + (SECOURS[f.police] || 'sans-serif') : O.ff;
+    el.style.fontWeight = f.graisse ? String(f.graisse) : O.fw;
+    el.style.fontStyle = f.italique === true ? 'italic' : f.italique === false ? 'normal' : O.fs;
+    el.style.textTransform = f.casse === 'maj' ? 'uppercase' : f.casse === 'normal' ? 'none' : O.tt;
+    el.style.letterSpacing = f.casse ? (f.casse === 'maj' ? '.01em' : 'normal') : O.ls;
+    el.style.fontSize = f.taille && Number(f.taille) !== 100 ? (O.base * Number(f.taille) / 100) + 'px' : O.sz;
+    if (styled.indexOf(el) < 0) styled.push(el);
+  }
+  function unstyle(el) { var O = el.__rtFo; if (!O) return; el.style.fontFamily = O.ff; el.style.fontWeight = O.fw; el.style.fontStyle = O.fs; el.style.textTransform = O.tt; el.style.fontSize = O.sz; el.style.letterSpacing = O.ls; el.__rtFo = null; }
+  function applyFonts() {
+    var R = fix(window.CASA_RETOUCHES), v = view(), keep = [];
+    R.polices.forEach(function (r) {
+      if (!r || !r.chemin || pg(r.page) !== v && pg(r.page) !== '*') return;
+      var el = findPlace(r); if (!el) return; styleEl(el, r); keep.push(el);
+    });
+    styled = styled.filter(function (el) { if (keep.indexOf(el) >= 0) return true; unstyle(el); return false; });
+  }
   var dragEl = null;
-  function refresh() { busy = true; try { restore(); compile(); walk(document.body); applyPlaces(); } finally { busy = false; } }
+  function refresh() { busy = true; try { restore(); compile(); walk(document.body); applyPlaces(); applyFonts(); } finally { busy = false; } }
   var lastView = null;
   function onMut(muts) {
     if (busy) return; busy = true;
@@ -199,7 +223,7 @@
         else if (m.type === 'attributes') { if (m.target.tagName === 'IMG') doImg(m.target); }
         else for (var j = 0; j < m.addedNodes.length; j++) walk(m.addedNodes[j]);
       }
-      if (muts.some(function (m) { return m.type === 'childList' && !inUi(m.target); })) applyPlaces();
+      if (muts.some(function (m) { return m.type === 'childList' && !inUi(m.target); })) { applyPlaces(); applyFonts(); }
     } finally { busy = false; }
   }
   function start() {
@@ -209,7 +233,7 @@
     // contenus publiés en ligne (chargés après coup) ou changement de page : on réapplique
     setInterval(function () {
       var v = view();
-      if (window.CASA_RETOUCHES !== src || v !== lastView) { src = window.CASA_RETOUCHES; lastView = v; refresh(); } else applyPlaces();
+      if (window.CASA_RETOUCHES !== src || v !== lastView) { src = window.CASA_RETOUCHES; lastView = v; refresh(); } else { applyPlaces(); applyFonts(); }
       ui();
     }, 700);
   }
@@ -275,7 +299,7 @@
       PUB = clone(fix(W)); window.CASA_RETOUCHES = clone(PUB); try { localStorage.removeItem(DKEY); } catch (e) {} renderBar(); say('Retouches publiées : visibles par tous les visiteurs');
     }, function (e) { btn.disabled = false; btn.textContent = 'Publier'; say('Publication impossible : ' + ((e && e.message) || 'erreur')); });
   }
-  function count() { var a = fix(W), b = fix(PUB), n = 0; ['textes', 'images', 'places'].forEach(function (k) { var s = {}; b[k].forEach(function (r) { s[JSON.stringify(r)] = 1; }); a[k].forEach(function (r) { if (!s[JSON.stringify(r)]) n++; }); n += Math.max(0, b[k].length - a[k].length); }); return n; }
+  function count() { var a = fix(W), b = fix(PUB), n = 0; ['textes', 'images', 'places', 'polices'].forEach(function (k) { var s = {}; b[k].forEach(function (r) { s[JSON.stringify(r)] = 1; }); a[k].forEach(function (r) { if (!s[JSON.stringify(r)]) n++; }); n += Math.max(0, b[k].length - a[k].length); }); return n; }
   function renderBar() {
     if (bar) { bar.remove(); bar = null; }
     if (!W || (!on && saved())) return;
@@ -386,17 +410,44 @@
       startDrag(cur.el, get, set, stopDrag); dragBtn.textContent = '✓ Terminer le déplacement'; dragBtn.classList.remove('pri');
       if (panel) panel.classList.add('rt-ghost'); say('Faites glisser n’importe où sur la page : l’élément suit. « Terminer » quand c’est bien.');
     });
-    var pick = function () { endDrag(); cur = opts[Number(sel.value) || 0]; mark(cur.el); var p = get(); set(p[0], p[1], false); };
+    // ---- police de l'élément choisi ----
+    var fIdx = function () { var k = keyOf(); for (var i = 0; i < W.polices.length; i++) { var r = W.polices[i]; if (r.chemin === k.chemin && pg(r.page) === v) return i; } return -1; };
+    var fpol = E('select', { class: 'rt-in' }, POLICES.map(function (o) { return E('option', { value: o[0], text: o[1], style: o[0] ? 'font-family:\'' + o[0] + '\'' : null }); }));
+    var fgr = E('select', { class: 'rt-in' }, [['', 'Graisse d’origine'], ['400', 'Normale'], ['500', 'Moyenne'], ['600', 'Demi-grasse'], ['700', 'Grasse'], ['800', 'Très grasse']].map(function (o) { return E('option', { value: o[0], text: o[1] }); }));
+    var fit = E('select', { class: 'rt-in' }, [['', 'Style d’origine'], ['oui', 'Italique'], ['non', 'Droit']].map(function (o) { return E('option', { value: o[0], text: o[1] }); }));
+    var fca = E('select', { class: 'rt-in' }, [['', 'Casse d’origine'], ['maj', 'TOUT EN CAPITALES'], ['normal', 'Minuscules normales']].map(function (o) { return E('option', { value: o[0], text: o[1] }); }));
+    var fsz = E('input', { type: 'range', min: '50', max: '200', step: '5', value: '100', 'aria-label': 'Taille du texte' });
+    var fszv = E('span', { text: '100 %' });
+    var fread = function () { var i = fIdx(), r = i >= 0 ? W.polices[i] : {}; fpol.value = r.police || ''; fgr.value = r.graisse ? String(r.graisse) : ''; fit.value = r.italique === true ? 'oui' : r.italique === false ? 'non' : ''; fca.value = r.casse || ''; fsz.value = String(r.taille || 100); fszv.textContent = fsz.value + ' %'; };
+    var fval = function () { var o = {}; if (fpol.value) o.police = fpol.value; if (fgr.value) o.graisse = Number(fgr.value); if (fit.value) o.italique = fit.value === 'oui'; if (fca.value) o.casse = fca.value; if (Number(fsz.value) !== 100) o.taille = Number(fsz.value); return o; };
+    var fsave = function (commit) {
+      var o = fval(); fszv.textContent = fsz.value + ' %';
+      if (Object.keys(o).length) styleEl(cur.el, o); else unstyle(cur.el);
+      if (!commit) return;
+      var i = fIdx(); if (i >= 0) W.polices.splice(i, 1);
+      if (Object.keys(o).length) { var k = keyOf(); W.polices.push(Object.assign({ page: v, chemin: k.chemin, cls: k.cls }, o)); }
+      live();
+    };
+    [fpol, fgr, fit, fca].forEach(function (x) { x.addEventListener('change', function () { fsave(true); }); });
+    fsz.addEventListener('input', function () { fsave(false); }); fsz.addEventListener('change', function () { fsave(true); });
+    var fontCard = E('div', { class: 'rt-card' }, [
+      E('span', { class: 'rt-lbl', text: 'Police d’écriture' }),
+      E('p', { class: 'rt-note', text: 'S’applique à l’élément choisi dans « Déplacer » (encadré bleu) : pour un titre ou un paragraphe, gardez « Cet élément ». Même réglage sur ordinateur et téléphone.' }),
+      fpol, E('div', { class: 'rt-row', style: 'display:grid;grid-template-columns:1fr 1fr;gap:.4rem' }, [fgr, fit]), E('div', { class: 'rt-row' }, [fca]),
+      E('label', { class: 'rt-zoom' }, ['Taille ', fsz, fszv]),
+      E('div', { class: 'rt-row' }, [E('button', { type: 'button', class: 'rt-b dan', onclick: function () { fpol.value = fgr.value = fit.value = fca.value = ''; fsz.value = '100'; fsave(true); } }, ['Police d’origine'])])
+    ]);
+    var pick = function () { endDrag(); cur = opts[Number(sel.value) || 0]; mark(cur.el); var p = get(); set(p[0], p[1], false); fread(); };
     sel.addEventListener('change', pick);
     setTimeout(pick, 0);
-    return E('div', { class: 'rt-card' }, [
+    return [E('div', { class: 'rt-card' }, [
       E('span', { class: 'rt-lbl', text: 'Déplacer' }),
       E('p', { class: 'rt-note', text: 'Choisissez ce qui bouge (encadré en pointillés bleus), puis faites-le glisser sur la page ou avancez-le avec les flèches. Réglé à part ' + (sc === 'mob' ? 'pour le téléphone' : 'pour l’ordinateur') + ' : l’autre écran ne change pas.' }),
       sel,
       E('div', { class: 'rt-row' }, [dragBtn]),
       E('div', { class: 'rt-row' }, [arrow('←', -1, 0, 'Vers la gauche'), arrow('↑', 0, -1, 'Vers le haut'), arrow('↓', 0, 1, 'Vers le bas'), arrow('→', 1, 0, 'Vers la droite'), pas]),
       E('div', { class: 'rt-row' }, [info, E('button', { type: 'button', class: 'rt-b dan', onclick: function () { set(0, 0, true); } }, ['Remettre à sa place'])])
-    ]);
+    ]), fontCard];
   }
   function openPanel(e) {
     var target = cand(e.target);
@@ -412,7 +463,7 @@
     var v = view();
     var kids = [E('div', { class: 'rt-h' }, [E('strong', { text: 'Retoucher' }), E('span', { class: 'rt-row', style: 'margin:0' }, [E('button', { type: 'button', class: 'rt-b', title: 'Mettre le volet de l’autre côté pour voir la page', onclick: function () { side = side === 'left' ? 'right' : 'left'; if (panel) panel.className = 'rt-ui rt-panel' + (side === 'left' ? ' rt-left' : ''); } }, ['⇆ Côté']), E('button', { type: 'button', class: 'rt-b', onclick: closePanel }, ['Fermer ✕'])])]),
       E('p', { class: 'rt-note', text: 'Le changement s’affiche tout de suite sur le site (aperçu). Rien n’est visible des visiteurs avant « Publier » dans la barre noire.' })];
-    var mv = moveCard(target || imgs[0]); if (mv) kids.push(mv);
+    var mv = moveCard(target || imgs[0]); if (mv) { kids.push(mv[0]); if (target && target.tagName !== 'IMG') kids.push(mv[1]); }
     texts.forEach(function (n) {
       var orig = norm(origText(n)), idx = textIdx(n);
       var i = findE(W.textes, orig, idx), r = i >= 0 ? W.textes[i] : null;

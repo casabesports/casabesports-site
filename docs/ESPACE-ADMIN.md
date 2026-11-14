@@ -176,3 +176,7 @@ Bouton « ✎ Retoucher », cliquez sur un texte ou une image : le volet commenc
 - « Glisser sur la page » : faites glisser n'importe où, l'élément suit ; « Terminer le déplacement » quand c'est bien. Ou utilisez les flèches (1, 10 ou 40 px).
 - Le réglage vaut pour l'écran utilisé (ordinateur ou téléphone) : l'autre ne change pas. Faites le réglage téléphone depuis un téléphone.
 - « Remettre à sa place » annule. Rien n'est visible des visiteurs avant « Publier ». Liste et suppression : Contenus du site › Retouches des pages › Éléments déplacés.
+
+## Changer la police (Retoucher)
+
+Sous « Déplacer », le bloc **Police d'écriture** : police (League Spartan, Cormorant Garamond, Mulish, Barlow Condensed, Archivo Black, Source Serif, Cinzel, Caveat), graisse, italique, capitales et taille (50 à 200 %). Il s'applique à l'élément choisi dans « Déplacer » ; pour un titre ou un paragraphe, gardez « Cet élément ». Même réglage sur ordinateur et téléphone. « Police d'origine » annule. Liste : Contenus du site › Retouches des pages › Polices changées.

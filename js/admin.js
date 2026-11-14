@@ -641,10 +641,19 @@
           E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Remettre cet élément à sa place d’origine ?')) return; v.places.splice(i, 1); mark(); render(); } }, 'Remettre à sa place')),
         E('p', { style: 'margin:.3rem 0 0;font-size:13px;color:var(--muted)' }, 'Décalé de ' + (r.dx || 0) + ' px horizontalement et ' + (r.dy || 0) + ' px verticalement' + (r.cls ? ' · ' + r.cls.split(' ')[0] : '')));
     });
+    v.polices = Array.isArray(v.polices) ? v.polices : [];
+    var polices = v.polices.map(function (r, i) {
+      var d = [r.police, r.graisse ? 'graisse ' + r.graisse : '', r.italique === true ? 'italique' : r.italique === false ? 'droit' : '', r.casse === 'maj' ? 'capitales' : r.casse === 'normal' ? 'minuscules' : '', r.taille ? r.taille + ' %' : ''].filter(Boolean).join(' · ');
+      return E('div', { class: 'cba-card', style: 'margin:.5rem 0' },
+        E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('span', { class: 'cba-tag' }, where(r)),
+          E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Rendre sa police d’origine à cet élément ?')) return; v.polices.splice(i, 1); mark(); render(); } }, 'Police d’origine')),
+        E('p', { style: 'margin:.3rem 0 0;font-size:13px;color:var(--muted)' }, (d || 'Réglage vide') + (r.cls ? ' · ' + r.cls.split(' ')[0] : '')));
+    });
     return E('div', {},
       E('h3', { style: 'margin:1rem 0 .3rem' }, 'Textes (' + texts.length + ')'), texts.length ? texts : E('p', { class: 'cba-sub' }, 'Aucun texte retouché.'),
       E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Images (' + imgs.length + ')'), imgs.length ? imgs : E('p', { class: 'cba-sub' }, 'Aucune image retouchée.'),
-      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Éléments déplacés (' + places.length + ')'), places.length ? places : E('p', { class: 'cba-sub' }, 'Aucun élément déplacé.'));
+      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Éléments déplacés (' + places.length + ')'), places.length ? places : E('p', { class: 'cba-sub' }, 'Aucun élément déplacé.'),
+      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Polices changées (' + polices.length + ')'), polices.length ? polices : E('p', { class: 'cba-sub' }, 'Aucune police changée.'));
   }
   // ---------- Fonds de page : une image par page, avec son cadrage ----------
   var FOND_PAGES = [['accueil', 'Accueil'], ['actualites', 'Actualités et articles'], ['direct', 'Direct'], ['videos', 'Vidéos'], ['disciplines', 'Disciplines'], ['clubs', 'Clubs et carte'], ['joueurs', 'Joueurs'], ['boutique', 'Boutique'], ['abonnements', 'Abonnements'], ['compte', 'Mon espace'], ['quotidien', 'Le quotidien (abonnés)'], ['clubhouse', 'Club House'], ['culture', 'Culture'], ['meteo', 'Météo'], ['partenaires', 'Partenaires'], ['apropos', 'À propos'], ['contact', 'Contact'], ['mentions', 'Mentions légales'], ['application', 'Application'], ['redaction', 'Rédaction']];
