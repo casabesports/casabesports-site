@@ -1123,7 +1123,7 @@
       resolvePlace(spec, b).then(function (P) { if (my !== token) return; place = P; buildField(); build(); loadMap(); });
     }
     function build() {
-      if (sim) { sim = null; setSimBtn(); }
+      if (sim) { sim = null; hush(); setSimBtn(); }
       tokens.forEach(function (t) { S.root.remove(t.g); dispose(t.g); }); tokens = [];
       var x = sp(), kit = KITS[L.kit], F = (L.pos[x.id] && L.pos[x.id].length === x.forms[form()].length) ? L.pos[x.id] : x.forms[form()], N = names(), C = cap(), hs = hScale();
       F.forEach(function (pct, i) {
@@ -1167,51 +1167,91 @@
     };
     S.onCamera = function (on) { dioOn = on; geo.group.visible = !on; env.setDiorama(on); if (catcher) catcher.visible = on; if (stad) stad.group.visible = !on; if (lines) lines.visible = on; placeChip.style.display = attr.style.display = on ? 'none' : ''; setHint(on ? 'Joueurs, ballon et lignes du terrain posés sur l’image de votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); };
     /* ----- Simulation de jeu : joueurs et ballon se déplacent selon le système de jeu choisi ----- */
-    // Positions en % comme les systèmes (y = 0 : en-but / but adverse, en haut). Chaque étape = une phase de jeu.
+    // Positions en % comme les systèmes (y = 0 : en-but / but adverse, en haut). Chaque étape = une phase de jeu,
+    // avec son commentaire en français, anglais et arabe (lu par la voix du téléphone si le commentaire audio est activé).
     function simSteps(x, F, f) {
-      var id = x.id, n = F.length, N = names(), bp = fromPos(ball.position);
+      var id = x.id, n = F.length, bp = fromPos(ball.position), P = (x.postes && x.postes[f]) || [];
+      var NM = names(), team = L.team || 'Casa Besports';
       function cl(v, a, b) { return Math.max(a, Math.min(b, v)); }
-      function S(label, pos, b, o) { return Object.assign({ label: label, pos: pos.map(function (p) { return p.slice(); }), ball: b ? b.slice() : bp }, o || {}); }
+      function S(say, pos, b, o) { return Object.assign({ say: say, label: say.fr, pos: pos.map(function (p) { return p.slice(); }), ball: b ? b.slice() : bp }, o || {}); }
       function at(p, dy) { return [p[0], p[1] + (dy == null ? -1.5 : dy)]; } // ballon au pied, juste devant le joueur
-      function cp(P) { return P.map(function (p) { return p.slice(); }); }
+      function cp(Q) { return Q.map(function (p) { return p.slice(); }); }
+      function nm(j, lg) { return pname(NM[j], lg); }
+      // trois langues d'un coup : t('fr {a}', 'en {a}', 'ar {a}', { a: indice du joueur ou texte })
+      function t(fr, en, ar, v) { var o = { fr: fr, en: en, ar: ar }; Object.keys(o).forEach(function (lg) { o[lg] = o[lg].replace(/\{(\w+)\}/g, function (m, k) { var val = v && v[k]; return typeof val === 'number' ? nm(val, lg) : val == null ? '' : (typeof val === 'object' ? val[lg] : val); }); o[lg] = (o[lg].charAt(0).toUpperCase() + o[lg].slice(1)).replace(/([.!?…]\s+)([a-zà-ÿ])/g, function (m, a, c) { return a + c.toUpperCase(); }); }); return o; }
+      function poste(re, list) { for (var j = 0; j < n; j++) if (re.test(P[j] || '') && (!list || list.indexOf(j) >= 0)) return j; return null; }
       var G = { football: { push: [-8, -18, -28], minY: 9, goal: -4, box: 12 }, hand: { push: [-10, -22, -34], minY: 20, goal: -3, box: 18 },
         waterpolo: { push: [-10, -22, -34], minY: 10, goal: -3, box: 12 }, roller: { push: [-10, -22, -32], minY: 12, goal: 6, box: 14 },
         basket: { push: [-18, -34, -48], minY: 8, goal: 3, box: 14 } }[id];
       if (G) {
         var gk = x.gk, out = [], i; for (i = 0; i < n; i++) if (i !== gk) out.push(i);
-        var byY = out.slice().sort(function (a, b) { return F[b][1] - F[a][1]; }), t = Math.max(1, Math.round(byY.length / 3));
+        var byY = out.slice().sort(function (a, b) { return F[b][1] - F[a][1]; }), tt = Math.max(1, Math.round(byY.length / 3));
         var central = function (l) { return l.slice().sort(function (a, b) { return Math.abs(F[a][0] - 50) - Math.abs(F[b][0] - 50); })[0]; };
         var wide = function (l) { return l.slice().sort(function (a, b) { return Math.abs(F[b][0] - 50) - Math.abs(F[a][0] - 50); })[0]; };
-        var deep = byY.slice(0, t), front = byY.slice(byY.length - t), mid = byY.slice(t, byY.length - t); if (!mid.length) mid = deep;
+        var deep = byY.slice(0, tt), front = byY.slice(byY.length - tt), mid = byY.slice(tt, byY.length - tt); if (!mid.length) mid = deep;
         var p0 = gk >= 0 ? gk : central(deep), p1 = central(deep.filter(function (j) { return j !== p0; })); if (p1 == null) p1 = central(mid);
         var p2 = central(mid.filter(function (j) { return j !== p1; })); if (p2 == null) p2 = central(mid);
-        var p3 = wide(front.concat(mid).filter(function (j) { return j !== p2; })), p4 = central(front.filter(function (j) { return j !== p3; })); if (p4 == null) p4 = central(mid.filter(function (j) { return j !== p3; })) ; if (p4 == null) p4 = p3;
+        var p3 = wide(front.concat(mid).filter(function (j) { return j !== p2; })), p4 = central(front.filter(function (j) { return j !== p3; })); if (p4 == null) p4 = central(mid.filter(function (j) { return j !== p3; })); if (p4 == null) p4 = p3;
+        // la logique de chaque système : qui construit, qui prend la largeur, qui finit
+        var wideTxt = t('Débordement de {a} sur le côté !', '{a} goes wide down the flank!', '{a} ينطلق على الجهة!', { a: p3 }), finTxt = null, ex = {}, exEx = null;
+        if (id === 'football') {
+          var dc = poste(/^DC$/), mc = poste(/^(MDC|MC|MOC)$/); if (dc != null) p1 = dc; if (mc != null) p2 = mc;
+          if (f === '4-3-3') { p3 = poste(/^(AG|AD)$/) != null ? poste(/^(AG|AD)$/) : p3; p4 = poste(/^BU$/) != null ? poste(/^BU$/) : p4; p2 = poste(/^MDC$/) != null ? poste(/^MDC$/) : p2;
+            wideTxt = t('Le 4-3-3 s’étire : l’ailier {a} prend la largeur et élimine son vis-à-vis !', 'The 4-3-3 stretches play: winger {a} hugs the touchline and beats his man!', 'خطة 4-3-3 تفتح الملعب: الجناح {a} يتوسع ويتخطى مدافعه!', { a: p3 }); }
+          else if (f === '3-5-2') { p3 = poste(/^(PG|PD)$/) != null ? poste(/^(PG|PD)$/) : p3; p4 = poste(/^BU$/) != null ? poste(/^BU$/) : p4; ex[p3] = [0, -14];
+            wideTxt = t('En 3-5-2, c’est le piston {a} qui avale tout le couloir !', 'In the 3-5-2 it is wing-back {a} who bombs forward down the channel!', 'في خطة 3-5-2 الظهير الجناح {a} يكتسح الرواق!', { a: p3 }); }
+          else if (f === '4-4-2') { p3 = poste(/^(MG|MD)$/) != null ? poste(/^(MG|MD)$/) : p3; p4 = poste(/^BU$/) != null ? poste(/^BU$/) : p4;
+            var bu2 = null; for (var b2 = n - 1; b2 >= 0; b2--) if (P[b2] === 'BU' && b2 !== p4) { bu2 = b2; break; } if (bu2 != null) exEx = bu2;
+            wideTxt = t('Le 4-4-2 bien en place : le milieu excentré {a} part dans le dos de la défense !', 'A classic 4-4-2: wide midfielder {a} runs in behind the defence!', 'خطة 4-4-2 الكلاسيكية: لاعب الوسط {a} ينطلق خلف الدفاع!', { a: p3 }); }
+          else if (f === '4-2-3-1') { p3 = poste(/^(AG|AD)$/) != null ? poste(/^(AG|AD)$/) : p3; p4 = poste(/^MOC$/) != null ? poste(/^MOC$/) : p4;
+            wideTxt = t('Le 4-2-3-1 joue entre les lignes : {a} attaque l’espace sur l’aile !', 'The 4-2-3-1 plays between the lines: {a} attacks the space out wide!', 'خطة 4-2-3-1 تلعب بين الخطوط: {a} يهاجم المساحة على الجناح!', { a: p3 }); }
+          finTxt = t('Centre de {a}… {b} est là !', '{a} whips in the cross… {b} is there!', 'عرضية من {a}... و{b} في المكان المناسب!', { a: p3, b: p4 });
+        } else if (id === 'hand') {
+          var ar0 = poste(/^Arrière/), dmc = poste(/^(Demi-centre|Avancé)$/), ail = poste(/^Ailier/), piv = poste(/^Pivot$/);
+          if (ar0 != null) p1 = ar0; if (dmc != null) p2 = dmc; if (ail != null) p3 = ail; if (piv != null) p4 = f === '5-1' && dmc != null ? dmc : piv;
+          wideTxt = f === '5-1' ? t('En 5-1, l’avancé {a} harcèle la base arrière, le ballon file vers {b} !', 'In the 5-1 the advanced defender {a} presses high, the ball flies out to {b}!', 'في خطة 5-1 المدافع المتقدم {a} يضغط، والكرة تنتقل إلى {b}!', { a: dmc != null ? dmc : p2, b: p3 })
+            : t('Défense 6-0 bien alignée, et la contre-attaque part vers l’ailier {a} !', 'A flat 6-0 defence, and the counter goes out to winger {a}!', 'دفاع 6-0 منظم، والهجمة المرتدة نحو الجناح {a}!', { a: p3 });
+          finTxt = t('Passe pour {b}, il s’élève au-dessus de la zone !', 'Feed for {b}, he rises above the D!', 'تمريرة إلى {b}، يرتقي فوق المنطقة!', { b: p4 });
+        } else if (id === 'basket') {
+          var men = poste(/^Meneur$/), pv = poste(/^Pivot$/), ai = poste(/^Ailier$/); var arr = poste(/^Arrière$/); if (arr != null) p1 = arr; if (men != null) p2 = men; if (ai != null) p3 = ai; if (pv != null) p4 = pv;
+          wideTxt = t('Transition rapide ! {a} remonte le ballon, {b} court dans le couloir.', 'Fast break! {a} pushes the ball, {b} sprints down the wing.', 'هجمة سريعة! {a} يتقدم بالكرة و{b} ينطلق على الجناح.', { a: p2, b: p3 });
+          finTxt = t('Pick and roll… {b} se présente seul sous le cercle !', 'Pick and roll… {b} rolls to the rim all alone!', 'حاجز ودوران... {b} وحيد تحت السلة!', { b: p4 });
+        } else if (id === 'roller') {
+          wideTxt = f === 'Losange' ? t('En losange, {a} monte côté gauche, la pointe fixe la défense.', 'In the diamond, {a} attacks the left side while the point holds the defence.', 'في خطة المعين، {a} يتقدم من اليسار والمهاجم يثبت الدفاع.', { a: p3 })
+            : t('Le carré se déplace en bloc, {a} porte le palet sur l’aile.', 'The box moves as one, {a} carries the puck down the wing.', 'المربع يتحرك ككتلة واحدة، {a} يحمل القرص على الجناح.', { a: p3 });
+        } else if (id === 'waterpolo') {
+          var pt = poste(/^Pointe$/); if (pt != null) p4 = pt;
+          wideTxt = t('Contre-attaque à la nage ! {a} sur l’aile, le 3-3 s’ouvre.', 'Swimming counter-attack! {a} on the wing, the 3-3 opens up.', 'هجمة مرتدة بالسباحة! {a} على الجناح وخطة 3-3 تنفتح.', { a: p3 });
+          finTxt = t('Ballon pour la pointe {b}, dos au but…', 'Ball into the centre-forward {b}, back to goal…', 'الكرة لرأس الحربة {b} وظهره للمرمى...', { b: p4 });
+        }
+        if (!finTxt) finTxt = t('Passe décisive pour {b} !', 'The killer pass for {b}!', 'تمريرة حاسمة إلى {b}!', { b: p4 });
         var shift = function (dy, spread, extra) { return F.map(function (p, j) { if (j === gk) return [p[0], cl(p[1] + dy * 0.12, 82, 99)]; var q = [cl(50 + (p[0] - 50) * spread, 3, 97), cl(p[1] + dy, G.minY, 98)]; if (extra && extra[j]) { q[0] = cl(q[0] + extra[j][0], 3, 97); q[1] = cl(q[1] + extra[j][1], G.minY - 8, 98); } return q; }); };
-        var s1 = shift(G.push[0], 1.05), s2 = shift(G.push[1], 1.1), ex = {}; ex[p3] = [F[p3][0] < 50 ? -8 : 8, -10]; var s3 = shift(G.push[2], 1.15, ex);
-        var s4 = cp(s3); s4[p4] = [cl(50 + (F[p4][0] - 50) * 0.35, 32, 68), G.goal + G.box];
+        var s1 = shift(G.push[0], 1.05), s2 = shift(G.push[1], 1.1); ex[p3] = [F[p3][0] < 50 ? -8 : 8, (ex[p3] ? ex[p3][1] : 0) - 10]; var s3 = shift(G.push[2], 1.15, ex);
+        var s4 = cp(s3); s4[p4] = [cl(50 + (F[p4][0] - 50) * 0.35, 32, 68), G.goal + G.box]; if (exEx != null) s4[exEx] = [cl(s4[p4][0] + (s4[p4][0] < 50 ? 14 : -14), 20, 80), G.goal + G.box + 4];
         var back = F.map(function (p, j) { return j === gk ? p.slice() : [50 + (p[0] - 50) * 0.8, cl(p[1] + 4, 0, 98)]; });
-        var goalTxt = id === 'basket' ? 'Panier !' : 'But !';
+        var goalTxt = id === 'basket' ? t('PANIER ! {b} ! Quelle action de {team} !', 'BUCKET! {b}! What a play by {team}!', 'سلة! {b}! يا لها من لعبة رائعة من {team}!', { b: p4, team: team })
+          : t('BUUUUT ! {b} ! Quelle action collective de {team} !', 'GOAL! {b}! What a team move from {team}!', 'هدددف! {b}! يا لها من هجمة جماعية رائعة من {team}!', { b: p4, team: team });
         return [
-          S(gk >= 0 ? 'Relance du gardien' : 'Remise en jeu', F, at(F[p0], -2.5)),
-          S('Construction : ' + N[p1] + ' reçoit', s1, at(s1[p1]), { lob: id === 'basket' ? 0 : 0.3 }),
-          S('Le bloc monte · ' + N[p2] + ' oriente le jeu', s2, at(s2[p2])),
-          S('Débordement de ' + N[p3], s3, at(s3[p3]), { lob: 0.4 }),
-          S('Passe décisive pour ' + N[p4], s4, at(s4[p4]), { lob: id === 'football' ? 1 : 0.5 }),
-          S(goalTxt + ' ' + N[p4] + ' conclut', s4, [50, G.goal], { dur: 2200, lob: id === 'basket' ? 1.4 : 0.2 }),
-          S('Repli défensif, le bloc se resserre', back, [50, 48], { dur: 2000 })
+          S(id === 'basket' ? t('Ballon récupéré par {team}, remise en jeu pour {a}.', 'Turnover won by {team}, {a} inbounds the ball.', '{team} يستعيد الكرة، و{a} يعيدها إلى اللعب.', { a: p0, team: team }) : gk >= 0 ? t('{team} en {f}. {a} relance proprement.', '{team} lining up in a {f}. {a} plays it out from the back.', '{team} بخطة {f}. {a} يبدأ اللعب من الخلف.', { a: p0, team: team, f: f }) : t('{team} en {f}, remise en jeu pour {a}.', '{team} in a {f}, {a} takes the inbound.', '{team} بخطة {f}، {a} يعيد الكرة إلى اللعب.', { a: p0, team: team, f: f }), F, at(F[p0], -2.5)),
+          S(t('{a} reçoit, construction patiente.', '{a} receives, patient build-up.', '{a} يستلم الكرة، بناء هادئ للهجمة.', { a: p1 }), s1, at(s1[p1]), { lob: id === 'basket' ? 0 : 0.3 }),
+          S(t('Le bloc monte ! {a} oriente le jeu.', 'The whole team pushes up! {a} dictates play.', 'الفريق يتقدم! {a} يوجه اللعب.', { a: p2 }), s2, at(s2[p2])),
+          S(wideTxt, s3, at(s3[p3]), { lob: 0.4 }),
+          S(finTxt, s4, at(s4[p4]), { lob: id === 'football' ? 1 : 0.5 }),
+          S(goalTxt, s4, [50, G.goal], { dur: 2200, lob: id === 'basket' ? 1.4 : 0.2, goal: true }),
+          S(t('Tout le monde se replace, le bloc se resserre.', 'Everyone drops back into shape.', 'الجميع يعود إلى مركزه، والفريق يتماسك.', null), back, [50, 48], { dur: 2000 })
         ];
       }
       if (id === 'rugby' && n === 15) {
         var mv = function (dF, dB, over) { return F.map(function (p, j) { return over && over[j] ? over[j] : [p[0], cl(p[1] + (j < 8 ? dF : dB), -4, 98)]; }); };
         var r1 = mv(-2, -3), r2 = mv(-4, -8), r3 = mv(-6, -15), r4 = mv(-8, -24), r5 = mv(-10, -28, { 13: [92, -3] });
         return [
-          S('Mêlée : le ballon est introduit', F, [50, 61]),
-          S(N[8] + ' (demi de mêlée) sort le ballon', r1, at(r1[8], 1)),
-          S('Passe vers l’arrière à ' + N[9] + ' (ouvreur)', r2, at(r2[9], 1), { lob: 0.3 }),
-          S('Passe à ' + N[11] + ' (centre)', r3, at(r3[11], 1), { lob: 0.3 }),
-          S('Passe à ' + N[12] + ', la ligne attaque', r4, at(r4[12], 1), { lob: 0.3 }),
-          S(N[13] + ' (ailier) file à l’essai', r5, at(r5[13], 1), { lob: 0.3, dur: 2200 }),
-          S('Replacement', F, [50, 61], { dur: 2000 })
+          S(t('Mêlée pour {team}, les huit avants poussent ensemble.', 'Scrum to {team}, all eight forwards drive together.', 'مجموعة الدفع لصالح {team}، المهاجمون الثمانية يدفعون معا.', { team: team }), F, [50, 61]),
+          S(t('{a}, le demi de mêlée, sort le ballon.', 'Scrum-half {a} whips the ball away.', 'نصف المجموعة {a} يُخرج الكرة.', { a: 8 }), r1, at(r1[8], 1)),
+          S(t('Passe vers l’arrière pour l’ouvreur {a}.', 'Back to the fly-half, {a}.', 'تمريرة إلى الخلف لصانع اللعب {a}.', { a: 9 }), r2, at(r2[9], 1), { lob: 0.3 }),
+          S(t('{a} au centre, la ligne de trois-quarts s’étire.', '{a} in the centre, the back line spreads wide.', '{a} في الوسط، وخط الظهير يتوسع.', { a: 11 }), r3, at(r3[11], 1), { lob: 0.3 }),
+          S(t('{a} fixe son vis-à-vis et décale !', '{a} draws the man and passes!', '{a} يجذب المدافع ويمرر!', { a: 12 }), r4, at(r4[12], 1), { lob: 0.3 }),
+          S(t('ESSAI ! L’ailier {a} aplatit en coin pour {team} !', 'TRY! Winger {a} goes over in the corner for {team}!', 'محاولة! الجناح {a} يسجل في الزاوية لصالح {team}!', { a: 13, team: team }), r5, at(r5[13], 1), { lob: 0.3, dur: 2200, goal: true }),
+          S(t('Tout le monde se replace.', 'Everyone back in position.', 'الجميع يعود إلى مركزه.', null), F, [50, 61], { dur: 2000 })
         ];
       }
       if (id === 'volley' && n === 6) {
@@ -1219,56 +1259,100 @@
         var v2 = cp(v1); v2[1] = [80, 62];
         var v3 = cp(v2); v3[1] = [78, 53]; v3[2] = [55, 56];
         return [
-          S('Service adverse', F, [50, 3]),
-          S(N[5] + ' (libéro) réceptionne · ' + N[0] + ' file au filet', v1, at(F[5], -3), { lob: 1.2 }),
-          S('Passe haute de ' + N[0], v2, [62, 52], { lob: 1.2 }),
-          S('Attaque de ' + N[1] + ' (pointu)', v3, [78, 51], { lob: 1.4 }),
-          S('Point !', v3, [28, 18], { dur: 1800 }),
-          S('Replacement', F, [50, 3], { dur: 1800 })
+          S(t('Service adverse, {team} en réception.', 'Opponents serving, {team} ready to receive.', 'إرسال المنافس، و{team} في الاستقبال.', { team: team }), F, [50, 3]),
+          S(t('Belle réception du libéro {a}, le passeur {b} file au filet.', 'Great dig from libero {a}, setter {b} runs to the net.', 'استقبال رائع من الليبرو {a}، والمعد {b} يتقدم نحو الشبكة.', { a: 5, b: 0 }), v1, at(F[5], -3), { lob: 1.2 }),
+          S(t('Passe haute de {a}…', 'High set from {a}…', 'تمريرة عالية من {a}...', { a: 0 }), v2, [62, 52], { lob: 1.2 }),
+          S(t('{a} s’envole et frappe !', '{a} takes off and hammers it!', '{a} يرتقي ويضرب بقوة!', { a: 1 }), v3, [78, 51], { lob: 1.4 }),
+          S(t('POINT pour {team} !', 'POINT to {team}!', 'نقطة لصالح {team}!', { team: team }), v3, [28, 18], { dur: 1800, goal: true }),
+          S(t('Rotation et replacement.', 'Rotate and reset.', 'دوران وعودة إلى المراكز.', null), F, [50, 3], { dur: 1800 })
         ];
       }
       if (id === 'tennis') {
-        var duo = n > 1, pl = function (x0, y0, bx) { var P = [[x0, y0]]; if (duo) P.push([cl(bx, 32, 68), 63]); return P; };
+        var duo = n > 1, pl = function (x0, y0, bx) { var Q = [[x0, y0]]; if (duo) Q.push([cl(bx, 32, 68), 63]); return Q; };
         return [
-          S('Service de ' + N[0], pl(F[0][0], F[0][1], 60), [F[0][0] + 2, F[0][1] - 1]),
-          S('Service croisé', pl(50, 86, 40), [36, 24], { lob: 0.5 }),
-          S('Retour adverse', pl(32, 84, 34), [33, 81], { lob: 0.5 }),
-          S('Coup droit croisé', pl(50, 86, 66), [68, 22], { lob: 0.5 }),
-          S('Retour adverse', pl(68, 84, 66), [67, 81], { lob: 0.5 }),
-          S('Revers le long de la ligne : point gagnant', pl(50, 86, 70), [76, 20], { lob: 0.4, dur: 2000 })
+          S(t('{a} au service.', '{a} to serve.', '{a} على الإرسال.', { a: 0 }), pl(F[0][0], F[0][1], 60), [F[0][0] + 2, F[0][1] - 1]),
+          S(t('Service croisé, bien placé.', 'Cross-court serve, well placed.', 'إرسال قطري متقن.', null), pl(50, 86, 40), [36, 24], { lob: 0.5 }),
+          S(t('Retour adverse, {a} se déplace.', 'The return comes back, {a} moves across.', 'الكرة تعود، و{a} يتحرك.', { a: 0 }), pl(32, 84, 34), [33, 81], { lob: 0.5 }),
+          S(t('Coup droit croisé de {a} !', 'Cross-court forehand from {a}!', 'ضربة أمامية قطرية من {a}!', { a: 0 }), pl(50, 86, 66), [68, 22], { lob: 0.5 }),
+          S(t('Ça revient sur le revers…', 'It comes back to the backhand…', 'الكرة تعود إلى الضربة الخلفية...', null), pl(68, 84, 66), [67, 81], { lob: 0.5 }),
+          S(t('Revers le long de la ligne : point gagnant pour {a} !', 'Backhand down the line: a winner for {a}!', 'ضربة خلفية على طول الخط: نقطة رابحة لصالح {a}!', { a: 0 }), pl(50, 86, 70), [76, 20], { lob: 0.4, dur: 2000, goal: true })
         ];
       }
       if (id === 'athle' && f === 'Relais 4×100') {
-        var leg = function (k, d) { return athPct(trackXZ(4, k * 100 + d)); }, out2 = [S('À vos marques', [0, 1, 2, 3].map(function (k) { return leg(k, 0); }), null, { dur: 1200 })];
-        for (var r = 0; r < 4; r++) for (var j = 1; j <= 5; j++) out2.push(S(N[r] + ' · ' + (r === 0 ? '1er' : (r + 1) + 'e') + ' relais' + (j === 5 && r < 3 ? ' : passage du témoin' : ''),
-          [0, 1, 2, 3].map(function (k) { return k < r ? leg(k, 100) : k === r ? leg(k, j * 20) : leg(k, 0); }), null, { dur: 700, lin: true, still: 0 }));
-        out2[out2.length - 1].label = 'Arrivée !'; out2[out2.length - 1].still = 0.6; out2[out2.length - 1].dur = 2200;
+        var leg = function (k, d) { return athPct(trackXZ(4, k * 100 + d)); }, out2 = [S(t('Relais 4 fois 100 mètres pour {team}. À vos marques…', '4 by 100 metres relay for {team}. On your marks…', 'سباق التتابع 4 في 100 متر لـ{team}. خذوا أماكنكم...', { team: team }), [0, 1, 2, 3].map(function (k) { return leg(k, 0); }), null, { dur: 1200 })];
+        var ord = [t('premier', 'first', 'الأول', null), t('deuxième', 'second', 'الثاني', null), t('troisième', 'third', 'الثالث', null), t('dernier', 'final', 'الأخير', null)];
+        for (var r = 0; r < 4; r++) for (var j = 1; j <= 5; j++) out2.push(S(j === 1 ? t('{a}, {o} relayeur, est lancé !', '{a}, the {o} leg, is off!', '{a}، العدّاء {o}، ينطلق!', { a: r, o: ord[r] }) : { fr: '', en: '', ar: '' },
+          [0, 1, 2, 3].map(function (k) { return k < r ? leg(k, 100) : k === r ? leg(k, j * 20) : leg(k, 0); }), null, { dur: 700, lin: true, still: 0, label: NM[r] + ' · relais ' + (r + 1) }));
+        var lastR = out2[out2.length - 1]; lastR.say = t('Et {a} franchit la ligne ! Superbe relais de {team} !', 'And {a} crosses the line! A superb relay from {team}!', 'و{a} يعبر خط النهاية! تتابع رائع من {team}!', { a: 3, team: team }); lastR.label = lastR.say.fr; lastR.still = 0.6; lastR.dur = 2200; lastR.goal = true;
         return out2;
       }
       if (id === 'athle') {
         var fin = athPct([0, -TR.S / 2])[1], sp100 = function (k) { return F.map(function (p, j) { var v = 1 - ((j * 37) % 8) * 0.012; return [p[0], p[1] + (fin - p[1]) * Math.min(1, k * v)]; }); };
+        var win = 0; F.forEach(function (p, j) { if (((j * 37) % 8) < ((win * 37) % 8)) win = j; });
         return [
-          S('À vos marques… Prêts…', F, null, { dur: 1500 }),
-          S('Partez !', sp100(0.35), null, { lin: true, still: 0, dur: 1100 }),
-          S('Mi-course', sp100(0.7), null, { lin: true, still: 0, dur: 1100 }),
-          S('Arrivée !', sp100(1), null, { lin: true, still: 0.5, dur: 1900 }),
-          S('Retour aux blocs', F, null, { dur: 1600 })
+          S(t('Finale du 100 mètres. À vos marques… Prêts…', 'The 100 metres final. On your marks… Set…', 'نهائي سباق 100 متر. خذوا أماكنكم... استعد...', null), F, null, { dur: 1500 }),
+          S(t('Partez !', 'Go!', 'انطلق!', null), sp100(0.35), null, { lin: true, still: 0, dur: 1100 }),
+          S(t('{a} prend l’avantage à mi-course !', '{a} hits the front at halfway!', '{a} يتقدم في منتصف السباق!', { a: win }), sp100(0.7), null, { lin: true, still: 0, dur: 1100 }),
+          S(t('Victoire de {a} !', 'Victory for {a}!', 'الفوز من نصيب {a}!', { a: win }), sp100(1), null, { lin: true, still: 0.5, dur: 1900, goal: true }),
+          S(t('Retour aux blocs.', 'Back to the blocks.', 'العودة إلى نقطة الانطلاق.', null), F, null, { dur: 1600 })
         ];
       }
       return null;
     }
+    // noms par défaut traduits (« Joueur 7 » → « Player 7 » / « اللاعب 7 »), noms saisis gardés tels quels
+    function pname(s, lg) {
+      if (!s) return s; if (lg === 'fr') return s === 'Gardien' ? 'le gardien' : s; var m = /^(Joueur|Athlète) (\d+)$/.exec(s);
+      if (m) return (lg === 'en' ? (m[1] === 'Joueur' ? 'Player ' : 'Athlete ') : (m[1] === 'Joueur' ? 'اللاعب ' : 'العدّاء ')) + m[2];
+      if (s === 'Gardien') return lg === 'en' ? 'the goalkeeper' : 'الحارس'; return s;
+    }
+    /* ----- Le commentateur : voix de synthèse du téléphone (gratuite, sans serveur) ----- */
+    var VOIX = { off: 'Sans commentaire', fr: 'Commentaire en français', en: 'Commentary in English', ar: 'تعليق بالعربية' };
+    var LANGS = { fr: 'fr-FR', en: 'en-GB', ar: 'ar-SA' };
+    function tts() { return window.speechSynthesis && window.SpeechSynthesisUtterance ? window.speechSynthesis : null; }
+    function pickVoice(lg) {
+      var vs = (tts() && tts().getVoices()) || [], pre = lg.toLowerCase();
+      var mine = vs.filter(function (v) { return (v.lang || '').toLowerCase().replace('_', '-').indexOf(pre) === 0; });
+      var pref = { fr: /thomas|daniel|nicolas|google français|paul/i, en: /daniel|arthur|google uk english male|oliver|alex/i, ar: /maged|majed|tarik|google/i }[pre];
+      return mine.filter(function (v) { return pref && pref.test(v.name); })[0] || mine.filter(function (v) { return v.localService; })[0] || mine[0] || null;
+    }
+    function speak(txt, excited, onDone) {
+      var T = tts(), lg = L.voice; if (!T || !lg || lg === 'off' || !txt) { if (onDone) onDone(); return; }
+      var u = new SpeechSynthesisUtterance(txt), v = pickVoice(lg), done = false;
+      function fin() { if (done) return; done = true; if (onDone) onDone(); }
+      u.lang = v ? v.lang : LANGS[lg]; if (v) u.voice = v; u.rate = excited ? 1.12 : 1.05; u.pitch = excited ? 1.25 : 1.05; u.volume = 1;
+      u.onend = fin; u.onerror = fin;
+      setTimeout(fin, 1500 + txt.length * 95); // garde-fou si la voix ne prévient pas la fin
+      try { T.cancel(); T.speak(u); } catch (e) { fin(); }
+    }
+    function hush() { try { if (tts()) tts().cancel(); } catch (e) {} }
+    if (tts() && tts().getVoices && !tts().getVoices().length) try { tts().addEventListener('voiceschanged', function () {}); } catch (e) {}
     var sim = null, simBtn = el('button', { type: 'button', class: 'cbar-btn', onclick: function () { if (sim) stopSim(); else startSim(); } }, '▶ Simuler le jeu');
+    var voiceSel = el('select', { 'aria-label': 'Commentaire audio', title: 'Commentaire audio' });
+    Object.keys(VOIX).forEach(function (k) { var op = el('option', { value: k }, (k === 'off' ? '🔇 ' : '🎙 ') + VOIX[k]); voiceSel.appendChild(op); });
+    voiceSel.value = L.voice || 'off'; voiceSel.onchange = function () { L.voice = voiceSel.value; save(); hush();
+      if (L.voice !== 'off' && !tts()) toast('Ce navigateur ne sait pas lire à voix haute');
+      else if (L.voice !== 'off' && tts().getVoices().length && !pickVoice(L.voice)) toast(L.voice === 'ar' ? 'Pas de voix arabe sur cet appareil : ajoutez-la dans Réglages › Accessibilité › Contenu énoncé › Voix' : 'Pas de voix pour cette langue sur cet appareil');
+      if (sim) sayStep(sim.steps[(sim.i + 1) % sim.steps.length]); };
     function setSimBtn() { simBtn.innerHTML = sim ? '■ Arrêter' : '▶ Simuler le jeu'; simBtn.setAttribute('aria-pressed', String(!!sim)); }
+    function stepText(s) { var lg = L.voice && L.voice !== 'off' ? L.voice : 'fr'; return (s.say && s.say[lg]) || s.label || ''; }
+    function sayStep(s) {
+      var txt = stepText(s); if (txt) setHint(txt);
+      if (!sim) return; var my = sim; my.talking = !!(L.voice && L.voice !== 'off' && s.say && s.say[L.voice]);
+      if (my.talking) speak(s.say[L.voice], !!s.goal, function () { my.talking = false; });
+    }
     function startSim() {
       var x = sp(), F = (L.pos[x.id] && L.pos[x.id].length === x.forms[form()].length) ? L.pos[x.id] : x.forms[form()];
       var steps = simSteps(x, F, form()); if (!steps || steps.length < 2 || !tokens.length) { toast('Simulation indisponible pour cette discipline'); return; }
-      drag = null; bounceT = null; sim = { steps: steps, i: 0, t0: performance.now() }; setSimBtn(); setHint(steps[1].label);
+      drag = null; bounceT = null; sim = { steps: steps, i: 0, t0: performance.now() }; setSimBtn();
+      sayStep(steps[1]); // lancé dans le geste du doigt : indispensable pour que l'iPhone accepte de parler
     }
-    function stopSim() { if (!sim) return; sim = null; setSimBtn(); build(); setHint(dioOn ? 'Joueurs, ballon et lignes du terrain posés sur l’image de votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); }
+    function stopSim() { if (!sim) return; sim = null; hush(); setSimBtn(); build(); setHint(dioOn ? 'Joueurs, ballon et lignes du terrain posés sur l’image de votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); }
     function angTo(a, b, k) { var d = Math.atan2(Math.sin(b - a), Math.cos(b - a)); return a + d * k; }
     function simTick(now) {
       var s = sim, n = s.steps.length, k = (now - s.t0) / (s.steps[(s.i + 1) % n].dur || 1600);
-      if (k >= 1) { s.i = (s.i + 1) % n; s.t0 = now; k = 0; setHint(s.steps[(s.i + 1) % n].label); }
+      // on passe à l'action suivante quand le mouvement est fini ET que le commentateur a fini sa phrase
+      if (k >= 1 && !s.talking) { s.i = (s.i + 1) % n; s.t0 = now; k = 0; sayStep(s.steps[(s.i + 1) % n]); }
+      k = Math.min(1, k);
       var A = s.steps[s.i], B = s.steps[(s.i + 1) % n], still = B.still == null ? 0.3 : B.still, m = Math.min(1, k / (1 - still || 1));
       var e = B.lin ? m : m * m * (3 - 2 * m), moving = m < 1, hs = hScale();
       tokens.forEach(function (tk, i) {
@@ -1280,6 +1364,7 @@
       if (ball) { var ba = toPos(A.ball), bb = toPos(B.ball), d = ba.distanceTo(bb); ball.position.lerpVectors(ba, bb, e); ball.position.y = y0u + Math.sin(Math.PI * Math.min(1, e)) * Math.min(0.08, d * 0.12) * (B.lob == null ? 0.15 : B.lob) * (moving ? 1 : 0); }
     }
     S.stageButtons = [simBtn];
+    S.stop = function () { sim = null; hush(); };
     function sel(label, opts, cur0, fn) { var s = el('select', { 'aria-label': label, title: label }); opts.forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (String(o[0]) === String(cur0)) op.selected = true; s.appendChild(op); }); s.onchange = function () { fn(s.value); }; return s; }
     function compoText(sep) { var x = sp(), N = names(), C = cap(); return L.team + ' · ' + x.label + ' (' + form() + ')' + sep + N.map(function (n, i) { return (sep === '\n' ? (i + 1) + '. ' : '') + n + (i === C ? ' (C)' : ''); }).join(sep === '\n' ? '\n' : ', '); }
     function setView(p, d, y) { S.view.pitch = p; S.view.dist = d; if (y != null) S.view.yaw = y; S.placeCam(); }
@@ -1315,6 +1400,7 @@
       if (x.id === 'tennis') r3.appendChild(sel('Surface', Object.keys(TENNIS_SURF).map(function (k) { return [k, TENNIS_SURF[k]]; }), L.surface, function (v) { L.surface = v; save(); buildField(); }));
       r3.appendChild(sel('Taille des joueurs', [['agrandie', 'Joueurs agrandis (lisibles)'], ['reelle', 'Taille réelle']], L.scale, function (v) { L.scale = v; save(); build(); }));
       panel.appendChild(r3);
+      var rv = el('div', { class: 'cbar-row' }); rv.appendChild(el('div', { class: 'cbar-lbl' }, 'Simulation et commentaire audio')); rv.appendChild(voiceSel); panel.appendChild(rv);
       var r4 = el('div', { class: 'cbar-row' });
       r4.appendChild(btn('📖 Règlement', function () { showRules(x.id); }, true));
       r4.appendChild(btn('Vue tribune', function () { setView(0.26, x.kind === 'stade' ? (L.style === 'grand' ? 0.62 : 0.9) : 1.1); }));
@@ -1468,7 +1554,7 @@
   function close() {
     if (!st) return; try { if (st.xr) st.xr.end(); } catch (e) {} cancelAnimationFrame(st.raf);
     if (st.stream) st.stream.getTracks().forEach(function (t) { t.stop(); });
-    if (st.stopGyro) st.stopGyro(); if (st.S) { window.removeEventListener('resize', st.S.resize); st.S.renderer.dispose(); }
+    if (st.stopGyro) st.stopGyro(); if (st.S && st.S.stop) st.S.stop(); if (st.S) { window.removeEventListener('resize', st.S.resize); st.S.renderer.dispose(); }
     st.root.remove(); document.documentElement.style.overflow = ''; st = null;
   }
   function open(mode, data) {
@@ -1497,7 +1583,7 @@
     }
     if (mode === 'regles') { var pageR = el('div', { class: 'cbar-hub', style: 'display:block' }); root.appendChild(pageR); var sid = (data && SPORT_OF[data.sport]) || 'football'; showRules(sid, null, function () { open('hub', data); }); return; }
     var stage = el('div', { class: 'cbar-stage' }); root.appendChild(stage);
-    var hint = el('div', { class: 'cbar-hint' }, ''); stage.appendChild(hint);
+    var hint = el('div', { class: 'cbar-hint', dir: 'auto', 'aria-live': 'polite' }, ''); stage.appendChild(hint);
     function setHint(t) { hint.textContent = t; hint.style.display = t ? '' : 'none'; }
     var panel = el('div', { class: 'cbar-panel' }); root.appendChild(panel);
     if (mode === 'photo') { photo(stage, panel); setHint('Cadrez-vous, puis « Prendre la photo »'); return; }
