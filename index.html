@@ -2406,6 +2406,32 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   .ab-hero-in > *:nth-child(2) { animation-delay: .08s; } .ab-hero-in > *:nth-child(3) { animation-delay: .16s; } .ab-hero-in > *:nth-child(n+4) { animation-delay: .24s; }
   @keyframes abUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 }
+
+/* ---------- À propos : écriture élégante (Cormorant), comme les résultats ---------- */
+.ab { --ab-serif: 'Cormorant Garamond', Georgia, serif; }
+.ab-h1, .ab-h2, .ab-h3, .ab-year, .ab-quote p, .ab-sign-t, .ab-sub, .ab-p, .ab-cta-fin, .ab-sign-s, .ab-pil-n { font-family: var(--ab-serif); font-variant-numeric: lining-nums; }
+.ab-h1 { font-weight: 600; text-transform: none; letter-spacing: -.01em; line-height: 1.02; font-size: clamp(2.8rem, 7vw, 5.6rem); max-width: 13ch; }
+.ab-sub { font-style: italic; font-weight: 500; font-size: clamp(1.3rem, 2.2vw, 1.65rem); line-height: 1.4; }
+.ab-h2 { font-weight: 600; letter-spacing: -.005em; line-height: 1.08; font-size: clamp(2.2rem, 4.6vw, 3.6rem); }
+.ab-h3 { font-weight: 600; letter-spacing: 0; line-height: 1.15; font-size: clamp(1.6rem, 2.4vw, 2.1rem); }
+.ab-p { font-weight: 500; font-size: clamp(1.15rem, 1.6vw, 1.28rem); line-height: 1.65; color: rgba(255,255,255,.74); }
+.ab-year { font-style: italic; font-weight: 500; font-size: clamp(1.5rem, 2.6vw, 2rem); letter-spacing: 0; color: rgba(255,255,255,.6); margin-bottom: .35rem; }
+.ab-dot { width: 9px; height: 9px; margin-left: -4px; border: 0; border-radius: 50%; box-shadow: 0 0 0 4px #0a0a0a, 0 0 0 5px rgba(255,255,255,.35); }
+.ab-quote { margin: 3rem auto; }
+.ab-quote p { font-style: italic; font-weight: 500; letter-spacing: 0; line-height: 1.2; font-size: clamp(2rem, 4.4vw, 3.2rem); max-width: 20ch; }
+.ab-quote p::before, .ab-quote p::after { color: rgba(255,255,255,.35); font-style: normal; }
+.ab-pils { background: transparent; border: 0; border-top: 1px solid rgba(255,255,255,.18); gap: 0 clamp(1.5rem, 4vw, 3rem); }
+.ab-pil { background: transparent; padding: 1.75rem 0 1rem; }
+.ab-pil-n { font-style: italic; font-weight: 500; font-size: 1.6rem; letter-spacing: 0; color: rgba(255,255,255,.45); margin: 0 0 1.25rem; }
+.ab-sign-t { font-weight: 600; font-style: italic; letter-spacing: -.005em; line-height: 1.12; font-size: clamp(2.2rem, 5vw, 3.8rem); }
+.ab-sign-s { font-size: clamp(1.2rem, 1.8vw, 1.4rem); font-weight: 500; }
+.ab-cta-p { color: rgba(255,255,255,.72); }
+.ab-intro { font-family: var(--ab-serif); font-weight: 500; font-size: 1.15rem; color: rgba(255,255,255,.75); }
+.ab-sign-t { max-width: 24ch; text-wrap: balance; }
+.ab-cta-fin { font-style: italic; font-weight: 500; font-size: clamp(1.3rem, 2vw, 1.55rem); color: #fff; }
+.ab-btn { font-size: 12.5px; letter-spacing: .14em; font-weight: 700; }
+.ab-btn-o { border-width: 1px; } .ab-btn-w { border-width: 1px; }
+.ab-eb { font-size: 11.5px; letter-spacing: .22em; font-weight: 700; color: rgba(255,255,255,.55); }
 </style>
 <style>
 /* ---------- Menu « Plus » regroupé + accès direct aux rubriques ---------- */
