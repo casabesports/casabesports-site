@@ -801,6 +801,23 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .bn-coll-stat { font-family: var(--bn-font); font-weight: 600; font-size: 12.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
 .bn-coll-cta { margin-top: .2rem; font-family: var(--bn-font); font-weight: 700; font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink); border-bottom: 2px solid var(--ink); padding-bottom: .1rem; }
 .bn-coll[aria-pressed="true"] .bn-coll-cta { border-bottom-color: transparent; }
+.mc { margin: 3rem 0 1rem; scroll-margin-top: 90px; }
+.mc-lead { font-size: 13px; color: var(--muted); }
+.mc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; }
+.mc-card { display: grid; grid-template-columns: 64px 1fr; grid-template-rows: 1fr auto; gap: .35rem 1rem; align-items: center; padding: 1rem; border: 1px solid var(--line); background: var(--surface); color: var(--text); text-decoration: none; transition: border-color .2s ease; min-width: 0; }
+.mc-card:hover, .mc-card:focus-visible { border-color: var(--ink); }
+.mc-logo { position: relative; grid-row: 1 / 3; width: 64px; height: 64px; border-radius: 50%; background: #fff; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.mc-logo img { position: absolute; inset: 9%; width: 82%; height: 82%; object-fit: contain; display: block; background: #fff; }
+.mc-logo img.mc-off { display: none; }
+.mc-mono { font-family: var(--bn-font); font-weight: 700; font-size: 26px; color: #111; }
+.mc-txt { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.mc-txt b { font-family: var(--bn-font); font-weight: 700; text-transform: uppercase; letter-spacing: -.01em; font-size: 15px; line-height: 1.25; color: var(--ink); }
+.mc-meta { font-size: 13px; color: var(--text-2); }
+.mc-plat { font-size: 12px; color: var(--muted); }
+.mc-go { font-family: var(--bn-font); font-weight: 700; font-size: 12.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink); }
+.mc-note { margin: 1rem 0 0; font-size: 13px; color: var(--muted); }
+@media (max-width: 1100px) { .mc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .mc-grid { grid-template-columns: 1fr; } }
 @media (max-width: 1100px) { .bn-colls { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .bn-colls { gap: .6rem; } .bn-coll-tag { display: none; } .bn-coll-txt { padding: 0 .6rem .8rem; } }
 /* L’édition limitée : un bloc noir */
@@ -3684,6 +3701,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <sc-for list="{{shopLines}}" as="c" hint-placeholder-count="4">
         <button type="button" class="chip" onClick="{{c.pick}}" aria-pressed="{{c.pressed}}" style="background: {{c.bg}}; color: {{c.fg}}; border: 1.5px solid {{c.border}}">{{c.label}}</button>
       </sc-for>
+      <sc-if value="{{maillots.show}}" hint-placeholder-val="{{ true }}"><button type="button" class="chip mc-chip" onClick="{{maillots.voir}}">♥ {{maillots.titre}}</button></sc-if>
       <span style="flex: 1"></span>
       <label style="display: flex; align-items: center; gap: .5rem; font-size: 14px; font-weight: 700; color: var(--text-2)">Trier
         <x-select class="field" value="{{shopSort}}" onChange="{{onShopSort}}" style="width: auto; min-height: 44px"><x-option value="pop">Meilleures ventes</x-option><x-option value="asc">Prix croissant</x-option><x-option value="desc">Prix décroissant</x-option><x-option value="new">Nouveautés</x-option></x-select>
@@ -3740,6 +3758,22 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         </div>
       </sc-for>
     </div>
+    <!-- Vos maillots de cœur : les boutiques officielles des clubs du Cotentin (modifiable dans l’admin, Boutique : présentation) -->
+    <sc-if value="{{maillots.show}}" hint-placeholder-val="{{ true }}">
+      <section class="mc" id="maillots-de-coeur" aria-label="{{maillots.titre}}">
+        <div class="bn-sect"><span class="bn-etiq">{{maillots.titre}}</span><span class="mc-lead">{{maillots.texte}}</span></div>
+        <div class="mc-grid">
+          <sc-for list="{{maillots.items}}" as="mc" hint-placeholder-count="6">
+            <a class="mc-card" href="{{mc.href}}" target="_blank" rel="noopener" aria-label="{{mc.aria}}">
+              <span class="mc-logo"><span class="mc-mono" aria-hidden="true">{{mc.mono}}</span><sc-if value="{{mc.hasLogo}}" hint-placeholder-val="{{ false }}"><img class="mc-img" src="{{mc.logo}}" alt="" loading="lazy" referrerpolicy="no-referrer"></sc-if></span>
+              <span class="mc-txt"><b>{{mc.nom}}</b><span class="mc-meta">{{mc.meta}}</span><sc-if value="{{mc.hasPlat}}" hint-placeholder-val="{{ false }}"><span class="mc-plat">Boutique en ligne · {{mc.plateforme}}</span></sc-if></span>
+              <span class="mc-go" aria-hidden="true">Voir la boutique ↗</span>
+            </a>
+          </sc-for>
+        </div>
+        <p class="mc-note">Boutiques gérées par les clubs eux-mêmes : vos achats les soutiennent directement. Votre club n’y figure pas ? Écrivez-nous.</p>
+      </section>
+    </sc-if>
     <!-- Articles de l’Atelier : import des packs (aperçu, application seule) ou publication (équipe, plateforme) -->
     <sc-if value="{{crea.show}}" hint-placeholder-val="{{ false }}">
       <section class="bn-crea" aria-label="Articles de l’Atelier">

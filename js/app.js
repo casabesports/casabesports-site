@@ -36,6 +36,8 @@ function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(lo
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
 const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
 const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+// Logos des boutiques de clubs (images hébergées chez les clubs) : si l'un ne charge pas, l'initiale du club reste affichée
+if (typeof document !== 'undefined') document.addEventListener('error', (e) => { const t = e.target; if (t && t.classList && t.classList.contains('mc-img')) t.classList.add('mc-off'); }, true);
 // Lien vers le site d'un partenaire, marqué « vient de Casa Besports » (paramètres utm_ lus par Google Analytics, Matomo, HubSpot…)
 function cbPartnerLink(url, id, kind) {
   const u0 = String(url || '').trim(); if (!u0) return '';
@@ -1662,6 +1664,16 @@ class Component extends DCLogic {
     const shopPosters = [
       ...(BQ.collections || []).map((c) => ({ line: c.nom, kick: c.accroche || '', title: c.titre || c.nom, tag: c.texte || '', img: c.image || (X.products.find((p) => p.line === c.ligne) || {}).img || 'assets/hero.jpg', credits: lineStat(c.ligne) }))
     ].map((d) => Object.assign({ pressed: s.shopLine === d.line ? 'true' : 'false', aria: d.title + ' : afficher la collection ' + d.line, cta: s.shopLine === d.line ? 'Collection affichée' : 'Voir la collection', pick: () => this.setState({ shopLine: s.shopLine === d.line ? 'Tout' : d.line }) }, d));
+    // Vos maillots de cœur : les boutiques officielles des clubs du Cotentin (liens marqués « vient de Casa Besports »)
+    const clubLogo = (id) => { const c = (window.CASA_CLUBS || []).find((x) => x && x.id === id); return c ? (c.logo || '') : ''; };
+    const mcItems = (BQ.maillots || []).filter((m) => m && m.nom && m.boutiqueUrl && m.actif !== false).map((m, i) => {
+      const logo = m.logo || clubLogo(m.club);
+      return { nom: m.nom, meta: [m.sport, m.city].filter(Boolean).join(' · '), plateforme: m.plateforme || '', hasPlat: !!m.plateforme, logo, hasLogo: !!logo, noLogo: !logo,
+        mono: String(m.nom).replace(/^(AS|US|FC|CS|SC|PL|ES|JS|UC|RC)\s+/i, '').charAt(0).toUpperCase() || '?',
+        href: cbPartnerLink(m.boutiqueUrl, 'maillots-' + (m.club || i), 'boutique-club'), aria: 'Boutique officielle de ' + m.nom + ' (nouvel onglet)' };
+    }).filter((m) => m.href);
+    const maillots = { show: mcItems.length > 0, titre: BQ.maillotsTitre || 'Vos maillots de cœur', texte: BQ.maillotsTexte || '', items: mcItems,
+      voir: () => { try { const el = document.getElementById('maillots-de-coeur'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} } };
     const nuitP = X.products.find((p) => p.id === 'kit-nuit');
     const trailer = nuitP ? { name: nuitP.name, title: 'Nuit', sub: 'Le maillot third des Vikings du Cotentin : noir profond à fines rayures, médaillon et écusson pentagone dorés.', img: nuitP.img, price: eur0(nuitP.price), open: () => this.go('product', { productId: 'kit-nuit', color: 0, size: null, qty: 1, persoName: '', persoNum: '', sizeGuide: false, prodImg: 0 }) } : {};
     const showTrailer = !!nuitP && (s.shopLine === 'Tout' || s.shopLine === 'Collection Vikings');
@@ -2654,7 +2666,7 @@ class Component extends DCLogic {
       pronoRows, pronoCount,
       matchOpen: !!mxRaw, mx, closeMatch: () => this.setState({ matchId: null }),
       // boutique
-      shopPosters, shopPres, showTrailer, trailer, crea, creaBanner,
+      shopPosters, shopPres, showTrailer, trailer, crea, creaBanner, maillots,
       introOn: !!s.introOn, skipIntro: () => { clearTimeout(this._introT); this.setState({ introOn: false }); },
       goShopVikings: () => this.go('shop', { shopLine: 'Collection Vikings' }),
       freeShip: FREE + ' €', shopLines, shopSort: s.shopSort, onShopSort: (e) => this.setState({ shopSort: e.target.value }), showCherwoodBanner: s.shopLine === 'Cherwood × Casa' || s.shopLine === 'Tout',
