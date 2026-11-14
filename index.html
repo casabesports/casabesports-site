@@ -144,7 +144,8 @@ html[data-cb-theme], body { background: var(--bg, #ffffff); }
 .pro-hero { padding-top: 2.4rem; padding-bottom: 2.4rem; border-bottom: 1px solid var(--line) }
 .pro-eb { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-text, #e8a830); display: flex; align-items: center; gap: .5rem; margin-bottom: .7rem }
 .pro-eb2 { margin-top: 2.6rem }
-.pro-dot { width: 8px; height: 8px; border-radius: 50%; background: #e8a830; box-shadow: 0 0 0 4px rgba(232,168,48,.18) }
+.pro-dot { width: 13px; height: 13px; background: #e8a830; -webkit-mask: var(--ancre) center/contain no-repeat; mask: var(--ancre) center/contain no-repeat } /* ancre : clin d'œil au port de Cherbourg */
+:root { --ancre: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='4.6' r='2.1'/%3E%3Cpath d='M12 6.7V21.5M8.2 10.2h7.6M4.2 13.8c.4 4.4 3.7 7.7 7.8 7.7s7.4-3.3 7.8-7.7M2.6 15.6l1.6-1.8 1.9 1.4M21.4 15.6l-1.6-1.8-1.9 1.4'/%3E%3C/svg%3E"); }
 .pro-h1 { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 900; font-size: clamp(2.3rem, 6.4vw, 5.2rem); line-height: .95; letter-spacing: -.02em; text-transform: uppercase; margin: 0 0 1rem; max-width: 14ch }
 .pro-h1 span, .pro-h2 span { color: var(--gold-text, #e8a830) }
 .pro-lead { font-size: 14px; color: var(--text-2); max-width: 60ch; margin: 0 0 1.3rem }
@@ -165,8 +166,8 @@ html[data-cb-theme], body { background: var(--bg, #ffffff); }
 .pro-h2 { display: block; font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 900; font-size: clamp(1.5rem, 3.4vw, 2.4rem); line-height: 1; text-transform: uppercase; letter-spacing: -.01em; margin: 0 0 .7rem; color: var(--ink) }
 .pro-prom { font-size: 14px; color: var(--text-2); margin: 0 0 1.1rem }
 .pro-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem }
-.pro-list li { font-size: 13.5px; padding-left: 1.3rem; position: relative; color: var(--text) }
-.pro-list li::before { content: ''; position: absolute; left: 0; top: .45em; width: 8px; height: 8px; background: #e8a830 }
+.pro-list li { font-size: 13.5px; padding-left: 1.6rem; position: relative; color: var(--text) }
+.pro-list li::before { content: ''; position: absolute; left: 0; top: .2em; width: 14px; height: 14px; background: #e8a830; -webkit-mask: var(--ancre) center/contain no-repeat; mask: var(--ancre) center/contain no-repeat }
 .pro-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1rem; margin-top: 2.6rem }
 .pro-step { border-top: 2px solid var(--ink); padding-top: .8rem }
 .pro-step h3 { font-size: 15px; margin: .3rem 0 .3rem; color: var(--ink) }
