@@ -168,3 +168,11 @@ Conseils : fichier .mp4, moins de 15 secondes, 1080p au plus, 50 Mo maximum (id�
 
 - **Accueil** : 5 blocs essentiels s'affichent pour tout le monde (grand bandeau à la une, résultats du week-end, portes « passionné » / « pro », Casa × Cherwood, Gazette du mois). Les autres rubriques (actus, vidéos, météo, Club House, culture…) sont proposées aux abonnés connectés dans **Personnaliser mon accueil** : sports et clubs favoris (ils passent en tête du bandeau, des résultats et des actus), rubriques à afficher et leur ordre, disposition, arrière-plan. Ces choix sont gardés dans le compte de l'abonné (Supabase, aucune table à créer) et le suivent sur tous ses appareils.
 - **Couleurs des fonds** (Contenus du site › Fonds de page) : photos de fond en noir et blanc ou en couleur, couleur de fond pour tout le site, et couleur propre à une page. Chaque abonné peut aussi choisir sa couleur dans Personnaliser mon accueil ou Mon espace › Apparence. Par défaut : noir et blanc, sans teinte.
+
+## Déplacer un élément (Retoucher)
+
+Bouton « ✎ Retoucher », cliquez sur un texte ou une image : le volet commence par **Déplacer**.
+- Choisissez ce qui bouge : l'élément lui-même, le cadre autour, un bloc plus grand ou la section (encadré en pointillés bleus).
+- « Glisser sur la page » : faites glisser n'importe où, l'élément suit ; « Terminer le déplacement » quand c'est bien. Ou utilisez les flèches (1, 10 ou 40 px).
+- Le réglage vaut pour l'écran utilisé (ordinateur ou téléphone) : l'autre ne change pas. Faites le réglage téléphone depuis un téléphone.
+- « Remettre à sa place » annule. Rien n'est visible des visiteurs avant « Publier ». Liste et suppression : Contenus du site › Retouches des pages › Éléments déplacés.

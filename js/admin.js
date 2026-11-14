@@ -634,9 +634,17 @@
         E('div', { class: 'cba-row', style: 'align-items:center;gap:1rem;margin-top:.5rem' }, th(r.avant, 'Origine'), E('span', { style: 'font-size:1.6rem' }, '→'), th(r.apres || r.avant, r.apres ? 'Nouvelle image' : 'Même image, recadrée'),
           E('span', { style: 'font-size:13px;color:var(--muted)' }, taille + (r.z && r.z !== 1 ? ' · zoom ' + r.z : ''))));
     });
+    v.places = Array.isArray(v.places) ? v.places : [];
+    var places = v.places.map(function (r, i) {
+      return E('div', { class: 'cba-card', style: 'margin:.5rem 0' },
+        E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('span', { class: 'cba-tag' }, where(r) + ' · ' + (r.ecran === 'mob' ? 'téléphone' : 'ordinateur')),
+          E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Remettre cet élément à sa place d’origine ?')) return; v.places.splice(i, 1); mark(); render(); } }, 'Remettre à sa place')),
+        E('p', { style: 'margin:.3rem 0 0;font-size:13px;color:var(--muted)' }, 'Décalé de ' + (r.dx || 0) + ' px horizontalement et ' + (r.dy || 0) + ' px verticalement' + (r.cls ? ' · ' + r.cls.split(' ')[0] : '')));
+    });
     return E('div', {},
       E('h3', { style: 'margin:1rem 0 .3rem' }, 'Textes (' + texts.length + ')'), texts.length ? texts : E('p', { class: 'cba-sub' }, 'Aucun texte retouché.'),
-      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Images (' + imgs.length + ')'), imgs.length ? imgs : E('p', { class: 'cba-sub' }, 'Aucune image retouchée.'));
+      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Images (' + imgs.length + ')'), imgs.length ? imgs : E('p', { class: 'cba-sub' }, 'Aucune image retouchée.'),
+      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Éléments déplacés (' + places.length + ')'), places.length ? places : E('p', { class: 'cba-sub' }, 'Aucun élément déplacé.'));
   }
   // ---------- Fonds de page : une image par page, avec son cadrage ----------
   var FOND_PAGES = [['accueil', 'Accueil'], ['actualites', 'Actualités et articles'], ['direct', 'Direct'], ['videos', 'Vidéos'], ['disciplines', 'Disciplines'], ['clubs', 'Clubs et carte'], ['joueurs', 'Joueurs'], ['boutique', 'Boutique'], ['abonnements', 'Abonnements'], ['compte', 'Mon espace'], ['quotidien', 'Le quotidien (abonnés)'], ['clubhouse', 'Club House'], ['culture', 'Culture'], ['meteo', 'Météo'], ['partenaires', 'Partenaires'], ['apropos', 'À propos'], ['contact', 'Contact'], ['mentions', 'Mentions légales'], ['application', 'Application'], ['redaction', 'Rédaction']];
