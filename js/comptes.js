@@ -124,7 +124,19 @@
     editedKeys: function () { return Object.keys(readCache()); },
     // Envoi d'un e-mail depuis la messagerie (fonction serveur « envoyer-email », voir docs/ESPACE-ADMIN.md)
     sendMail: function (to, subject, text, replyTo) {
-      return use(function (c) { return c.functions.invoke('envoyer-email', { body: { to: to, subject: subject, text: text, reponse_a: replyTo || null } }); });
+      // En cas d'échec, on remonte la vraie raison (fonction absente, clé manquante, expéditeur refusé par Brevo…)
+      return ready.then(function (c) {
+        return c.functions.invoke('envoyer-email', { body: { to: to, subject: subject, text: text, reponse_a: replyTo || null } }).then(function (r) {
+          if (!r.error) return r.data;
+          var ctx = r.error.context, status = ctx && ctx.status;
+          var lire = ctx && typeof ctx.json === 'function' ? ctx.json().catch(function () { return {}; }) : Promise.resolve({});
+          return lire.then(function (b) {
+            var e = new Error((b && b.error) || r.error.message || 'Erreur');
+            e.pasActive = !status || status === 404 || status === 501;
+            throw e;
+          });
+        });
+      });
     }
   };
 

@@ -370,8 +370,8 @@
       A.sendMail(C.to.trim(), C.subject.trim() || 'Casa Besports', C.text, C.replyTo).then(function () {
         S.busy = false; S.compose = null; toast('Message envoyé'); loadMsgs();
         if (C.replyTo) db(function (c) { return c.from('messages').update({ traite: true }).eq('id', C.replyTo); }).catch(function () {});
-      }, function () {
-        S.busy = false; C.fallback = true; render();
+      }, function (e) {
+        S.busy = false; C.fallback = true; C.raison = e && !e.pasActive ? e.message : ''; render();
       });
     };
     var mailto = 'mailto:' + encodeURIComponent(C.to.trim()) + '?subject=' + encodeURIComponent(C.subject) + '&body=' + encodeURIComponent(C.text);
@@ -381,7 +381,7 @@
       E('datalist', { id: 'cba-contacts' }, S.contacts.map(function (c) { return E('option', { value: c.email }, c.nom || ''); })),
       E('label', { class: 'cba-lbl' }, 'Objet'), E('input', { class: 'cba-in', value: C.subject, oninput: function (e) { C.subject = e.target.value; } }),
       E('label', { class: 'cba-lbl' }, 'Message'), E('textarea', { class: 'cba-in', style: 'min-height:220px', value: C.text, oninput: function (e) { C.text = e.target.value; } }),
-      C.fallback ? E('div', { class: 'cba-note', style: 'margin-top:.8rem' }, 'L’envoi direct depuis le site n’est pas encore activé (voir Aide). Envoyez-le depuis votre messagerie habituelle : ',
+      C.fallback ? E('div', { class: 'cba-note', style: 'margin-top:.8rem' }, C.raison ? 'L’envoi direct a échoué : ' + C.raison + '. En attendant, envoyez-le depuis votre messagerie habituelle : ' : 'L’envoi direct depuis le site n’est pas encore activé (voir Aide). Envoyez-le depuis votre messagerie habituelle : ',
         E('a', { href: mailto, onclick: function () { db(function (c) { return c.from('messages').insert({ source: 'E-mail', sens: 'envoye', destinataire: C.to.trim(), sujet: C.subject, message: C.text, reponse_a: C.replyTo, lu: true, traite: true }); }).then(function () { loadMsgs(); }, function () {}); } }, 'ouvrir dans ma messagerie'), '.') : null,
       E('div', { class: 'cba-row', style: 'margin-top:.8rem' },
         E('button', { type: 'button', class: 'cba-btn pri', disabled: S.busy || null, onclick: send }, S.busy ? 'Envoi…' : 'Envoyer'),
