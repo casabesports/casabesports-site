@@ -4,6 +4,7 @@
  *  - Messagerie : demandes reçues par le site + e-mails des adresses suivies, réponses
  *  - Contenus : toutes les sections modifiables (articles, Gazette, lieux, boutique, vidéos, culture, fonds, À propos, pages légales)
  *  - Images : envoi de photos (redimensionnées automatiquement) dans le stockage du site
+ *  - Abonnés : coordonnées des inscrits, étiquettes de la rédaction (supabase/abonnes.sql)
  *  - Équipe : demandes d'accès à la rédaction, rédacteurs habilités
  * Les droits sont vérifiés par Supabase (supabase/administration.sql) : ce fichier n'est que l'interface.
  */
@@ -97,7 +98,7 @@
   var LONG = /^(body|bodyEn|desc|texte|text|dek|dekEn|hook|moment|t|kicker|accroche|motif|message|why|citation|citationEn|note|lead|a|d|ours|solutions)$/;
 
   // ---------- état ----------
-  var S = { open: false, tab: 'msg', setup: null, msgs: [], mf: 'tous', q: '', sel: null, compose: null, contacts: [], team: [], reqs: [], key: null, work: null, dirty: false, openCards: {}, images: [], busy: false, loaded: {} };
+  var S = { open: false, tab: 'msg', setup: null, msgs: [], mf: 'tous', q: '', sel: null, compose: null, contacts: [], team: [], reqs: [], subs: [], key: null, work: null, dirty: false, openCards: {}, images: [], busy: false, loaded: {} };
   var root, body, toastEl, pushed = false, timer = null;
 
   // ---------- outils ----------
@@ -260,6 +261,7 @@
   function loadTab(t) {
     if (t === 'msg') { loadMsgs(); loadContacts(); }
     else if (t === 'team') loadTeam();
+    else if (t === 'subs') loadSubs();
     else if (t === 'img') loadImages();
     render();
   }
@@ -278,7 +280,7 @@
     if (!root) return;
     var y = body ? body.scrollTop : 0;
     root.textContent = '';
-    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
+    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['subs', 'Abonnés', 0], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
     add(root, E('div', { class: 'cba-top' },
       E('span', { class: 'cba-brand' }, E('span', { class: 'long' }, 'Casa Besports · '), 'Administration'),
       E('div', { class: 'cba-tabs', role: 'tablist' }, tabs.map(function (t) {
@@ -289,7 +291,7 @@
     var w = E('div', { class: 'cba-wrap' });
     if (S.setup === 'sql') add(w, E('div', { class: 'cba-note' }, E('strong', {}, 'Une étape à faire une seule fois. '), 'La base de l’espace administrateur n’est pas encore installée : ouvrez Supabase › SQL Editor › New query, collez le contenu du fichier supabase/administration.sql du dépôt, puis cliquez « Run ». Rechargez ensuite cette page. (Guide : docs/ESPACE-ADMIN.md)'));
     else if (S.setup === 'norole') add(w, E('div', { class: 'cba-note' }, 'Votre compte n’est pas reconnu comme administrateur par Supabase : vérifiez que votre adresse e-mail est confirmée et qu’elle figure dans la table « equipe » avec le rôle admin.'));
-    add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, team: viewTeam, help: viewHelp })[S.tab]());
+    add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, subs: viewSubs, team: viewTeam, help: viewHelp })[S.tab]());
     add(body, w); add(root, body);
     body.scrollTop = y;
   }
@@ -1196,12 +1198,94 @@
             db(function (c) { return c.from('equipe').insert({ email: e2, nom: nm.trim() || null, role: 'redacteur' }); }).then(function () { toast(e2 + ' peut maintenant accéder à l’espace rédaction'); loadTeam(); }, err);
           } }, 'Habiliter comme rédacteur')),
         !S.loaded.team ? E('p', {}, 'Chargement…') : E('table', { class: 'cba-tbl', style: 'margin-top:.8rem' }, E('tbody', {}, S.team.map(function (m) {
-          return E('tr', {}, E('td', {}, E('strong', {}, m.nom || m.email), E('div', { style: 'color:var(--muted)' }, m.email)), E('td', {}, m.role === 'admin' ? 'Administrateur' : 'Rédacteur'),
+          return E('tr', {}, E('td', {}, E('strong', {}, m.nom || m.email), E('div', { style: 'color:var(--muted)' }, m.email)), E('td', {}, etiquetteLabel(m.role) + (m.club ? ' · ' + clubName(m.club) : '')),
             E('td', { style: 'text-align:right' }, m.role === 'admin' ? null : E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Retirer l’accès à la rédaction de ' + m.email + ' ?')) return; db(function (c) { return c.from('equipe').delete().eq('email', m.email); }).then(function () { toast('Accès retiré'); loadTeam(); }, err); } }, 'Retirer l’accès')));
         })))),
       done.length ? [E('h2', { style: 'margin:1.6rem 0 .5rem' }, 'Demandes traitées'), E('table', { class: 'cba-tbl' }, E('tbody', {}, done.slice(0, 50).map(function (r) {
         return E('tr', {}, E('td', {}, r.nom || r.email, E('div', { style: 'color:var(--muted)' }, r.email)), E('td', {}, r.statut === 'acceptee' ? 'Acceptée' : 'Refusée'), E('td', {}, fmtDate(r.traite_le || r.cree_le)));
       })))] : null];
+  }
+
+  // ================= ABONNÉS ET ÉTIQUETTES DE LA RÉDACTION =================
+  // Liste lue par la fonction serveur liste_abonnes() (supabase/abonnes.sql) : réservée à l'administrateur.
+  var ETIQUETTES = [['', 'Aucun accès'], ['redacteur', 'Rédacteur'], ['collaborateur', 'Chef d’édition'], ['correspondant', 'Correspondant de club']];
+  function etiquetteLabel(r) { if (r === 'admin') return 'Administrateur'; var f = ETIQUETTES.filter(function (x) { return x[0] === r; })[0]; return f ? f[1] : (r || ''); }
+  function clubsList() { return (Array.isArray(window.CASA_CLUBS) ? window.CASA_CLUBS : []).filter(function (c) { return c && c.id && c.name; }); }
+  function clubName(id) { var c = clubsList().filter(function (k) { return k.id === id; })[0]; return c ? c.name : (id || ''); }
+  function formuleLabel(id) { var f = (Array.isArray(window.CASA_ABONNEMENTS) ? window.CASA_ABONNEMENTS : []).filter(function (a) { return a && a.id === id; })[0]; return f ? f.name : id; }
+  var STATUTS_ABO = { active: 'actif', trialing: 'essai', past_due: 'paiement en retard', unpaid: 'impayé', canceled: 'résilié', incomplete: 'paiement à finir', incomplete_expired: 'expiré' };
+  function aboActif(u) { return u.formule && (u.statut_abonnement === 'active' || u.statut_abonnement === 'trialing'); }
+  function loadSubs() {
+    S.subsErr = null;
+    return db(function (c) { return c.rpc('liste_abonnes'); }).then(function (d) { S.subs = d || []; S.loaded.subs = true; render(); }, function (e) {
+      var m = (e && e.message) || ''; S.subsErr = /liste_abonnes|function|schema cache|PGRST202/i.test(m) && !/Réservé/.test(m) ? 'sql' : m || 'Erreur'; S.loaded.subs = true; render();
+    });
+  }
+  function setEtiquette(u, role, club) {
+    var txt = role ? (u.email + ' recevra l’étiquette « ' + etiquetteLabel(role) + (club ? ' · ' + clubName(club) : '') + ' ».') : 'Retirer l’accès à la rédaction de ' + u.email + ' ?';
+    if (!confirm(txt)) return;
+    db(function (c) { return c.rpc('definir_etiquette', { adresse: u.email, etiquette: role || null, club_id: club || null, nom_affiche: u.nom || null }); }).then(function () {
+      if (S.subEdit) delete S.subEdit[u.id];
+      toast(role ? 'Étiquette enregistrée : elle s’applique à sa prochaine connexion' : 'Accès à la rédaction retiré');
+      loadSubs(); S.loaded.team = false;
+    }, err);
+  }
+  function subMatches(u) {
+    var f = S.subF || 'tous';
+    if (f === 'payants' && !aboActif(u)) return false;
+    if (f === 'redaction' && !u.etiquette) return false;
+    if (f === 'demandes' && u.demande !== 'en_attente') return false;
+    var q = (S.subQ || '').trim().toLowerCase(); if (!q) return true;
+    return [u.nom, u.email, u.telephone, u.numero_membre].some(function (v) { return v && String(v).toLowerCase().indexOf(q) >= 0; });
+  }
+  function subCard(u) {
+    var mailOk = u.email && u.email_confirme;
+    var cur = (S.subEdit && S.subEdit[u.id]) || u.etiquette || '';
+    var abo = u.formule ? formuleLabel(u.formule) + (u.periode ? ' · ' + (u.periode === 'an' ? 'à l’année' : 'au mois') : '') + ' · ' + (STATUTS_ABO[u.statut_abonnement] || u.statut_abonnement || '') + (u.fin_abonnement ? ' jusqu’au ' + new Date(u.fin_abonnement).toLocaleDateString('fr-FR') : '') : 'Compte gratuit';
+    var kv = [['E-mail', u.email ? E('a', { href: 'mailto:' + u.email }, u.email) : '—', u.email && !u.email_confirme ? ' (non confirmée)' : ''],
+      ['Téléphone', u.telephone ? E('a', { href: 'tel:+' + String(u.telephone).replace(/^\+/, '') }, '+' + String(u.telephone).replace(/^\+/, '')) : '—'],
+      ['Abonnement', abo], ['Carte membre', u.numero_membre || '—'],
+      ['Inscrit le', u.inscrit_le ? new Date(u.inscrit_le).toLocaleDateString('fr-FR') : '—'], ['Vu le', u.derniere_connexion ? fmtDate(u.derniere_connexion) : '—']];
+    return E('div', { class: 'cba-card' },
+      E('div', { class: 'cba-row', style: 'justify-content:space-between' },
+        E('strong', { style: 'font-size:1.05rem' }, u.nom || u.email || (u.telephone ? '+' + String(u.telephone).replace(/^\+/, '') : 'Sans nom'),
+          u.etiquette ? E('span', { class: 'cba-tag', style: 'background:#1d5e3a' }, etiquetteLabel(u.etiquette) + (u.club ? ' · ' + clubName(u.club) : '')) : null,
+          aboActif(u) ? E('span', { class: 'cba-tag dr' }, 'abonné') : null,
+          u.demande === 'en_attente' ? E('span', { class: 'cba-tag' }, 'demande en attente') : null),
+        u.email ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { S.tab = 'msg'; S.compose = { to: u.email, subject: 'Casa Besports', text: '', replyTo: null }; loadTab('msg'); } }, 'Lui écrire') : null),
+      E('dl', { class: 'cba-kv', style: 'margin:.6rem 0' }, kv.map(function (r) { return [E('dt', {}, r[0]), E('dd', {}, r[1], r[2] || null)]; })),
+      u.etiquette === 'admin' ? E('p', { style: 'color:var(--muted);margin:0' }, 'Compte administrateur : il ne se modifie pas ici.')
+      : !mailOk ? E('p', { style: 'color:var(--muted);margin:0' }, 'Accès à la rédaction impossible pour l’instant : il faut une adresse e-mail confirmée (la personne se connecte une fois avec son e-mail, depuis « Mon espace »).')
+      : [E('div', { class: 'cba-lbl' }, 'Accès à la rédaction'),
+        E('div', { class: 'cba-row' }, ETIQUETTES.map(function (t) {
+          return E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String(cur === t[0]), onclick: function () { S.subEdit = S.subEdit || {}; delete S.subEdit[u.id]; if (t[0] === 'correspondant') { S.subEdit[u.id] = 'correspondant'; render(); return; } if (t[0] === (u.etiquette || '')) { render(); return; } setEtiquette(u, t[0]); } }, t[1]);
+        })),
+        cur === 'correspondant' ? E('div', { class: 'cba-row', style: 'margin-top:.5rem' },
+          E('select', { class: 'cba-in', style: 'flex:1 1 220px;width:auto', 'aria-label': 'Club du correspondant', onchange: function (e) { if (e.target.value) setEtiquette(u, 'correspondant', e.target.value); } },
+            E('option', { value: '' }, u.club ? 'Changer de club…' : 'Choisir son club…'),
+            clubsList().map(function (c) { return E('option', { value: c.id, selected: c.id === u.club ? true : null }, c.name + (c.sport ? ' · ' + c.sport : '')); }))) : null]);
+  }
+  function subList() {
+    var list = S.subs.filter(subMatches);
+    return E('div', {}, E('p', { style: 'color:var(--muted);margin:.4rem 0 .8rem' }, list.length + ' compte' + (list.length > 1 ? 's' : '') + (list.length !== S.subs.length ? ' sur ' + S.subs.length : '')),
+      list.length ? list.slice(0, 300).map(subCard) : E('p', {}, 'Aucun compte ne correspond.'),
+      list.length > 300 ? E('p', { style: 'color:var(--muted)' }, 'Seuls les 300 premiers sont affichés : affinez la recherche.') : null);
+  }
+  function viewSubs() {
+    var head = [E('h1', { class: 'cba-h' }, 'Abonnés'),
+      E('p', { class: 'cba-sub' }, 'Toutes les personnes inscrites sur le site, avec leurs coordonnées et leur abonnement. Donnez ou retirez un accès à la rédaction avec les étiquettes : Rédacteur, Chef d’édition ou Correspondant de club (rattaché à un seul club). L’accès s’applique à leur prochaine connexion.'),
+      E('div', { class: 'cba-note' }, E('strong', {}, 'Données personnelles. '), 'Cette liste n’est visible que par vous (vérifié par Supabase). Utilisez ces coordonnées uniquement pour Casa Besports (RGPD) : ne les copiez pas ailleurs et ne les transmettez à personne.')];
+    if (!S.loaded.subs) return head.concat(E('p', {}, 'Chargement…'));
+    if (S.subsErr === 'sql') return head.concat(E('div', { class: 'cba-note' }, E('strong', {}, 'Une étape à faire une seule fois. '), 'Ouvrez Supabase › SQL Editor › New query, collez le contenu du fichier supabase/abonnes.sql du dépôt, puis cliquez « Run ». Revenez ensuite ici et cliquez « Actualiser ». (Guide : docs/ESPACE-ADMIN.md, partie « Abonnés »)'), E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.loaded.subs = false; render(); loadSubs(); } }, 'Actualiser'));
+    if (S.subsErr) return head.concat(E('div', { class: 'cba-note' }, 'La liste n’a pas pu être chargée : ' + S.subsErr), E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.loaded.subs = false; render(); loadSubs(); } }, 'Réessayer'));
+    var n = function (f) { return S.subs.filter(f).length; };
+    var chips = [['tous', 'Tous (' + S.subs.length + ')'], ['payants', 'Abonnés payants (' + n(aboActif) + ')'], ['redaction', 'Rédaction (' + n(function (u) { return u.etiquette; }) + ')'], ['demandes', 'Demandes en attente (' + n(function (u) { return u.demande === 'en_attente'; }) + ')']];
+    var holder = E('div', {}, subList());
+    return head.concat(
+      E('div', { class: 'cba-row', style: 'margin-bottom:.6rem' }, chips.map(function (c) { return E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String((S.subF || 'tous') === c[0]), onclick: function () { S.subF = c[0]; render(); } }, c[1]); }),
+        E('button', { type: 'button', class: 'cba-btn sm', style: 'margin-left:auto', onclick: function () { loadSubs(); } }, 'Actualiser')),
+      E('input', { class: 'cba-in', type: 'search', placeholder: 'Rechercher un nom, un e-mail, un téléphone, une carte membre…', value: S.subQ || '', 'aria-label': 'Rechercher un abonné', oninput: function (e) { S.subQ = e.target.value; holder.textContent = ''; add(holder, subList()); } }),
+      holder);
   }
 
   // ================= AIDE =================
