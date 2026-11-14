@@ -80,6 +80,12 @@
     // ---------- Rôles et espace administrateur (voir supabase/administration.sql) ----------
     // Rôle de la personne connectée d'après la table « equipe » : 'admin', 'redacteur' ou null
     myRole: function () { return use(function (c) { return c.rpc('mon_role'); }).then(function (r) { return Array.isArray(r) ? (r[0] || null) : (r || null); }); },
+    // Étiquette et club (supabase/abonnes.sql) : { role: 'admin' | 'collaborateur' | 'redacteur' | 'correspondant', club } ou null.
+    // Si abonnes.sql n'est pas encore lancé, se rabat sur mon_role().
+    myAccess: function () {
+      return use(function (c) { return c.rpc('mon_acces'); }).then(function (d) { var r = Array.isArray(d) ? d[0] : d; return r && r.role ? { role: r.role, club: r.club || null } : null; },
+        function () { return A.myRole().then(function (r) { return r ? { role: r, club: null } : null; }); });
+    },
     // Demande d'accès à l'espace rédaction (abonné connecté)
     requestAccess: function (nom, motif) {
       return use(function (c) { return c.from('demandes_acces').insert({ nom: nom || null, email: A.user && A.user.email ? A.user.email.toLowerCase() : null, motif: motif }).select().single(); });

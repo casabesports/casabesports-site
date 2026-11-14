@@ -5,6 +5,7 @@ Un espace visible **uniquement par vous** (l'administrateur du site) pour :
 - **Contenus du site** : modifier toutes les sections (articles, Gazette, lieux, boutique, vidéos, culture, fonds de page, À propos, pages légales) et leurs images, sans passer par GitHub ;
 - **Images** : envoyer vos photos (elles sont réduites automatiquement) ;
 - **Messagerie** : lire toutes les demandes reçues par le site, y répondre, et recevoir les e-mails des adresses que vous ajoutez ;
+- **Abonnés** : voir toutes les personnes inscrites (nom, e-mail, téléphone, abonnement, carte membre) et leur donner une étiquette de la rédaction ;
 - **Équipe et accès** : décider qui a accès à l'espace rédaction, accepter ou refuser les demandes des abonnés.
 
 ## 1. Installation (une seule fois, 2 minutes)
@@ -61,6 +62,36 @@ L'espace rédaction n'est visible que par vous et les personnes que vous habilit
 - Vous recevez la demande dans **Équipe et accès** (le nombre de demandes s'affiche sur l'onglet) : **Accepter** ou **Refuser**.
 - Vous pouvez aussi habiliter quelqu'un directement par son e-mail, ou lui **retirer l'accès**.
 - L'accès s'applique à la prochaine connexion de la personne (ou en rechargeant la page).
+
+## 4 bis. Abonnés et étiquettes de la rédaction
+
+L'onglet **Abonnés** liste toutes les personnes inscrites sur le site : nom, e-mail, téléphone, date d'inscription, dernière visite, carte membre et abonnement payé (formule, statut, date de fin). Recherche par nom, e-mail, téléphone ou numéro de carte ; filtres « Abonnés payants », « Rédaction », « Demandes en attente ».
+
+Sur chaque fiche, une rangée d'étiquettes décide de l'accès à l'espace rédaction :
+
+| Étiquette | Ce que la personne peut faire |
+|---|---|
+| Aucun accès | Abonné simple, pas d'espace rédaction. |
+| Rédacteur | Rédige ses articles et les soumet ; ne publie jamais seul. |
+| Chef d'édition | Rédige, soumet, gère la une et La Gazette. |
+| Correspondant de club | Rattaché à **un seul club** (à choisir dans la liste) : modèles guidés et fiche de son club, envoyés à la rédaction. |
+
+L'étiquette s'applique à la prochaine connexion de la personne (ou quand elle recharge la page). Une personne inscrite **uniquement par téléphone** doit d'abord se connecter une fois avec une adresse e-mail confirmée.
+
+### Installation (une seule fois, 1 minute)
+
+1. Ouvrez [supabase.com](https://supabase.com) › votre projet Casa Besports › **SQL Editor** (menu de gauche) › **New query**.
+2. Sur GitHub, ouvrez le fichier `supabase/abonnes.sql` du dépôt, cliquez l'icône **Copier** (deux carrés, en haut à droite du fichier).
+3. Collez dans Supabase, puis cliquez **Run** (en bas à droite). Le message « Success. No rows returned » doit s'afficher.
+4. Sur le site : **Admin** › onglet **Abonnés** › **Actualiser**.
+
+Ce fichier se lance **après** `supabase/administration.sql` (déjà fait le 2026-11-11). Il peut être relancé sans risque.
+
+### Données personnelles (RGPD)
+
+- La liste n'est lisible **que par l'administrateur** : Supabase vérifie votre rôle à chaque lecture (fonction `liste_abonnes`). Un visiteur ou un rédacteur reçoit « Réservé à l'administrateur ».
+- Le compte administrateur ne peut pas être modifié depuis le site.
+- Utilisez ces coordonnées uniquement pour Casa Besports ; ne les exportez pas et ne les transmettez à personne.
 
 ## 5. Messagerie
 
