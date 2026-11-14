@@ -3195,21 +3195,34 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   <section class="wrap" style="padding-top: 2rem; padding-bottom: 5rem">
     <div class="eb" style="margin-bottom: .5rem">Joueurs</div>
     <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem); margin-bottom: 1rem">Les sportifs qui font vibrer la Manche</h1>
-    <div style="display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0 2rem; align-items: center">
+    <div style="display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0 .6rem; align-items: center">
+      <sc-for list="{{zoneChips}}" as="c" hint-placeholder-count="2">
+        <button type="button" class="chip" onClick="{{c.pick}}" aria-pressed="{{c.pressed}}" style="background: {{c.bg}}; color: {{c.fg}}; border: 1.5px solid {{c.border}}">{{c.label}}</button>
+      </sc-for>
+      <button type="button" class="btn btn-gold" onClick="{{proposePlayer}}" style="margin-left: auto">Je suis joueur : ma fiche</button>
+    </div>
+    <sc-if value="{{hasSportChips}}" hint-placeholder-val="{{ true }}"><div style="display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 .6rem; align-items: center">
+      <sc-for list="{{sportChips}}" as="c" hint-placeholder-count="5">
+        <button type="button" class="chip" onClick="{{c.pick}}" aria-pressed="{{c.pressed}}" style="background: {{c.bg}}; color: {{c.fg}}; border: 1.5px solid {{c.border}}">{{c.label}}</button>
+      </sc-for>
+    </div></sc-if>
+    <div style="display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1.2rem; align-items: center">
       <sc-for list="{{roleChips}}" as="c" hint-placeholder-count="5">
         <button type="button" class="chip" onClick="{{c.pick}}" aria-pressed="{{c.pressed}}" style="background: {{c.bg}}; color: {{c.fg}}; border: 1.5px solid {{c.border}}">{{c.label}}</button>
       </sc-for>
-      <button type="button" class="btn btn-gold" onClick="{{proposePlayer}}" style="margin-left: auto">Faire briller un talent</button>
+      <span style="margin-left: auto; font-size: 12px; color: var(--muted)">{{playerCount}}</span>
     </div>
+    <sc-if value="{{hasLibres}}" hint-placeholder-val="{{ true }}"><p style="font-size: 12px; color: var(--muted); margin: 0 0 1.5rem; max-width: 760px">Joueurs des clubs professionnels et nationaux de Normandie : effectifs publiés sur Wikipédia et Wikidata, photos sous licence libre de Wikimedia Commons (auteur et licence sur chaque fiche). Les joueurs amateurs apparaissent seulement avec leur accord, via « Je suis joueur : ma fiche ».</p></sc-if>
+    <sc-if value="{{noPlayerList}}" hint-placeholder-val="{{ false }}"><p style="font-size: 14px; color: var(--text-2); margin: 0 0 1.5rem">Aucun profil pour ce choix pour l’instant.</p></sc-if>
     <div class="grid4">
       <sc-for list="{{playerList}}" as="p" hint-placeholder-count="8">
         <div class="card"><button type="button" class="hit" onClick="{{p.open}}">
           <div style="aspect-ratio: 4 / 5; overflow: hidden; position: relative; background: var(--inv-bg-2)">
-            <sc-if value="{{p.hasImg}}" hint-placeholder-val="{{ true }}"><img class="zimg" src="{{p.img}}" alt="{{p.name}}"></sc-if>
-            <sc-if value="{{p.noImg}}" hint-placeholder-val="{{ false }}"><span class="cond" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 96px; color: var(--inv-line); letter-spacing: 0">{{p.num}}</span></sc-if>
+            <sc-if value="{{p.hasImg}}" hint-placeholder-val="{{ true }}"><img class="zimg" src="{{p.img}}" alt="{{p.name}}" loading="lazy" style="object-position: 50% 15%"></sc-if>
+            <sc-if value="{{p.noImg}}" hint-placeholder-val="{{ false }}"><span class="cond" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 96px; color: var(--inv-line); letter-spacing: 0">{{p.ph}}</span></sc-if>
             <span class="cond" style="position: absolute; top: 10px; left: 12px; font-size: 32px; color: var(--on-inv); letter-spacing: 0; text-shadow: 0 2px 10px rgba(0,0,0,.4)">{{p.num}}</span>
           </div>
-          <div style="padding: .9rem 1rem 1.1rem"><div class="ttl" style="font-size: 21px">{{p.name}}</div><div style="font-size: 13px; color: var(--muted); margin-top: .2rem">{{p.role}} · {{p.club}}</div></div>
+          <div style="padding: .9rem 1rem 1.1rem"><div class="ttl" style="font-size: 21px">{{p.name}}</div><div style="font-size: 13px; color: var(--muted); margin-top: .2rem">{{p.role}} · {{p.club}}</div><sc-if value="{{p.isNormand}}" hint-placeholder-val="{{ false }}"><div style="font-size: 11px; color: var(--gold-text); margin-top: .25rem; text-transform: uppercase; letter-spacing: .06em">Né en Normandie</div></sc-if></div>
         </button></div>
       </sc-for>
     </div>
@@ -3220,8 +3233,9 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <sc-if value="{{isPlayer}}" hint-placeholder-val="{{ false }}">
   <section class="wrap" style="padding-top: 2rem; padding-bottom: 5rem; display: flex; flex-wrap: wrap; gap: 3rem; align-items: flex-start">
     <div style="flex: 0 1 380px; width: 100%; aspect-ratio: 4 / 5; border-radius: 0; overflow: hidden; background: var(--inv-bg-2); position: relative">
-      <sc-if value="{{pl.hasImg}}" hint-placeholder-val="{{ true }}"><img src="{{pl.img}}" alt="{{pl.name}}" style="width: 100%; height: 100%; object-fit: cover; display: block"></sc-if>
-      <sc-if value="{{pl.noImg}}" hint-placeholder-val="{{ false }}"><span class="cond" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 160px; color: var(--inv-line); letter-spacing: 0">{{pl.num}}</span></sc-if>
+      <sc-if value="{{pl.hasImg}}" hint-placeholder-val="{{ true }}"><img src="{{pl.img}}" alt="{{pl.name}}" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block"></sc-if>
+      <sc-if value="{{pl.hasCredit}}" hint-placeholder-val="{{ false }}"><a href="{{pl.creditUrl}}" target="_blank" rel="noopener" style="position: absolute; left: 0; right: 0; bottom: 0; padding: .35rem .6rem; font-size: 10.5px; line-height: 1.3; color: #fff; background: rgba(0,0,0,.6); text-decoration: none">{{pl.creditTxt}}</a></sc-if>
+      <sc-if value="{{pl.noImg}}" hint-placeholder-val="{{ false }}"><span class="cond" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 160px; color: var(--inv-line); letter-spacing: 0">{{pl.ph}}</span></sc-if>
     </div>
     <div style="flex: 1 1 420px">
       <div class="cond" style="font-size: 88px; line-height: .9; color: {{accent}}; letter-spacing: 0">{{pl.num}}</div>
@@ -3240,7 +3254,8 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         <button type="button" class="btn" onClick="{{pl.toggleFollow}}" style="background: {{pl.fBg}}; color: {{pl.fFg}}; border: 1.5px solid var(--ink)">{{pl.fLabel}}</button>
         <button type="button" class="btn btn-ghost" onClick="{{share}}">Partager le profil</button>
       </div>
-      <p style="font-size: 13px; color: var(--muted); margin-top: 1.25rem">Statistiques alimentées par les feuilles de match du club : [SOURCE À BRANCHER].</p>
+      <sc-if value="{{pl.hasSource}}" hint-placeholder-val="{{ false }}"><p style="font-size: 12px; color: var(--muted); margin-top: 1.25rem; line-height: 1.5">{{pl.lieu}}<br>Effectif vérifié le {{pl.sourceDate}} sur <a href="{{pl.sourceWp}}" target="_blank" rel="noopener" style="color: inherit">Wikipédia</a> et <a href="{{pl.sourceWd}}" target="_blank" rel="noopener" style="color: inherit">Wikidata</a>. Une erreur ? Écrivez-nous depuis la page Contact.</p></sc-if>
+      <sc-if value="{{pl.noSource}}" hint-placeholder-val="{{ true }}"><p style="font-size: 13px; color: var(--muted); margin-top: 1.25rem">Statistiques alimentées par les feuilles de match du club.</p></sc-if>
     </div>
   </section>
 </sc-if>
@@ -5169,6 +5184,21 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         <label class="lbl">Sujet<input class="field" value="{{subject}}" onChange="{{onSubject}}"></label>
         <label class="lbl">Profil<x-select class="field" value="{{profile}}" onChange="{{onProfile}}"><x-option value="">Sélectionnez votre profil</x-option><x-option value="Club">Club</x-option><x-option value="Entreprise">Entreprise</x-option><x-option value="Joueur">Joueur</x-option><x-option value="Média">Média</x-option><x-option value="Abonné">Abonné</x-option><x-option value="Autre">Autre</x-option></x-select></label>
       </div>
+      <sc-if value="{{isJoueurForm}}" hint-placeholder-val="{{ false }}">
+        <div style="border: 1px solid var(--line); padding: 1.1rem 1.2rem; margin-bottom: 1rem">
+          <div class="eb" style="margin-bottom: .4rem">Ma fiche joueur</div>
+          <p style="font-size: 13px; color: var(--text-2); margin: 0 0 1rem">Votre fiche apparaît dans la rubrique Joueurs après vérification par l’équipe. Vous pouvez demander à la modifier ou à la retirer à tout moment depuis la page Contact.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1rem; margin-bottom: 1rem">
+            <label class="lbl">Discipline<input class="field" value="{{jDisc}}" onChange="{{onJDisc}}" placeholder="Football, handball…"></label>
+            <label class="lbl">Club actuel<input class="field" value="{{jClub}}" onChange="{{onJClub}}"></label>
+            <label class="lbl">Poste<input class="field" value="{{jPoste}}" onChange="{{onJPoste}}" placeholder="Facultatif"></label>
+            <label class="lbl">Lien vers votre photo<input class="field" value="{{jPhoto}}" onChange="{{onJPhoto}}" placeholder="Facultatif, sinon par e-mail"></label>
+          </div>
+          <label style="display: flex; gap: .6rem; align-items: flex-start; font-size: 13px; margin-bottom: .6rem"><input type="checkbox" checked="{{jAge}}" onChange="{{onJAge}}" style="margin-top: .2rem">J’ai 15 ans ou plus. Si j’ai moins de 15 ans, ce formulaire est rempli par mon représentant légal, qui donne son accord.</label>
+          <label style="display: flex; gap: .6rem; align-items: flex-start; font-size: 13px; margin-bottom: .6rem"><input type="checkbox" checked="{{jPub}}" onChange="{{onJPub}}" style="margin-top: .2rem">J’autorise Casa Besports à publier sur son site mon nom, ma discipline, mon club, mon poste et ma photo.</label>
+          <label style="display: flex; gap: .6rem; align-items: flex-start; font-size: 13px"><input type="checkbox" checked="{{jDroits}}" onChange="{{onJDroits}}" style="margin-top: .2rem">Je suis l’auteur de la photo ou j’ai l’accord du photographe (facultatif : sans cette case, la fiche paraît sans photo).</label>
+        </div>
+      </sc-if>
       <label class="lbl" style="margin-bottom: 1rem">Message<textarea class="field" value="{{message}}" onChange="{{onMessage}}" style="min-height: 150px; padding: .8rem .9rem; resize: vertical"></textarea></label>
       <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
       <button type="button" class="btn btn-dark" onClick="{{sendContact}}">Envoyer le message</button>
@@ -7397,6 +7427,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/sport-federations.js?v=__VERSION__"></script>
 <script src="contenus/clubs.js?v=__VERSION__"></script>
 <script src="contenus/joueurs.js?v=__VERSION__"></script>
+<script src="contenus/joueurs-libres.js?v=__VERSION__"></script>
 <script src="contenus/partenaires.js?v=__VERSION__"></script>
 <script src="contenus/abonnements.js?v=__VERSION__"></script>
 <script src="contenus/clubhouse.js?v=__VERSION__"></script>
