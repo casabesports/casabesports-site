@@ -2230,6 +2230,11 @@ class Component extends DCLogic {
     const allScores = allM.filter((m) => m.status === 'live').concat(allM.filter((m) => m.status === 'done' && m.hs !== '–' && recent(m)).sort((a, b) => (zoneRang(a) - zoneRang(b)) || (a.date > b.date ? -1 : 1)));
     const favScores = hasFav ? allScores.filter(favMatch) : [];
     const dashScores = (favScores.length ? favScores : allScores).slice(0, 8);
+    // Résultats regroupés par compétition (titre une seule fois), 4 matchs sur téléphone
+    const resMax = (typeof window !== 'undefined' && window.innerWidth < 640) ? 4 : 8;
+    const resGroups = [];
+    const capFirst = (x) => { const v = String(x || '').split(' · ')[0].trim(); return v ? v.charAt(0).toUpperCase() + v.slice(1) : ''; };
+    dashScores.slice(0, resMax).forEach((m) => { let g = resGroups.find((x) => x.sport === m.sport); if (!g) { g = { sport: m.sport, matches: [] }; resGroups.push(g); } const comp = m.compLabel && m.compLabel !== m.sport ? capFirst(m.compLabel) : ''; g.matches.push(Object.assign({}, m, { comp, hasComp: !!comp, isLiveM: m.status === 'live' })); });
     const resNote = !hasFav ? 'Cotentin et Manche d’abord' : favScores.length ? 'Vos sports et vos clubs' : 'Rien pour vos favoris cette semaine : toute la Manche';
     const dashNews = homeOrder.slice(0, 4);
     const dashProducts = homeProducts.slice(0, 3);
@@ -2952,7 +2957,7 @@ class Component extends DCLogic {
       weather, wx, wxCities, wxFind, isMeteo: V === 'meteo', goMeteo: () => this.go('meteo'), goPrivate: () => this.go('private'), goTable: () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' }),
       isHomeDash: V === 'home' && s.homeLayout !== 'magazine', isHomeMag: V === 'home' && s.homeLayout === 'magazine', toMagazine: () => this.setLayout('magazine'), toDashboard: () => this.setLayout('dashboard'),
       homeMods: homeModsShown, noModules: homeModsShown.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
-      une, dashScores, hasScores: dashScores.length > 0, noScores: dashScores.length === 0, resNote, portes, hp: homePerso, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
+      une, dashScores, resGroups, hasScores: dashScores.length > 0, noScores: dashScores.length === 0, resNote, portes, hp: homePerso, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
       isPrivate: V === 'private', pv, pf: pfm, pvTabs, tabBar,
       isApp: V === 'app', appUrl, arModes, installSteps, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: inApp ? 'Vous êtes dans l’application.' : 'Lien privé tant que vous ne l’avez pas partagé. Fonctionne sur téléphone, tablette et ordinateur.',
       isOlisto: V === 'olisto', ol, goOlisto: () => this.go('olisto'),
