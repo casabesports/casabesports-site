@@ -1571,10 +1571,7 @@
     if (mode === 'hub') {
       var hub = el('div', { class: 'cbar-hub' });
       [['lineup', 'Réalité augmentée', 'Ma compo en AR', 'Football, rugby, basket, hand, volley, water-polo, tennis, roller hockey ou athlétisme : votre équipe sur le vrai terrain, à son vrai emplacement, au milieu des photos aériennes et des bâtiments du quartier. Avec le ballon et le règlement.'],
-       ['regles', 'Règlements', 'Les règles de chaque sport', 'L’essentiel du règlement de nos neuf disciplines : effectifs, durée, dimensions, points, fautes.'],
-       ['score', 'Réalité augmentée', 'Tableau d’affichage', 'Le score du direct flotte dans votre salon. Photo à partager avec la tribune.'],
-       ['phare', '3D', 'Phare de Gatteville', 'Le géant de granit de la pointe de Barfleur, et son faisceau qui balaie la mer.'],
-       ['photo', 'Caméra', 'Photo supporter', 'Selfie avec écharpe Casa Besports, prêt pour vos réseaux.']].forEach(function (x) {
+       ['regles', 'Règlements', 'Les règles de chaque sport', 'L’essentiel du règlement de nos neuf disciplines : effectifs, durée, dimensions, points, fautes.']].forEach(function (x) {
         hub.appendChild(el('button', { type: 'button', class: 'cbar-card', onclick: function () { open(x[0], data); } }, '<i>' + x[1] + '</i><b>' + x[2] + '</b><span>' + x[3] + '</span>'));
       });
       root.appendChild(hub);
