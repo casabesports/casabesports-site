@@ -132,6 +132,7 @@ class Component extends DCLogic {
   }
   componentDidMount() {
     try { window.CasaSite = this; } catch (e) {} // accès console / tests : CasaSite.go('shop')
+    try { this._onPwa = () => this.setState({ pwaTick: Date.now() }); window.addEventListener('casa-pwa', this._onPwa); } catch (e) {} // application installable (js/pwa.js)
     // Comptes abonnés (js/comptes.js) : la session Supabase pilote l'état connecté
     if (window.CasaAuth && window.CasaAuth.on) {
       window.CasaAuth.onChange((u) => {
@@ -189,7 +190,7 @@ class Component extends DCLogic {
     this.creaInit();
     this.fetchWeather(this.state.wxCity); this._wxIv = setInterval(() => { const c = this.state.wxCity; const w = (this.state.wxLive || {})[c]; if (w) { this.setState({ wxLive: Object.assign({}, this.state.wxLive, { [c]: Object.assign({}, w, { at: 0 }) }) }); } this.fetchWeather(c); }, 10 * 60 * 1000);
   }
-  componentWillUnmount() { clearInterval(this._crmIv); clearInterval(this._iv); clearInterval(this._wxIv); clearInterval(this._tmI); clearTimeout(this._t); clearTimeout(this._ai); try { window.removeEventListener('scroll', this._onScroll); } catch (e) {} try { if (this._mq) (this._mq.removeEventListener ? this._mq.removeEventListener('change', this._onMq) : this._mq.removeListener(this._onMq)); } catch (e) {} clearTimeout(this._th); }
+  componentWillUnmount() { try { window.removeEventListener('casa-pwa', this._onPwa); } catch (e) {} clearInterval(this._crmIv); clearInterval(this._iv); clearInterval(this._wxIv); clearInterval(this._tmI); clearTimeout(this._t); clearTimeout(this._ai); try { window.removeEventListener('scroll', this._onScroll); } catch (e) {} try { if (this._mq) (this._mq.removeEventListener ? this._mq.removeEventListener('change', this._onMq) : this._mq.removeListener(this._onMq)); } catch (e) {} clearTimeout(this._th); }
 
   data() {
     if (this._d) return this._d;
@@ -2679,6 +2680,18 @@ class Component extends DCLogic {
     const appUrl = (typeof window !== 'undefined' && window.CASA_APP_URL) || 'https://claude.ai/artifact/3Z1QbNeNwNDmCizUsTPHJ6';
     const inApp = typeof window !== 'undefined' && !!window.CASA_APP;
     const arModes = [['lineup', 'Réalité augmentée', 'Ma compo en AR', 'Neuf disciplines, votre équipe sur le vrai terrain, à son vrai emplacement (photos aériennes, bâtiments, soleil réel), avec le ballon et le règlement. Posez-le sur votre table et proposez la compo au Club House.']].map(([id, tag, title, text]) => ({ tag, title, text, open: () => this.openAR(id) }));
+    const PWA = typeof window !== 'undefined' && window.CasaPWA;
+    const pwaIn = !!(PWA && PWA.installee());
+    const installLabel = pwaIn ? 'Application installée' : 'Installer l’application';
+    const installApp = () => {
+      if (!PWA) { this.say('Ouvrez le site dans Chrome (Android) ou Safari (iPhone) pour installer l’application.'); return; }
+      PWA.install().then((r) => {
+        if (r === 'deja') this.say('Vous êtes dans l’application.');
+        else if (r === 'ok') this.say('Application installée sur votre écran d’accueil');
+        else if (r === 'ios') this.say('Sur iPhone : touchez le bouton Partager de Safari, puis « Sur l’écran d’accueil ».');
+        else if (r === 'manuel') this.say('Menu du navigateur → « Installer l’application » ou « Ajouter à l’écran d’accueil ».');
+      });
+    };
     const installSteps = [['Sur Android', 'Ouvrez l’application dans Chrome, puis touchez « Installer l’application » (ou menu ⋮ → « Ajouter à l’écran d’accueil »).'],
       ['Sur iPhone', 'Ouvrez l’application dans Safari, touchez le bouton Partager puis « Sur l’écran d’accueil ».'],
       ['Sur ordinateur', 'Dans Chrome ou Edge, cliquez sur l’icône d’installation dans la barre d’adresse.']].map(([title, text]) => ({ title, text }));
@@ -2960,7 +2973,7 @@ class Component extends DCLogic {
       homeMods: homeModsShown, noModules: homeModsShown.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
       une, dashScores, resGroups, hasScores: dashScores.length > 0, noScores: dashScores.length === 0, resNote, portes, hp: homePerso, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
       isPrivate: V === 'private', pv, pf: pfm, pvTabs, tabBar,
-      isApp: V === 'app', appUrl, arModes, installSteps, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: inApp ? 'Vous êtes dans l’application.' : 'Lien privé tant que vous ne l’avez pas partagé. Fonctionne sur téléphone, tablette et ordinateur.',
+      isApp: V === 'app', appUrl, arModes, installSteps, installApp, installLabel, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: pwaIn ? 'Vous êtes dans l’application.' : 'Gratuite, sans passer par un store. Fonctionne sur téléphone, tablette et ordinateur.',
       isOlisto: V === 'olisto', ol, goOlisto: () => this.go('olisto'),
       isClubhouse: V === 'clubhouse', card, cardColors, chTabs, ch, chf, chMe, chLevelColor: LV[lvIdx][2], chHome, goClubhouse: () => this.go('clubhouse'),
       pvGroups, pvTitle, tm, isCulture: V === 'culture', cuTabs, cu, cuf, workOpen: !!woRaw, wo, closeWork: () => this.setState({ workIdx: null }), oeuvre, cultureHome, goCulture: () => this.go('culture'),
