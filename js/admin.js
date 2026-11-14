@@ -645,6 +645,16 @@
     var mode = ['aucun', 'photo', 'lieux'].indexOf(v.modeParDefaut) >= 0 ? v.modeParDefaut : 'aucun';
     var modeSel = E('select', { class: 'cba-in', onchange: function (e) { v.modeParDefaut = e.target.value; mark(); render(); } },
       [['photo', 'Photos : les images choisies ci-dessous'], ['aucun', 'Fond uni (blanc ou noir), sans image'], ['lieux', 'Illustrations des lieux de légende']].map(function (o) { return E('option', { value: o[0], selected: o[0] === mode || null }, o[1]); }));
+    // Couleur : photos en noir et blanc ou en couleur, et teinte de fond (tout le site, ou page par page)
+    var hexOk = function (c) { return typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c); };
+    var couleurSel = E('select', { class: 'cba-in', onchange: function (e) { v.photosEnCouleur = e.target.value === 'couleur'; mark(); } },
+      [['nb', 'En noir et blanc (signature Casa Besports)'], ['couleur', 'En couleur']].map(function (o) { return E('option', { value: o[0], selected: (o[0] === 'couleur') === (v.photosEnCouleur === true) || null }, o[1]); }));
+    function teinteField(get, set, labelNone) {
+      var cur = get(); var on = hexOk(cur);
+      var inp = E('input', { type: 'color', value: on ? cur : '#1d4e89', style: 'width:52px;height:38px;padding:2px;cursor:pointer' + (on ? '' : ';opacity:.45'), oninput: function (e) { set(e.target.value.toLowerCase()); inp.style.opacity = '1'; chk.checked = false; mark(); } });
+      var chk = E('input', { type: 'checkbox', checked: !on || null, onchange: function (e) { if (e.target.checked) { set(''); inp.style.opacity = '.45'; } else { set(inp.value.toLowerCase()); inp.style.opacity = '1'; } mark(); } });
+      return E('div', { class: 'cba-row', style: 'align-items:center;gap:.8rem' }, inp, E('label', { style: 'display:flex;gap:.4rem;align-items:center;font-size:14px' }, chk, labelNone));
+    }
     var cards = FOND_PAGES.map(function (pg) {
       var id = pg[0], cur = v.pages[id];
       if (!Array.isArray(cur)) { cur = typeof cur === 'string' ? [cur, 'center'] : ['', 'center']; v.pages[id] = cur; }
@@ -652,15 +662,19 @@
       var pos = cur[1] || 'center'; var opts = FOND_POS.slice(); if (!opts.some(function (o) { return o[0] === pos; })) opts.unshift([pos, 'Réglage actuel (' + pos + ')']);
       var thumb = E('div', { class: 'cba-fond-prev', style: 'background-image:url("' + String(cur[0] || def || '').replace(/"/g, '') + '");background-position:' + pos });
       var sel = E('select', { class: 'cba-in', onchange: function (e) { cur[1] = e.target.value; thumb.style.backgroundPosition = e.target.value; mark(); } }, opts.map(function (o) { return E('option', { value: o[0], selected: o[0] === pos || null }, o[1]); }));
+      var pTeinte = teinteField(function () { return cur[2]; }, function (c) { if (c) cur[2] = c; else cur.length = Math.min(cur.length, 2); }, 'Teinte du site');
       return E('div', { class: 'cba-card', style: 'margin:.6rem 0' },
         E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('strong', {}, pg[1]),
           cur[0] ? null : E('span', { style: 'font-size:13px;color:var(--muted)' }, def ? 'Image d’origine utilisée' : 'Pas d’image')),
         E('div', { class: 'cba-row', style: 'align-items:flex-start;gap:1rem;margin-top:.4rem' }, thumb,
-          E('div', { style: 'flex:1 1 300px;min-width:0' }, imgField(cur, 0, 'orig', function (u) { thumb.style.backgroundImage = 'url("' + String(u || def || '').replace(/"/g, '') + '")'; }), E('label', { class: 'cba-lbl' }, 'Partie de la photo à montrer'), sel)));
+          E('div', { style: 'flex:1 1 300px;min-width:0' }, imgField(cur, 0, 'orig', function (u) { thumb.style.backgroundImage = 'url("' + String(u || def || '').replace(/"/g, '') + '")'; }), E('label', { class: 'cba-lbl' }, 'Partie de la photo à montrer'), sel, E('label', { class: 'cba-lbl' }, 'Couleur de fond de cette page'), pTeinte)));
     });
     return E('div', {},
       E('div', { class: 'cba-card' }, E('label', { class: 'cba-lbl', style: 'margin-top:0' }, 'Ce que voit un nouveau visiteur'), modeSel,
-        mode !== 'photo' ? E('p', { class: 'cba-sub', style: 'margin:.5rem 0 0' }, 'Pour que vos images de fond s’affichent pour tout le monde, choisissez « Photos ». Chaque visiteur peut ensuite changer dans Mon espace › Apparence.') : null),
+        mode !== 'photo' ? E('p', { class: 'cba-sub', style: 'margin:.5rem 0 0' }, 'Pour que vos images de fond s’affichent pour tout le monde, choisissez « Photos ». Chaque visiteur peut ensuite changer dans Mon espace › Apparence.') : null,
+        E('label', { class: 'cba-lbl' }, 'Photos de fond'), couleurSel,
+        E('label', { class: 'cba-lbl' }, 'Couleur de fond de tout le site'), teinteField(function () { return v.teinte; }, function (c) { v.teinte = c; }, 'Aucune (blanc ou noir)'),
+        E('p', { class: 'cba-sub', style: 'margin:.5rem 0 0' }, 'La couleur teinte le fond uni et les photos de fond. Une page peut avoir sa propre couleur (plus bas). Chaque abonné peut aussi choisir la sienne.')),
       E('p', { class: 'cba-sub' }, 'Une image par page. Envoyez une photo, prenez-la dans la bibliothèque, puis choisissez la partie à montrer. Une case vide reprend l’image d’origine.'),
       cards);
   }

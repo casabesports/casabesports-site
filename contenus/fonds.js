@@ -13,9 +13,16 @@
      'photo'  les photos ci-dessous
      'lieux'  les illustrations des lieux (contenus/lieux.js)
    Chaque visiteur peut ensuite choisir dans « Mon espace › Apparence ».
+
+   COULEURS
+     photosEnCouleur = false  photos de fond en noir et blanc (signature) ; true = en couleur
+     teinte = ''              couleur de fond de tout le site, par exemple '#1d4e89' (vide = blanc ou noir)
+     Une page peut avoir sa propre couleur en 3e réglage : accueil: ['assets/…jpg', 'center 35%', '#1d4e89'],
    ================================================================ */
 window.CASA_FONDS = {
   modeParDefaut: 'aucun',
+  photosEnCouleur: false,
+  teinte: '',
   pages: {
     accueil:      ['assets/img_51314cdd.jpg', 'center 35%'],
     actualites:   ['assets/img_11c2b62b.jpg', 'center 40%'],

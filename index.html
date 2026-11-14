@@ -251,6 +251,21 @@ html{scroll-behavior:smooth}
 .bento-item{min-width:0;display:flex}
 .bento-item>*{flex:1;min-width:0}
 .s2{grid-column:span 2}.r2{grid-row:span 2}
+/* Accueil épuré : blocs pleine largeur, résultats, portes d'entrée, Gazette du mois */
+.full{grid-column:1/-1}
+.bento-item.full .bn-une{min-height:clamp(340px,40vw,520px)}
+.ac-fav{margin:.6rem 0 0;font-size:14px;color:var(--text-2)}.ac-fav .cond{font-size:11.5px;color:var(--gold-text);margin-right:.4rem}
+.ac-res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:.5rem}
+.ac-portes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.ac-porte{display:flex;flex-direction:column;align-items:flex-start;gap:.35rem;border:1px solid var(--line);background:var(--surface);padding:1.4rem 1.5rem}
+.ac-porte .pro-eb{margin-bottom:.2rem}.ac-porte .pro-h2{margin:0 0 .2rem;font-size:clamp(1.25rem,2.4vw,1.75rem)}
+.ac-porte-p{display:block;font-size:14.5px;line-height:1.5;color:var(--text-2);margin:0 0 .8rem;max-width:34rem}
+.ac-porte .btn{margin-top:auto}
+.ac-porte-pro{border-left:4px solid #e8a830}
+.ac-gz{display:grid!important;grid-template-columns:minmax(120px,200px) minmax(0,1fr);gap:1.4rem;align-items:center;text-align:left;cursor:pointer;color:var(--text)}
+.ac-gz-cov{display:block;aspect-ratio:3/4;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}.ac-gz-cov img{width:100%;height:100%;object-fit:cover;display:block}
+.ac-gz-txt{display:flex;flex-direction:column;gap:.35rem;min-width:0}.ac-gz-txt .pro-h2{margin:0}
+@media (max-width:640px){.ac-portes{grid-template-columns:1fr}.ac-gz{grid-template-columns:96px minmax(0,1fr);gap:1rem}.ac-gz .ac-porte-p{display:none}.ac-res-grid>button:nth-of-type(n+5){display:none!important}}
 .b-card{position:relative;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.2rem;overflow:hidden;display:flex;flex-direction:column;color:var(--text);box-shadow:0 14px 34px -28px var(--shadow);font:inherit;transition:transform .25s ease,box-shadow .25s ease}
 button.b-card{cursor:pointer}
 button.b-card:hover{transform:translateY(-3px);box-shadow:0 20px 40px -26px var(--shadow)}
@@ -693,6 +708,7 @@ button.b-card:hover { transform: none; box-shadow: none; border-color: var(--ink
 .glass { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
 .fab { box-shadow: none; }
 .cb-bgp { filter: blur(3px) grayscale(1) !important; } /* photos de fond en noir et blanc */
+.cb-bgp.is-couleur { filter: blur(3px) saturate(1.05) !important; } /* option « En couleur » */
 .veilB { background: linear-gradient(0deg, rgba(0, 0, 0, .9) 0%, rgba(0, 0, 0, .25) 60%, rgba(0, 0, 0, 0) 100%); }
 
 /* ---------- Étiquette : le bandeau en petit ---------- */
@@ -2372,11 +2388,14 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <!-- ================= FOND : LIEU DE LÉGENDE ================= -->
 <div aria-hidden="true" style="position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden">
   <sc-if value="{{bg.isPhoto}}" hint-placeholder-val="{{ true }}">
-    <div style="position: absolute; inset: -24px; filter: var(--img-filter); opacity: {{bg.op}}; transition: opacity .6s ease"><img class="cb-bgp" src="{{bg.img}}" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: {{bg.pos}}; filter: blur(3px) saturate(1.05)"></div>
+    <div style="position: absolute; inset: -24px; filter: var(--img-filter); opacity: {{bg.op}}; transition: opacity .6s ease"><img class="cb-bgp {{bg.colorCls}}" src="{{bg.img}}" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: {{bg.pos}}; filter: blur(3px) saturate(1.05)"></div>
     <div class="cb-veil" style="position: absolute; inset: 0"></div>
   </sc-if>
   <sc-if value="{{bg.isIllu}}" hint-placeholder-val="{{ false }}">
-    <img src="{{place.img}}" alt="" style="width: 100%; height: 100%; object-fit: cover; opacity: calc({{placeOpacity}} * var(--place-op)); filter: var(--place-filter); transition: opacity .6s ease">
+    <img src="{{place.img}}" alt="" style="width: 100%; height: 100%; object-fit: cover; opacity: calc({{placeOpacity}} * var(--place-op)); filter: {{bg.illuFilter}}; transition: opacity .6s ease">
+  </sc-if>
+  <sc-if value="{{bg.hasTeinte}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; background: {{bg.teinte}}; opacity: {{bg.teinteOp}}; mix-blend-mode: {{bg.teinteBlend}}; transition: background .4s ease, opacity .4s ease"></div>
   </sc-if>
 </div>
 
@@ -2492,32 +2511,15 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <div>
         <div class="cond" style="font-size: 13px; color: var(--muted)">{{todayLabel}} · {{wx.cityTemp}}</div>
         <h1 class="h1 bn-bh"><span class="sr">Casa Besports, le média du sport dans le Cotentin et la Manche. </span><span class="bn-bandeau">{{greeting}}</span></h1>
-        <p class="bn-qui">Média sportif indépendant né à Cherbourg en 2024 : actualités, portraits, vidéos et clubs du Cotentin et de la Manche. <button type="button" class="lnk" onClick="{{goWork}}">Espace pro</button></p>
+        <p class="bn-qui">Média sportif indépendant né à Cherbourg en 2024 : actualités, portraits, vidéos et clubs du Cotentin et de la Manche.</p>
       </div>
       <div class="bn-accueil-act">
-        <button type="button" class="btn btn-ghost" onClick="{{openCustomize}}" style="min-height: 44px; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Personnaliser</button>
-        <button type="button" class="btn btn-ghost" onClick="{{toMagazine}}" style="min-height: 44px; font-size: 15px">Vue magazine</button>
+        <button type="button" class="btn btn-ghost" onClick="{{openCustomize}}" style="min-height: 44px; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Personnaliser mon accueil</button>
       </div>
     </div>
-    <button type="button" onClick="{{openSearch}}" style="width: 100%; display: flex; align-items: center; gap: .75rem; text-align: left; background: var(--surface); border: 1.5px solid var(--line-2); border-radius: 0; padding: 0 1.25rem; min-height: 56px; cursor: pointer; color: var(--muted); font-size: 16px; box-shadow: 0 10px 30px -22px var(--shadow)">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
-      <span style="flex: 1">Un club, un joueur, un score, un maillot…</span>
-      <span class="cond" style="font-size: 12px; color: var(--ink)">Rechercher</span>
-    </button>
-    <div style="display: flex; gap: .4rem; overflow-x: auto; padding: .75rem 0 .25rem">
-      <sc-for list="{{quickChips}}" as="qc" hint-placeholder-count="5">
-        <button type="button" onClick="{{qc.go}}" class="chip" style="flex: none; min-height: 40px; font-size: 14.5px; background: var(--surface); color: var(--text); border: 1.5px solid var(--line-2); display: inline-flex; align-items: center; gap: .4rem"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{qc.dot}}"></span>{{qc.label}}</button>
-      </sc-for>
-    </div>
+    <sc-if value="{{hp.hasFav}}" hint-placeholder-val="{{ false }}"><p class="ac-fav"><span class="cond">Vos favoris</span> {{hp.favLabel}}</p></sc-if>
   </section>
 
-  <!-- Casa PRO -->
-  <section class="wrap" style="margin-top: .5rem; margin-bottom: 1.5rem">
-    <div class="pro-home">
-      <div><div class="pro-eb"><span class="pro-dot" aria-hidden="true"></span>CASA PRO</div><h2 class="pro-h2">Club, marque, collectivité ? <span>Votre accès dédié.</span></h2></div>
-      <button type="button" class="btn btn-gold" onClick="{{goWork}}">Entrer dans l’espace pro</button>
-    </div>
-  </section>
   <section class="wrap" style="padding-bottom: 3rem">
     <div class="bento">
       <sc-for list="{{homeMods}}" as="hm" hint-placeholder-count="10">
@@ -2533,17 +2535,58 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
               </span>
             </button>
           </sc-if>
-          <!-- Le direct -->
-          <sc-if value="{{hm.isLive}}" hint-placeholder-val="{{ false }}">
-            <div class="b-card">
-              <div class="b-head"><span class="cond" style="display: flex; align-items: center; gap: .45rem; color: var(--danger)"><span class="pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #e03040"></span>Le direct</span><button type="button" class="b-more" onClick="{{goLive}}">Tout voir</button></div>
-              <div style="display: flex; flex-direction: column; gap: .45rem">
-                <sc-for list="{{dashScores}}" as="m" hint-placeholder-count="5">
-                  <button type="button" onClick="{{m.open}}" style="display: grid; grid-template-columns: 1fr auto; gap: .1rem .6rem; text-align: left; background: var(--surface-3); border: 1px solid var(--line); border-radius: 0; padding: .55rem .7rem; cursor: pointer; color: var(--text)">
-                    <span style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{m.home}}</span><span class="num" style="font-size: 17px; color: var(--ink)">{{m.hs}}</span>
-                    <span style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{m.away}}</span><span class="num" style="font-size: 17px; color: var(--ink)">{{m.as}}</span>
-                    <span class="cond" style="font-size: 11px; color: {{m.stColor}}">{{m.sport}} · {{m.statusLabel}}</span>
-                  </button>
+          <!-- Résultats du week-end -->
+          <sc-if value="{{hm.isResultats}}" hint-placeholder-val="{{ false }}">
+            <div class="b-card ac-res">
+              <div class="b-head"><span class="cond" style="display: flex; align-items: center; gap: .45rem; color: var(--ink)"><span class="pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #e03040"></span>Résultats du week-end</span><button type="button" class="b-more" onClick="{{goLive}}">Scores et classements</button></div>
+              <p class="cond" style="margin: -.3rem 0 .6rem; font-size: 11.5px; color: var(--muted)">{{resNote}}</p>
+              <sc-if value="{{hasScores}}" hint-placeholder-val="{{ true }}">
+                <div class="ac-res-grid">
+                  <sc-for list="{{dashScores}}" as="m" hint-placeholder-count="6">
+                    <button type="button" onClick="{{m.open}}" style="display: grid; grid-template-columns: 1fr auto; gap: .1rem .6rem; text-align: left; background: var(--surface-3); border: 1px solid var(--line); border-radius: 0; padding: .55rem .7rem; cursor: pointer; color: var(--text)">
+                      <span style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{m.home}}</span><span class="num" style="font-size: 17px; color: var(--ink)">{{m.hs}}</span>
+                      <span style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{m.away}}</span><span class="num" style="font-size: 17px; color: var(--ink)">{{m.as}}</span>
+                      <span class="cond" style="font-size: 11px; color: {{m.stColor}}">{{m.sport}} · {{m.statusLabel}}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{noScores}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; color: var(--text-2); font-size: 14.5px">Les résultats du week-end arrivent ici dès les premiers coups de sifflet. En attendant, l’agenda et les classements sont sur <button type="button" class="lnk" onClick="{{goLive}}" style="font-size: 14.5px">Le Terrain</button>.</p></sc-if>
+            </div>
+          </sc-if>
+          <!-- Les deux portes d'entrée -->
+          <sc-if value="{{hm.isPortes}}" hint-placeholder-val="{{ false }}">
+            <div class="ac-portes">
+              <div class="ac-porte">
+                <span class="pro-eb">Je suis passionné</span>
+                <span class="pro-h2">Le sport du Cotentin, <span>à votre façon.</span></span>
+                <span class="ac-porte-p">{{portes.passionTxt}}</span>
+                <button type="button" class="btn btn-dark" onClick="{{portes.passionGo}}">{{portes.passionCta}}</button>
+              </div>
+              <div class="ac-porte ac-porte-pro">
+                <span class="pro-eb"><span class="pro-dot" aria-hidden="true"></span>Je suis pro · CASA PRO</span>
+                <span class="pro-h2">Club, marque, collectivité ? <span>Votre accès dédié.</span></span>
+                <span class="ac-porte-p">Visibilité, contenus, partenariats et outils pour les clubs, les entreprises, les sportifs et les médias.</span>
+                <button type="button" class="btn btn-gold" onClick="{{goWork}}">Entrer dans Casa PRO</button>
+              </div>
+            </div>
+          </sc-if>
+          <!-- Casa × Cherwood -->
+          <sc-if value="{{hm.isCherwood}}" hint-placeholder-val="{{ false }}">
+            <button type="button" class="cw-band cw-hit" onClick="{{cherwood.go}}" aria-label="Voir la capsule Cherwood × Casa" style="margin-top: 0">
+              <img class="cw-img" src="{{cherwood.img}}" alt="{{cherwood.alt}}" width="1600" height="1000" loading="lazy">
+              <span class="cw-txt"><span class="pro-eb">Collaboration</span><span class="pro-h2">Casa × Cherwood</span><span class="cw-p">Dessinée et brodée à Cherbourg. La capsule qui habille le Cotentin.</span><span class="btn btn-gold cw-btn">Voir la capsule</span></span>
+            </button>
+          </sc-if>
+          <!-- Toutes les rubriques (facultatif) -->
+          <sc-if value="{{hm.isRubriques}}" hint-placeholder-val="{{ false }}">
+            <div class="b-card rb" style="margin: 0">
+              <div class="b-head"><span class="cond" style="color: var(--gold-text)">Toutes les rubriques</span></div>
+              <div class="rb-grid">
+                <sc-for list="{{rubriques}}" as="rg" hint-placeholder-count="4">
+                  <div class="rb-g"><div class="mn-gt">{{rg.titre}}</div>
+                    <sc-for list="{{rg.items}}" as="ri" hint-placeholder-count="4"><button type="button" class="rb-it" onClick="{{ri.go}}"><span class="rb-l">{{ri.label}}</span><span class="rb-s">{{ri.sub}}</span><span class="rb-a" aria-hidden="true">→</span></button></sc-for>
+                  </div>
                 </sc-for>
               </div>
             </div>
@@ -2619,13 +2662,16 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
               <sc-for list="{{dashTable}}" as="r" hint-placeholder-count="4"><div style="display: flex; align-items: center; gap: .6rem; padding: .35rem 0; border-bottom: 1px solid var(--line); font-size: 14px"><span class="num" style="width: 18px; color: var(--muted)">{{r.rank}}</span><span style="flex: 1; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.team}}</span><span class="num" style="color: var(--ink)">{{r.pts}}</span></div></sc-for>
             </div>
           </sc-if>
-          <!-- Gazette -->
+          <!-- Gazette du mois -->
           <sc-if value="{{hm.isGazette}}" hint-placeholder-val="{{ false }}">
-            <button type="button" onClick="{{openReader}}" class="b-card b-img cb-deep gz-pc" aria-label="Feuilleter La Gazette du Cotentin, numéro d’essai">
-              <img src="{{gzCover.image}}" alt="" class="gz-pc-img">
-              <span class="gz-pc-veil"></span>
-              <span class="gz-pc-top"><span class="gz-pc-k">Le mag · {{gzCover.numero}}</span><span class="gz-pc-m"><span>La Gazette</span><br><span>du Cotentin</span></span></span>
-              <span class="gz-pc-bas"><span class="gz-pc-choc">{{gzCover.titre}}</span><span class="gz-pc-cta">Feuilleter les {{gzCount}} pages →</span></span>
+            <button type="button" onClick="{{openReader}}" class="b-card ac-gz" aria-label="Feuilleter La Gazette du Cotentin, {{gzCover.numero}}">
+              <span class="ac-gz-cov"><img src="{{gzCover.image}}" alt=""></span>
+              <span class="ac-gz-txt">
+                <span class="pro-eb">La Gazette du mois · {{gzCover.numDate}}</span>
+                <span class="pro-h2">{{gzCover.titre}}</span>
+                <span class="ac-porte-p">{{gzCover.accroche}}</span>
+                <span class="btn btn-dark" style="align-self: flex-start">Feuilleter les {{gzCount}} pages</span>
+              </span>
             </button>
           </sc-if>
           <!-- Lieu du jour -->
@@ -2674,24 +2720,6 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     <sc-if value="{{noModules}}" hint-placeholder-val="{{ false }}"><div style="border: 1.5px dashed var(--line-2); border-radius: 0; padding: 2rem; text-align: center; color: var(--muted)">Tous les blocs sont masqués. <button type="button" class="lnk" onClick="{{openCustomize}}" style="font-size: 15px">Personnaliser l’accueil</button></div></sc-if>
   </section>
 
-  <!-- Toutes les rubriques, en accès direct -->
-  <!-- Casa × Cherwood -->
-  <section class="wrap" style="margin-top: 0; margin-bottom: 3rem">
-    <button type="button" class="cw-band cw-hit" onClick="{{cherwood.go}}" aria-label="Voir la capsule Cherwood × Casa">
-      <img class="cw-img" src="{{cherwood.img}}" alt="{{cherwood.alt}}" width="1600" height="1000" loading="lazy">
-      <span class="cw-txt"><span class="pro-eb">Collaboration</span><span class="pro-h2">Casa × Cherwood</span><span class="cw-p">Dessinée et brodée à Cherbourg. La capsule qui habille le Cotentin.</span><span class="btn btn-gold cw-btn">Voir la capsule</span></span>
-    </button>
-  </section>
-  <section class="wrap rb" aria-labelledby="rb-td">
-    <h2 id="rb-td" class="h2 rb-h">Toutes les rubriques</h2>
-    <div class="rb-grid">
-      <sc-for list="{{rubriques}}" as="rg" hint-placeholder-count="4">
-        <div class="rb-g"><div class="mn-gt">{{rg.titre}}</div>
-          <sc-for list="{{rg.items}}" as="ri" hint-placeholder-count="4"><button type="button" class="rb-it" onClick="{{ri.go}}"><span class="rb-l">{{ri.label}}</span><span class="rb-s">{{ri.sub}}</span><span class="rb-a" aria-hidden="true">→</span></button></sc-for>
-        </div>
-      </sc-for>
-    </div>
-  </section>
 </sc-if>
 
 <!-- ================= ACCUEIL ================= -->
@@ -5280,6 +5308,16 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <div role="radiogroup" aria-label="Arrière-plan des pages" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .5rem">
         <sc-for list="{{bgModes}}" as="bm" hint-placeholder-count="3"><button type="button" role="radio" aria-checked="{{bm.checked}}" onClick="{{bm.pick}}" style="text-align: left; padding: .75rem .9rem; border-radius: 0; cursor: pointer; background: var(--surface); color: var(--text); border: 2px solid {{bm.border}}"><span style="display: block; font-weight: 800">{{bm.label}}</span><span style="font-size: 12.5px; color: var(--muted)">{{bm.sub}}</span></button></sc-for>
       </div>
+      <div class="lbl" style="margin: 1.25rem 0 .5rem">Photos de fond</div>
+      <div role="radiogroup" aria-label="Photos de fond" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .5rem">
+        <sc-for list="{{bgColorOpts}}" as="bc" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{bc.checked}}" onClick="{{bc.pick}}" style="text-align: left; padding: .75rem .9rem; border-radius: 0; cursor: pointer; background: var(--surface); color: var(--text); border: 2px solid {{bc.border}}"><span style="display: block; font-weight: 800">{{bc.label}}</span><span style="font-size: 12.5px; color: var(--muted)">{{bc.sub}}</span></button></sc-for>
+      </div>
+      <div class="lbl" style="margin: 1.25rem 0 .5rem">Couleur de l’arrière-plan</div>
+      <div role="radiogroup" aria-label="Couleur de l’arrière-plan" style="display: flex; flex-wrap: wrap; gap: .5rem; align-items: center">
+        <sc-for list="{{teintes}}" as="tc" hint-placeholder-count="8"><button type="button" role="radio" aria-checked="{{tc.checked}}" aria-label="{{tc.label}}" title="{{tc.label}}" onClick="{{tc.pick}}" style="width: 44px; height: 44px; border-radius: 50%; cursor: pointer; padding: 0; background: {{tc.sw}}; border: 3px solid {{tc.ring}}; box-shadow: inset 0 0 0 2px var(--surface); color: var(--muted); font-size: 18px; line-height: 1"><sc-if value="{{tc.isNone}}" hint-placeholder-val="{{ false }}">⌀</sc-if></button></sc-for>
+        <label style="display: inline-flex; align-items: center; gap: .45rem; font-size: 14px; font-weight: 700; cursor: pointer; min-height: 44px">Autre couleur <input type="color" value="{{teinteLibre.value}}" onInput="{{teinteLibre.onInput}}" aria-label="Choisir une autre couleur" style="width: 44px; height: 36px; border: 1px solid var(--line-2); background: var(--surface); padding: 2px; cursor: pointer"></label>
+      </div>
+      <p style="margin: .5rem 0 0; font-size: 12.5px; color: var(--muted)">La teinte colore le fond uni et les photos de fond. <sc-if value="{{teinteLibre.isPerso}}" hint-placeholder-val="{{ false }}"><button type="button" class="lnk" onClick="{{teinteLibre.reset}}" style="font-size: 12.5px">Revenir au réglage du site</button></sc-if></p>
     </section>
     <sc-if value="{{isStaff}}" hint-placeholder-val="{{ false }}"><div class="cb-deep" style="margin-top: 1.5rem; background: var(--inv-bg); color: var(--on-inv-2); border-radius: 0; padding: 1.25rem 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between"><span><strong style="color: var(--on-inv)">Espace rédaction</strong> · {{pendingCount}} article(s) en attente de relecture</span><button type="button" class="btn btn-gold" onClick="{{goStudio}}">Ouvrir l’espace rédaction</button></div></sc-if>
     <h2 class="h2" style="font-size: 2rem; margin: 3rem 0 1.25rem">Mes commandes et abonnements</h2>
@@ -6719,27 +6757,58 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   </div>
 </sc-if>
 
-<!-- Personnaliser l'accueil -->
+<!-- Personnaliser mon accueil (abonnés connectés : choix gardés sur le compte) -->
 <sc-if value="{{customizeOpen}}" hint-placeholder-val="{{ false }}">
   <div style="position: fixed; inset: 0; z-index: 61; background: var(--overlay); display: flex; justify-content: center; align-items: center; padding: 1rem">
-    <div role="dialog" aria-label="Personnaliser l’accueil" class="float-in" style="width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; background: var(--surface); color: var(--text); border-radius: 0; padding: 1.5rem; box-shadow: 0 30px 80px -20px var(--shadow)">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem"><span class="ttl" style="font-size: 28px">Personnaliser l’accueil</span><button type="button" onClick="{{closeCustomize}}" aria-label="Fermer" style="width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--surface-2); cursor: pointer; font-size: 20px; color: var(--text)">×</button></div>
-      <p style="margin: 0 0 1rem; color: var(--muted); font-size: 14px">Affichez, masquez et réordonnez les blocs. Enregistré sur cet appareil.</p>
-      <div class="lbl" style="margin-bottom: .5rem">Disposition</div>
-      <div role="radiogroup" aria-label="Disposition de l’accueil" style="display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-bottom: 1.25rem">
-        <sc-for list="{{layouts}}" as="ly" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{ly.checked}}" onClick="{{ly.pick}}" style="text-align: left; padding: .75rem; border-radius: 0; cursor: pointer; background: var(--surface); color: var(--text); border: 2px solid {{ly.border}}"><span style="display: block; font-weight: 800">{{ly.label}}</span><span style="font-size: 12.5px; color: var(--muted)">{{ly.desc}}</span></button></sc-for>
+    <div role="dialog" aria-label="Personnaliser mon accueil" class="float-in" style="width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; background: var(--surface); color: var(--text); border-radius: 0; padding: 1.5rem; box-shadow: 0 30px 80px -20px var(--shadow)">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem"><span class="ttl" style="font-size: 28px">Personnaliser mon accueil</span><button type="button" onClick="{{closeCustomize}}" aria-label="Fermer" style="width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--surface-2); cursor: pointer; font-size: 20px; color: var(--text)">×</button></div>
+      <sc-if value="{{hp.locked}}" hint-placeholder-val="{{ true }}">
+        <p style="margin: 0 0 1rem; color: var(--text-2); font-size: 15px; line-height: 1.5">Avec votre compte Casa Besports, composez votre propre accueil : vos sports, vos clubs favoris, les rubriques que vous voulez voir, dans l’ordre que vous voulez, et les couleurs du fond. Vos choix vous suivent sur tous vos appareils.</p>
+        <div style="display: flex; gap: .5rem; flex-wrap: wrap"><button type="button" class="btn btn-dark" onClick="{{hp.login}}" style="flex: 1 1 200px">Se connecter ou créer un compte</button><button type="button" class="btn btn-ghost" onClick="{{hp.offers}}" style="flex: 1 1 200px">Voir les abonnements</button></div>
+      </sc-if>
+      <sc-if value="{{hp.open}}" hint-placeholder-val="{{ false }}">
+        <p style="margin: 0 0 1rem; color: var(--muted); font-size: 14px">Vos choix sont enregistrés sur votre compte et vous suivent sur tous vos appareils.</p>
+        <div class="lbl" style="margin-bottom: .5rem">Mes sports</div>
+        <div style="display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.25rem">
+          <sc-for list="{{hp.sportChips}}" as="sc" hint-placeholder-count="8"><button type="button" aria-pressed="{{sc.pressed}}" onClick="{{sc.toggle}}" class="chip" style="min-height: 40px; font-size: 14px; background: {{sc.bg}}; color: {{sc.fg}}; border: 1.5px solid var(--line-2)">{{sc.label}}</button></sc-for>
+        </div>
+        <div class="lbl" style="margin-bottom: .5rem">Mes clubs favoris</div>
+        <input class="field" type="search" value="{{hp.cfQ}}" onInput="{{hp.onCfQ}}" placeholder="Chercher un club ou une ville" aria-label="Chercher un club" style="margin-bottom: .5rem">
+        <div style="display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .4rem">
+          <sc-for list="{{hp.clubChips}}" as="cc" hint-placeholder-count="6"><button type="button" aria-pressed="{{cc.pressed}}" onClick="{{cc.toggle}}" class="chip" title="{{cc.sub}}" style="min-height: 40px; font-size: 14px; background: {{cc.bg}}; color: {{cc.fg}}; border: 1.5px solid var(--line-2)">{{cc.label}}</button></sc-for>
+        </div>
+        <sc-if value="{{hp.clubMore}}" hint-placeholder-val="{{ false }}"><p style="margin: 0 0 .4rem; font-size: 12.5px; color: var(--muted)">Tapez un nom pour trouver d’autres clubs.</p></sc-if>
+        <sc-if value="{{hp.hasFav}}" hint-placeholder-val="{{ false }}"><button type="button" class="lnk" onClick="{{hp.clearFav}}" style="font-size: 13px">Retirer tous mes favoris</button></sc-if>
+        <div class="lbl" style="margin: 1.25rem 0 .5rem">Mes rubriques, dans l’ordre</div>
+        <div style="display: flex; flex-direction: column; gap: .4rem">
+          <sc-for list="{{modRows}}" as="mr" hint-placeholder-count="10">
+            <div style="display: flex; align-items: center; gap: .5rem; border: 1px solid var(--line); border-radius: 0; padding: .35rem .35rem .35rem .75rem; background: var(--surface-3)">
+              <label style="flex: 1; display: flex; align-items: center; gap: .6rem; cursor: pointer; min-height: 40px; font-weight: 700"><input type="checkbox" checked="{{mr.on}}" onChange="{{mr.toggle}}" style="width: 20px; height: 20px; accent-color: var(--ink)">{{mr.label}}<sc-if value="{{mr.essentiel}}" hint-placeholder-val="{{ false }}"><span class="cond" style="font-size: 10.5px; color: var(--muted)">essentiel</span></sc-if></label>
+              <button type="button" onClick="{{mr.up}}" aria-label="Monter {{mr.label}}" style="width: 40px; height: 40px; border-radius: 0; border: 1px solid var(--line-2); background: var(--surface); cursor: pointer; color: var(--text)">↑</button>
+              <button type="button" onClick="{{mr.down}}" aria-label="Descendre {{mr.label}}" style="width: 40px; height: 40px; border-radius: 0; border: 1px solid var(--line-2); background: var(--surface); cursor: pointer; color: var(--text)">↓</button>
+            </div>
+          </sc-for>
+        </div>
+        <div class="lbl" style="margin: 1.25rem 0 .5rem">Disposition</div>
+        <div role="radiogroup" aria-label="Disposition de l’accueil" style="display: grid; grid-template-columns: 1fr 1fr; gap: .5rem">
+          <sc-for list="{{layouts}}" as="ly" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{ly.checked}}" onClick="{{ly.pick}}" style="text-align: left; padding: .75rem; border-radius: 0; cursor: pointer; background: var(--surface); color: var(--text); border: 2px solid {{ly.border}}"><span style="display: block; font-weight: 800">{{ly.label}}</span><span style="font-size: 12.5px; color: var(--muted)">{{ly.desc}}</span></button></sc-for>
+        </div>
+        <div class="lbl" style="margin: 1.25rem 0 .5rem">Arrière-plan</div>
+        <div role="radiogroup" aria-label="Arrière-plan des pages" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .5rem">
+          <sc-for list="{{bgModes}}" as="bm" hint-placeholder-count="3"><button type="button" role="radio" aria-checked="{{bm.checked}}" onClick="{{bm.pick}}" style="text-align: left; padding: .75rem .9rem; border-radius: 0; cursor: pointer; background: var(--surface); color: var(--text); border: 2px solid {{bm.border}}"><span style="display: block; font-weight: 800">{{bm.label}}</span><span style="font-size: 12.5px; color: var(--muted)">{{bm.sub}}</span></button></sc-for>
+        </div>
+      <div class="lbl" style="margin: 1.25rem 0 .5rem">Photos de fond</div>
+      <div role="radiogroup" aria-label="Photos de fond" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .5rem">
+        <sc-for list="{{bgColorOpts}}" as="bc" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{bc.checked}}" onClick="{{bc.pick}}" style="text-align: left; padding: .75rem .9rem; border-radius: 0; cursor: pointer; background: var(--surface); color: var(--text); border: 2px solid {{bc.border}}"><span style="display: block; font-weight: 800">{{bc.label}}</span><span style="font-size: 12.5px; color: var(--muted)">{{bc.sub}}</span></button></sc-for>
       </div>
-      <div class="lbl" style="margin-bottom: .5rem">Blocs du tableau de bord</div>
-      <div style="display: flex; flex-direction: column; gap: .4rem">
-        <sc-for list="{{modRows}}" as="mr" hint-placeholder-count="10">
-          <div style="display: flex; align-items: center; gap: .5rem; border: 1px solid var(--line); border-radius: 0; padding: .35rem .35rem .35rem .75rem; background: var(--surface-3)">
-            <label style="flex: 1; display: flex; align-items: center; gap: .6rem; cursor: pointer; min-height: 40px; font-weight: 700"><input type="checkbox" checked="{{mr.on}}" onChange="{{mr.toggle}}" style="width: 20px; height: 20px; accent-color: var(--ink)">{{mr.label}}</label>
-            <button type="button" onClick="{{mr.up}}" aria-label="Monter {{mr.label}}" style="width: 40px; height: 40px; border-radius: 0; border: 1px solid var(--line-2); background: var(--surface); cursor: pointer; color: var(--text)">↑</button>
-            <button type="button" onClick="{{mr.down}}" aria-label="Descendre {{mr.label}}" style="width: 40px; height: 40px; border-radius: 0; border: 1px solid var(--line-2); background: var(--surface); cursor: pointer; color: var(--text)">↓</button>
-          </div>
-        </sc-for>
+      <div class="lbl" style="margin: 1.25rem 0 .5rem">Couleur de l’arrière-plan</div>
+      <div role="radiogroup" aria-label="Couleur de l’arrière-plan" style="display: flex; flex-wrap: wrap; gap: .5rem; align-items: center">
+        <sc-for list="{{teintes}}" as="tc" hint-placeholder-count="8"><button type="button" role="radio" aria-checked="{{tc.checked}}" aria-label="{{tc.label}}" title="{{tc.label}}" onClick="{{tc.pick}}" style="width: 44px; height: 44px; border-radius: 50%; cursor: pointer; padding: 0; background: {{tc.sw}}; border: 3px solid {{tc.ring}}; box-shadow: inset 0 0 0 2px var(--surface); color: var(--muted); font-size: 18px; line-height: 1"><sc-if value="{{tc.isNone}}" hint-placeholder-val="{{ false }}">⌀</sc-if></button></sc-for>
+        <label style="display: inline-flex; align-items: center; gap: .45rem; font-size: 14px; font-weight: 700; cursor: pointer; min-height: 44px">Autre couleur <input type="color" value="{{teinteLibre.value}}" onInput="{{teinteLibre.onInput}}" aria-label="Choisir une autre couleur" style="width: 44px; height: 36px; border: 1px solid var(--line-2); background: var(--surface); padding: 2px; cursor: pointer"></label>
       </div>
-      <div style="display: flex; gap: .5rem; margin-top: 1.25rem"><button type="button" class="btn btn-ghost" onClick="{{resetModules}}" style="flex: 1">Réinitialiser</button><button type="button" class="btn btn-dark" onClick="{{closeCustomize}}" style="flex: 1">Terminé</button></div>
+      <p style="margin: .5rem 0 0; font-size: 12.5px; color: var(--muted)">La teinte colore le fond uni et les photos de fond. <sc-if value="{{teinteLibre.isPerso}}" hint-placeholder-val="{{ false }}"><button type="button" class="lnk" onClick="{{teinteLibre.reset}}" style="font-size: 12.5px">Revenir au réglage du site</button></sc-if></p>
+        <div style="display: flex; gap: .5rem; margin-top: 1.25rem"><button type="button" class="btn btn-ghost" onClick="{{resetModules}}" style="flex: 1">Revenir à l’essentiel</button><button type="button" class="btn btn-dark" onClick="{{closeCustomize}}" style="flex: 1">Terminé</button></div>
+      </sc-if>
     </div>
   </div>
 </sc-if>

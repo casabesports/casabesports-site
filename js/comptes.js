@@ -35,6 +35,10 @@
     updateName: function (name) {
       return use(function (c) { return c.auth.updateUser({ data: { name: name } }); });
     },
+    // Accueil personnalisé de l'abonné (sports, clubs, rubriques, couleurs) : gardé dans son profil, retrouvé sur tous ses appareils
+    savePrefs: function (prefs) {
+      return use(function (c) { return c.auth.updateUser({ data: { accueil: prefs } }); });
+    },
     // Connexion par mot de passe : identifiant = e-mail ou numéro de mobile
     signInPassword: function (id, password) {
       id = String(id || '').trim();
@@ -148,7 +152,7 @@
   function toUser(session) {
     var u = session && session.user; if (!u) return null;
     var m = u.user_metadata || {};
-    return { id: u.id, email: u.email || '', phone: u.phone ? '+' + String(u.phone).replace(/^\+/, '') : '', name: m.name || '', hasPassword: !!m.has_password || !!A.viaPassword, created: u.created_at || '' };
+    return { id: u.id, email: u.email || '', phone: u.phone ? '+' + String(u.phone).replace(/^\+/, '') : '', name: m.name || '', hasPassword: !!m.has_password || !!A.viaPassword, created: u.created_at || '', prefs: m.accueil && typeof m.accueil === 'object' ? m.accueil : null };
   }
   function use(fn) {
     return ready.then(function (c) {
