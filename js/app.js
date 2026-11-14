@@ -36,7 +36,7 @@ function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(lo
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
 const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
 // Nom d'équipe lisible : « AS ISIGNY LE BUAT 1 » → « AS Isigny le Buat 1 » (sigles gardés en capitales)
-const CB_SIGLES = /^(AS|US|CS|JS|FC|SC|HB|HBC|BC|RC|CL|AL|ES|SM|ASPTT|ENT|USM|AJ|AC|OC|UL|ASC|CA|ST|SU|AAJ|CHB|UST|VB|EC|SA|OM|PL|AG|ASL|USO|ESM|UC|SCO)$/;
+const CB_SIGLES = /^(AS|US|CS|JS|FC|SC|HB|HBC|BC|RC|CL|AL|ES|SM|ASPTT|ENT|USM|AJ|AC|OC|UL|ASC|CA|SU|AAJ|CHB|UST|VB|EC|SA|OM|PL|AG|ASL|USO|ESM|UC|SCO)$/;
 function cbNomEquipe(n) {
   const s = String(n || '').trim();
   if (!s || s !== s.toUpperCase()) return s;
@@ -1639,7 +1639,7 @@ class Component extends DCLogic {
     const dZones = zonesHere.length > 1 ? zonesHere.map((z) => Object.assign(pill(z === dZoneId), { label: z, pick: () => this.setState({ dZone: z, dNiv: '', dComp: null }) })) : [];
     const dNivs = nivsHere.length > 1 ? nivsHere.map((z) => Object.assign(pill(z === dNivId), { label: z, pick: () => this.setState({ dNiv: z, dComp: null }) })) : [];
     const dCompId = compsHere.some((c) => c.id === s.dComp) ? s.dComp : (compsHere[0] || {}).id;
-    const dComps = compsHere.map((c) => Object.assign(pill(c.id === dCompId), { label: c.label, pick: () => this.setState({ dComp: c.id }) }));
+    const dComps = compsHere.map((c) => Object.assign(pill(c.id === dCompId), { label: (String(c.label || '').charAt(0).toUpperCase() + String(c.label || '').slice(1)), cur: c.id === dCompId ? 'is-on' : '', pick: () => this.setState({ dComp: c.id }) }));
     const inComp = allM.filter((m) => m.sport === s.dSport && m.compId === dCompId);
     const sportHasData = inComp.length > 0;
     const tabDefs = [['live', 'Direct'], ['results', 'Résultats'], ['agenda', 'Agenda'], ['cal', 'Calendrier'], ['table', 'Classement'], ['pronos', 'Pronos']];
