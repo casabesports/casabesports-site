@@ -35,6 +35,21 @@ function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(lo
 
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
 const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
+// Nom d'équipe lisible : « AS ISIGNY LE BUAT 1 » → « AS Isigny le Buat 1 » (sigles gardés en capitales)
+const CB_SIGLES = /^(AS|US|CS|JS|FC|SC|HB|HBC|BC|RC|CL|AL|ES|SM|ASPTT|ENT|USM|AJ|AC|OC|UL|ASC|CA|ST|SU|AAJ|CHB|UST|VB|EC|SA|OM|PL|AG|ASL|USO|ESM|UC|SCO)$/;
+function cbNomEquipe(n) {
+  const s = String(n || '').trim();
+  if (!s || s !== s.toUpperCase()) return s;
+  let debut = true; // début de nom (après un sigle, « La Haye » garde sa majuscule)
+  return s.toLowerCase().replace(/[a-zà-ÿ0-9]+/g, (w) => {
+    const up = w.toUpperCase(), d = debut; debut = false;
+    if (up === 'ENT') return 'Ent.';
+    if (/\d/.test(w) || CB_SIGLES.test(up)) { debut = true; return up; }
+    if (!d && /^(le|la|les|de|du|des|en|et|sur|sous|aux|au)$/.test(w)) return w;
+    if (w.length === 1) return up;
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  });
+}
 const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
 // Logos des boutiques de clubs (images hébergées chez les clubs) : si l'un ne charge pas, l'initiale du club reste affichée
 if (typeof document !== 'undefined') document.addEventListener('error', (e) => { const t = e.target; if (t && t.classList && t.classList.contains('mc-img')) t.classList.add('mc-off'); }, true);
@@ -1456,6 +1471,7 @@ class Component extends DCLogic {
         progress: live ? Math.round(minute / (m.sport === 'Basketball' ? 40 : 90) * 100) + '%' : done ? '100%' : '0%',
         vLabel: m.verified ? 'Vérifié' : 'À confirmer', vColor: m.verified ? 'var(--success)' : 'var(--gold-text)',
         homeW: hasScore && m.hs > m.as ? '800' : '600', awayW: hasScore && m.as > m.hs ? '800' : '600',
+        homeN: cbNomEquipe(m.home), awayN: cbNomEquipe(m.away), homeWin: hasScore && +m.hs > +m.as ? 'is-win' : '', awayWin: hasScore && +m.as > +m.hs ? 'is-win' : '',
         open: () => this.setState({ matchId: m.id }),
         upcoming: m.status === 'up', opts: pronoOpts(m),
         rLabel: rem ? 'Rappel activé ✓' : 'Me le rappeler', rBg: rem ? 'var(--inv-bg)' : 'var(--surface)', rFg: rem ? 'var(--on-inv)' : 'var(--ink)',
@@ -2214,6 +2230,11 @@ class Component extends DCLogic {
     const allScores = allM.filter((m) => m.status === 'live').concat(allM.filter((m) => m.status === 'done' && m.hs !== '–' && recent(m)).sort((a, b) => (zoneRang(a) - zoneRang(b)) || (a.date > b.date ? -1 : 1)));
     const favScores = hasFav ? allScores.filter(favMatch) : [];
     const dashScores = (favScores.length ? favScores : allScores).slice(0, 8);
+    // Résultats regroupés par compétition (titre une seule fois), 4 matchs sur téléphone
+    const resMax = (typeof window !== 'undefined' && window.innerWidth < 640) ? 4 : 8;
+    const resGroups = [];
+    const capFirst = (x) => { const v = String(x || '').split(' · ')[0].trim(); return v ? v.charAt(0).toUpperCase() + v.slice(1) : ''; };
+    dashScores.slice(0, resMax).forEach((m) => { let g = resGroups.find((x) => x.sport === m.sport); if (!g) { g = { sport: m.sport, matches: [] }; resGroups.push(g); } const comp = m.compLabel && m.compLabel !== m.sport ? capFirst(m.compLabel) : ''; g.matches.push(Object.assign({}, m, { comp, hasComp: !!comp, isLiveM: m.status === 'live' })); });
     const resNote = !hasFav ? 'Cotentin et Manche d’abord' : favScores.length ? 'Vos sports et vos clubs' : 'Rien pour vos favoris cette semaine : toute la Manche';
     const dashNews = homeOrder.slice(0, 4);
     const dashProducts = homeProducts.slice(0, 3);
@@ -2936,7 +2957,7 @@ class Component extends DCLogic {
       weather, wx, wxCities, wxFind, isMeteo: V === 'meteo', goMeteo: () => this.go('meteo'), goPrivate: () => this.go('private'), goTable: () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' }),
       isHomeDash: V === 'home' && s.homeLayout !== 'magazine', isHomeMag: V === 'home' && s.homeLayout === 'magazine', toMagazine: () => this.setLayout('magazine'), toDashboard: () => this.setLayout('dashboard'),
       homeMods: homeModsShown, noModules: homeModsShown.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
-      une, dashScores, hasScores: dashScores.length > 0, noScores: dashScores.length === 0, resNote, portes, hp: homePerso, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
+      une, dashScores, resGroups, hasScores: dashScores.length > 0, noScores: dashScores.length === 0, resNote, portes, hp: homePerso, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
       isPrivate: V === 'private', pv, pf: pfm, pvTabs, tabBar,
       isApp: V === 'app', appUrl, arModes, installSteps, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: inApp ? 'Vous êtes dans l’application.' : 'Lien privé tant que vous ne l’avez pas partagé. Fonctionne sur téléphone, tablette et ordinateur.',
       isOlisto: V === 'olisto', ol, goOlisto: () => this.go('olisto'),

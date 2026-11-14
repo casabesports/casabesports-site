@@ -255,7 +255,26 @@ html{scroll-behavior:smooth}
 .full{grid-column:1/-1}
 .bento-item.full .bn-une{min-height:clamp(340px,40vw,520px)}
 .ac-fav{margin:.6rem 0 0;font-size:14px;color:var(--text-2)}.ac-fav .cond{font-size:11.5px;color:var(--gold-text);margin-right:.4rem}
-.ac-res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:.5rem}
+.rs{padding:2.4rem 0 1rem;border-top:1px solid var(--line-2);min-width:0;max-width:100%;overflow:hidden}
+.rs-head{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.8rem}
+.rs-k{margin:0;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:500;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+.rs-t{margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-style:italic;letter-spacing:-.01em;line-height:.95;font-size:clamp(2.6rem,5.4vw,4.2rem);color:var(--ink)}
+.rs-g{margin-bottom:1.6rem}
+.rs-gh{display:flex;align-items:baseline;gap:.9rem;margin:0 0 .2rem;padding-bottom:.55rem;border-bottom:1px solid var(--ink)}
+.rs-sp{font-family:var(--bn-font);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.rs-cp{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-size:15.5px;font-style:italic;color:var(--muted);letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;margin-bottom:.1rem}
+.rs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));column-gap:3rem}
+.rs-m{display:flex;flex-direction:column;gap:.35rem;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:.95rem 0;cursor:pointer;color:var(--text);min-width:0;transition:opacity .2s ease}
+.rs-m:hover .rs-n{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.rs-l{display:flex;align-items:baseline;justify-content:space-between;gap:1.2rem;color:var(--muted)}
+.rs-n{font-size:15px;font-weight:400;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rs-s{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:25px;line-height:1;font-variant-numeric:lining-nums tabular-nums;letter-spacing:0;min-width:2ch;text-align:right;flex:none}
+.rs-l.is-win{color:var(--ink)}.rs-l.is-win .rs-n{font-weight:600}.rs-l.is-win .rs-s{font-weight:700}
+.rs-live{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--danger)}
+.rs-foot{margin:.4rem 0 0;text-align:right}
+.rs-all{background:none;border:0;padding:0 0 .2rem;cursor:pointer;color:var(--text-2);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:500;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;border-bottom:1px solid var(--line-2)}
+.rs-all:hover{color:var(--ink);border-color:var(--ink)}
+.rs-vide{margin:0 0 1rem;color:var(--text-2);font-size:15px;font-style:italic}
 .ac-portes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
 .ac-porte{display:flex;flex-direction:column;align-items:flex-start;gap:.35rem;border:1px solid var(--line);background:var(--surface);padding:1.4rem 1.5rem}
 .ac-porte .pro-eb{margin-bottom:.2rem}.ac-porte .pro-h2{margin:0 0 .2rem;font-size:clamp(1.25rem,2.4vw,1.75rem)}
@@ -265,7 +284,7 @@ html{scroll-behavior:smooth}
 .ac-gz{display:grid!important;grid-template-columns:minmax(120px,200px) minmax(0,1fr);gap:1.4rem;align-items:center;text-align:left;cursor:pointer;color:var(--text)}
 .ac-gz-cov{display:block;aspect-ratio:3/4;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}.ac-gz-cov img{width:100%;height:100%;object-fit:cover;display:block}
 .ac-gz-txt{display:flex;flex-direction:column;gap:.35rem;min-width:0}.ac-gz-txt .pro-h2{margin:0}
-@media (max-width:640px){.ac-portes{grid-template-columns:1fr}.ac-gz{grid-template-columns:96px minmax(0,1fr);gap:1rem}.ac-gz .ac-porte-p{display:none}.ac-res-grid>button:nth-of-type(n+5){display:none!important}}
+@media (max-width:640px){.ac-portes{grid-template-columns:1fr}.ac-gz{grid-template-columns:96px minmax(0,1fr);gap:1rem}.ac-gz .ac-porte-p{display:none}.rs{padding-top:1.8rem}.rs-foot{text-align:left}}
 .b-card{position:relative;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.2rem;overflow:hidden;display:flex;flex-direction:column;color:var(--text);box-shadow:0 14px 34px -28px var(--shadow);font:inherit;transition:transform .25s ease,box-shadow .25s ease}
 button.b-card{cursor:pointer}
 button.b-card:hover{transform:translateY(-3px);box-shadow:0 20px 40px -26px var(--shadow)}
@@ -2197,7 +2216,7 @@ textarea.field { min-height: 92px; padding: .7rem .9rem; line-height: 1.5; resiz
   @media (max-width: 760px){
     .fab-lieu{padding:0 .3rem!important;min-height:44px!important;border-radius:50%!important;width:44px;justify-content:center}
     .fab-lieu .fab-lieu-txt{display:none}
-    .fab-ia{width:52px!important;height:52px!important}
+    .fab-ia{width:44px!important;height:44px!important}
   }
 .bn-qui { font-size: 13px; line-height: 1.45; color: var(--muted); margin: .6rem 0 0; max-width: 62ch; }
 .bn-qui .lnk { display: inline; min-height: 0; font-size: 13px; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--text); text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; padding: 0; cursor: pointer; font-family: var(--font-body); }
@@ -2552,24 +2571,33 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
               </span>
             </button>
           </sc-if>
-          <!-- Résultats du week-end -->
+          <!-- Résultats du week-end : présentation éditoriale, façon page résultats d'un quotidien -->
           <sc-if value="{{hm.isResultats}}" hint-placeholder-val="{{ false }}">
-            <div class="b-card ac-res">
-              <div class="b-head"><span class="cond" style="display: flex; align-items: center; gap: .45rem; color: var(--ink)"><span class="pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #e03040"></span>Résultats du week-end</span><button type="button" class="b-more" onClick="{{goLive}}">Scores et classements</button></div>
-              <p class="cond" style="margin: -.3rem 0 .6rem; font-size: 11.5px; color: var(--muted)">{{resNote}}</p>
+            <section class="rs" aria-labelledby="rs-t">
+              <header class="rs-head">
+                <p class="rs-k">Le week-end <span aria-hidden="true">—</span> {{resNote}}</p>
+                <h2 id="rs-t" class="rs-t">Les résultats</h2>
+              </header>
               <sc-if value="{{hasScores}}" hint-placeholder-val="{{ true }}">
-                <div class="ac-res-grid">
-                  <sc-for list="{{dashScores}}" as="m" hint-placeholder-count="6">
-                    <button type="button" onClick="{{m.open}}" style="display: grid; grid-template-columns: 1fr auto; gap: .1rem .6rem; text-align: left; background: var(--surface-3); border: 1px solid var(--line); border-radius: 0; padding: .55rem .7rem; cursor: pointer; color: var(--text)">
-                      <span style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{m.home}}</span><span class="num" style="font-size: 17px; color: var(--ink)">{{m.hs}}</span>
-                      <span style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{m.away}}</span><span class="num" style="font-size: 17px; color: var(--ink)">{{m.as}}</span>
-                      <span class="cond" style="font-size: 11px; color: {{m.stColor}}">{{m.sport}} · {{m.statusLabel}}</span>
-                    </button>
-                  </sc-for>
-                </div>
+                <sc-for list="{{resGroups}}" as="g" hint-placeholder-count="1">
+                  <div class="rs-g">
+                    <p class="rs-gh"><span class="rs-sp">{{g.sport}}</span></p>
+                    <div class="rs-grid">
+                      <sc-for list="{{g.matches}}" as="m" hint-placeholder-count="4">
+                        <button type="button" class="rs-m" onClick="{{m.open}}" aria-label="{{m.homeN}} {{m.hs}}, {{m.awayN}} {{m.as}}">
+                          <sc-if value="{{m.hasComp}}" hint-placeholder-val="{{ true }}"><span class="rs-cp">{{m.comp}}</span></sc-if>
+                          <span class="rs-l {{m.homeWin}}"><span class="rs-n">{{m.homeN}}</span><span class="rs-s">{{m.hs}}</span></span>
+                          <span class="rs-l {{m.awayWin}}"><span class="rs-n">{{m.awayN}}</span><span class="rs-s">{{m.as}}</span></span>
+                          <sc-if value="{{m.isLiveM}}" hint-placeholder-val="{{ false }}"><span class="rs-live">{{m.statusLabel}}</span></sc-if>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
               </sc-if>
-              <sc-if value="{{noScores}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; color: var(--text-2); font-size: 14.5px">Les résultats du week-end arrivent ici dès les premiers coups de sifflet. En attendant, l’agenda et les classements sont sur <button type="button" class="lnk" onClick="{{goLive}}" style="font-size: 14.5px">Le Terrain</button>.</p></sc-if>
-            </div>
+              <sc-if value="{{noScores}}" hint-placeholder-val="{{ false }}"><p class="rs-vide">Les résultats arrivent ici dès les premiers coups de sifflet.</p></sc-if>
+              <p class="rs-foot"><button type="button" class="rs-all" onClick="{{goLive}}">Tous les scores et classements</button></p>
+            </section>
           </sc-if>
           <!-- Les deux portes d'entrée -->
           <sc-if value="{{hm.isPortes}}" hint-placeholder-val="{{ false }}">
@@ -6856,7 +6884,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <sc-if value="{{showToTop}}" hint-placeholder-val="{{ false }}">
   <button type="button" class="fab lift22" onClick="{{toTop}}" aria-label="Revenir en haut" style="right: 92px; bottom: 22px; width: 48px; height: 48px; border-radius: 50%; background: var(--surface); color: var(--text); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
 </sc-if>
-<button type="button" class="fab cb-deep lift16 fab-ia" onClick="{{toggleAi}}" aria-label="{{aiAria}}" style="right: 16px; bottom: 16px; width: 66px; height: 66px; border-radius: 50%; background: #000; color: {{accent}}; display: flex; align-items: center; justify-content: center; padding: 0; overflow: hidden; box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #000000">
+<button type="button" class="fab cb-deep lift16 fab-ia" onClick="{{toggleAi}}" aria-label="{{aiAria}}" style="right: 16px; bottom: 16px; width: 56px; height: 56px; border-radius: 50%; background: #000; color: {{accent}}; display: flex; align-items: center; justify-content: center; padding: 0; overflow: hidden; box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px #000000">
   <sc-if value="{{aiClosed}}" hint-placeholder-val="{{ true }}"><img src="assets/logo-be-plus.jpg" alt="" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.05)"></sc-if>
   <sc-if value="{{aiOpen}}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></sc-if>
 </button>
