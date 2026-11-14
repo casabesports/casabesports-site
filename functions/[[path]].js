@@ -79,7 +79,11 @@ async function loadData(ctx, origin) {
     articles: merge(file.CASA_ARTICLES, online.CASA_ARTICLES).filter(visible),
     videos: merge(file.CASA_VIDEOS, online.CASA_VIDEOS).filter((v) => v && v.id),
     clubs: merge(file.CASA_CLUBS, online.CASA_CLUBS).filter((c) => c && c.id),
-    joueurs: merge(file.CASA_JOUEURS, online.CASA_JOUEURS).filter((p) => p && p.id)
+    joueurs: (function () {
+      const m = merge(file.CASA_JOUEURS, online.CASA_JOUEURS).filter((p) => p && p.id);
+      const libres = (Array.isArray(file.CASA_JOUEURS_LIBRES) ? file.CASA_JOUEURS_LIBRES : []).filter((p) => p && p.id && !m.some((x) => x.id === p.id));
+      return m.filter((p) => !p.masquer).concat(libres);
+    })()
   };
 }
 
