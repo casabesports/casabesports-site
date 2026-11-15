@@ -34,6 +34,12 @@
     try { window.dispatchEvent(new Event('casa-pwa')); } catch (er) {}
   });
   if ('serviceWorker' in navigator && window.isSecureContext) {
+    // Clic sur une notification alors que le site est déjà ouvert : on va à la page annoncée
+    navigator.serviceWorker.addEventListener('message', function (e) {
+      var d = e.data || {};
+      if (d.type !== 'ouvrir' || typeof d.url !== 'string') return;
+      try { var u = new URL(d.url, location.href); if (u.origin === location.origin) location.href = u.href; } catch (er) {}
+    });
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('/sw.js').then(function () { return navigator.serviceWorker.ready; }).then(function (reg) {
         // Première visite : les scripts étaient déjà chargés avant le service worker, on lui demande d'en garder une copie

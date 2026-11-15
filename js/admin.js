@@ -263,6 +263,7 @@
     else if (t === 'team') loadTeam();
     else if (t === 'subs') loadSubs();
     else if (t === 'clics') loadClics();
+    else if (t === 'notif') loadNotif();
     else if (t === 'img') loadImages();
     render();
   }
@@ -281,7 +282,7 @@
     if (!root) return;
     var y = body ? body.scrollTop : 0;
     root.textContent = '';
-    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['subs', 'Abonnés', 0], ['clics', 'Clics boutiques', 0], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
+    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['subs', 'Abonnés', 0], ['clics', 'Clics boutiques', 0], ['notif', 'Notifications', 0], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
     add(root, E('div', { class: 'cba-top' },
       E('span', { class: 'cba-brand' }, E('span', { class: 'long' }, 'Casa Besports · '), 'Administration'),
       E('div', { class: 'cba-tabs', role: 'tablist' }, tabs.map(function (t) {
@@ -292,7 +293,7 @@
     var w = E('div', { class: 'cba-wrap' });
     if (S.setup === 'sql') add(w, E('div', { class: 'cba-note' }, E('strong', {}, 'Une étape à faire une seule fois. '), 'La base de l’espace administrateur n’est pas encore installée : ouvrez Supabase › SQL Editor › New query, collez le contenu du fichier supabase/administration.sql du dépôt, puis cliquez « Run ». Rechargez ensuite cette page. (Guide : docs/ESPACE-ADMIN.md)'));
     else if (S.setup === 'norole') add(w, E('div', { class: 'cba-note' }, 'Votre compte n’est pas reconnu comme administrateur par Supabase : vérifiez que votre adresse e-mail est confirmée et qu’elle figure dans la table « equipe » avec le rôle admin.'));
-    add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, subs: viewSubs, clics: viewClics, team: viewTeam, help: viewHelp })[S.tab]());
+    add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, subs: viewSubs, clics: viewClics, notif: viewNotif, team: viewTeam, help: viewHelp })[S.tab]());
     add(body, w); add(root, body);
     body.scrollTop = y;
   }
@@ -1349,6 +1350,83 @@
         : E('p', {}, 'Aucun clic enregistré pour l’instant. Les clics apparaissent ici dès qu’un visiteur ouvre la boutique d’un club depuis votre site.'));
   }
 
+
+  // ================= NOTIFICATIONS (supabase/notifications.sql + fonction « notifications », docs/NOTIFICATIONS.md) =================
+  var NF = { titre: '', texte: '', lien: '/', art: '' };
+  function appelNotif(body) { return A.appel ? A.appel('notifications', body) : Promise.reject(new Error('Comptes non configurés')); }
+  function loadNotif() {
+    S.loaded.notif = false; S.notifErr = '';
+    appelNotif({ action: 'etat' }).then(function (d) { S.notif = d || {}; S.loaded.notif = true; render(); }, function (e) {
+      var m = String((e && e.message) || e || '');
+      S.notifErr = e && e.pasActive ? 'fonction' : /push_|relation|does not exist|notifications\.sql/i.test(m) ? 'sql' : m;
+      S.loaded.notif = true; render();
+    });
+    if (window.CasaNotif) window.CasaNotif.monAppareil().then(function (ep) { S.notifMoi = ep; if (S.tab === 'notif') render(); });
+  }
+  function envoyerNotif(essai) {
+    var t = NF.titre.trim();
+    if (!t) { toast('Écrivez un titre', true); return; }
+    if (!essai) {
+      var n = (S.notif && S.notif.inscrits) || 0;
+      if (!confirm('Envoyer « ' + t + ' » à ' + n + ' appareil' + (n > 1 ? 's' : '') + ' maintenant ?\nUne notification envoyée ne peut pas être reprise.')) return;
+    }
+    S.busy = true; render();
+    appelNotif({ action: 'envoyer', titre: t, texte: NF.texte.trim(), lien: NF.lien.trim() || '/', essai: essai || undefined }).then(function (r) {
+      S.busy = false;
+      var msg = (essai ? 'Essai envoyé à cet appareil' : 'Notification envoyée à ' + r.envoyees + ' appareil' + (r.envoyees > 1 ? 's' : '')) + (r.echecs ? ' · ' + r.echecs + ' échec(s)' : '') + (r.retirees ? ' · ' + r.retirees + ' appareil(s) désinscrit(s) retiré(s)' : '');
+      toast(msg, !!r.echecs && !r.envoyees);
+      if (r.erreurs && r.erreurs.length) console.warn('Notifications : ', r.erreurs);
+      if (!essai) { NF.titre = ''; NF.texte = ''; NF.lien = '/'; NF.art = ''; }
+      loadNotif();
+    }, function (e) { S.busy = false; render(); err(e); });
+  }
+  function viewNotif() {
+    var head = [E('h1', { class: 'cba-h' }, 'Notifications'),
+      E('p', { class: 'cba-sub' }, 'Envoyez une notification sur le téléphone et l’ordinateur de toutes les personnes qui ont touché « Activer les notifications » (page Application, ou Mon espace). Elle s’affiche même site fermé ; un toucher ouvre la page que vous choisissez. Sur iPhone, seules les personnes qui ont installé l’application la reçoivent.')];
+    if (!S.loaded.notif) return head.concat(E('p', {}, 'Chargement…'));
+    if (S.notifErr === 'fonction' || S.notifErr === 'sql') return head.concat(E('div', { class: 'cba-note' }, E('strong', {}, 'Deux étapes à faire une seule fois. '),
+      '1) Supabase › SQL Editor › New query : collez le contenu du fichier supabase/notifications.sql du dépôt, puis Run. 2) Supabase › Edge Functions › Deploy a new function › Via Editor : nom « notifications », collez supabase/functions/notifications/index.ts, Deploy, puis désactivez « Verify JWT ». Guide pas à pas : docs/NOTIFICATIONS.md.'),
+      E('button', { type: 'button', class: 'cba-btn', onclick: loadNotif }, 'Réessayer'));
+    if (S.notifErr) return head.concat(E('div', { class: 'cba-note' }, 'Les notifications n’ont pas pu être chargées : ' + S.notifErr), E('button', { type: 'button', class: 'cba-btn', onclick: loadNotif }, 'Réessayer'));
+    var d = S.notif || {}, n = d.inscrits || 0, ap = d.appareils || {};
+    var arts = (window.CASA_ARTICLES || []).filter(function (a) { return a && a.id && a.title; }).slice(0, 15);
+    var lim = function (v, max) { return E('span', { class: 'cba-count' }, v.length + ' / ' + max); };
+    var apercu = E('div', { style: 'display:flex;gap:.7rem;align-items:flex-start;background:#1f1f1f;color:#fff;padding:.8rem .9rem;max-width:420px;font-family:system-ui,sans-serif;margin-top:.4rem' },
+      E('img', { src: 'assets/app/icon-192.png', alt: '', style: 'width:38px;height:38px;flex:none' }),
+      E('div', { style: 'min-width:0' }, E('div', { style: 'font-weight:700;font-size:14px' }, NF.titre || 'Titre de la notification'), E('div', { style: 'font-size:13px;opacity:.85;line-height:1.4;margin-top:.15rem' }, NF.texte || 'Le texte apparaît ici.'), E('div', { style: 'font-size:11px;opacity:.6;margin-top:.3rem' }, 'Casa Besports · ' + location.host)));
+    var maj = function () { render(); var el = root && root.querySelector('[data-nf="' + maj.k + '"]'); if (el) { el.focus(); try { el.setSelectionRange(el.value.length, el.value.length); } catch (x) {} } };
+    var champ = function (k, tag, max, extra) {
+      return E(tag, Object.assign({ class: 'cba-in', 'data-nf': k, value: NF[k], maxlength: max ? String(max) : null, oninput: function (e) { NF[k] = e.target.value; maj.k = k; maj(); } }, extra || {}));
+    };
+    var moi = S.notifMoi;
+    return head.concat(
+      E('div', { class: 'cba-row', style: 'margin-bottom:.8rem;align-items:baseline' }, E('strong', { style: 'font-size:1.3rem' }, n + ' appareil' + (n > 1 ? 's' : '') + ' inscrit' + (n > 1 ? 's' : '')),
+        E('span', { style: 'color:var(--muted,#666);font-size:14px' }, Object.keys(ap).map(function (k) { return k + ' : ' + ap[k]; }).join(' · ')),
+        E('button', { type: 'button', class: 'cba-btn sm', style: 'margin-left:auto', onclick: loadNotif }, 'Actualiser')),
+      E('div', { class: 'cba-card' },
+        E('strong', {}, 'Nouvelle notification'),
+        arts.length ? [E('label', { class: 'cba-lbl' }, 'Partir d’un article (facultatif)'),
+          E('select', { class: 'cba-in', value: NF.art, onchange: function (e) {
+            var a = arts.filter(function (x) { return x.id === e.target.value; })[0]; NF.art = e.target.value;
+            if (a) { NF.titre = String(a.title).slice(0, 80); NF.texte = String(a.dek || a.excerpt || '').slice(0, 160); NF.lien = '/#/article/' + encodeURIComponent(a.id); }
+            render();
+          } }, E('option', { value: '' }, '— Choisir un article —'), arts.map(function (a) { var o = E('option', { value: a.id }, String(a.title).slice(0, 90)); if (a.id === NF.art) o.selected = true; return o; }))] : null,
+        E('label', { class: 'cba-lbl' }, 'Titre', lim(NF.titre, 80)), champ('titre', 'input', 80, { placeholder: 'Ex. : Victoire de l’AS Cherbourg 3-1 !' }),
+        E('label', { class: 'cba-lbl' }, 'Texte (facultatif)', lim(NF.texte, 160)), champ('texte', 'textarea', 160, { style: 'min-height:80px', placeholder: 'Une phrase courte. Au-delà de 2 lignes, le téléphone coupe le texte.' }),
+        E('label', { class: 'cba-lbl' }, 'Page ouverte au toucher'), champ('lien', 'input', 500, { placeholder: '/ (accueil), /#/article/…, ou une adresse https://…' }),
+        E('label', { class: 'cba-lbl' }, 'Aperçu'), apercu,
+        E('div', { class: 'cba-row', style: 'margin-top:1rem' },
+          E('button', { type: 'button', class: 'cba-btn pri', disabled: S.busy || !n || !NF.titre.trim() ? true : null, onclick: function () { envoyerNotif(null); } }, S.busy ? 'Envoi…' : 'Envoyer à tous (' + n + ')'),
+          E('button', { type: 'button', class: 'cba-btn', disabled: S.busy || !moi || !NF.titre.trim() ? true : null, title: moi ? '' : 'Activez d’abord les notifications sur cet appareil', onclick: function () { envoyerNotif(moi); } }, 'M’envoyer un essai')),
+        moi ? null : E('p', { style: 'font-size:13px;color:var(--muted,#666);margin:.6rem 0 0' }, 'Pour recevoir un essai sur cet appareil : fermez l’espace admin, page Application (ou Mon espace) › « Activer les notifications ».')),
+      E('h2', { style: 'margin:1.6rem 0 .5rem' }, 'Derniers envois'),
+      (d.envois || []).length ? E('table', { class: 'cba-tbl' }, E('tbody', {}, d.envois.map(function (x) {
+        return E('tr', {}, E('td', { style: 'white-space:nowrap' }, fmtDate(x.cree_le)), E('td', {}, E('strong', {}, x.titre), x.texte ? E('div', { style: 'font-size:13px;color:var(--muted,#666)' }, x.texte) : null),
+          E('td', { style: 'white-space:nowrap;text-align:right' }, (x.essai ? 'Essai · ' : '') + x.envoyees + ' reçue' + (x.envoyees > 1 ? 's' : '') + (x.echecs ? ' · ' + x.echecs + ' échec(s)' : '')));
+      }))) : E('p', {}, 'Aucune notification envoyée pour l’instant.'),
+      E('div', { class: 'cba-note', style: 'margin-top:1.2rem' }, E('strong', {}, 'Bon usage. '), 'Deux ou trois notifications par semaine au maximum (grands résultats, nouvelle Gazette, info importante d’un club) : au-delà, les gens les coupent. Une notification ne peut pas être reprise une fois envoyée : faites d’abord un essai sur votre téléphone.'));
+  }
+
   // ================= AIDE =================
   // ---------- Résultats et classements (saisie à la main) ----------
   var SP_SPORTS = ['Football', 'Basketball', 'Rugby', 'Water-polo', 'Natation', 'Judo', 'Tennis', 'Trail'];
@@ -1492,6 +1570,8 @@
         P('Envoyez une photo depuis n’importe quel champ image, ou depuis l’onglet Images. Elle est réduite automatiquement puis stockée en ligne ; son adresse est remplie à votre place.')),
       E('div', { class: 'cba-card' }, E('strong', {}, 'Messagerie'),
         P('Toutes les demandes du site arrivent ici. Pour répondre directement depuis le site et recevoir les e-mails des adresses suivies, deux réglages sont à faire une fois (Brevo et l’adresse de réception) : suivez docs/ESPACE-ADMIN.md. En attendant, « Répondre » ouvre votre messagerie habituelle.')),
+      E('div', { class: 'cba-card' }, E('strong', {}, 'Notifications'),
+        P('Onglet Notifications : écrivez un titre et une phrase, choisissez la page à ouvrir, faites « M’envoyer un essai », puis « Envoyer à tous ». Les visiteurs les activent sur la page Application ou dans Mon espace (sur iPhone : seulement dans l’application installée). Mise en place une seule fois : docs/NOTIFICATIONS.md.')),
       E('div', { class: 'cba-card' }, E('strong', {}, 'Accès à la rédaction'),
         P('Seules les personnes listées dans Équipe et accès voient l’espace rédaction. Un abonné peut vous envoyer une demande depuis Mon espace ; vous l’acceptez ou la refusez en un clic.'))];
   }
