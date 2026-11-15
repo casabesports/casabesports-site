@@ -36,7 +36,7 @@ function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(lo
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
 const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
 // Nom d'équipe lisible : « AS ISIGNY LE BUAT 1 » ou « as isigny le buat 1 » → « AS Isigny le Buat 1 » (sigles gardés en capitales)
-const CB_SIGLES = /^(AS|US|CS|JS|FC|SC|HB|HBC|BC|RC|CL|AL|ES|SM|ASPTT|ENT|USM|AJ|AC|OC|UL|ASC|CA|SU|AAJ|CHB|UST|VB|EC|SA|OM|PL|AG|ASL|USO|ESM|UC|SCO)$/;
+const CB_SIGLES = /^(AS|US|CS|JS|FC|SC|HB|HBC|BC|RC|CL|AL|ES|SM|ASPTT|ENT|USM|AJ|AC|OC|UL|ASC|CA|SU|AAJ|CHB|UST|VB|EC|SA|OM|PL|AG|ASL|USO|ESM|UC|SCO|CMS|SMV|GCO|CC)$/;
 function cbNomEquipe(n) {
   const s = String(n || '').trim();
   if (!s || (s !== s.toUpperCase() && s !== s.toLowerCase())) return s; // casse mixte : gardée telle que saisie
@@ -722,7 +722,7 @@ class Component extends DCLogic {
     // scores en direct
     if (has(/direct|live|en cours|score/) && !has(/classement/)) {
       const live = X.matches.filter((m) => m.status === 'live');
-      if (live.length) return { text: 'En direct :\n' + live.map((m) => '• ' + m.home + ' ' + score(m) + ' ' + m.away + ' — ' + compName(m)).join('\n'), actions: [act('Ouvrir le Terrain', () => this.go('live', { dTab: 'live' }))] };
+      if (live.length) return { text: 'En direct :\n' + live.map((m) => '• ' + cbNomEquipe(m.home) + ' ' + score(m) + ' ' + cbNomEquipe(m.away) + ' — ' + compName(m)).join('\n'), actions: [act('Ouvrir le Terrain', () => this.go('live', { dTab: 'live' }))] };
       return { text: 'Aucun match en direct pour le moment.', actions: [act('Voir l’agenda', () => this.go('live', { dTab: 'agenda' }))] };
     }
     // classement
@@ -735,13 +735,13 @@ class Component extends DCLogic {
     if (has(/resultat|dernier match|score final|gagne|perdu/)) {
       const sp = sportOf();
       const done = X.matches.filter((m) => m.sport === sp && m.status === 'done').sort((a, b) => (a.verified === b.verified ? (a.date > b.date ? -1 : 1) : a.verified ? -1 : 1)).slice(0, 4);
-      return { text: 'Derniers résultats ' + sp + ' :\n' + done.map((m) => '• ' + m.home + ' ' + score(m) + ' ' + m.away + '').join('\n'), actions: [act('Tous les résultats', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'results' }))] };
+      return { text: 'Derniers résultats ' + sp + ' :\n' + done.map((m) => '• ' + cbNomEquipe(m.home) + ' ' + score(m) + ' ' + cbNomEquipe(m.away) + '').join('\n'), actions: [act('Tous les résultats', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'results' }))] };
     }
     if (has(/prochain|agenda|quand|calendrier|programme|ce week/)) {
       if (has(/pointe|hague|avranches|coupe/)) return { text: 'ES Pointe-Hague – US Avranches, 4e tour de la Coupe de France, à Beaumont-Hague. La date et l’heure restent à confirmer.', actions: [act('Activer un rappel', () => { this.toggleIn('reminders', 'm-cfa-avranches', 'Rappel activé', 'Rappel retiré'); }), act('Pronostiquer', () => this.setState({ matchId: 'm-cfa-avranches', aiOpen: false }))] };
       const sp = sportOf();
       const up = X.matches.filter((m) => m.sport === sp && m.status === 'up' && m.date).sort((a, b) => a.date < b.date ? -1 : 1).slice(0, 4);
-      return { text: 'Prochains matchs ' + sp + ' :\n' + up.map((m) => '• ' + m.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + m.time + ' : ' + m.home + ' – ' + m.away).join('\n'), actions: [act('Ouvrir l’agenda', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'agenda' }))] };
+      return { text: 'Prochains matchs ' + sp + ' :\n' + up.map((m) => '• ' + m.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + m.time + ' : ' + cbNomEquipe(m.home) + ' – ' + cbNomEquipe(m.away)).join('\n'), actions: [act('Ouvrir l’agenda', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'agenda' }))] };
     }
     const pl = D.players.find((p) => { const parts = n(p.name).split(' '); return parts.some((w) => w.length >= 5 && new RegExp('\\b' + w + '\\b').test(q)); });
     if (pl) return { text: pl.name + ' — n° ' + pl.num + ', ' + pl.role + ' · ' + pl.clubLabel + '.', actions: [act('Voir le profil', () => this.go('player', { playerId: pl.id }))] };
@@ -1468,7 +1468,7 @@ class Component extends DCLogic {
     const openClubByTeam = (t) => () => { const id = X.teamClub[t]; if (id) this.go('club', { clubId: id, clubTab: 'matchs' }); else this.say('Club non référencé pour l’instant'); };
     const pronoOpts = (m) => {
       const mine = s.pronos[m.id];
-      return [['1', m.home.split(' ').slice(-1)[0] + ' gagne'], ['N', 'Match nul'], ['2', m.away.split(' ').slice(-1)[0] + ' gagne']].map(([v, label]) => Object.assign(pill(mine === v), { label,
+      return [['1', cbNomEquipe(m.home).split(' ').slice(-1)[0] + ' gagne'], ['N', 'Match nul'], ['2', cbNomEquipe(m.away).split(' ').slice(-1)[0] + ' gagne']].map(([v, label]) => Object.assign(pill(mine === v), { label,
         pick: () => { this.setState({ pronos: Object.assign({}, s.pronos, { [m.id]: v }) }); this.say('Prono enregistré'); } }));
     };
     const matchV = (m) => {
@@ -1499,7 +1499,7 @@ class Component extends DCLogic {
     // Le rendez-vous de l'accueil : le prochain match à venir (contenus/sport.js), sinon le bloc est masqué
     const todayIso = new Date().toISOString().slice(0, 10);
     const rdvM = allM.filter((m) => m.status === 'up' && (!m.date || m.date >= todayIso)).sort((a, b) => ((a.date || '') + (a.time || '') > (b.date || '') + (b.time || '') ? 1 : -1))[0];
-    const rdv = rdvM ? { has: true, home: rdvM.home, away: rdvM.away, comp: rdvM.compLabel || '', when: [rdvM.dateLabel, rdvM.time, rdvM.venue].filter(Boolean).join(' · '),
+    const rdv = rdvM ? { has: true, home: cbNomEquipe(rdvM.home), away: cbNomEquipe(rdvM.away), comp: rdvM.compLabel || '', when: [rdvM.dateLabel, rdvM.time, rdvM.venue].filter(Boolean).join(' · '),
       open: () => this.setState({ matchId: rdvM.id }) } : { has: false, home: '', away: '', comp: '', when: '', open: () => {} };
     const byDate = (a, b) => (a.date || '9999') < (b.date || '9999') ? -1 : 1;
 
@@ -2080,7 +2080,7 @@ class Component extends DCLogic {
       sResults = []
         .concat(ARTS.filter((a) => m(a.title + ' ' + a.dek + ' ' + a.tag)).map((a) => ({ label: a.title, sub: a.tag + ' · ' + a.date, kind: 'Article', go: () => this.go('article', { articleId: a.id }) })))
         .concat(X.products.filter((p) => m(p.name + ' ' + p.short + ' ' + lineName[p.line])).map((p) => ({ label: p.name, sub: lineName[p.line] + ' · ' + eur0(p.price), kind: 'Boutique', go: () => this.go('product', { productId: p.id, color: 0, size: null, qty: 1 }) })))
-        .concat(allM.filter((x) => m(x.home + ' ' + x.away)).map((x) => ({ label: x.home + ' – ' + x.away, sub: x.compLabel + ' · ' + x.dateLabel + ' · ' + x.scoreMid, kind: 'Match', go: () => this.go('live', { dSport: x.sport, dComp: x.compId, dTab: x.status === 'up' ? 'agenda' : 'results', matchId: x.id }) })))
+        .concat(allM.filter((x) => m(x.home + ' ' + x.away)).map((x) => ({ label: cbNomEquipe(x.home) + ' – ' + cbNomEquipe(x.away), sub: x.compLabel + ' · ' + x.dateLabel + ' · ' + x.scoreMid, kind: 'Match', go: () => this.go('live', { dSport: x.sport, dComp: x.compId, dTab: x.status === 'up' ? 'agenda' : 'results', matchId: x.id }) })))
         .concat(D.videos.filter((v) => m(v.title + ' ' + v.dek)).map((v) => ({ label: v.title, sub: v.date, kind: 'Vidéo', go: () => this.go('video', { videoId: v.id }) })))
         .concat(D.clubs.filter((c) => m(c.name + ' ' + c.city + ' ' + c.sport)).map((c) => ({ label: c.name, sub: c.sport + ' · ' + c.city, kind: 'Club', go: () => this.go('club', { clubId: c.id, clubTab: 'articles' }) })))
         .concat(D.players.filter((p) => m(p.name + ' ' + p.role + ' ' + p.clubLabel)).map((p) => ({ label: p.name, sub: p.role + ' · ' + p.clubLabel, kind: 'Joueur', go: () => this.go('player', { playerId: p.id }) })))
@@ -2268,7 +2268,7 @@ class Component extends DCLogic {
     const resNote = !hasFav ? 'Cotentin et Manche d’abord' : favScores.length ? 'Vos sports et vos clubs' : 'Rien pour vos favoris cette semaine : toute la Manche';
     const dashNews = homeOrder.slice(0, 4);
     const dashProducts = homeProducts.slice(0, 3);
-    const dashTable = (X.tables.r2 || []).slice(0, 4).map((r, i) => ({ rank: String(i + 1), team: r.team, pts: String(r.pts) }));
+    const dashTable = (X.tables.r2 || []).slice(0, 4).map((r, i) => ({ rank: String(i + 1), team: cbNomEquipe(r.team), pts: String(r.pts) }));
     const dashVideos = videos.slice(0, 2);
     // Un bloc d'accueil facultatif sans contenu réel ne s'affiche pas : il réapparaît dès qu'il y a des articles, des produits, un classement ou des vidéos
     const emptyMod = { actus: !dashNews.length, shop: !dashProducts.length, table: !dashTable.length, videos: !dashVideos.length };
@@ -2301,7 +2301,7 @@ class Component extends DCLogic {
     const nid = () => Math.random().toString(36).slice(2, 9);
     const CATS = { Sport: '#2e9e6b', Club: '#e8a830', Santé: '#d0473e', Famille: '#6aa6c8', Culture: '#b07acc', Travail: '#8e7cc3', Match: '#e03040' };
     const tIso = this.addDays(0);
-    const reminderEvents = s.reminders.map((id) => allM.find((m) => m.id === id)).filter((m) => m && m.date).map((m) => ({ id: 'r-' + m.id, title: m.home + ' – ' + m.away, date: m.date, time: m.time, cat: 'Match', place: '', reminder: true }));
+    const reminderEvents = s.reminders.map((id) => allM.find((m) => m.id === id)).filter((m) => m && m.date).map((m) => ({ id: 'r-' + m.id, title: cbNomEquipe(m.home) + ' – ' + cbNomEquipe(m.away), date: m.date, time: m.time, cat: 'Match', place: '', reminder: true }));
     const allEvents = P0.events.concat(reminderEvents).sort((a, b) => (a.date + a.time < b.date + b.time ? -1 : 1));
     const evV = (e) => ({ title: e.title, time: e.time || '', cat: e.cat, place: e.place ? ' · ' + e.place : '', color: CATS[e.cat] || '#8f9aa8', canDelete: !e.reminder, remove: () => { this.setPriv({ events: P0.events.filter((x) => x.id !== e.id) }); this.say('Événement supprimé'); } });
     const upcoming = allEvents.filter((e) => e.date >= tIso);
@@ -2351,10 +2351,10 @@ class Component extends DCLogic {
       onNoteTitle: (e) => this.setPriv({ notes: P0.notes.map((n) => n.id === note.id ? Object.assign({}, n, { title: e.target.value }) : n) }),
       onNoteText: (e) => this.setPriv({ notes: P0.notes.map((n) => n.id === note.id ? Object.assign({}, n, { text: e.target.value }) : n) }),
       deleteNote: () => { const rest = P0.notes.filter((n) => n.id !== note.id); this.setPriv({ notes: rest, noteId: rest[0] ? rest[0].id : null }); this.say('Note supprimée'); },
-      rides: P0.rides.map((r) => { const m = allM.find((x) => x.id === r.matchId); return { match: m ? m.home + ' – ' + m.away : 'Match', when: m ? fmtDay(m.date) + ' · ' + m.time : '', from: r.from, driver: r.mine ? 'vous conduisez' : r.driver, seats: String(r.seats),
+      rides: P0.rides.map((r) => { const m = allM.find((x) => x.id === r.matchId); return { match: m ? cbNomEquipe(m.home) + ' – ' + cbNomEquipe(m.away) : 'Match', when: m ? fmtDay(m.date) + ' · ' + m.time : '', from: r.from, driver: r.mine ? 'vous conduisez' : r.driver, seats: String(r.seats),
         btnLabel: r.mine ? 'Retirer' : r.joined ? 'Inscrit ✓' : 'Réserver une place', btnBg: r.joined ? 'var(--inv-bg)' : 'var(--surface)', btnFg: r.joined ? 'var(--on-inv)' : 'var(--ink)',
         act: () => { if (r.mine) { this.setPriv({ rides: P0.rides.filter((x) => x.id !== r.id) }); return; } if (!r.joined && r.seats < 1) { this.say('Plus de place disponible'); return; } this.setPriv({ rides: P0.rides.map((x) => x.id === r.id ? Object.assign({}, x, { joined: !x.joined, seats: x.seats + (x.joined ? 1 : -1) }) : x) }); this.say(r.joined ? 'Réservation annulée' : 'Place réservée'); } }; }),
-      matchOpts: upMatches.map((m) => ({ v: m.id, l: fmtDay(m.date) + ' · ' + m.home + ' – ' + m.away })),
+      matchOpts: upMatches.map((m) => ({ v: m.id, l: fmtDay(m.date) + ' · ' + cbNomEquipe(m.home) + ' – ' + cbNomEquipe(m.away) })),
       addRide: () => { if (!pfm.rideFrom.trim()) { this.say('Indiquez un lieu de départ'); return; } this.setPriv({ rides: [{ id: nid(), matchId: pfm.rideMatch, from: pfm.rideFrom.trim(), driver: 'vous', seats: Math.max(1, +pfm.rideSeats || 1), mine: true, joined: false }].concat(P0.rides) }); this.setState({ pf: Object.assign({}, pfm, { rideFrom: '' }) }); this.say('Trajet publié'); },
       budget: P0.budget.slice().sort((a, b) => (a.date > b.date ? -1 : 1)).map((b) => ({ label: b.label, cat: b.cat, amount: eur2(b.amount), date: fmtDay(b.date).replace(/^\S+ /, ''), remove: () => this.setPriv({ budget: P0.budget.filter((x) => x.id !== b.id) }) })),
       budgetCats: bcats, yearTotal: eur2(yearTotal), yearLabel: yearPrefix,
@@ -2426,7 +2426,7 @@ class Component extends DCLogic {
     const mFilter = s.pvMember || 'all';
     pv.agendaDays = pv.agendaDays.map((d) => Object.assign({}, d)); // copie
     const evWho = (e) => e.who || 'me';
-    const upcoming2 = P1.events.concat(s.reminders.map((id) => allM.find((m) => m.id === id)).filter((m) => m && m.date).map((m) => ({ id: 'r-' + m.id, title: m.home + ' – ' + m.away, date: m.date, time: m.time, cat: 'Match', reminder: true, who: 'me' })))
+    const upcoming2 = P1.events.concat(s.reminders.map((id) => allM.find((m) => m.id === id)).filter((m) => m && m.date).map((m) => ({ id: 'r-' + m.id, title: cbNomEquipe(m.home) + ' – ' + cbNomEquipe(m.away), date: m.date, time: m.time, cat: 'Match', reminder: true, who: 'me' })))
       .filter((e) => e.date >= tIso && (mFilter === 'all' || evWho(e) === mFilter)).sort((a, b) => (a.date + a.time < b.date + b.time ? -1 : 1));
     const byDay2 = {}; upcoming2.forEach((e) => { (byDay2[e.date] = byDay2[e.date] || []).push(e); });
     pv.agendaDays = Object.keys(byDay2).sort().slice(0, 14).map((d) => ({ label: d === tIso ? 'Aujourd’hui · ' + fmtDay(d) : d === this.addDays(1) ? 'Demain · ' + fmtDay(d) : fmtDay(d),
