@@ -49,7 +49,7 @@ Ce n'est pas obligatoire : l'appli web installable suffit pour démarrer. Les st
 | Coût | 25 $ une fois | 99 $ par an |
 | Compte | Compte « organisation » conseillé (numéro D-U-N-S gratuit, quelques jours). Un compte personnel doit d'abord faire tester l'appli par 12 personnes pendant 14 jours | Compte « organisation » avec numéro D-U-N-S |
 | Fabrication | Faisable à partir du site actuel (outil gratuit PWABuilder, format « TWA ») | Plus difficile : Apple refuse souvent les applis qui ne sont qu'un site emballé. Il faut des fonctions propres à l'appli (notifications, etc.) |
-| Abonnements Casa B+ / Gazette | Google impose en principe son propre système de paiement pour les abonnements numériques vendus dans l'appli | Apple impose l'achat intégré (commission 15 à 30 %) pour les abonnements numériques. La boutique (vêtements) peut rester sur Stripe |
+| Abonnements BE+ / Gazette | Google impose en principe son propre système de paiement pour les abonnements numériques vendus dans l'appli | Apple impose l'achat intégré (commission 15 à 30 %) pour les abonnements numériques. La boutique (vêtements) peut rester sur Stripe |
 | Suppression de compte | Obligatoire depuis l'appli et sur une page web | Obligatoire depuis l'appli |
 
 Ordre conseillé : 1) sortir l'appli web installable, 2) régler les bloquants ci-dessus, 3) Google Play, 4) App Store seulement si l'appli a des fonctions propres et qu'on a réglé la question des abonnements.

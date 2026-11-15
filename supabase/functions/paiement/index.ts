@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
         type: 'abonnement', formule: plan.id, periode, cadeau: cadeau ? '1' : '0', email, nom: txt(b.nom, 100),
         adresse: txt(b.adresse, 450), user_id: cadeau ? '' : (user?.id || ''), payeur_user_id: user?.id || '',
       };
-      const nom = (cadeau ? 'Abonnement offert · ' : '') + txt(plan.name, 120) + (periode === 'an' ? (cadeau ? ' · 1 an' : ' · annuel') : (cadeau ? ' · 1 mois' : ' · mensuel'));
+      const nom = (cadeau ? 'Abonnement offert · ' : '') + txt(plan.name, 120).replace(/Casa B\+/g, 'BE+') + (periode === 'an' ? (cadeau ? ' · 1 an' : ' · annuel') : (cadeau ? ' · 1 mois' : ' · mensuel'));
       const customer = cadeau ? undefined : await clientConnu(email);
       const session = await stripe.checkout.sessions.create({
         mode: cadeau ? 'payment' : 'subscription',
@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
       if (!lignes.length) return json({ error: 'Votre panier est vide.' }, 400);
       const email = user?.email || txt(b.email, 200).toLowerCase();
       if (!validEmail(email)) return json({ error: 'Adresse e-mail invalide.' }, 400);
-      // Remise abonnés Casa B+ (−10 %) : vérifiée côté serveur
+      // Remise abonnés BE+ (−10 %) : vérifiée côté serveur
       let remise = false;
       if (user) {
         const { data: subs } = await sb.from('abonnements').select('formule, statut, fin, cadeau').or(`email.eq.${user.email},user_id.eq.${user.id}`);

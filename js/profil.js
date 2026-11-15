@@ -425,7 +425,7 @@ var CasaCV = (function () {
       certOk: ok, cert: cert ? { id: showId(cert.id), emis: fmtDate(cert.emisLe), par: cert.par || 'l’équipe Casa Besports' } : {}, hasQr: !!qr, qr: qr || {}, qrD: qr ? qr.d : '', qrVb: qr ? qr.vb : '0 0 1 1',
       demo: demo, sceauSub: 'Parcours vérifié',
       pied: ok ? 'Certifié Casa Besports · n° ' + showId(cert.id) + ' · émis le ' + fmtDate(cert.emisLe) + (url ? ' · vérification : ' + url.replace(/^https?:\/\//, '') : ' · vérification sur le site Casa Besports, rubrique « Vérifier un certificat »')
-        : certState === 'modifie' ? 'CV modifié depuis sa certification n° ' + cert.id + ' : la certification doit être renouvelée.' : 'CV établi sur Casa Besports +, le média du sport dans la Manche. Non certifié.',
+        : certState === 'modifie' ? 'CV modifié depuis sa certification n° ' + cert.id + ' : la certification doit être renouvelée.' : 'CV établi sur Casa Besports, le média du sport dans la Manche. Non certifié.',
       logo: (window.ASSET_DATA && window.ASSET_DATA['logo-be.svg']) || 'assets/logo-be.svg'
     };
   }

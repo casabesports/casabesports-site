@@ -298,7 +298,9 @@ class Component extends DCLogic {
     const teamClub = Object.assign({}, teamClubBase, autoTeamClub, clubNames, SP.teamClub || {});
     // Formules d'abonnement : contenus/abonnements.js (modifiable dans l'espace administrateur)
     const subPlans = {};
-    ((typeof window !== 'undefined' && window.CASA_ABONNEMENTS) || []).forEach((f) => { if (f && f.id) subPlans[f.id] = Object.assign({ name: f.id, mois: 0, an: 0, perks: [], casab: false, gazette: null, paper: false }, f, { gazette: f.gazette || null, perks: (f.perks || []).filter(Boolean) }); });
+    // Ancien nom « Casa B+ » (copie publiée en ligne avant le renommage) → BE+
+    const beplus = (t) => typeof t === 'string' ? t.replace(/Casa B\+/g, 'BE+') : t;
+    ((typeof window !== 'undefined' && window.CASA_ABONNEMENTS) || []).forEach((f) => { if (f && f.id) subPlans[f.id] = Object.assign({ name: f.id, mois: 0, an: 0, perks: [], casab: false, gazette: null, paper: false }, f, { name: beplus(f.name || f.id), gazette: f.gazette || null, perks: (f.perks || []).filter(Boolean).map(beplus) }); });
     // Lieux (arrière-plans « Lieux de légende », lieu du jour) : contenus/lieux.js
     const places = (typeof window !== 'undefined' && Array.isArray(window.CASA_LIEUX) && window.CASA_LIEUX.length) ? window.CASA_LIEUX.filter((p) => p && p.id).map((p) => Object.assign({}, p, { img: p.photo || p.img, isPhoto: !!p.photo })) : [{ id: 'rade', name: 'Casa Besports', short: 'Casa Besports', where: 'Cotentin', year: '', img: 'assets/hero.jpg', hook: '', desc: '', moment: '' }];
     // Partenaires : contenus/partenaires.js (modifiable dans l'espace administrateur)
@@ -494,7 +496,7 @@ class Component extends DCLogic {
         clT: 'Le classement qui ne sert à rien', clSub: 'Les cinq bruits du dimanche au bord du terrain',
         classement: T(['Les crampons qui claquent sur le béton du couloir.', '« On se parle ! », crié par quelqu’un qui ne parle à personne.', 'La sono de la buvette qui grésille pendant l’annonce des équipes.', 'Le ballon qui finit dans le jardin du voisin. Encore.', 'Le vent. Toujours le vent.']) }),
       P({ id: 'quiz', sec: 'La pause', kind: 'quiz', thumb: B('f46b43bf0cb05c3fde4cba8ae7d9c8d5'), rubric: 'Jeux', title: 'Le quiz du Cotentin', script: 'dix questions, zéro triche', kicker: 'Testez votre culture sportive et locale, détails chocs compris. Solutions en dernière page.' }),
-      P({ id: 'partenaires', sec: 'La pause', kind: 'ads', thumb: B('0855c8136dcdda770cb476333ba7ad46'), rubric: 'Partenaires', title: 'Ils soutiennent le sport d’ici', script: 'avantages lecteurs', kicker: 'Avantages réservés aux abonnés Casa B+ et aux lecteurs de la Gazette. OlistO est un partenaire réel ; les autres annonceurs sont fictifs.' }),
+      P({ id: 'partenaires', sec: 'La pause', kind: 'ads', thumb: B('0855c8136dcdda770cb476333ba7ad46'), rubric: 'Partenaires', title: 'Ils soutiennent le sport d’ici', script: 'avantages lecteurs', kicker: 'Avantages réservés aux abonnés BE+ et aux lecteurs de la Gazette. OlistO est un partenaire réel ; les autres annonceurs sont fictifs.' }),
       P({ id: 'back', sec: 'La pause', kind: 'back', rubric: 'Dernière page', title: 'Make it happen', script: 'ici, le sport a une histoire', img: B('bae1d2ac6cb6529aa1e99e023df405ff'),
         solutions: 'Solutions du quiz : 1. 75 mètres · 2. 1120 · 3. Le Titanic · 4. 708 · 5. 8-0 · 6. 30 ans · 7. 2017 · 8. Jacques Prévert · 9. 2012 · 10. Peter Sagan.',
         ours: 'La Gazette du Cotentin est éditée par Casa Besports, média indépendant du sport local fondé en 2024. Numéro d’essai : contenus de démonstration, annonceurs fictifs, photo-illustrations signalées comme telles. Les détails chocs sont vérifiés et sourcés.' })
@@ -638,7 +640,7 @@ class Component extends DCLogic {
     const name = this.state.name ? ' ' + this.state.name.split(' ')[0] : '';
 
     if (has(/^(bonjour|salut|hello|coucou|bonsoir|hey)\b/)) return { text: 'Bonjour' + name + ' ! Je suis Casa IA. Je peux vous donner les scores, conseiller une tenue, ouvrir la Gazette, raconter l’histoire des lieux du Cotentin ou vous guider dans le site.', actions: [act('Scores en direct', () => this.go('live', { dTab: 'live' })), act('Conseil boutique', () => this.aiAsk('Une tenue chill à moins de 60 €'))] };
-    if (has(/\baide\b|que (peux|sais)|tu fais quoi|comment ca marche/)) return { text: 'Voici ce que je sais faire :\n• Scores, résultats, agenda et classements par discipline\n• Conseils boutique et ajout au panier (« ajoute le hoodie signature en M »)\n• Abonnements Casa B+ et La Gazette, ouverture d’une page précise\n• Histoire des lieux du Cotentin\n• Infos clubs, joueurs et partenaires\n• Navigation : « emmène-moi à la boutique »', actions: [] };
+    if (has(/\baide\b|que (peux|sais)|tu fais quoi|comment ca marche/)) return { text: 'Voici ce que je sais faire :\n• Scores, résultats, agenda et classements par discipline\n• Conseils boutique et ajout au panier (« ajoute le hoodie signature en M »)\n• Abonnements BE+ et La Gazette, ouverture d’une page précise\n• Histoire des lieux du Cotentin\n• Infos clubs, joueurs et partenaires\n• Navigation : « emmène-moi à la boutique »', actions: [] };
 
     if (has(/realite augmentee|\bar\b|compo|line ?up|composition|3d|selfie|photo supporter|application|appli/)) {
       if (has(/application|appli/) && !has(/compo|realite|3d/)) return { text: 'L’application Casa Besports réunit scores, Club House, Mon quotidien, la Gazette et les expériences en réalité augmentée. Elle s’installe sur l’écran d’accueil depuis le navigateur.', actions: [act('Découvrir l’application', () => this.go('app'))] };
@@ -765,7 +767,7 @@ class Component extends DCLogic {
       if (!pool.length) return { text: 'Rien ne correspond à ce budget. Les goodies commencent à 6 € et la carte cadeau à 20 €.', actions: [act('Voir les goodies', () => this.go('shop', { shopLine: 'Goodies' }))] };
       return { text: 'Ma sélection' + (budget ? ' à moins de ' + budget + ' €' : '') + ' :\n' + pool.map((p) => '• ' + p.name + ' — ' + eur(p.price)).join('\n') + (this.state.subs.casab ? '\nRemise abonné −10 % appliquée au panier.' : ''), actions: pool.map((p) => act('Voir ' + p.name.split(' «')[0], () => this.go('product', { productId: p.id, color: 0, size: null, qty: 1, persoName: '', persoNum: '' }))) };
     }
-    if (has(/abonn|casa b|premium|tarif|prix|pack/)) return { text: 'Les formules :\n• Casa B+ : 4,99 € / mois (articles Premium, alertes, −10 % boutique)\n• La Gazette : dès 3,99 € / mois\n• Pack Supporter : 11,90 € / mois (tout compris)\nEn annuel, deux mois sont offerts.', actions: [act('Comparer les offres', () => this.go('offers'))] };
+    if (has(/abonn|casa b|premium|tarif|prix|pack/)) return { text: 'Les formules :\n• BE+ : 4,99 € / mois (articles Premium, alertes, −10 % boutique)\n• La Gazette : dès 3,99 € / mois\n• Pack Supporter : 11,90 € / mois (tout compris)\nEn annuel, deux mois sont offerts.', actions: [act('Comparer les offres', () => this.go('offers'))] };
     if (has(/partenaire|sponsor|avantage/)) return { text: 'Nos partenaires :\n' + X.partners.map((p) => '• ' + p.name + ' — ' + p.perk).join('\n'), actions: [act('Voir les partenaires', () => this.go('partners'))] };
     if (has(/redaction|relecture|relire|valider|publier|admin|brouillon/)) {
       if (!this.state.role) return { text: 'L’espace rédaction est réservé à l’équipe.', actions: [act('Se connecter', () => this.setState({ loginOpen: true }))] };
@@ -1166,7 +1168,7 @@ class Component extends DCLogic {
     if (id === 'fidel') {
       C.contacts.forEach((c) => {
         if (c.type !== 'Abonné' || days(c.last) < 2 || (c.tags || []).indexOf('Offre annuelle proposée') >= 0) return;
-        const text = 'Objet : Passez à l’annuel, 2 mois offerts\n\nBonjour ' + c.name.replace(/ \(démo\)$/, '') + ',\n\nMerci de suivre le sport du Cotentin avec Casa B+. En passant à la formule annuelle, deux mois vous sont offerts. Votre avantage partenaire reste actif toute l’année.\n\nÀ très vite au bord des terrains !';
+        const text = 'Objet : Passez à l’annuel, 2 mois offerts\n\nBonjour ' + c.name.replace(/ \(démo\)$/, '') + ',\n\nMerci de suivre le sport du Cotentin avec BE+. En passant à la formule annuelle, deux mois vous sont offerts. Votre avantage partenaire reste actif toute l’année.\n\nÀ très vite au bord des terrains !';
         if (A.mode === 'auto') { c.tags = (c.tags || []).concat(['Offre annuelle proposée']); log('a proposé l’offre annuelle à ' + c.name, '#6aa6c8'); }
         else if (!C.approvals.some((a) => a.contactId === c.id)) { C.approvals.unshift({ id: 'ap' + Date.now() + n, agent: 'Agent Fidélisation', contactId: c.id, title: 'Offre annuelle pour ' + c.name, text, when: t, kind: 'fidel' }); log('prépare une offre de fidélisation pour ' + c.name, '#6aa6c8'); }
         n++;
@@ -1510,7 +1512,7 @@ class Component extends DCLogic {
     const goV = (v, extra) => () => this.go(v, extra || {});
     const menuGroups = [
       { titre: 'Le sport', items: [['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', 'Tous les sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Météo', 'meteo', 'Prévisions et conditions de jeu']] },
-      { titre: 'Vos services', items: [['Abonnements', 'offers', 'Casa B+ et La Gazette'], ['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents']] },
+      { titre: 'Vos services', items: [['Abonnements', 'offers', 'BE+ et La Gazette'], ['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents']] },
       { titre: 'La maison', items: [['Casa PRO', 'work', 'Clubs, marques, collectivités, sportifs, médias'], ['Partenaires', 'partners', 'Offres entreprises, OlistO et projet immobilier'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
@@ -1821,9 +1823,9 @@ class Component extends DCLogic {
     const priceOf = (id) => X.subPlans[id][period === 'an' ? 'an' : 'mois'];
     const perLabel = period === 'an' ? '/ an' : '/ mois';
     const periods = [['mois', 'Mensuel'], ['an', 'Annuel · 2 mois offerts']].map(([id, label]) => Object.assign(pill(s.period === id), { label, pick: () => this.setState({ period: id }) }));
-    const offerTabsDefs = ['Tout', 'Casa B+', 'La Gazette', 'Packs'];
+    const offerTabsDefs = ['Tout', 'BE+', 'La Gazette', 'Packs'];
     const offerTabs = offerTabsDefs.map((t) => ({ label: t, sel: s.offerTab === t ? 'true' : 'false', color: s.offerTab === t ? 'var(--ink)' : 'var(--muted)', line: s.offerTab === t ? accent : 'transparent', pick: () => this.setState({ offerTab: t }) }));
-    const tabPlans = { 'Tout': ['casab', 'gaz-duo', 'pack'], 'Casa B+': ['casab', 'pack'], 'La Gazette': ['gaz-num', 'gaz-pap', 'gaz-duo'], 'Packs': ['pack', 'gaz-duo'] }[s.offerTab];
+    const tabPlans = { 'Tout': ['casab', 'gaz-duo', 'pack'], 'BE+': ['casab', 'pack'], 'La Gazette': ['gaz-num', 'gaz-pap', 'gaz-duo'], 'Packs': ['pack', 'gaz-duo'] }[s.offerTab];
     const owned = (id) => { const p = X.subPlans[id]; return (p.casab ? s.subs.casab : true) && (p.gazette ? s.subs.gazette === p.gazette || (s.subs.gazette === 'duo' && p.gazette !== 'duo') : true) && (p.casab || p.gazette); };
     const offerCards = tabPlans.map((id) => {
       const p = X.subPlans[id];
@@ -1897,8 +1899,8 @@ class Component extends DCLogic {
       siteHref: cbPartnerLink(ptBase.site, ptBase.id, 'site'), appHref: cbPartnerLink(ptBase.app, ptBase.id, 'application'),
       hasSite: !!cbPartnerLink(ptBase.site, ptBase.id, 'site'), hasApp: !!cbPartnerLink(ptBase.app, ptBase.id, 'application'),
       note: ptRaw && ptRaw.real ? 'Partenaire Casa Besports.' : 'Partenaire Casa Besports.',
-      claimLabel: ptRaw && ptRaw.real ? 'Découvrir l’offre OlistO' : claimed ? 'Avantage enregistré ✓' : (subscribed ? 'Profiter de l’avantage' : 'Réservé aux abonnés Casa B+'),
-      claim: () => { if (ptRaw && ptRaw.real) { this.go('olisto'); return; } if (!subscribed) { this.go('offers', { offerTab: 'Casa B+' }); return; } if (!claimed) { this.setState({ claimed: s.claimed.concat([ptRaw.id]) }); this.say('Avantage ajouté à Mon espace'); } }
+      claimLabel: ptRaw && ptRaw.real ? 'Découvrir l’offre OlistO' : claimed ? 'Avantage enregistré ✓' : (subscribed ? 'Profiter de l’avantage' : 'Réservé aux abonnés BE+'),
+      claim: () => { if (ptRaw && ptRaw.real) { this.go('olisto'); return; } if (!subscribed) { this.go('offers', { offerTab: 'BE+' }); return; } if (!claimed) { this.setState({ claimed: s.claimed.concat([ptRaw.id]) }); this.say('Avantage ajouté à Mon espace'); } }
     });
 
     // ---------- Gazette (liseuse, édition « Le bandeau ») ----------
@@ -2061,7 +2063,7 @@ class Component extends DCLogic {
     const alerts = [['matchs', 'Scores en direct de mes clubs'], ['articles', 'Nouveaux articles'], ['videos', 'Nouvelles vidéos']].map(([id, label]) => ({ label, on: !!s.alerts[id], toggle: () => this.setState({ alerts: Object.assign({}, s.alerts, { [id]: !s.alerts[id] }) }) }));
     const savedArticles = allA.filter((a) => s.saved.indexOf(a.id) >= 0);
     const gazLabel = { num: 'Gazette numérique', pap: 'Gazette papier', duo: 'Gazette papier + numérique' }[s.subs.gazette];
-    const subStatus = [s.subs.casab ? 'Casa B+' : null, gazLabel || null].filter(Boolean).join(' · ') || 'Compte gratuit';
+    const subStatus = [s.subs.casab ? 'BE+' : null, gazLabel || null].filter(Boolean).join(' · ') || 'Compte gratuit';
 
     // ---------- recherche ----------
     const sq = norm(s.sq.trim());
@@ -2149,7 +2151,7 @@ class Component extends DCLogic {
     // ---------- thèmes ----------
     const THEME_DEFS = [
       ['auto', 'Automatique', 'Auto', 'Suit votre appareil', 'Blanc le jour, noir le soir, selon les réglages de votre appareil.', { bg: '#ffffff', bar: '#000000', card: '#ffffff', line: '#e0e0e0', text: '#000000', acc: '#000000', split: '50%' }],
-      ['light', 'Clair', 'Clair', 'Noir sur blanc', 'Fond blanc, titres noirs et bandeau noir : le logo Casa Besports + sur papier.', { bg: '#ffffff', bar: '#000000', card: '#ffffff', line: '#e0e0e0', text: '#000000', acc: '#000000', split: '0%' }],
+      ['light', 'Clair', 'Clair', 'Noir sur blanc', 'Fond blanc, titres noirs et bandeau noir : le logo BE+ sur papier.', { bg: '#ffffff', bar: '#000000', card: '#ffffff', line: '#e0e0e0', text: '#000000', acc: '#000000', split: '0%' }],
       ['dark', 'Sombre', 'Sombre', 'Blanc sur noir', 'Fond noir et lettres blanches, comme le logo : pour lire le soir sans éblouissement.', { bg: '#0b0b0b', bar: '#000000', card: '#141414', line: '#272727', text: '#ffffff', acc: '#ffffff', split: '0%' }],
       ['noir', 'Noir absolu', 'Noir', 'Contraste maximal', 'Noir pur et blanc pur : le contraste le plus fort, idéal sur écran OLED.', { bg: '#000000', bar: '#000000', card: '#0a0a0a', line: '#333333', text: '#ffffff', acc: '#ffffff', split: '0%' }],
       ['paper', 'Papier journal', 'Papier', 'Encre et papier', 'Papier grisé, encre noire et texte à empattements, comme un quotidien imprimé.', { bg: '#f1eee7', bar: '#111111', card: '#f8f6f1', line: '#bdb6a7', text: '#111111', acc: '#111111', split: '0%' }]
@@ -2520,7 +2522,7 @@ class Component extends DCLogic {
     const hash = [...this.profileKey()].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
     const qr = [];
     for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) { const finder = (x < 3 && y < 3) || (x > 5 && y < 3) || (x < 3 && y > 5); const on = finder ? !(x % 6 === 1 && y % 6 === 1) : ((hash >> ((x * 9 + y) % 29)) & 1) === 1; qr.push({ c: on ? (s.cardColor === 'noir' ? '#0b0b0b' : '#141a21') : 'transparent' }); }
-    const BADGES = [['Premier prono', 'Pronostiquer un match du Terrain', myPronos > 0], ['Plume', 'Publier au Club House', myPosts > 0], ['Tribune', 'Participer à un événement', myRsvp > 0], ['Œil de lynx', 'Voter au concours photo', myCulture > 0], ['Entraide', 'Annonce ou covoiturage', myAds + myRides > 0], ['Abonné', 'Être abonné Casa B+', !!s.subs.casab]];
+    const BADGES = [['Premier prono', 'Pronostiquer un match du Terrain', myPronos > 0], ['Plume', 'Publier au Club House', myPosts > 0], ['Tribune', 'Participer à un événement', myRsvp > 0], ['Œil de lynx', 'Voter au concours photo', myCulture > 0], ['Entraide', 'Annonce ou covoiturage', myAds + myRides > 0], ['Abonné', 'Être abonné BE+', !!s.subs.casab]];
     const authU = window.CasaAuth && window.CasaAuth.user;
     const memberNo = s.loggedIn ? cbMemberNo(authU ? authU.id : hash.toString(16).padStart(10, '0')) : '';
     const memberQr = memberNo ? cbQr(cbSiteUrl() + '?membre=' + memberNo) : null;
@@ -2530,7 +2532,7 @@ class Component extends DCLogic {
       pct: nextLv ? Math.round((pts - LV[lvIdx][1]) / (nextLv[1] - LV[lvIdx][1]) * 100) + '%' : '100%',
       toNext: !s.loggedIn ? 'Connectez-vous pour cumuler des points' : nextLv ? 'Encore ' + (nextLv[1] - pts) + ' pts pour le niveau ' + nextLv[0] : 'Niveau maximal atteint', qr,
       badges: BADGES.map(([name, how, ok]) => ({ name, how, status: ok ? 'Obtenu' : 'À débloquer', stColor: ok ? 'var(--success)' : 'var(--muted)', border: ok ? 'var(--acc)' : 'var(--line)', op: ok ? '1' : '.7' })),
-      perks: X.partners.map((p) => { const claimed = s.claimed.indexOf(p.id) >= 0; return { name: p.name, mono: p.mono, color: p.color, perk: p.perk, status: claimed ? 'Activé' : s.subs.casab ? 'Disponible' : 'Avec Casa B+', stColor: claimed ? 'var(--success)' : 'var(--gold-text)', open: () => this.setState({ partnerId: p.id }) }; }) };
+      perks: X.partners.map((p) => { const claimed = s.claimed.indexOf(p.id) >= 0; return { name: p.name, mono: p.mono, color: p.color, perk: p.perk, status: claimed ? 'Activé' : s.subs.casab ? 'Disponible' : 'Avec BE+', stColor: claimed ? 'var(--success)' : 'var(--gold-text)', open: () => this.setState({ partnerId: p.id }) }; }) };
     const chTabsDef = [['fil', 'Le fil'], ['annonces', 'Annonces & entraide'], ['events', 'Événements'], ['ligue', 'Classement'], ['carte', 'Ma carte membre']];
     const chTab = chTabsDef.some((t) => t[0] === s.chTab) ? s.chTab : 'fil';
     const chTabs = chTabsDef.map(([id, label]) => Object.assign(pill(id === chTab), { label, sel: id === chTab ? 'true' : 'false', pick: () => this.setState({ chTab: id }) }));
@@ -2582,7 +2584,7 @@ class Component extends DCLogic {
       publishAd: () => { if (needLogin()) return; if (!chf.adTitle.trim()) { this.say('Titre requis'); return; } saveCh({ ads: [{ id: 'a' + Date.now(), type: chf.adType, cat: chf.adCat, title: chf.adTitle.trim(), text: chf.adText.trim(), author: meName, where: chf.adWhere.trim() || 'Cotentin', time: 'à l’instant', mine: true }].concat(chState.ads) }); this.setState({ chf: Object.assign({}, chf, { adTitle: '', adText: '', adWhere: '' }) }); this.say('Annonce publiée · +5 pts'); },
       addRide: () => { if (needLogin()) return; pv.addRide(); },
       events: chEvents, board: boardV,
-      scale: [['Un pronostic', '+10'], ['Un événement « J’y vais »', '+10'], ['Une publication', '+5'], ['Une annonce ou un covoiturage', '+5'], ['Le sondage de la semaine', '+5'], ['Un commentaire', '+2'], ['Un vote au concours photo', '+2'], ['Une commande boutique', '+50'], ['Abonnement Casa B+', '+100']].map(([what, p]) => ({ what, pts: p })) };
+      scale: [['Un pronostic', '+10'], ['Un événement « J’y vais »', '+10'], ['Une publication', '+5'], ['Une annonce ou un covoiturage', '+5'], ['Le sondage de la semaine', '+5'], ['Un commentaire', '+2'], ['Un vote au concours photo', '+2'], ['Une commande boutique', '+50'], ['Abonnement BE+', '+100']].map(([what, p]) => ({ what, pts: p })) };
     const CARDS0 = { gold: { line: '#3a2706', land: 'rgba(58,39,6,.10)' }, argent: { line: '#1d2a38', land: 'rgba(29,42,56,.08)' }, noir: { line: '#e8b64c', land: 'rgba(232,182,76,.07)' } };
     const CARDS = { gold: { name: 'Gold', bg: 'linear-gradient(135deg, #7a561a 0%, #c8973a 22%, #f3dc9a 46%, #e2b65a 60%, #9a6c22 100%)', fg: '#23180a', sub: '#4d3712', acc: '#3a2706', qrBg: '#fff7e0', shine: '.35', logoOp: '.28', blend: 'multiply', sw: 'linear-gradient(135deg,#9a6c22,#f3dc9a,#c8973a)' },
       argent: { name: 'Argent', bg: 'linear-gradient(135deg, #6d747c 0%, #aeb6be 24%, #f2f4f6 48%, #c4cbd2 64%, #7d858e 100%)', fg: '#141a21', sub: '#3c454f', acc: '#1d2a38', qrBg: '#ffffff', shine: '.45', logoOp: '.22', blend: 'multiply', sw: 'linear-gradient(135deg,#7d858e,#f2f4f6,#aeb6be)' },

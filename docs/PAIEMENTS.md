@@ -5,7 +5,7 @@ carte bancaire, Apple Pay, Google Pay. L'argent arrive sur le compte bancaire de
 
 Ce qui est prêt dans le site :
 
-- **Abonnements** (Casa B+, La Gazette, Pack Supporter) : prélèvement automatique chaque mois ou chaque année.
+- **Abonnements** (BE+, La Gazette, Pack Supporter) : prélèvement automatique chaque mois ou chaque année.
 - **Abonnement offert** : paiement unique d'un mois ou d'un an, activé sur l'adresse e-mail du proche.
 - **Boutique** : paiement du panier, frais de livraison et remise abonnés −10 % recalculés par le serveur.
 - **Mon espace** : l'abonné voit son abonnement et ses commandes ; le bouton « Gérer ou résilier » ouvre son espace client Stripe (carte, factures, résiliation).
@@ -79,7 +79,7 @@ Sans ces secrets, aucun e-mail ne part et tout le reste fonctionne normalement.
 
 ## Essai (mode test)
 
-1. Sur le site, connectez-vous, ouvrez **Abonnements**, choisissez Casa B+, allez jusqu'à **Payer**.
+1. Sur le site, connectez-vous, ouvrez **Abonnements**, choisissez BE+, allez jusqu'à **Payer**.
 2. Sur la page Stripe, carte **4242 4242 4242 4242**, une date future (ex. 12/34), n'importe quel code (ex. 123).
 3. Retour sur le site : « Paiement reçu », puis l'abonnement apparaît **Actif** dans Mon espace, et un message « Paiement » arrive dans la messagerie de l'espace administrateur.
 4. Dans Mon espace, « Gérer ou résilier » ouvre l'espace client Stripe.
@@ -114,7 +114,7 @@ Les frais Stripe sont prélevés sur chaque paiement : voir **https://stripe.com
 ## Comment c'est construit (pour un informaticien)
 
 - `js/paiement.js` : appelle la fonction `paiement`, redirige vers Stripe Checkout, lit le retour `?paiement=reussi|annule`, lit les tables `abonnements` / `commandes` (RLS : ses lignes, par compte ou par e-mail confirmé).
-- `supabase/functions/paiement` : recalcule les prix (table `site_contenu`, sinon `contenus/*.js` du site), crée la session Checkout (`subscription` ou `payment`), remise Casa B+ vérifiée en base.
+- `supabase/functions/paiement` : recalcule les prix (table `site_contenu`, sinon `contenus/*.js` du site), crée la session Checkout (`subscription` ou `payment`), remise BE+ vérifiée en base.
 - `supabase/functions/stripe-webhook` : signature vérifiée, écrit les tables avec la clé service, ajoute un message dans `messages`.
 - `supabase/functions/portail-abonne` : session Billing Portal pour le client Stripe de l'abonné connecté.
 - Aucune écriture possible dans `abonnements` / `commandes` depuis le navigateur.
