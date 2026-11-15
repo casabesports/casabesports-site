@@ -887,6 +887,10 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .mc-plat { font-size: 12px; color: var(--muted); }
 .mc-go { font-family: var(--bn-font); font-weight: 700; font-size: 12.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink); }
 .mc-note { margin: 1rem 0 0; font-size: 13px; color: var(--muted); }
+.mc-mention { margin-top: .4rem; font-size: 12px; }
+.mc-part { align-self: flex-start; font-family: var(--bn-font); font-weight: 700; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; background: var(--ink); color: var(--bg); padding: .15rem .4rem; margin-bottom: .2rem; }
+.mc-code { margin-top: .2rem; font-size: 12.5px; color: var(--text-2); }
+.mc-code b { font-family: var(--bn-font); letter-spacing: .06em; color: var(--ink); border: 1px dashed var(--ink); padding: .05rem .35rem; }
 @media (max-width: 1100px) { .mc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .mc-grid { grid-template-columns: 1fr; } }
 @media (max-width: 1100px) { .bn-colls { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -3898,14 +3902,15 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         <div class="bn-sect"><span class="bn-etiq">{{maillots.titre}}</span><span class="mc-lead">{{maillots.texte}}</span></div>
         <div class="mc-grid">
           <sc-for list="{{maillots.items}}" as="mc" hint-placeholder-count="6">
-            <a class="mc-card" href="{{mc.href}}" target="_blank" rel="noopener" aria-label="{{mc.aria}}">
+            <a class="mc-card" href="{{mc.href}}" target="_blank" rel="noopener" aria-label="{{mc.aria}}" onClick="{{mc.track}}">
               <span class="mc-logo"><span class="mc-mono" aria-hidden="true">{{mc.mono}}</span><sc-if value="{{mc.hasLogo}}" hint-placeholder-val="{{ false }}"><img class="mc-img" src="{{mc.logo}}" alt="" loading="lazy" referrerpolicy="no-referrer"></sc-if></span>
-              <span class="mc-txt"><b>{{mc.nom}}</b><span class="mc-meta">{{mc.meta}}</span><sc-if value="{{mc.hasPlat}}" hint-placeholder-val="{{ false }}"><span class="mc-plat">Boutique en ligne · {{mc.plateforme}}</span></sc-if></span>
+              <span class="mc-txt"><sc-if value="{{mc.partenaire}}" hint-placeholder-val="{{ false }}"><span class="mc-part">Partenaire</span></sc-if><b>{{mc.nom}}</b><span class="mc-meta">{{mc.meta}}</span><sc-if value="{{mc.hasPlat}}" hint-placeholder-val="{{ false }}"><span class="mc-plat">Boutique en ligne · {{mc.plateforme}}</span></sc-if><sc-if value="{{mc.hasCode}}" hint-placeholder-val="{{ false }}"><span class="mc-code">Code <b>{{mc.code}}</b> {{mc.avantage}}</span></sc-if></span>
               <span class="mc-go" aria-hidden="true">Voir la boutique ↗</span>
             </a>
           </sc-for>
         </div>
-        <p class="mc-note">Boutiques gérées par les clubs eux-mêmes : vos achats les soutiennent directement. Votre club n’y figure pas ? Écrivez-nous.</p>
+        <p class="mc-note">Boutiques officielles gérées par les clubs ou leurs équipementiers : vos achats les soutiennent directement. Votre club n’y figure pas ? Écrivez-nous.</p>
+        <sc-if value="{{maillots.hasMention}}" hint-placeholder-val="{{ false }}"><p class="mc-note mc-mention">{{maillots.mention}}</p></sc-if>
       </section>
     </sc-if>
     <!-- Articles de l’Atelier : import des packs (aperçu, application seule) ou publication (équipe, plateforme) -->
