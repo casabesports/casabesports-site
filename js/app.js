@@ -1614,7 +1614,7 @@ class Component extends DCLogic {
     const sportOf = (p) => p.sport || (((D.clubs.find((c) => c.id === p.club) || {}).sport) || (/basket/i.test(p.clubLabel) ? 'Basketball' : 'Football'));
     const zoneOk = (p) => plZone === 'Normandie' || (p.departement ? p.departement === 'Manche' : true);
     const plSports = ['Toutes'].concat(Array.from(new Set(D.players.map(sportOf))).sort());
-    const sportChips = plSports.length > 2 ? plSports.map((x) => Object.assign(pill(x === plSport), { label: x, pick: () => this.setState({ plSport: x }) })) : [];
+    const plSportChips = plSports.length > 2 ? plSports.map((x) => Object.assign(pill(x === plSport), { label: x, pick: () => this.setState({ plSport: x }) })) : [];
     const zoneChips = [['Manche', 'Manche'], ['Normandie', 'Toute la Normandie']].map(([v, l]) => Object.assign(pill(v === plZone), { label: l, pick: () => this.setState({ plZone: v }) }));
     const playerList = D.players.filter((p) => (s.plRole === 'Tous' || (s.plRole === 'Staff & arbitres' ? isStaff(p) : p.role === s.plRole)) && (plSport === 'Toutes' || sportOf(p) === plSport) && zoneOk(p)).map(playerV);
     const hasLibres = D.players.some((p) => p.source);
@@ -2775,7 +2775,7 @@ class Component extends DCLogic {
       vid: curV, otherVideos: videos.filter((v) => v.id !== curV.id), playing: s.playing, notPlaying: !s.playing, togglePlay: () => this.setState({ playing: !s.playing }),
       playLabel: s.playing ? 'Pause' : 'Lire la vidéo', playState: s.playing ? 'Lecture en cours' : 'Prêt à lire', vidDim: s.playing ? 0.9 : 0.75,
       disciplines, disc, clubChips, clubList, club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs',
-      roleChips, sportChips, hasSportChips: sportChips.length > 0, zoneChips, playerList, playerCount: playerList.length + (playerList.length > 1 ? ' profils' : ' profil'), noPlayerList: playerList.length === 0, hasLibres, pl, cityName: s.city, cityClubs,
+      roleChips, sportChips: plSportChips, hasSportChips: plSportChips.length > 0, zoneChips, playerList, playerCount: playerList.length + (playerList.length > 1 ? ' profils' : ' profil'), noPlayerList: playerList.length === 0, hasLibres, pl, cityName: s.city, cityClubs,
       // terrain
       dSports, dComps, hasComps: dComps.length > 0, dZones, hasZones: dZones.length > 0, dNivs, hasNivs: dNivs.length > 0, dSportName: s.dSport, dTabs, sportEmpty: !sportHasData, sportHasData,
       isDemo: sportHasData, srcLabel: (spMaj ? 'Données officielles' + (spAuto.source ? ' (' + spAuto.source.replace(/\s*\(.*\)$/, '') + ')' : '') + ' · mise à jour ' + new Date(spMaj).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : 'Résultats vérifiés par la rédaction'), srcColor: 'var(--gold-text)', updatedAgo: spMaj ? new Date(spMaj).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—',
