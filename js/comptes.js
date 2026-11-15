@@ -124,9 +124,14 @@
     editedKeys: function () { return Object.keys(readCache()); },
     // Envoi d'un e-mail depuis la messagerie (fonction serveur « envoyer-email », voir docs/ESPACE-ADMIN.md)
     sendMail: function (to, subject, text, replyTo) {
-      // En cas d'échec, on remonte la vraie raison (fonction absente, clé manquante, expéditeur refusé par Brevo…)
+      return A.appel('envoyer-email', { to: to, subject: subject, text: text, reponse_a: replyTo || null });
+    },
+    // Appel d'une fonction serveur Supabase (Edge Function). En cas d'échec, on remonte la vraie raison
+    // (fonction absente, clé manquante, refus…) ; e.pasActive = la fonction n'est pas encore déployée ou configurée.
+    appel: function (nom, body) {
+      if (!ready) return Promise.reject(Object.assign(new Error('Comptes non configurés'), { pasActive: true }));
       return ready.then(function (c) {
-        return c.functions.invoke('envoyer-email', { body: { to: to, subject: subject, text: text, reponse_a: replyTo || null } }).then(function (r) {
+        return c.functions.invoke(nom, { body: body || {} }).then(function (r) {
           if (!r.error) return r.data;
           var ctx = r.error.context, status = ctx && ctx.status;
           var lire = ctx && typeof ctx.json === 'function' ? ctx.json().catch(function () { return {}; }) : Promise.resolve({});

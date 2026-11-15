@@ -5393,6 +5393,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4rem); margin-bottom: 1rem">Bonjour {{displayName}}</h1>
     <p style="margin: 0 0 1.2rem; color: var(--text-2); font-size: 14px">Connecté avec : <strong>{{acctId}}</strong> · {{acctRole}}</p>
     <sc-if value="{{isAdmin}}" hint-placeholder-val="{{ false }}"><div style="margin: 0 0 1.5rem; background: var(--inv-bg); color: var(--on-inv); padding: 1.1rem 1.4rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between"><span><strong>Espace administrateur</strong> · contenus du site, images, messagerie, équipe et demandes d’accès</span><button type="button" class="btn btn-gold" onClick="{{openAdmin}}">Ouvrir l’espace administrateur</button></div></sc-if>
+    <div style="margin: 0 0 1.5rem; border: 1px solid var(--line); background: var(--surface); padding: .9rem 1.1rem; display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; justify-content: space-between"><span style="flex: 1 1 260px; font-size: 14px; color: var(--text-2); line-height: 1.5"><strong style="color: var(--text)">Notifications · </strong>{{notif.etat}}</span><button type="button" class="btn btn-ghost" onClick="{{notif.toggle}}" aria-pressed="{{notif.on}}">{{notif.label}}</button></div>
     <div class="pf-head">
       <div class="pf-ava-col">
         <div class="pf-ava"><sc-if value="{{cvv.prof.hasPhoto}}" hint-placeholder-val="{{ false }}"><img src="{{cvv.prof.photo}}" alt="Votre photo de profil"></sc-if><sc-if value="{{cvv.prof.noPhoto}}" hint-placeholder-val="{{ true }}"><span aria-hidden="true">{{initial}}</span></sc-if></div>
@@ -6508,6 +6509,14 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 1rem">
       <sc-for list="{{arModes}}" as="am" hint-placeholder-count="4"><button type="button" onClick="{{am.open}}" style="text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: 1.2rem; cursor: pointer; color: var(--text); display: flex; flex-direction: column; gap: .4rem"><span class="cond" style="font-size: 11px; color: var(--gold-text)">{{am.tag}}</span><span class="ttl" style="font-size: 23px">{{am.title}}</span><span style="font-size: 14px; color: var(--text-2); line-height: 1.5">{{am.text}}</span></button></sc-for>
     </div>
+  </section>
+  <section class="wrap" id="notifications" style="padding-top: 2.5rem; padding-bottom: .5rem">
+    <h2 class="h2" style="font-size: clamp(1.8rem, 3.4vw, 2.6rem); margin-bottom: 1rem">Les notifications</h2>
+    <div style="border: 1px solid var(--line); background: var(--surface); padding: 1.2rem 1.3rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between">
+      <p style="margin: 0; flex: 1 1 320px; color: var(--text-2); line-height: 1.6; font-size: 15px" role="status">{{notif.etat}}</p>
+      <button type="button" class="btn btn-dark" onClick="{{notif.toggle}}" aria-pressed="{{notif.on}}" style="min-height: 48px">{{notif.label}}</button>
+    </div>
+    <p style="font-size: 13px; color: var(--muted); margin-top: .8rem">Quelques notifications par semaine au plus, jamais de publicité. Vous pouvez les couper ici à tout moment.</p>
   </section>
   <section class="wrap" style="padding-top: 2.5rem; padding-bottom: 4.5rem">
     <h2 class="h2" style="font-size: clamp(1.8rem, 3.4vw, 2.6rem); margin-bottom: 1rem">Installer l’application</h2>
@@ -7668,6 +7677,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="js/langue.js?v=__VERSION__"></script>
 <script src="js/comptes.js?v=__VERSION__"></script>
 <script src="js/paiement.js?v=__VERSION__"></script>
+<script src="js/notifications.js?v=__VERSION__"></script>
 <script src="js/app.js?v=__VERSION__"></script>
 <script src="js/admin.js?v=__VERSION__"></script>
 <script src="js/retouches.js?v=__VERSION__"></script>

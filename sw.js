@@ -64,3 +64,37 @@ self.addEventListener('fetch', (e) => {
     return copie || reseau;
   }));
 });
+
+// ---------- Notifications (envoyées depuis l'espace Admin › Notifications, voir docs/NOTIFICATIONS.md) ----------
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (er) { d = { body: e.data ? e.data.text() : '' }; }
+  const titre = d.title || 'Casa Besports';
+  e.waitUntil(self.registration.showNotification(titre, {
+    body: d.body || '',
+    icon: d.icon || '/assets/app/icon-192.png',
+    badge: '/assets/app/badge-96.png',
+    image: d.image || undefined,
+    tag: d.tag || undefined,
+    renotify: !!d.tag,
+    lang: d.lang || 'fr',
+    data: { url: d.url || '/' }
+  }));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  let cible;
+  try { cible = new URL((e.notification.data && e.notification.data.url) || '/', self.location.origin); } catch (er) { cible = new URL('/', self.location.origin); }
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((liste) => {
+    // Le site est déjà ouvert : on l'affiche et on va à la bonne page
+    for (const c of liste) {
+      if (new URL(c.url).origin === self.location.origin && 'focus' in c) {
+        if (cible.origin === self.location.origin) c.postMessage({ type: 'ouvrir', url: cible.href });
+        else if (self.clients.openWindow) return self.clients.openWindow(cible.href);
+        return c.focus();
+      }
+    }
+    return self.clients.openWindow ? self.clients.openWindow(cible.href) : null;
+  }));
+});
