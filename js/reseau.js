@@ -223,7 +223,8 @@ var CasaReseau = (function () {
     var fond = u.fond || readLS(LS.fond, null) || (tuiles ? 'plan' : 'casa');
     if (!tuiles) fond = 'casa';
     var couches = Object.assign({ clubs: true, commerces: true, limites: false }, u.couches || {});
-    var panel = u.panel || 'clubs';
+    var panel = u.panel || 'wk';
+    var wkV = c.wkVilles || [];
     var set = function (p) { ui(self, p); };
     var cd = comData(self);
     var cats = u.comCat || 'tout';
@@ -238,7 +239,7 @@ var CasaReseau = (function () {
 
     /* --- clubs par ville --- */
     var cityNames = Object.keys(D.cities).filter(function (n) { return D.clubs.some(function (cl) { return cl.city === n; }); });
-    var clubsPins = cityNames.map(function (n) { var ll = D.cities[n]; var k = D.clubs.filter(function (cl) { return cl.city === n; }).length; return { name: n, lat: ll[0], lon: ll[1], count: String(k), aria: n + ', ' + k + ' club' + (k > 1 ? 's' : ''), sel: s.city === n }; });
+    var clubsPins = cityNames.map(function (n) { var ll = D.cities[n]; var k = D.clubs.filter(function (cl) { return cl.city === n; }).length; return { name: n, lat: ll[0], lon: ll[1], count: String(k), aria: n + ', ' + k + ' club' + (k > 1 ? 's' : '') + (wkV.indexOf(n) >= 0 ? ', ça joue ce jour-là' : ''), sel: s.city === n, wk: wkV.indexOf(n) >= 0 }; });
     var cityChips = cityNames.map(function (n) { var k = D.clubs.filter(function (cl) { return cl.city === n; }).length; return Object.assign(pill(s.city === n), { label: n, n: String(k), pick: function () { self.setState({ city: n }); var ll = D.cities[n]; set({ focus: { k: 'c' + n + Date.now(), lat: ll[0], lon: ll[1], zoom: 13 }, panel: 'clubs' }); } }); });
 
     /* --- recherche --- */
@@ -382,8 +383,8 @@ var CasaReseau = (function () {
       q: q, onQ: function (e) { set({ q: ev(e) }); }, hasQ: !!q, clearQ: function () { set({ q: '' }); }, results: results, hasResults: results.length > 0, noResults: qn.length >= 2 && results.length === 0,
       locate: function () { if (window.CasaCarte && leaflet) window.CasaCarte.locate(); else self.say('La géolocalisation demande la carte interactive'); },
       recentrer: function () { if (leaflet) set({ focus: { k: 'n' + Date.now(), normandie: true } }); else set({ svgZoom: 1, svgCx: null, svgCy: null }); },
-      tabs: [['clubs', 'Clubs'], ['commerces', 'Commerces'], ['hors', 'Hors connexion']].map(function (t) { var on = panel === t[0]; return { id: t[0], label: t[1], selected: on ? 'true' : 'false', cls: on ? 'is-on' : '', pick: function () { set({ panel: t[0] }); } }; }),
-      tabClubs: panel === 'clubs', tabCom: panel === 'commerces', tabHors: panel === 'hors',
+      tabs: [['wk', 'Ce week-end'], ['clubs', 'Clubs'], ['commerces', 'Commerces'], ['hors', 'Hors connexion']].map(function (t) { var on = panel === t[0]; return { id: t[0], label: t[1], selected: on ? 'true' : 'false', cls: on ? 'is-on' : '', pick: function () { set({ panel: t[0] }); } }; }),
+      tabWk: panel === 'wk', tabClubs: panel === 'clubs', tabCom: panel === 'commerces', tabHors: panel === 'hors',
       hasCommune: !!commune, commune: commune || {}, cityChips: cityChips,
       sources: leaflet ? 'Fonds : Plan IGN v2 et photographies aériennes © IGN (Géoplateforme, Licence Ouverte) · © contributeurs OpenStreetMap (ODbL) · carte embarquée : IGN Admin Express, INSEE COG 2026, Natural Earth. Positions des clubs indicatives (centre de la ville).' : 'Aperçu vectoriel : IGN Admin Express (Licence Ouverte), Natural Earth. Positions des clubs indicatives.',
       hors: hors, comPinsN: comPins.length

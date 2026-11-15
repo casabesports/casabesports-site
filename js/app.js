@@ -50,7 +50,7 @@ function cbNomEquipe(n) {
     return w.charAt(0).toUpperCase() + w.slice(1);
   });
 }
-const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+const CB_TITLES = { home: '', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Autour de moi', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
 // Logos des boutiques de clubs (images hébergées chez les clubs) : si l'un ne charge pas, l'initiale du club reste affichée
 if (typeof document !== 'undefined') document.addEventListener('error', (e) => { const t = e.target; if (t && t.classList && t.classList.contains('mc-img')) t.classList.add('mc-off'); }, true);
 // Lien vers le site d'un partenaire, marqué « vient de Casa Besports » (paramètres utm_ lus par Google Analytics, Matomo, HubSpot…)
@@ -116,7 +116,7 @@ class Component extends DCLogic {
       city: 'Cherbourg', menuOpen: false, moreOpen: false, searchOpen: false, sq: '', pwShow: false, loginOpen: false, linkSent: false, loginMode: 'password', pw: '', pw2: '', loginId: '', pwOpen: false, pwDone: false, resetSent: false, hasPassword: false, phone: '', smsCode: '', codeSent: false, authBusy: false,
       loggedIn: false, subs: { casab: false, gazette: null }, name: '', email: '', address: '', subject: '', profile: '', message: '', contactSent: false,
       formError: '', step: 1, period: 'mois', subPlan: 'casab', isGift: false, saved: [], follows: [], followPlayers: [], remind: false,
-      summary: false, listening: false, fontStep: 1, reaction: null, playing: false, goal: 'Visibilité',
+      summary: false, listening: false, radioT: '', wkDay: '', fontStep: 1, reaction: null, playing: false, goal: 'Visibilité',
       alerts: { matchs: true, articles: true, videos: false }, toast: '',
       dSport: 'Football', dComp: 'r2', dTab: 'live', calMonth: 9, calDay: 10, matchId: null, pronos: {}, reminders: [],
       shopLine: 'Tout', proTab: 'clubs', shopSort: 'pop', color: 0, size: null, qty: 1, persoName: '', persoNum: '', prodError: '', sizeGuide: false,
@@ -1234,11 +1234,20 @@ class Component extends DCLogic {
 
   // Lecture audio d'un article avec la voix de synthèse du téléphone ou de l'ordinateur (gratuit, sans serveur)
   ecouter(a, locked) {
-    const S = window.speechSynthesis;
-    if (!S || typeof window.SpeechSynthesisUtterance !== 'function') { this.say('La lecture audio n’est pas disponible sur ce navigateur.'); return; }
     if (this.state.listening) { this.stopVoix(); return; }
     const corps = locked ? cbPhrase(a.body) : String(a.body || '').split(/\n\s*\n/).map((x) => cbTexte(x)).filter(Boolean).join('\n');
-    const texte = [cbTexte(a.title), cbTexte(a.dek), corps].filter(Boolean).map((x) => /[.!?…]$/.test(x) ? x : x + '.').join('\n');
+    this.lireTexte([cbTexte(a.title), cbTexte(a.dek), corps].filter(Boolean).map((x) => /[.!?…]$/.test(x) ? x : x + '.').join('\n'), '');
+  }
+  // Radio du terrain : le journal du week-end ou un récit, lu à voix haute dans un mini-lecteur qui suit la navigation
+  radio(titre, texte) {
+    if (this.state.listening && this.state.radioT === titre) { this.stopVoix(); return; }
+    if (!texte) { this.say('Rien à écouter pour ce jour-là.'); return; }
+    this.lireTexte(cbTexte(texte) || texte, titre);
+    this.writeLS('cb-radio-n', (+this.readLS('cb-radio-n', 0) || 0) + 1);
+  }
+  lireTexte(texte, radioT) {
+    const S = window.speechSynthesis;
+    if (!S || typeof window.SpeechSynthesisUtterance !== 'function') { this.say('La lecture audio n’est pas disponible sur ce navigateur.'); return; }
     // découpé en morceaux : certains navigateurs coupent les textes longs
     const morceaux = texte.match(/[^.!?…\n]+[.!?…]*\s*/g) || [texte];
     const total = texte.length || 1; let lu = 0;
@@ -1249,19 +1258,19 @@ class Component extends DCLogic {
     morceaux.forEach((m, i) => {
       const u = new SpeechSynthesisUtterance(m); u.lang = 'fr-FR'; if (v) u.voice = v; u.rate = 1;
       u.onstart = () => { if (tour === this._voix) this.setState({ voixPct: Math.round(lu / total * 100) + '%' }); };
-      u.onend = () => { lu += m.length; if (tour !== this._voix) return; if (i === morceaux.length - 1) this.setState({ listening: false, voixPct: '0%' }); else this.setState({ voixPct: Math.round(lu / total * 100) + '%' }); };
-      u.onerror = () => { if (tour === this._voix && i === morceaux.length - 1) this.setState({ listening: false }); };
+      u.onend = () => { lu += m.length; if (tour !== this._voix) return; if (i === morceaux.length - 1) this.setState({ listening: false, voixPct: '0%', radioT: '' }); else this.setState({ voixPct: Math.round(lu / total * 100) + '%' }); };
+      u.onerror = () => { if (tour === this._voix && i === morceaux.length - 1) this.setState({ listening: false, radioT: '' }); };
       S.speak(u);
     });
-    this.setState({ listening: true, voixPct: '0%' });
+    this.setState({ listening: true, voixPct: '0%', radioT: radioT || '' });
   }
   stopVoix() {
     this._voix = (this._voix || 0) + 1;
     try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
-    if (this.state.listening) this.setState({ listening: false, voixPct: '0%' });
+    if (this.state.listening) this.setState({ listening: false, voixPct: '0%', radioT: '' });
   }
   go(view, extra) {
-    if (this.state.listening) this.stopVoix();
+    if (this.state.listening && !this.state.radioT) this.stopVoix();
     if (view === 'admin') {
       if (this.state.role === 'admin' && window.CasaAdmin) { window.CasaAdmin.open(); return; }
       if (window.CasaAdmin && window.CasaAdmin.wantOpen) window.CasaAdmin.wantOpen();
@@ -1512,7 +1521,7 @@ class Component extends DCLogic {
     // Menu « Plus » regroupé en trois familles (les mêmes rubriques alimentent l'accès direct de l'accueil)
     const goV = (v, extra) => () => this.go(v, extra || {});
     const menuGroups = [
-      { titre: 'Le sport', items: [['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', 'Tous les sports suivis'], ['Territoire', 'map', 'La carte des clubs'], ['Météo', 'meteo', 'Prévisions et conditions de jeu']] },
+      { titre: 'Le sport', items: [['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', 'Tous les sports suivis'], ['Autour de moi', 'map', 'La carte vivante du week-end'], ['Météo', 'meteo', 'Prévisions et conditions de jeu']] },
       { titre: 'Vos services', items: [['Abonnements', 'offers', 'BE+ et La Gazette'], ['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents']] },
       { titre: 'La maison', items: [['Casa PRO', 'work', 'Clubs, marques, collectivités, sportifs, médias'], ['Partenaires', 'partners', 'Offres entreprises, OlistO et projet immobilier'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
@@ -2267,6 +2276,65 @@ class Component extends DCLogic {
     const capFirst = (x) => { const v = String(x || '').split(' · ')[0].trim(); return v ? v.charAt(0).toUpperCase() + v.slice(1) : ''; };
     dashScores.slice(0, resMax).forEach((m) => { let g = resGroups.find((x) => x.sport === m.sport); if (!g) { g = { sport: m.sport, matches: [] }; resGroups.push(g); } const comp = m.compLabel && m.compLabel !== m.sport ? capFirst(m.compLabel) : ''; g.matches.push(Object.assign({}, m, { comp, hasComp: !!comp, isLiveM: m.status === 'live' })); });
     const resNote = !hasFav ? 'Cotentin et Manche d’abord' : favScores.length ? 'Vos sports et vos clubs' : 'Rien pour vos favoris cette semaine : toute la Manche';
+    // ---------- Le week-end : le fil des scores et des récits, jour par jour (accueil, carte vivante, radio du terrain) ----------
+    const WK_J = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const WK_M = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+    const wkT0 = new Date(); wkT0.setHours(0, 0, 0, 0);
+    const wkEcart = (iso) => { const d = pd(String(iso || '').slice(0, 10)); return d ? Math.round((d - wkT0) / 864e5) : null; };
+    const wkJour = (iso) => { const d = pd(iso), k = wkEcart(iso); const base = WK_J[d.getDay()] + ' ' + d.getDate() + ' ' + WK_M[d.getMonth()]; return k === 0 ? 'Aujourd’hui' : k === -1 ? 'Hier · ' + base : k === 1 ? 'Demain · ' + base : base; };
+    const wkCourt = (iso) => { const d = pd(iso), k = wkEcart(iso); return k === 0 ? 'Aujourd’hui' : k === -1 ? 'Hier' : k === 1 ? 'Demain' : WK_J[d.getDay()].slice(0, 3) + '. ' + d.getDate(); };
+    const wkVilles = Object.keys(D.cities || {});
+    const wkVilleEq = (t) => { const id = (X.teamClub || {})[t]; const c = id && clubById(id); if (c && c.city) return c.city; const tn = ' ' + nrm(t) + ' '; return wkVilles.find((v) => tn.indexOf(' ' + nrm(v) + ' ') >= 0) || ''; };
+    const wkNiv = (m) => { const c = (X.comps[m.sport] || []).find((x) => x.id === m.compId) || {}; return !c.niveau || c.niveau === 'Seniors' ? 0 : 1; };
+    const wkMs = allM.filter((m) => { const k = wkEcart(m.date); return k != null && k >= -8 && k <= 7 && (m.status === 'live' || m.status === 'up' || (m.status === 'done' && m.hs !== '–')); });
+    const wkPool = hasFav && wkMs.some(favMatch) ? wkMs.filter(favMatch) : wkMs;
+    const wkArts = homeOrder.filter((a) => { const k = wkEcart(a.pubIso); return k != null && k >= -8 && k <= 0; });
+    const wkGarde = (d) => { const k = wkEcart(d); if (k == null || k < -3 || k > 7) return false; const j = pd(d).getDay(); return k === 0 || j === 0 || j === 6 || wkPool.some((m) => m.date === d && m.status === 'live') || wkArts.some((a) => String(a.pubIso).slice(0, 10) === d); };
+    const wkDays = wkPool.map((m) => m.date).concat(wkArts.map((a) => String(a.pubIso).slice(0, 10))).filter((d, i, t) => d && t.indexOf(d) === i && wkGarde(d)).sort();
+    const wkPasse = wkDays.filter((d) => wkEcart(d) <= 0);
+    const wkDay = wkDays.indexOf(s.wkDay) >= 0 ? s.wkDay : (wkDays.find((d) => wkEcart(d) === 0 && wkPool.some((m) => m.date === d && m.status !== 'up')) || wkPasse[wkPasse.length - 1] || wkDays[0] || '');
+    const wkTri = (a, b) => ((b.status === 'live') - (a.status === 'live')) || (wkNiv(a) - wkNiv(b)) || (zoneRang(a) - zoneRang(b)) || String(a.time || '').localeCompare(String(b.time || ''));
+    const wkDuJour = wkPool.filter((m) => m.date === wkDay).sort(wkTri);
+    const wkMax = resMax + 2;
+    const wkScoreTxt = (m) => cbNomEquipe(m.home) + (m.status === 'up' ? ' contre ' + cbNomEquipe(m.away) + (m.time ? ', à ' + m.time.replace(':', ' heures ') : '') : ' ' + m.hs + ', ' + cbNomEquipe(m.away) + ' ' + m.as);
+    const wkMatchIt = (m) => { const comp = m.compLabel && m.compLabel !== m.sport ? capFirst(m.compLabel) : ''; const v = wkVilleEq(m.home) || wkVilleEq(m.away);
+      return Object.assign({}, m, { isMatch: true, isRecit: false, comp, hasComp: !!comp, isLiveM: m.status === 'live', isUp: m.status === 'up', notUp: m.status !== 'up',
+        heure: m.status === 'live' ? 'Direct' : m.status === 'up' ? (m.time || 'À venir') : 'Final', heureCls: m.status === 'live' ? 'is-live' : m.status === 'up' ? 'is-up' : '', ville: v, hasVille: !!v,
+        goVille: () => { if (v) this.go('map', { city: v }); } }); };
+    const radioT = s.listening ? (s.radioT || '') : '';
+    const wkRecitIt = (a) => { const titre = 'Récit · ' + a.title; const on = radioT === titre;
+      return { isMatch: false, isRecit: true, id: a.id, title: a.title, dek: a.dek || '', tag: a.tag || a.sport || 'Récit', img: a.img || '', hasImg: !!a.img, open: a.open, heure: 'Récit',
+        ecouter: () => this.radio(titre, [a.title, a.dek, a.premium && !subscribed ? cbPhrase(a.body) + ' La suite est réservée aux abonnés BE+.' : String(a.body || '').split(/\n\s*\n/).map((x) => cbTexte(x)).filter(Boolean).join('\n')].filter(Boolean).join('.\n')),
+        ecLabel: on ? 'Arrêter' : 'Écouter', ecPressed: on ? 'true' : 'false' }; };
+    const wkRecits = wkArts.filter((a) => String(a.pubIso).slice(0, 10) === wkDay).map(wkRecitIt);
+    const wkItems = wkRecits.slice(0, 1).concat(wkDuJour.slice(0, wkMax).map(wkMatchIt), wkRecits.slice(1));
+    const wkReste = Math.max(0, wkDuJour.length - wkMax);
+    const wkDernier = !wkArts.length && homeOrder[0] ? wkRecitIt(homeOrder[0]) : null;
+    const wkJournalT = 'Le journal du terrain · ' + (wkDay ? wkJour(wkDay) : '');
+    const wkJournal = () => {
+      if (!wkDay) return '';
+      const parSport = {}; wkDuJour.slice(0, 12).forEach((m) => { (parSport[m.sport] = parSport[m.sport] || []).push(m); });
+      const lignes = ['Le journal du terrain, BE+. ' + wkJour(wkDay).replace(' · ', ', ') + '.'];
+      Object.keys(parSport).forEach((sp) => { lignes.push(sp + '.'); parSport[sp].forEach((m) => lignes.push(wkScoreTxt(m) + '.')); });
+      if (wkReste) lignes.push('Et ' + (wkReste + Math.max(0, wkDuJour.length - 12 - wkReste)) + ' autres rencontres à retrouver sur le Terrain.');
+      wkArts.filter((a) => String(a.pubIso).slice(0, 10) === wkDay).forEach((a) => lignes.push('À lire : ' + a.title + '. ' + (a.dek || '')));
+      lignes.push('Bon sport dans le Cotentin.');
+      return lignes.join('\n');
+    };
+    const wk = {
+      has: wkDays.length > 0, none: !wkDays.length, note: resNote,
+      jours: wkDays.map((d) => { const on = d === wkDay; const n = wkPool.filter((m) => m.date === d).length; return { label: wkCourt(d), n: n ? String(n) : '', hasN: n > 0, live: wkPool.some((m) => m.date === d && m.status === 'live'), cls: on ? 'is-on' : '', sel: on ? 'true' : 'false', pick: () => this.setState({ wkDay: d }) }; }),
+      jourLabel: wkDay ? wkJour(wkDay) : '', items: wkItems, hasItems: wkItems.length > 0, reste: wkReste ? '+ ' + wkReste + ' autre' + (wkReste > 1 ? 's' : '') + ' rencontre' + (wkReste > 1 ? 's' : '') + ' ce jour' : '', hasReste: wkReste > 0,
+      dernier: wkDernier || {}, hasDernier: !!wkDernier,
+      radio: () => this.radio(wkJournalT, wkJournal()), radioOn: radioT === wkJournalT, radioLabel: radioT === wkJournalT ? 'Arrêter la radio' : 'Écouter le journal', radioPressed: radioT === wkJournalT ? 'true' : 'false',
+      // carte vivante : ce qui se joue, commune par commune
+      villes: (() => { const vs = {}; wkPool.filter((m) => m.date === wkDay).forEach((m) => { [wkVilleEq(m.home), wkVilleEq(m.away)].filter((v, i, t) => v && t.indexOf(v) === i).forEach((v) => { (vs[v] = vs[v] || []).push(m); }); });
+        return Object.keys(vs).sort((a, b) => (vs[b].some((m) => m.status === 'live') - vs[a].some((m) => m.status === 'live')) || (vs[b].length - vs[a].length)).map((v) => ({ nom: v, n: String(vs[v].length), live: vs[v].some((m) => m.status === 'live'), sel: s.city === v ? 'true' : 'false', cls: s.city === v ? 'is-on' : '',
+          matchs: vs[v].sort(wkTri).slice(0, 4).map(wkMatchIt), plus: vs[v].length > 4 ? '+ ' + (vs[v].length - 4) + ' sur le Terrain' : '', hasPlus: vs[v].length > 4,
+          pick: () => { this.setState({ city: v }); const ll = D.cities[v]; if (ll && typeof CasaReseau !== 'undefined') CasaReseau.ui(this, { panel: 'wk', focus: { k: 'w' + v + Date.now(), lat: ll[0], lon: ll[1], zoom: 13 } }); } })); })()
+    };
+    wk.villesN = wk.villes.length + (wk.villes.length > 1 ? ' communes' : ' commune'); wk.hasVilles = wk.villes.length > 0; wk.noVilles = !wk.villes.length;
+    wk.villesWk = wk.villes.map((v) => v.nom);
     const dashNews = homeOrder.slice(0, 4);
     const dashProducts = homeProducts.slice(0, 3);
     const dashTable = (X.tables.r2 || []).slice(0, 4).map((r, i) => ({ rank: String(i + 1), team: cbNomEquipe(r.team), pts: String(r.pts) }));
@@ -2531,6 +2599,16 @@ class Component extends DCLogic {
     const qr = [];
     for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) { const finder = (x < 3 && y < 3) || (x > 5 && y < 3) || (x < 3 && y > 5); const on = finder ? !(x % 6 === 1 && y % 6 === 1) : ((hash >> ((x * 9 + y) % 29)) & 1) === 1; qr.push({ c: on ? (s.cardColor === 'noir' ? '#0b0b0b' : '#141a21') : 'transparent' }); }
     const BADGES = [['Premier prono', 'Pronostiquer un match du Terrain', myPronos > 0], ['Plume', 'Publier au Club House', myPosts > 0], ['Tribune', 'Participer à un événement', myRsvp > 0], ['Œil de lynx', 'Voter au concours photo', myCulture > 0], ['Entraide', 'Annonce ou covoiturage', myAds + myRides > 0], ['Abonné', 'Être abonné BE+', !!s.subs.casab]];
+    // Album à vignettes : chaque geste réel du supporter colle une vignette, et chaque club suivi a la sienne
+    const ALBUM = BADGES.concat([['Mon club', 'Suivre un club', s.follows.length > 0], ['Fan', 'Suivre un joueur', s.followPlayers.length > 0], ['Lecteur', 'Garder un récit dans ses favoris', s.saved.length > 0],
+      ['Auditeur', 'Écouter la radio du terrain', (+this.readLS('cb-radio-n', 0) || 0) > 0 || !!s.radioT], ['Rappel', 'Activer un rappel de match', s.reminders.length > 0], ['Maillot', 'Commander à la boutique', s.orders.length > 0]]);
+    const albumClubs = s.follows.map((id) => clubById(id)).filter(Boolean).map((c) => ({ num: 'C', name: c.name, how: [c.sport, c.city].filter(Boolean).join(' · '), ok: true, isClub: true, logo: c.logo || '', hasLogo: !!c.logo, noLogo: !c.logo, ini: initials(c.name), open: () => this.go('club', { clubId: c.id, clubTab: 'articles' }) }));
+    const albumV = (() => {
+      const v = ALBUM.map(([name, how, ok], i) => ({ num: String(i + 1).padStart(2, '0'), name, how, ok, isClub: false, ini: name.split(/[\s’']+/).map((w) => w.charAt(0)).join('').slice(0, 2).toUpperCase(), hasLogo: false, noLogo: true, logo: '', open: () => {} }));
+      const all = v.concat(albumClubs).map((x) => Object.assign(x, { cls: x.ok ? 'is-ok' : 'is-vide', status: x.ok ? (x.isClub ? 'Club suivi' : 'Collée') : 'À gagner' }));
+      const n = v.filter((x) => x.ok).length;
+      return { items: all, n: String(n), total: String(v.length), pct: Math.round(n / v.length * 100) + '%', clubs: String(albumClubs.length), hasClubs: albumClubs.length > 0 };
+    })();
     const authU = window.CasaAuth && window.CasaAuth.user;
     const memberNo = s.loggedIn ? cbMemberNo(authU ? authU.id : hash.toString(16).padStart(10, '0')) : '';
     const memberQr = memberNo ? cbQr(cbSiteUrl() + '?membre=' + memberNo) : null;
@@ -2540,8 +2618,9 @@ class Component extends DCLogic {
       pct: nextLv ? Math.round((pts - LV[lvIdx][1]) / (nextLv[1] - LV[lvIdx][1]) * 100) + '%' : '100%',
       toNext: !s.loggedIn ? 'Connectez-vous pour cumuler des points' : nextLv ? 'Encore ' + (nextLv[1] - pts) + ' pts pour le niveau ' + nextLv[0] : 'Niveau maximal atteint', qr,
       badges: BADGES.map(([name, how, ok]) => ({ name, how, status: ok ? 'Obtenu' : 'À débloquer', stColor: ok ? 'var(--success)' : 'var(--muted)', border: ok ? 'var(--acc)' : 'var(--line)', op: ok ? '1' : '.7' })),
+      album: albumV,
       perks: X.partners.map((p) => { const claimed = s.claimed.indexOf(p.id) >= 0; return { name: p.name, mono: p.mono, color: p.color, perk: p.perk, status: claimed ? 'Activé' : s.subs.casab ? 'Disponible' : 'Avec BE+', stColor: claimed ? 'var(--success)' : 'var(--gold-text)', open: () => this.setState({ partnerId: p.id }) }; }) };
-    const chTabsDef = [['fil', 'Le fil'], ['annonces', 'Annonces & entraide'], ['events', 'Événements'], ['ligue', 'Classement'], ['carte', 'Ma carte membre']];
+    const chTabsDef = [['fil', 'Le fil'], ['annonces', 'Annonces & entraide'], ['events', 'Événements'], ['ligue', 'Classement'], ['carte', 'Ma carte et mon album']];
     const chTab = chTabsDef.some((t) => t[0] === s.chTab) ? s.chTab : 'fil';
     const chTabs = chTabsDef.map(([id, label]) => Object.assign(pill(id === chTab), { label, sel: id === chTab ? 'true' : 'false', pick: () => this.setState({ chTab: id }) }));
     const ROOMS = ['Général', 'Football', 'Basket', 'Water-polo', 'Trail & course'];
@@ -2744,7 +2823,7 @@ class Component extends DCLogic {
     const V = s.view;
     const n = newsArticles.length;
     // ---------- réseau local (carte, commerces, espace club, administration) et profil membre (photo, CV, certification) ----------
-    const rsCtx = { D, V, me, isAdmin, staffRole: s.role ? staffRole : '', role: s.role, posts, clubRoleId: s.role === 'club' ? s.clubRoleId : '', canReseau, clubId: s.clubId,
+    const rsCtx = { D, V, me, isAdmin, staffRole: s.role ? staffRole : '', role: s.role, posts, clubRoleId: s.role === 'club' ? s.clubRoleId : '', canReseau, clubId: s.clubId, wkVilles: wk.villesWk,
       setPost: (id, patch, line) => this.setPost(id, patch, line), blocksOf: (b) => this.blocksOf(b), go: (v, x) => this.go(v, x) };
     const CVV = typeof CasaCV !== 'undefined' ? CasaCV.vals(this, rsCtx) : { prof: {}, cv: {}, verif: {}, adm: {}, avatar: '' };
     rsCtx.cvPending = typeof CasaCV !== 'undefined' && canReseau && s.studioTab === 'reseau' ? CasaCV.pending(this) : 0;
@@ -2791,7 +2870,7 @@ class Component extends DCLogic {
       art: artObj, gzSide, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
       fontUp: () => this.setState({ fontStep: Math.min(3, s.fontStep + 1) }), fontDown: () => this.setState({ fontStep: Math.max(0, s.fontStep - 1) }),
       toggleSummary: () => this.setState({ summary: !s.summary }), summaryOpen: s.summary, summaryPressed: s.summary ? 'true' : 'false', sumBg: s.summary ? 'var(--inv-bg)' : 'var(--surface)', sumFg: s.summary ? 'var(--on-inv)' : 'var(--ink)',
-      toggleListen: () => this.ecouter(curA, locked), listening: s.listening, voixPct: s.voixPct || '0%', listenPressed: s.listening ? 'true' : 'false', lisBg: s.listening ? 'var(--inv-bg)' : 'var(--surface)', lisFg: s.listening ? 'var(--on-inv)' : 'var(--ink)', listenLabel: s.listening ? 'En écoute' : 'Écouter',
+      toggleListen: () => this.ecouter(curA, locked), listening: (s.listening && !s.radioT), voixPct: s.voixPct || '0%', listenPressed: (s.listening && !s.radioT) ? 'true' : 'false', lisBg: (s.listening && !s.radioT) ? 'var(--inv-bg)' : 'var(--surface)', lisFg: (s.listening && !s.radioT) ? 'var(--on-inv)' : 'var(--ink)', listenLabel: (s.listening && !s.radioT) ? 'En écoute' : 'Écouter',
       reactions,
       share: () => {
         // Partage de la page affichée, avec son adresse lisible (/actualites/…)
@@ -3023,7 +3102,7 @@ class Component extends DCLogic {
       weather, wx, wxCities, wxFind, isMeteo: V === 'meteo', goMeteo: () => this.go('meteo'), goPrivate: () => this.go('private'), goTable: () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' }),
       isHomeDash: V === 'home' && s.homeLayout !== 'magazine', isHomeMag: V === 'home' && s.homeLayout === 'magazine', toMagazine: () => this.setLayout('magazine'), toDashboard: () => this.setLayout('dashboard'),
       homeMods: homeModsShown, noModules: homeModsShown.length === 0, modRows, layouts, customizeOpen: s.customizeOpen, openCustomize: () => this.setState({ customizeOpen: true }), closeCustomize: () => this.setState({ customizeOpen: false }), resetModules: () => this.setMods(this.defaultMods()),
-      une, dashScores, resGroups, hasScores: dashScores.length > 0, noScores: dashScores.length === 0, resNote, portes, hp: homePerso, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
+      une, wk, rdo: { on: !!(s.listening && s.radioT), titre: s.radioT || '', pct: s.voixPct || '0%', stop: () => this.stopVoix(), goWk: () => this.go('home') }, dashScores, resGroups, hasScores: dashScores.length > 0, noScores: dashScores.length === 0, resNote, portes, hp: homePerso, dashNews, dashProducts, dashTable, dashVideos, lieuDuJour, quickChips, todayLabel, greeting,
       isPrivate: V === 'private', pv, pf: pfm, pvTabs, tabBar,
       isApp: V === 'app', appUrl, arModes, notif, installSteps, installApp, installLabel, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: pwaIn ? 'Vous êtes dans l’application.' : 'Gratuite, sans passer par un store. Fonctionne sur téléphone, tablette et ordinateur.',
       isOlisto: V === 'olisto', ol, goOlisto: () => this.go('olisto'),
