@@ -611,7 +611,7 @@
   }
   function adBoards(K, parent, hw, hl, h, sides) {
     var THREE = K.THREE, c = document.createElement('canvas'); c.width = 1024; c.height = 64; var g = c.getContext('2d');
-    for (var i = 0; i < 4; i++) { g.fillStyle = i % 2 ? NAVY : '#000000'; g.fillRect(i * 256, 0, 256, 64); g.fillStyle = i % 2 ? GOLD : '#ffffff'; g.font = '900 34px Mulish, Arial, sans-serif'; g.textAlign = 'center'; g.fillText(i % 2 ? 'OlistO' : 'CASA BESPORTS +', i * 256 + 128, 44); }
+    for (var i = 0; i < 4; i++) { g.fillStyle = i % 2 ? NAVY : '#000000'; g.fillRect(i * 256, 0, 256, 64); g.fillStyle = i % 2 ? GOLD : '#ffffff'; g.font = '900 34px Mulish, Arial, sans-serif'; g.textAlign = 'center'; g.fillText(i % 2 ? 'OlistO' : 'BE+', i * 256 + 128, 44); }
     var dark = K.M('#16191d');
     (sides || [[0, -hl, hw * 2, 0], [0, hl, hw * 2, Math.PI], [-hw, 0, hl * 2, Math.PI / 2], [hw, 0, hl * 2, -Math.PI / 2]]).forEach(function (b) {
       var t = K.tex(c, [Math.max(1, Math.round(b[2] / 12)), 1]); t.wrapT = THREE.ClampToEdgeWrapping;

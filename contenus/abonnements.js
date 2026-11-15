@@ -6,7 +6,7 @@
 window.CASA_ABONNEMENTS = [
   {
     "id": "casab",
-    "name": "Casa B+",
+    "name": "BE+",
     "mois": 4.99,
     "an": 49,
     "perks": [
@@ -67,7 +67,7 @@ window.CASA_ABONNEMENTS = [
     "mois": 11.9,
     "an": 119,
     "perks": [
-      "Casa B+ complet",
+      "BE+ complet",
       "La Gazette papier + numérique",
       "−10 % sur la boutique",
       "Une écharpe offerte avec l’annuel"

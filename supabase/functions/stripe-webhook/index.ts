@@ -65,7 +65,7 @@ async function bienvenue(o: { email: string; prenom: string; formule: string; pe
   const text = [salut, '', intro, '', coeur, '', perks.length ? 'Ce que votre abonnement vous ouvre dès maintenant :\n' + perks.map((x) => '• ' + x).join('\n') : '', papier, '', acces, '', fin, '', 'À très vite au bord du terrain,', 'L’équipe Casa Besports', 'Le sport passe. Les histoires restent.', SITE].filter((l, i, a) => !(l === '' && a[i - 1] === '')).join('\n');
   const P = (t: string) => `<p style="margin:0 0 14px;font-size:14px;line-height:1.5;color:#1a1a1a">${t}</p>`;
   const html = `<div style="background:#f4f4f2;padding:24px 12px;font-family:Helvetica,Arial,sans-serif"><div style="max-width:560px;margin:0 auto;background:#ffffff">
-<div style="background:#0b0b0b;color:#ffffff;padding:18px 24px;font-weight:800;letter-spacing:.04em;font-size:15px">CASA BESPORTS+</div>
+<div style="background:#0b0b0b;color:#ffffff;padding:18px 24px;font-weight:800;letter-spacing:.04em;font-size:15px">BE+</div>
 <div style="padding:26px 24px 8px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.2;color:#0b0b0b">${esc(sujet)}</h1>
 ${P(esc(salut))}${P(esc(intro).replace(esc(nom), '<strong>' + esc(nom) + '</strong>'))}${P(esc(coeur))}

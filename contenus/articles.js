@@ -10,7 +10,7 @@
  *   tag: 'Régional 2',                      // rubrique / compétition
  *   date: '12 nov.',                        // date affichée
  *   read: '3 min',                          // temps de lecture
- *   premium: false,                         // true = réservé aux abonnés Casa B+
+ *   premium: false,                         // true = réservé aux abonnés BE+
  *   img: 'assets/articles/mon-image.jpg',   // image principale
  *   alt: 'Description de l’image',
  *   title: 'Titre',

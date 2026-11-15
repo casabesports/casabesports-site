@@ -30,7 +30,7 @@ const SECTIONS = {
   'a-propos': { t: 'À propos', d: 'Casa Besports, média sportif indépendant fondé en 2024 à Cherbourg-en-Cotentin : révéler, raconter et transmettre les histoires du sport local.' },
   'contact': { t: 'Contact', d: 'Écrire à la rédaction de Casa Besports : une question, une histoire à proposer, un projet de partenariat.' },
   'partenaires': { t: 'Partenaires', d: 'Les partenaires de Casa Besports et les offres réservées aux abonnés.' },
-  'abonnements': { t: 'Abonnements', d: 'Suivre Casa Besports : abonnement Casa B+ et La Gazette du Cotentin.' },
+  'abonnements': { t: 'Abonnements', d: 'Suivre Casa Besports : abonnement BE+ et La Gazette du Cotentin.' },
   'le-terrain': { t: 'Le Terrain', d: 'Scores, agenda et classements du sport dans la Manche.' },
   'club-house': { t: 'Club House', d: 'La tribune des supporters du Cotentin : discussions, sondages et rendez-vous.' },
   'culture': { t: 'Culture', d: 'Le sport, l’art et la mémoire du Cotentin.' },
@@ -197,7 +197,7 @@ export async function onRequest(ctx) {
         noscript: '<p><a href="/actualites">' + esc(sec.t) + '</a></p><h1>' + esc(a.title) + '</h1>' + (a.dek ? '<p><strong>' + esc(a.dek) + '</strong></p>' : '') +
           '<p>Par ' + esc(a.author || 'la rédaction') + (published ? ' · ' + esc(String(published).slice(0, 10)) : '') + '</p>' +
           (img ? '<figure><img src="' + esc(img) + '" alt="' + esc(a.alt || '') + '">' + (a.credit ? '<figcaption>Photo : ' + esc(a.credit) + '</figcaption>' : '') + '</figure>' : '') +
-          (a.premium ? '<p>' + esc(clip(a.body, 320)) + '</p><p>La suite est réservée aux abonnés Casa B+.</p>' : bodyHtml(a.body))
+          (a.premium ? '<p>' + esc(clip(a.body, 320)) + '</p><p>La suite est réservée aux abonnés BE+.</p>' : bodyHtml(a.body))
       };
     }
   } else if (kind === 'club') {
