@@ -35,11 +35,11 @@ function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(lo
 
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
 const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
-// Nom d'équipe lisible : « AS ISIGNY LE BUAT 1 » → « AS Isigny le Buat 1 » (sigles gardés en capitales)
+// Nom d'équipe lisible : « AS ISIGNY LE BUAT 1 » ou « as isigny le buat 1 » → « AS Isigny le Buat 1 » (sigles gardés en capitales)
 const CB_SIGLES = /^(AS|US|CS|JS|FC|SC|HB|HBC|BC|RC|CL|AL|ES|SM|ASPTT|ENT|USM|AJ|AC|OC|UL|ASC|CA|SU|AAJ|CHB|UST|VB|EC|SA|OM|PL|AG|ASL|USO|ESM|UC|SCO)$/;
 function cbNomEquipe(n) {
   const s = String(n || '').trim();
-  if (!s || s !== s.toUpperCase()) return s;
+  if (!s || (s !== s.toUpperCase() && s !== s.toLowerCase())) return s; // casse mixte : gardée telle que saisie
   let debut = true; // début de nom (après un sigle, « La Haye » garde sa majuscule)
   return s.toLowerCase().replace(/[a-zà-ÿ0-9]+/g, (w) => {
     const up = w.toUpperCase(), d = debut; debut = false;
