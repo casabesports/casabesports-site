@@ -797,7 +797,7 @@ class Component extends DCLogic {
     return { id: p.id, sport: p.sport, tag: p.tag, date: '6 oct.', read: Math.max(1, Math.round(words / 200)) + ' min', premium: p.premium, img: p.img, alt: p.alt || p.title, title: p.title, dek: p.dek, clubs: p.clubs, points: this.sentences(this.textOf(p.body)).slice(0, 3), body: p.body, author: p.author, fromStudio: true, video: p.video && p.video.url ? p.video : null, related: p.related || [], date: p.online && p.online.at ? (typeof CasaRedac !== 'undefined' ? CasaRedac.fmtDate(p.online.at).replace(/ \d{4}$/, '') : '6 oct.') : '6 oct.' };
   }
 
-  loadTheme() { try { const t = window.localStorage.getItem('cb-theme'); return ['auto', 'light', 'dark', 'noir', 'paper'].indexOf(t) >= 0 ? t : 'dark'; } catch (e) { return 'dark'; } }
+  loadTheme() { try { const t = window.localStorage.getItem('cb-theme'); return ['auto', 'light', 'dark', 'noir', 'paper'].indexOf(t) >= 0 ? t : 'light'; } catch (e) { return 'light'; } }
   sysDark() { try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) { return false; } }
   profileKey() { const s = this.state; return s.role ? 'role-' + s.role : (s.email.trim().toLowerCase() || 'compte'); }
   setTheme(id, opts) {
@@ -2157,13 +2157,13 @@ class Component extends DCLogic {
 
     // ---------- thèmes ----------
     const THEME_DEFS = [
-      ['auto', 'Automatique', 'Auto', 'Suit votre appareil', 'Blanc le jour, noir le soir, selon les réglages de votre appareil.', { bg: '#ffffff', bar: '#000000', card: '#ffffff', line: '#e0e0e0', text: '#000000', acc: '#000000', split: '50%' }],
-      ['light', 'Clair', 'Clair', 'Noir sur blanc', 'Fond blanc, titres noirs et bandeau noir : le logo BE+ sur papier.', { bg: '#ffffff', bar: '#000000', card: '#ffffff', line: '#e0e0e0', text: '#000000', acc: '#000000', split: '0%' }],
-      ['dark', 'Sombre', 'Sombre', 'Blanc sur noir', 'Fond noir et lettres blanches, comme le logo : pour lire le soir sans éblouissement.', { bg: '#0b0b0b', bar: '#000000', card: '#141414', line: '#272727', text: '#ffffff', acc: '#ffffff', split: '0%' }],
+      ['auto', 'Automatique', 'Auto', 'Suit votre appareil', 'Clair le jour, bleu nuit le soir, selon les réglages de votre appareil.', { bg: '#e9efee', bar: '#10283a', card: '#ffffff', line: '#d3dedc', text: '#10283a', acc: '#10283a', split: '50%' }],
+      ['light', 'Clair', 'Clair', 'Marée, le jour', 'Fond brume, titres bleu de rade et bandeau bleu : les couleurs de la rade de Cherbourg.', { bg: '#e9efee', bar: '#10283a', card: '#ffffff', line: '#d3dedc', text: '#10283a', acc: '#10283a', split: '0%' }],
+      ['dark', 'Sombre', 'Sombre', 'Marée, la nuit', 'Fond bleu nuit et boutons couleur soleil : pour lire le soir sans éblouissement.', { bg: '#0c1d2a', bar: '#10283a', card: '#122838', line: '#1f3a4d', text: '#ffffff', acc: '#f2b33d', split: '0%' }],
       ['noir', 'Noir absolu', 'Noir', 'Contraste maximal', 'Noir pur et blanc pur : le contraste le plus fort, idéal sur écran OLED.', { bg: '#000000', bar: '#000000', card: '#0a0a0a', line: '#333333', text: '#ffffff', acc: '#ffffff', split: '0%' }],
       ['paper', 'Papier journal', 'Papier', 'Encre et papier', 'Papier grisé, encre noire et texte à empattements, comme un quotidien imprimé.', { bg: '#f1eee7', bar: '#111111', card: '#f8f6f1', line: '#bdb6a7', text: '#111111', acc: '#111111', split: '0%' }]
     ];
-    const curTheme = THEME_DEFS.find((t) => t[0] === s.theme) ? s.theme : 'dark';
+    const curTheme = THEME_DEFS.find((t) => t[0] === s.theme) ? s.theme : 'light';
     const themes = THEME_DEFS.map(([id, name, short, desc, long, sw]) => {
       const on = id === curTheme;
       return Object.assign({}, sw, { id, name, short, desc, long, checked: on ? 'true' : 'false', isOn: on,
