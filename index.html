@@ -2571,9 +2571,12 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 .wk-v.is-on { border-color: var(--rade, #10283a); box-shadow: inset 4px 0 0 var(--sun, #f2b33d); }
 .wk-v-h { display: flex; align-items: center; gap: .45rem; width: 100%; background: none; border: 0; padding: .6rem .75rem .3rem; cursor: pointer; color: var(--text); text-align: left; }
 .wk-v-n { flex: 1; font: 800 16px/1 var(--bn-font, sans-serif); text-transform: uppercase; }
-.wk-vm { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: .5rem; width: 100%; background: none; border: 0; border-top: 1px dashed var(--line); padding: .45rem .75rem; text-align: left; color: var(--text); cursor: pointer; font-size: 13.5px; }
+.wk-vm { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: .6rem; width: 100%; background: none; border: 0; border-top: 1px solid var(--line); padding: .6rem .85rem .65rem; text-align: left; color: var(--text); cursor: pointer; }
+.wk-vm:hover { background: var(--surface-3); }
+.wk-vm-t { display: grid; gap: .1rem; min-width: 0; }
+.wk-vm .rs-n { font-size: 17px; } .wk-vm .rs-s { font-size: 20px; }
+.wk-vm .rs-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wk-vm .wk-h { padding-top: .1rem; }
-.wk-vm-t { overflow: hidden; text-overflow: ellipsis; }
 .wk-v .lnk { margin: 0 .75rem .55rem; }
 .cb-pin-club.is-wk .n { box-shadow: 0 0 0 2px #fff, 0 0 0 5px #f2b33d; }
 /* radio du terrain : mini-lecteur qui suit la navigation */
@@ -2590,6 +2593,55 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 .rdo-bar span { display: block; height: 100%; background: #f2b33d; transition: width .4s; }
 .rdo-x { flex: none; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 0; background: #f2b33d; color: #10283a; cursor: pointer; border-radius: 0; }
 @media (max-width: 760px) { .rdo { left: 16px; transform: none; width: calc(100vw - 104px); } }
+/* ===== À propos dans le thème Marée : mêmes polices et formes, couleurs du site ===== */
+.ab { background: var(--bg); color: var(--text); }
+.ab-hero { background: #10283a; }
+.ab-hero-img { filter: grayscale(.2) contrast(1.02); }
+.ab-hero-veil { background: linear-gradient(180deg, rgba(16, 40, 58, .2) 0%, rgba(16, 40, 58, .55) 45%, #10283a 100%); }
+.ab-hero .ab-eb { color: #f2b33d; }
+.ab-btn-w { background: #f2b33d; color: #10283a; border-color: #f2b33d; }
+.ab-btn-w:hover { background: transparent; color: #fff; border-color: #fff; }
+.ab-eb { color: var(--muted); }
+.ab-h2, .ab-h3, .ab-year, .ab-quote p, .ab-sign-t, .ab-cta-fin { color: var(--ink); }
+.ab-p, .ab-lead, .ab-fin, .ab-cta-p { color: var(--text-2); }
+.ab-hero .ab-h1, .ab-hero .ab-sub { color: #fff; }
+.ab-hero .ab-intro { color: rgba(255, 255, 255, .82); }
+.ab-lead:first-of-type { color: var(--ink); }
+.ab-lead:first-of-type::after { background: #f2b33d; height: 2px; }
+.ab-quote p::before, .ab-quote p::after { color: var(--gold-text); }
+.ab-sec-t, .ab-pil-sec, .ab-pils { border-color: var(--line); }
+.ab-tl::before { background: #f2b33d; width: 2px; }
+.ab-dot { background: #f2b33d; box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px #f2b33d; }
+.ab-year::after { content: ''; display: block; width: 32px; height: 2px; background: #f2b33d; margin-top: .55rem; }
+.ab-pil-n { color: var(--gold-text); }
+.ab-step-img img { filter: none; box-shadow: 0 0 0 1px var(--line); }
+.ab-sign { background: #10283a; color: #fff; }
+.ab-sign .ab-eb { color: #f2b33d; }
+.ab-sign .ab-sign-t { color: #fff; }
+.ab-sign .ab-sign-s { color: rgba(255, 255, 255, .8); }
+.ab-btn-o { color: var(--ink); border-color: var(--line); }
+.ab-btn-o:hover { border-color: var(--ink); background: var(--surface-3); }
+.ab-cta .ab-btn-w:hover { color: var(--ink); border-color: var(--ink); }
+/* album du club : cartes joueurs */
+.ca-head { display: flex; justify-content: space-between; align-items: flex-end; gap: .6rem; flex-wrap: wrap; }
+.ca-t { font-size: clamp(22px, 3vw, 30px); }
+.ca-act { display: flex; align-items: center; justify-content: space-between; gap: .6rem 1rem; flex-wrap: wrap; padding: .8rem 1rem; margin-bottom: 1rem; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid #f2b33d; }
+.ca-act p { margin: 0; color: var(--text-2); max-width: 60ch; }
+.ca-act { display: block; }
+.ca-act > sc-if { display: flex; align-items: center; justify-content: space-between; gap: .6rem 1rem; flex-wrap: wrap; }
+.wk-vm .rs-l { min-width: 0; }
+.ca-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .8rem; }
+.ca-c { position: relative; display: flex; flex-direction: column; align-items: stretch; text-align: left; padding: 6px; aspect-ratio: 5 / 7; background: #10283a; color: #fff; border: 0; cursor: pointer; border-radius: 0; box-shadow: 0 10px 22px -16px rgba(8, 15, 26, .8); }
+.ca-c.is-vide { background: var(--surface-3); color: var(--muted); border: 1.5px dashed var(--line); box-shadow: none; cursor: default; }
+.ca-c.is-neuve { box-shadow: 0 0 0 3px #f2b33d, 0 14px 26px -14px rgba(8, 15, 26, .8); }
+.ca-num { position: absolute; top: 10px; left: 10px; z-index: 1; min-width: 28px; padding: 3px 5px; background: #f2b33d; color: #10283a; font: 800 14px/1 var(--bn-font, sans-serif); text-align: center; }
+.ca-c.is-vide .ca-num { background: transparent; color: var(--muted); border: 1px dashed var(--line); }
+.ca-ph { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; background: linear-gradient(180deg, #1d4258, #10283a); font: 800 34px/1 var(--bn-font, sans-serif); color: #f2b33d; }
+.ca-c.is-vide .ca-ph { background: transparent; color: var(--line); font-size: 48px; }
+.ca-ph img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.ca-n { display: block; padding: .5rem .3rem 0; font: 800 14px/1.15 var(--bn-font, sans-serif); text-transform: uppercase; }
+.ca-r { display: block; padding: .15rem .3rem .3rem; font: 600 11px/1.2 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; color: #f2b33d; min-height: 1.2em; }
+.ca-new { position: absolute; top: 10px; right: 10px; padding: 3px 6px; background: #fff; color: #10283a; font: 800 10px/1 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; }
 /* album à vignettes */
 .al-head { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
 .al-cpt { font-size: 13px; color: var(--muted); }
@@ -3268,7 +3320,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <sc-if value="{{unlocked}}" hint-placeholder-val="{{ true }}">
         <div class="art-txt" style="font-size: {{fontSize}}; line-height: 1.8; color: var(--text)">
           <sc-if value="{{art.noBody}}" hint-placeholder-val="{{ true }}">
-          <div class="bn-signe"><svg class="bn-sym" viewBox="0 0 1000 1000" width="28" height="28" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="none" stroke="#7fa7b8" stroke-width="110" stroke-linecap="round" d="M0 1580 q120 -110 240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0"></path></svg></div>
+          <div class="bn-signe"><svg class="bn-sym" viewBox="0 0 1000 1000" width="28" height="28" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></div>
           </sc-if>
           <sc-if value="{{art.hasBody}}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{art.blocks}}" as="bk" hint-placeholder-count="3">
@@ -3278,7 +3330,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
               <sc-if value="{{bk.isL}}" hint-placeholder-val="{{ false }}"><div style="display: flex; gap: .7rem; margin: 0 0 .5em"><span style="width: 7px; height: 7px; border-radius: 50%; background: {{accent}}; margin-top: .7em; flex: none"></span><span>{{bk.t}}</span></div></sc-if>
               <sc-if value="{{bk.isImg}}" hint-placeholder-val="{{ false }}"><figure style="margin: 1.6rem 0"><img src="{{bk.src}}" alt="{{bk.t}}" loading="lazy" style="display: block; width: 100%; height: auto"><sc-if value="{{bk.t}}" hint-placeholder-val="{{ false }}"><figcaption style="font-size: 13.5px; color: var(--muted); padding-top: .5rem">{{bk.t}}</figcaption></sc-if></figure></sc-if>
             </sc-for>
-            <div class="bn-signe"><svg class="bn-sym" viewBox="0 0 1000 1000" width="28" height="28" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="none" stroke="#7fa7b8" stroke-width="110" stroke-linecap="round" d="M0 1580 q120 -110 240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0"></path></svg><span>Par {{art.author}} · relu et validé par la rédaction</span></div>
+            <div class="bn-signe"><svg class="bn-sym" viewBox="0 0 1000 1000" width="28" height="28" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg><span>Par {{art.author}} · relu et validé par la rédaction</span></div>
           </sc-if>
         </div>
         <div style="margin-top: 2.25rem">
@@ -3486,6 +3538,35 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       </sc-for></div>
       <sc-if value="{{club.noPlayers}}" hint-placeholder-val="{{ false }}"><p style="color: var(--text-2)">Aucun profil joueur pour ce club pour l’instant. <button type="button" class="lnk" onClick="{{proposePlayer}}" style="font-size: 15px">Faire briller un talent</button></p></sc-if>
     </sc-if>
+    <sc-if value="{{tabAlbum}}" hint-placeholder-val="{{ false }}">
+      <section class="ca" aria-label="Album du club">
+        <div class="ca-head">
+          <div><div class="eb">L'album des supporters</div><div class="ttl ca-t">Les cartes de {{club.name}}</div></div>
+          <sc-if value="{{club.album.has}}" hint-placeholder-val="{{ true }}"><span class="al-cpt"><b>{{club.album.n}}</b> / {{club.album.total}} cartes</span></sc-if>
+        </div>
+        <sc-if value="{{club.album.has}}" hint-placeholder-val="{{ true }}"><div class="al-bar" aria-hidden="true"><span style="width: {{club.album.pct}}"></span></div></sc-if>
+        <div class="ca-act">
+          <sc-if value="{{club.album.pasMembre}}" hint-placeholder-val="{{ false }}"><p>Les membres du club collectionnent les cartes des joueurs : une pochette à ouvrir chaque jour, et chaque joueur suivi rejoint l'album.</p><button type="button" class="wk-radio" onClick="{{club.album.devenir}}">Suivre le club et ouvrir mon album</button></sc-if>
+          <sc-if value="{{club.album.peutOuvrir}}" hint-placeholder-val="{{ false }}"><p>Votre pochette du jour vous attend.</p><button type="button" class="wk-radio" onClick="{{club.album.ouvrir}}">Ouvrir ma pochette du jour</button></sc-if>
+          <sc-if value="{{club.album.dejaOuvert}}" hint-placeholder-val="{{ false }}"><p><sc-if value="{{club.album.hasDerniere}}" hint-placeholder-val="{{ false }}">Carte du jour : <b>{{club.album.derniere}}</b>. </sc-if>Prochaine pochette demain. Suivez un joueur pour coller sa carte tout de suite.</p></sc-if>
+          <sc-if value="{{club.album.complet}}" hint-placeholder-val="{{ false }}"><p><b>Album complet.</b> Vous avez toutes les cartes de l'effectif publié.</p></sc-if>
+        </div>
+        <sc-if value="{{club.album.has}}" hint-placeholder-val="{{ true }}">
+          <div class="ca-grid">
+            <sc-for list="{{club.album.cartes}}" as="k" hint-placeholder-count="6">
+              <button type="button" class="ca-c {{k.cls}}" onClick="{{k.open}}" aria-label="{{k.name}}">
+                <span class="ca-num">{{k.num}}</span>
+                <span class="ca-ph"><sc-if value="{{k.hasImg}}" hint-placeholder-val="{{ false }}"><img src="{{k.img}}" alt="" loading="lazy"></sc-if><sc-if value="{{k.noImg}}" hint-placeholder-val="{{ true }}"><span>{{k.ini}}</span></sc-if></span>
+                <span class="ca-n">{{k.name}}</span>
+                <span class="ca-r">{{k.role}}</span>
+                <sc-if value="{{k.neuve}}" hint-placeholder-val="{{ false }}"><span class="ca-new">Nouvelle</span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{club.album.vide}}" hint-placeholder-val="{{ false }}"><p style="color: var(--text-2)">L'album s'ouvrira dès que l'effectif du club sera publié. <button type="button" class="lnk" onClick="{{proposePlayer}}" style="font-size: 15px">Faire briller un talent</button></p></sc-if>
+      </section>
+    </sc-if>
     <sc-if value="{{tabMatches}}" hint-placeholder-val="{{ false }}">
       <div class="lv-res lv-res-club">
         <sc-for list="{{club.matches}}" as="m" hint-placeholder-count="3">
@@ -3649,7 +3730,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
                 <div class="wk-v {{v.cls}}">
                   <button type="button" class="wk-v-h" onClick="{{v.pick}}" aria-pressed="{{v.sel}}"><span class="wk-v-n">{{v.nom}}</span><sc-if value="{{v.live}}" hint-placeholder-val="{{ false }}"><span class="wk-dot" aria-label="en direct"></span></sc-if><span class="wk-n">{{v.n}}</span></button>
                   <sc-for list="{{v.matchs}}" as="it" hint-placeholder-count="2">
-                    <button type="button" class="wk-vm" onClick="{{it.open}}"><span class="wk-h {{it.heureCls}}">{{it.heure}}</span><span class="wk-vm-t">{{it.homeN}} <b><sc-if value="{{it.notUp}}" hint-placeholder-val="{{ true }}">{{it.hs}}–{{it.as}}</sc-if><sc-if value="{{it.isUp}}" hint-placeholder-val="{{ false }}">contre</sc-if></b> {{it.awayN}}</span></button>
+                    <button type="button" class="wk-vm" onClick="{{it.open}}" aria-label="{{it.homeN}} {{it.hs}}, {{it.awayN}} {{it.as}}"><span class="wk-h {{it.heureCls}}">{{it.heure}}</span><span class="wk-vm-t"><span class="wk-cp">{{it.sport}}<sc-if value="{{it.hasComp}}" hint-placeholder-val="{{ true }}"> · {{it.comp}}</sc-if></span><span class="rs-l {{it.homeWin}}"><span class="rs-n">{{it.homeN}}</span><sc-if value="{{it.notUp}}" hint-placeholder-val="{{ true }}"><span class="rs-s">{{it.hs}}</span></sc-if></span><span class="rs-l {{it.awayWin}}"><span class="rs-n">{{it.awayN}}</span><sc-if value="{{it.notUp}}" hint-placeholder-val="{{ true }}"><span class="rs-s">{{it.as}}</span></sc-if></span></span></button>
                   </sc-for>
                   <sc-if value="{{v.hasPlus}}" hint-placeholder-val="{{ false }}"><button type="button" class="lnk" onClick="{{goLive}}" style="font-size: 13px">{{v.plus}}</button></sc-if>
                 </div>
@@ -6868,7 +6949,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   </div>
   <div class="wrap" style="padding-top: 3rem; padding-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 3rem; justify-content: space-between">
     <div style="flex: 1 1 300px; max-width: 380px">
-      <div class="bn-pied-marque"><svg class="bn-sym" viewBox="0 0 1000 1000" width="64" height="64" role="img" aria-label="BE+"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="none" stroke="#7fa7b8" stroke-width="110" stroke-linecap="round" d="M0 1580 q120 -110 240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0"></path></svg></div>
+      <div class="bn-pied-marque"><svg class="bn-sym" viewBox="0 0 1000 1000" width="64" height="64" role="img" aria-label="BE+"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></div>
       <p style="line-height: 1.65; margin: .75rem 0 1.25rem">Le média du sport local dans le Nord Cotentin. Résumés, interviews, inside vestiaire.</p>
       <div style="display: flex; flex-wrap: wrap; gap: .5rem">
         <sc-for list="{{reseaux}}" as="rs" hint-placeholder-count="5"><a href="{{rs.href}}" target="_blank" rel="noopener me" style="color: var(--on-inv-2); border: 1px solid var(--inv-line); border-radius: 0; padding: 0 .8rem; font-size: 14px; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center">{{rs.label}}</a></sc-for>
@@ -7089,7 +7170,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <sc-if value="{{introOn}}" hint-placeholder-val="{{ false }}">
   <div class="bn-intro" role="dialog" aria-label="BE+" onClick="{{skipIntro}}">
     <div class="bn-intro-in">
-      <span class="bn-intro-sym" aria-hidden="true"><svg class="bn-sym" viewBox="0 0 1000 1000" width="112" height="112" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="none" stroke="#7fa7b8" stroke-width="110" stroke-linecap="round" d="M0 1580 q120 -110 240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0 t240 0"></path></svg></span>
+      <span class="bn-intro-sym" aria-hidden="true"><svg class="bn-sym" viewBox="0 0 1000 1000" width="112" height="112" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></span>
       <span class="bn-intro-mot"><img src="assets/logo-be.svg" alt="BE+" width="300" height="179"></span>
       <span class="bn-intro-tag">Le sport local mérite une vitrine d’élite</span>
     </div>

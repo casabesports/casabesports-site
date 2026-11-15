@@ -1614,7 +1614,33 @@ class Component extends DCLogic {
     club.noPlayers = club.players.length === 0;
     club.matches = allM.filter((m) => X.teamClub[m.home] === curC.id || X.teamClub[m.away] === curC.id).sort(byDate);
     club.noMatches = club.matches.length === 0;
-    const tabs = [['articles', 'Articles'], ['matchs', 'Matchs'], ['players', 'Effectif'], ['infos', 'Infos club']];
+    // Album du club : les membres (supporters qui suivent le club) collectionnent les cartes des joueurs de l'effectif
+    const albKey = 'cb-album:' + this.profileKey();
+    const albAll = this.readLS(albKey, {}) || {};
+    const albMine = (albAll[curC.id] && Array.isArray(albAll[curC.id].cartes)) ? albAll[curC.id] : { cartes: [], jour: '' };
+    const albMembre = s.follows.indexOf(curC.id) >= 0;
+    const albJour = this.isoOf(this.today0());
+    const albOk = (p) => albMine.cartes.indexOf(p.id) >= 0 || s.followPlayers.indexOf(p.id) >= 0;
+    const albSave = (m) => { const all = this.readLS(albKey, {}) || {}; all[curC.id] = m; this.writeLS(albKey, all); this.setState({ albTick: (s.albTick || 0) + 1 }); };
+    const albNew = club.players.filter((p) => !albOk(p));
+    club.album = {
+      membre: albMembre, pasMembre: !albMembre, has: club.players.length > 0, vide: club.players.length === 0,
+      n: String(club.players.filter(albOk).length), total: String(club.players.length), pct: club.players.length ? Math.round(club.players.filter(albOk).length / club.players.length * 100) + '%' : '0%',
+      peutOuvrir: albMembre && albMine.jour !== albJour && albNew.length > 0, dejaOuvert: albMembre && albMine.jour === albJour && albNew.length > 0, complet: albMembre && club.players.length > 0 && albNew.length === 0,
+      derniere: albMine.derniere && albMine.jour === albJour ? ((club.players.find((p) => p.id === albMine.derniere) || {}).name || '') : '',
+      devenir: () => this.toggleIn('follows', curC.id, 'Bienvenue au club : votre album est ouvert', 'Vous ne suivez plus ' + curC.name),
+      ouvrir: () => {
+        if (!albMembre || albMine.jour === albJour || !albNew.length) return;
+        const p = albNew[Math.floor(Math.random() * albNew.length)];
+        albSave({ cartes: albMine.cartes.concat([p.id]), jour: albJour, derniere: p.id });
+        this.say('Nouvelle carte : ' + p.name);
+      },
+      cartes: club.players.map((p, i) => { const ok = albOk(p); const neuve = ok && albMine.derniere === p.id && albMine.jour === albJour;
+        return { num: p.num || String(i + 1).padStart(2, '0'), name: ok ? p.name : 'Carte à gagner', role: ok ? (p.role || '') : '', ok, pas: !ok, cls: (ok ? 'is-ok' : 'is-vide') + (neuve ? ' is-neuve' : ''), img: ok && p.img ? p.img : '', hasImg: !!(ok && p.img), noImg: !(ok && p.img),
+          ini: ok ? String(p.name || '').split(/\s+/).map((w) => w.charAt(0)).join('').slice(0, 2).toUpperCase() : '?', open: ok ? p.open : () => {}, neuve }; })
+    };
+    club.album.hasDerniere = !!club.album.derniere;
+    const tabs = [['articles', 'Articles'], ['matchs', 'Matchs'], ['players', 'Effectif'], ['album', 'Album du club'], ['infos', 'Infos club']];
     const clubTabs = tabs.map(([id, label]) => ({ label, sel: s.clubTab === id ? 'true' : 'false', color: s.clubTab === id ? 'var(--ink)' : 'var(--muted)', line: s.clubTab === id ? accent : 'transparent', pick: () => this.setState({ clubTab: id }) }));
 
     // ---------- joueurs ----------
@@ -2298,7 +2324,7 @@ class Component extends DCLogic {
     const wkMax = resMax + 2;
     const wkScoreTxt = (m) => cbNomEquipe(m.home) + (m.status === 'up' ? ' contre ' + cbNomEquipe(m.away) + (m.time ? ', à ' + m.time.replace(':', ' heures ') : '') : ' ' + m.hs + ', ' + cbNomEquipe(m.away) + ' ' + m.as);
     const wkMatchIt = (m) => { const comp = m.compLabel && m.compLabel !== m.sport ? capFirst(m.compLabel) : ''; const v = wkVilleEq(m.home) || wkVilleEq(m.away);
-      return Object.assign({}, m, { isMatch: true, isRecit: false, comp, hasComp: !!comp, isLiveM: m.status === 'live', isUp: m.status === 'up', notUp: m.status !== 'up',
+      return Object.assign({}, m, { homeN: String(m.homeN || '').replace(/\.{2,}/g, '.'), awayN: String(m.awayN || '').replace(/\.{2,}/g, '.'), isMatch: true, isRecit: false, comp, hasComp: !!comp, isLiveM: m.status === 'live', isUp: m.status === 'up', notUp: m.status !== 'up',
         heure: m.status === 'live' ? 'Direct' : m.status === 'up' ? (m.time || 'À venir') : 'Final', heureCls: m.status === 'live' ? 'is-live' : m.status === 'up' ? 'is-up' : '', ville: v, hasVille: !!v,
         goVille: () => { if (v) this.go('map', { city: v }); } }); };
     const radioT = s.listening ? (s.radioT || '') : '';
@@ -2880,7 +2906,7 @@ class Component extends DCLogic {
       },
       vid: curV, otherVideos: videos.filter((v) => v.id !== curV.id), playing: s.playing, notPlaying: !s.playing, togglePlay: () => this.setState({ playing: !s.playing }),
       playLabel: s.playing ? 'Pause' : 'Lire la vidéo', playState: s.playing ? 'Lecture en cours' : 'Prêt à lire', vidDim: s.playing ? 0.9 : 0.75,
-      disciplines, disc, clubChips, clubList, club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs',
+      disciplines, disc, clubChips, clubList, club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs', tabAlbum: s.clubTab === 'album',
       roleChips, sportChips: plSportChips, hasSportChips: plSportChips.length > 0, zoneChips, playerList, playerCount: playerList.length + (playerList.length > 1 ? ' profils' : ' profil'), noPlayerList: playerList.length === 0, hasLibres, pl, cityName: s.city, cityClubs,
       // terrain
       dSports, dComps, hasComps: dComps.length > 0, dZones, hasZones: dZones.length > 0, dNivs, hasNivs: dNivs.length > 0, dSportName: s.dSport, dTabs, sportEmpty: !sportHasData, sportHasData,
