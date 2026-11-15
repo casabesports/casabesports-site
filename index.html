@@ -7,7 +7,7 @@
 <script>window.CASA_SITE_URL = "__SITE_URL__";</script>
 <title>Casa Besports — le média sport du Cotentin</title>
 <meta name="description" content="Casa Besports, le média du sport dans la Manche : scores en direct, actualités, vidéos, clubs et joueurs, boutique Cherwood × Casa et La Gazette du Cotentin.">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#10283a">
 <meta property="og:site_name" content="Casa Besports">
 <meta property="og:title" content="Casa Besports — Le média sport de la Manche">
 <meta property="og:description" content="Le sport local mérite une vitrine d’élite.">
@@ -26,9 +26,9 @@
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAwIDEwMDAiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNhc2EgQmVzcG9ydHMiPjx0aXRsZT5DYXNhIEJlc3BvcnRzPC90aXRsZT48cmVjdCB3aWR0aD0iMTAwMCIgaGVpZ2h0PSIxMDAwIiBmaWxsPSIjMDAwMDAwIi8+PHBhdGggdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAwIDMxNi4xKSBzY2FsZSgwLjI3ODY1KSIgZmlsbD0iI0ZGRkZGRiIgZD0iTTAgMEg0NTNRNTY2IDAgNjYyLjUgMzFRNzU5IDYyIDgxOC41IDEzMi41UTg3OCAyMDMgODc4IDMyM1E4NzggNDAyIDg0OC41IDQ2NFE4MTkgNTI2IDc3MC41IDU2NS41UTcyMiA2MDUgNjY1IDYxOFE3MTUgNjI0IDc2Mi41IDY0Ni41UTgxMCA2NjkgODQ4LjUgNzA4LjVRODg3IDc0OCA5MDkuNSA4MDYuNVE5MzIgODY1IDkzMiA5NDVROTMyIDEwNTYgODgyLjUgMTE0MC41UTgzMyAxMjI1IDczOC41IDEyNzIuNVE2NDQgMTMyMCA1MDcgMTMyMEgwWk0yOTkgMTA4MUg0MzVRNDk5IDEwODEgNTM5LjUgMTA2MS41UTU4MCAxMDQyIDU5OSAxMDA1LjVRNjE4IDk2OSA2MTggOTE4UTYxOCA4MzggNTY4LjUgODAwLjVRNTE5IDc2MyA0MzAgNzYzSDI5OVpNMjk5IDUyOUg0MjBRNDczIDUyOSA1MDguNSA1MTBRNTQ0IDQ5MSA1NjIuNSA0NTYuNVE1ODEgNDIyIDU4MSAzNzdRNTgxIDI5NiA1MzUgMjY3LjVRNDg5IDIzOSA0MDkgMjM5SDI5OVogTTEwMzQgMEgxODc3VjI2MkgxMzMyVjUzMUgxODcyVjc4NUgxMzMyVjEwNThIMTg3N1YxMzIwSDEwMzRaIE0yNTg1IDc3OVYxMDY3SDIzMzhWNzc5SDIwNTBWNTM0SDIzMzhWMjQ2SDI1ODVWNTM0SDI4NzFWNzc5WiIvPjwvc3ZnPgo=" type="image/svg+xml">
 <meta name="color-scheme" content="light dark">
 <script>
-  /* Thème appliqué avant le premier affichage (évite le flash de couleurs). Défaut : sombre (fond noir, identité Casa Besports). */
+  /* Thème appliqué avant le premier affichage (évite le flash de couleurs). Défaut : clair (direction « Marée »). */
   (function () {
-    var t = 'dark';
+    var t = 'light';
     try { var s = localStorage.getItem('cb-theme'); if (['auto', 'light', 'dark', 'noir', 'paper'].indexOf(s) >= 0) t = s; } catch (e) {}
     document.documentElement.setAttribute('data-cb-theme', t);
   })();
@@ -2465,6 +2465,75 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   .rb-it { min-height: 46px; padding: .55rem 0; }
 }
 </style>
+<style>
+/*!
+ * Casa Besports — direction « Marée » (novembre 2026)
+ * Le journal sportif du Cotentin : bleu de rade, soleil couchant et plage verte (les couleurs de Casa × Cherwood).
+ * Fond clair par défaut, bleu nuit en thème sombre. Les polices et les formes (capitales, angles droits, bandeaux) ne changent pas.
+ * Ce bloc vient en dernier : il remplace les couleurs noir et blanc de « Le bandeau » pour les thèmes Clair, Sombre et Automatique.
+ * Les thèmes « Noir absolu » et « Papier journal » restent disponibles tels quels dans Mon espace › Apparence.
+ * Pour changer une couleur : modifier la variable ici (--bg = fond, --ink = titres, --acc = boutons, --sun = jaune).
+ */
+[data-cb-theme], .cb-scope-light {
+  --sun: #f2b33d; --herbe: #2f6b4f; --rade: #10283a;
+}
+[data-cb-theme="light"], [data-cb-theme="auto"], [data-cb-theme="dark"], .cb-scope-light {
+  --bn-noir: #10283a; --bn-trait: #2c4a60; --bn-gris: #a9bcc6;
+}
+[data-cb-theme="light"], [data-cb-theme="auto"], .cb-scope-light {
+  --bg: #e9efee; --surface: #ffffff; --surface-2: #f1f5f4; --surface-3: #f6f9f8; --sand: #dde6e4;
+  --ink: #10283a; --text: #142b3b; --text-2: #3b5566; --muted: #587080; --muted-2: #627a88;
+  --line: #d3dedc; --line-2: #b4c6c4; --gold-text: #10283a;
+  --inv-bg: #10283a; --inv-bg-2: #1a3a50; --inv-line: #2c4a60; --on-inv: #ffffff; --on-inv-2: #c9d6dc; --gold-on-inv: #f2b33d;
+  --acc: #10283a; --on-acc: #ffffff; --success: #2f6b4f; --danger: #b3261e;
+  --note-bg: #f1f5f4; --note-line: #cfdcda; --note-fg: #142b3b;
+  --glass: rgba(255,255,255,.96); --overlay: rgba(16,40,58,.5); --shadow: rgba(16,40,58,.3);
+  --reader-bg: #10283a; --place-filter: none; --img-filter: none;
+}
+[data-cb-theme="dark"] {
+  --bg: #0c1d2a; --surface: #122838; --surface-2: #183244; --surface-3: #14293a; --sand: #1d3a4e;
+  --ink: #ffffff; --text: #e8eff2; --text-2: #bccbd3; --muted: #93a8b4; --muted-2: #8299a6;
+  --line: #1f3a4d; --line-2: #2f4f64; --gold-text: #f2b33d;
+  --inv-bg: #f2b33d; --inv-bg-2: #183244; --inv-line: #2f4f64; --on-inv: #10283a; --on-inv-2: #3b5566; --gold-on-inv: #10283a;
+  --acc: #f2b33d; --on-acc: #10283a; --success: #6fcf97; --danger: #ff8a80;
+  --note-bg: #183244; --note-line: #2f4f64; --note-fg: #e8eff2; --danger-bg: #3a1f24; --danger-line: #6b2a33;
+  --glass: rgba(12,29,42,.96); --overlay: rgba(4,12,18,.65); --shadow: rgba(0,0,0,.6);
+  --reader-bg: #0c1d2a; --place-filter: none; --place-op: .85; --img-filter: brightness(.95);
+  --bn-bord-noir: #2c4a60;
+}
+@media (prefers-color-scheme: dark) {
+  [data-cb-theme="auto"] {
+    --bg: #0c1d2a; --surface: #122838; --surface-2: #183244; --surface-3: #14293a; --sand: #1d3a4e;
+    --ink: #ffffff; --text: #e8eff2; --text-2: #bccbd3; --muted: #93a8b4; --muted-2: #8299a6;
+    --line: #1f3a4d; --line-2: #2f4f64; --gold-text: #f2b33d;
+    --inv-bg: #f2b33d; --inv-bg-2: #183244; --inv-line: #2f4f64; --on-inv: #10283a; --on-inv-2: #3b5566; --gold-on-inv: #10283a;
+    --acc: #f2b33d; --on-acc: #10283a; --success: #6fcf97; --danger: #ff8a80;
+    --note-bg: #183244; --note-line: #2f4f64; --note-fg: #e8eff2; --danger-bg: #3a1f24; --danger-line: #6b2a33;
+    --glass: rgba(12,29,42,.96); --overlay: rgba(4,12,18,.65); --shadow: rgba(0,0,0,.6);
+    --reader-bg: #0c1d2a; --place-op: .85; --img-filter: brightness(.95);
+    --bn-bord-noir: #2c4a60;
+  }
+}
+/* Zones « bandeau » (en-tête, pied de page, panneaux) : bleu de rade au lieu du noir, boutons couleur soleil */
+[data-cb-theme="light"] .bn-scope, [data-cb-theme="auto"] .bn-scope, [data-cb-theme="dark"] .bn-scope {
+  --surface: #10283a; --surface-2: #183244; --surface-3: #14293a; --line: #2c4a60; --line-2: #3d5d73;
+  --text: #f1f5f6; --text-2: #c9d6dc; --muted: #a9bcc6; --muted-2: #93a8b4;
+  --gold-text: #f2b33d; --acc: #f2b33d; --on-acc: #10283a; --glass: #10283a; --inv-bg: #ffffff; --on-inv: #10283a;
+}
+[data-cb-theme="light"] .cb-deep, [data-cb-theme="auto"] .cb-deep, [data-cb-theme="dark"] .cb-deep {
+  --inv-bg: #10283a; --inv-bg-2: #183244; --inv-line: #2c4a60; --on-inv: #ffffff; --on-inv-2: #c9d6dc; --gold-on-inv: #f2b33d; --acc: #f2b33d; --on-acc: #10283a;
+}
+@media (prefers-color-scheme: dark) {
+  [data-cb-theme="auto"] .cb-deep { --inv-bg: #10283a; --inv-bg-2: #183244; --inv-line: #2c4a60; --on-inv: #ffffff; --on-inv-2: #c9d6dc; --gold-on-inv: #f2b33d; }
+}
+
+/* Polices, formes et bandeaux restent ceux de « Le bandeau » : seule la couleur change. */
+.hdr-pro { border-color: var(--sun); color: var(--sun); }
+.hdr-pro:hover { background: var(--sun); color: var(--rade); }
+/* Bandeau Casa × Cherwood : toujours sur fond nuit, donc bouton et surtitre couleur soleil */
+.cw-band { --acc: #f2b33d; --on-acc: #10283a; --gold-text: #f2b33d; }
+.fab-ia { background: var(--rade) !important; box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px var(--rade) !important; }
+</style>
 </head>
 <body>
 <noscript>Casa Besports nécessite JavaScript pour fonctionner.</noscript>
@@ -3105,7 +3174,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <sc-if value="{{unlocked}}" hint-placeholder-val="{{ true }}">
         <div class="art-txt" style="font-size: {{fontSize}}; line-height: 1.8; color: var(--text)">
           <sc-if value="{{art.noBody}}" hint-placeholder-val="{{ true }}">
-          <div class="bn-signe"><svg class="bn-sym" viewBox="0 0 1000 1000" width="28" height="28" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#000000"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></div>
+          <div class="bn-signe"><svg class="bn-sym" viewBox="0 0 1000 1000" width="28" height="28" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></div>
           </sc-if>
           <sc-if value="{{art.hasBody}}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{art.blocks}}" as="bk" hint-placeholder-count="3">
@@ -3115,7 +3184,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
               <sc-if value="{{bk.isL}}" hint-placeholder-val="{{ false }}"><div style="display: flex; gap: .7rem; margin: 0 0 .5em"><span style="width: 7px; height: 7px; border-radius: 50%; background: {{accent}}; margin-top: .7em; flex: none"></span><span>{{bk.t}}</span></div></sc-if>
               <sc-if value="{{bk.isImg}}" hint-placeholder-val="{{ false }}"><figure style="margin: 1.6rem 0"><img src="{{bk.src}}" alt="{{bk.t}}" loading="lazy" style="display: block; width: 100%; height: auto"><sc-if value="{{bk.t}}" hint-placeholder-val="{{ false }}"><figcaption style="font-size: 13.5px; color: var(--muted); padding-top: .5rem">{{bk.t}}</figcaption></sc-if></figure></sc-if>
             </sc-for>
-            <div class="bn-signe"><svg class="bn-sym" viewBox="0 0 1000 1000" width="28" height="28" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#000000"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg><span>Par {{art.author}} · relu et validé par la rédaction</span></div>
+            <div class="bn-signe"><svg class="bn-sym" viewBox="0 0 1000 1000" width="28" height="28" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg><span>Par {{art.author}} · relu et validé par la rédaction</span></div>
           </sc-if>
         </div>
         <div style="margin-top: 2.25rem">
@@ -6672,7 +6741,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
   </div>
   <div class="wrap" style="padding-top: 3rem; padding-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 3rem; justify-content: space-between">
     <div style="flex: 1 1 300px; max-width: 380px">
-      <div class="bn-pied-marque"><svg class="bn-sym" viewBox="0 0 1000 1000" width="64" height="64" role="img" aria-label="BE+"><rect width="1000" height="1000" fill="#000000"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></div>
+      <div class="bn-pied-marque"><svg class="bn-sym" viewBox="0 0 1000 1000" width="64" height="64" role="img" aria-label="BE+"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></div>
       <p style="line-height: 1.65; margin: .75rem 0 1.25rem">Le média du sport local dans le Nord Cotentin. Résumés, interviews, inside vestiaire.</p>
       <div style="display: flex; flex-wrap: wrap; gap: .5rem">
         <sc-for list="{{reseaux}}" as="rs" hint-placeholder-count="5"><a href="{{rs.href}}" target="_blank" rel="noopener me" style="color: var(--on-inv-2); border: 1px solid var(--inv-line); border-radius: 0; padding: 0 .8rem; font-size: 14px; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center">{{rs.label}}</a></sc-for>
@@ -6893,7 +6962,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <sc-if value="{{introOn}}" hint-placeholder-val="{{ false }}">
   <div class="bn-intro" role="dialog" aria-label="BE+" onClick="{{skipIntro}}">
     <div class="bn-intro-in">
-      <span class="bn-intro-sym" aria-hidden="true"><svg class="bn-sym" viewBox="0 0 1000 1000" width="112" height="112" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#000000"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></span>
+      <span class="bn-intro-sym" aria-hidden="true"><svg class="bn-sym" viewBox="0 0 1000 1000" width="112" height="112" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></span>
       <span class="bn-intro-mot"><img src="assets/logo-be.svg" alt="BE+" width="300" height="179"></span>
       <span class="bn-intro-tag">Le sport local mérite une vitrine d’élite</span>
     </div>
