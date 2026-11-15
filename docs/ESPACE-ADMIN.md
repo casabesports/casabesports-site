@@ -180,3 +180,9 @@ Bouton « ✎ Retoucher », cliquez sur un texte ou une image : le volet commenc
 ## Changer la police (Retoucher)
 
 Sous « Déplacer », le bloc **Police d'écriture** : police (League Spartan, Cormorant Garamond, Mulish, Barlow Condensed, Archivo Black, Source Serif, Cinzel, Caveat), graisse, italique, capitales et taille (50 à 200 %). Il s'applique à l'élément choisi dans « Déplacer » ; pour un titre ou un paragraphe, gardez « Cet élément ». Même réglage sur ordinateur et téléphone. « Police d'origine » annule. Liste : Contenus du site › Retouches des pages › Polices changées.
+
+## Masquer, couleurs et liens (Retoucher)
+
+- **Apparence** : « Masquer cet élément pour les visiteurs » (il reste visible en transparence, bordé de rouge, en mode retouche pour pouvoir le réafficher), couleur du texte, couleur du fond (doré, blanc, noir, gris, transparent ou toute autre couleur). « Où » : cette page ou toutes les pages (utile pour l'en-tête et le pied de page).
+- **Lien du bouton** : apparaît quand on clique sur un bouton ou un lien. Choisir une page du site ou une autre adresse (site, mailto:, tel:) ; les sites extérieurs s'ouvrent dans un nouvel onglet. Pour l'essayer, passez en « Naviguer ».
+- Tout se retrouve dans Contenus du site › Retouches des pages (« Polices, couleurs et éléments masqués », « Liens modifiés »).

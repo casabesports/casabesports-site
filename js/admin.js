@@ -635,6 +635,14 @@
           E('span', { style: 'font-size:13px;color:var(--muted)' }, taille + (r.z && r.z !== 1 ? ' · zoom ' + r.z : ''))));
     });
     v.places = Array.isArray(v.places) ? v.places : [];
+    v.liens = Array.isArray(v.liens) ? v.liens : [];
+    var liens = v.liens.map(function (r, i) {
+      var to = /^view:/.test(r.vers || '') ? 'page ' + (PAGE_NOMS[r.vers.slice(5)] || r.vers.slice(5)) : r.vers;
+      return E('div', { class: 'cba-card', style: 'margin:.5rem 0' },
+        E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('span', { class: 'cba-tag' }, where(r)),
+          E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Rendre à ce bouton sa destination d’origine ?')) return; v.liens.splice(i, 1); mark(); render(); } }, 'Destination d’origine')),
+        E('p', { style: 'margin:.3rem 0 0;font-size:13px;color:var(--muted)' }, 'Mène vers ' + to + (r.cls ? ' · ' + r.cls.split(' ')[0] : '')));
+    });
     var places = v.places.map(function (r, i) {
       return E('div', { class: 'cba-card', style: 'margin:.5rem 0' },
         E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('span', { class: 'cba-tag' }, where(r) + ' · ' + (r.ecran === 'mob' ? 'téléphone' : 'ordinateur')),
@@ -643,17 +651,18 @@
     });
     v.polices = Array.isArray(v.polices) ? v.polices : [];
     var polices = v.polices.map(function (r, i) {
-      var d = [r.police, r.graisse ? 'graisse ' + r.graisse : '', r.italique === true ? 'italique' : r.italique === false ? 'droit' : '', r.casse === 'maj' ? 'capitales' : r.casse === 'normal' ? 'minuscules' : '', r.taille ? r.taille + ' %' : ''].filter(Boolean).join(' · ');
+      var d = [r.police, r.graisse ? 'graisse ' + r.graisse : '', r.italique === true ? 'italique' : r.italique === false ? 'droit' : '', r.casse === 'maj' ? 'capitales' : r.casse === 'normal' ? 'minuscules' : '', r.taille ? r.taille + ' %' : '', r.couleur ? 'texte ' + r.couleur : '', r.fond ? 'fond ' + (r.fond === 'aucun' ? 'transparent' : r.fond) : '', r.cache ? 'MASQUÉ' : ''].filter(Boolean).join(' · ');
       return E('div', { class: 'cba-card', style: 'margin:.5rem 0' },
         E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('span', { class: 'cba-tag' }, where(r)),
-          E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Rendre sa police d’origine à cet élément ?')) return; v.polices.splice(i, 1); mark(); render(); } }, 'Police d’origine')),
+          E('button', { type: 'button', class: 'cba-btn sm dan', onclick: function () { if (!confirm('Rendre à cet élément sa police, ses couleurs et sa visibilité d’origine ?')) return; v.polices.splice(i, 1); mark(); render(); } }, 'Revenir à l’origine')),
         E('p', { style: 'margin:.3rem 0 0;font-size:13px;color:var(--muted)' }, (d || 'Réglage vide') + (r.cls ? ' · ' + r.cls.split(' ')[0] : '')));
     });
     return E('div', {},
       E('h3', { style: 'margin:1rem 0 .3rem' }, 'Textes (' + texts.length + ')'), texts.length ? texts : E('p', { class: 'cba-sub' }, 'Aucun texte retouché.'),
       E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Images (' + imgs.length + ')'), imgs.length ? imgs : E('p', { class: 'cba-sub' }, 'Aucune image retouchée.'),
       E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Éléments déplacés (' + places.length + ')'), places.length ? places : E('p', { class: 'cba-sub' }, 'Aucun élément déplacé.'),
-      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Polices changées (' + polices.length + ')'), polices.length ? polices : E('p', { class: 'cba-sub' }, 'Aucune police changée.'));
+      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Polices, couleurs et éléments masqués (' + polices.length + ')'), polices.length ? polices : E('p', { class: 'cba-sub' }, 'Aucun changement.'),
+      E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Liens modifiés (' + liens.length + ')'), liens.length ? liens : E('p', { class: 'cba-sub' }, 'Aucun lien modifié.'));
   }
   // ---------- Fonds de page : une image par page, avec son cadrage ----------
   var FOND_PAGES = [['accueil', 'Accueil'], ['actualites', 'Actualités et articles'], ['direct', 'Direct'], ['videos', 'Vidéos'], ['disciplines', 'Disciplines'], ['clubs', 'Clubs et carte'], ['joueurs', 'Joueurs'], ['boutique', 'Boutique'], ['abonnements', 'Abonnements'], ['compte', 'Mon espace'], ['quotidien', 'Le quotidien (abonnés)'], ['clubhouse', 'Club House'], ['culture', 'Culture'], ['meteo', 'Météo'], ['partenaires', 'Partenaires'], ['apropos', 'À propos'], ['contact', 'Contact'], ['mentions', 'Mentions légales'], ['application', 'Application'], ['redaction', 'Rédaction']];
