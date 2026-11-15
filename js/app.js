@@ -2270,13 +2270,13 @@ class Component extends DCLogic {
       : { passionTxt: 'Scores, récits, Gazette et Club House. Abonnez-vous et composez votre propre accueil.', passionCta: 'Je m’abonne', passionGo: () => this.go('offers') };
     // Choix des favoris (fenêtre « Personnaliser mon accueil »)
     const sportList = D.sports.concat(D.clubs.map((c) => c.sport)).filter((x, i, a) => x && a.indexOf(x) === i && x !== 'Multisport');
-    const sportChips = sportList.map((sp) => { const on = favS.indexOf(sp) >= 0; return { label: sp, pressed: on ? 'true' : 'false', bg: on ? 'var(--ink)' : 'var(--surface)', fg: on ? 'var(--bg)' : 'var(--text)', toggle: () => this.setFav('sports', on ? favS.filter((x) => x !== sp) : favS.concat([sp])) }; });
+    const favSportChips = sportList.map((sp) => { const on = favS.indexOf(sp) >= 0; return { label: sp, pressed: on ? 'true' : 'false', bg: on ? 'var(--ink)' : 'var(--surface)', fg: on ? 'var(--bg)' : 'var(--text)', toggle: () => this.setFav('sports', on ? favS.filter((x) => x !== sp) : favS.concat([sp])) }; });
     const cfq = nrm(s.cfQ);
     const clubPool = D.clubs.filter((c) => favC.indexOf(c.id) < 0 && (!favS.length || favS.indexOf(c.sport) >= 0) && (!cfq || nrm(c.name + " " + c.city).indexOf(cfq) >= 0))
       .sort((a, b) => ((ZONE_RANG[a.zone || ''] != null ? ZONE_RANG[a.zone || ''] : 7) - (ZONE_RANG[b.zone || ''] != null ? ZONE_RANG[b.zone || ''] : 7)) || (a.name > b.name ? 1 : -1));
     const favClubChip = (c, on) => ({ label: c.name, sub: [c.sport, c.city].filter(Boolean).join(' · '), pressed: on ? 'true' : 'false', bg: on ? 'var(--ink)' : 'var(--surface)', fg: on ? 'var(--bg)' : 'var(--text)', toggle: () => this.setFav('clubs', on ? favC.filter((x) => x !== c.id) : favC.concat([c.id])) });
     const favClubChips = favClubObjs.map((c) => favClubChip(c, true)).concat(clubPool.slice(0, 24).map((c) => favClubChip(c, false)));
-    const homePerso = { locked: !s.loggedIn, open: !!s.loggedIn, sportChips, clubChips: favClubChips, clubMore: clubPool.length > 24, cfQ: s.cfQ || '', onCfQ: (e) => this.setState({ cfQ: e.target.value }), hasFav, favLabel: favS.concat(favClubObjs.map((c) => c.name)).join(' · '),
+    const homePerso = { locked: !s.loggedIn, open: !!s.loggedIn, sportChips: favSportChips, clubChips: favClubChips, clubMore: clubPool.length > 24, cfQ: s.cfQ || '', onCfQ: (e) => this.setState({ cfQ: e.target.value }), hasFav, favLabel: favS.concat(favClubObjs.map((c) => c.name)).join(' · '),
       clearFav: () => { this.setFav('sports', []); this.setFav('clubs', []); }, login: () => this.setState({ customizeOpen: false, loginOpen: true, linkSent: false }), offers: () => this.go('offers') };
     const ldj = X.places[now0.getDate() % X.places.length];
     const lieuDuJour = Object.assign({}, ldj, { open: () => this.setState({ placeOpen: true, placeIdx: X.places.indexOf(ldj) }) });
