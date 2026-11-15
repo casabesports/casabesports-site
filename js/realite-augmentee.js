@@ -69,6 +69,9 @@
       '#cbar .cbar-sheet a{color:#e8a830}' +
       '#cbar.cbar-full .cbar-top,#cbar.cbar-full .cbar-panel{display:none}' +
       '#cbar.cbar-full .cbar-stage{padding:env(safe-area-inset-top,0px) 0 0}' +
+      '#cbar.cbar-full .cbar-place{display:none}' +
+      '#cbar.cbar-full .cbar-hint{font-size:clamp(14px,2.6vw,30px);top:auto;bottom:18px;white-space:normal;text-align:center;max-width:88%}' +
+      '#cbar details.cbar-more{margin-bottom:.5rem}#cbar details.cbar-more>summary{cursor:pointer;font:700 11px "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#e8a830;padding:.3rem 0;list-style:none}#cbar details.cbar-more>summary::before{content:"▸ "}#cbar details.cbar-more[open]>summary::before{content:"▾ "}' +
       '@media (prefers-reduced-motion:reduce){#cbar *{animation:none!important;transition:none!important}}';
     document.head.appendChild(el('style', { id: 'cbar-css' }, css));
   }
@@ -154,8 +157,8 @@
   function texFromCanvas(THREE, c, srgb) { var t = new THREE.CanvasTexture(c); t.anisotropy = 8; if (srgb) t.encoding = THREE.sRGBEncoding; return t; }
   function labelCanvas(num, name, kit) {
     var c = document.createElement('canvas'); c.width = 256; c.height = 128; var g = c.getContext('2d');
-    g.fillStyle = 'rgba(5,9,15,.82)'; roundRect(g, 8, 70, 240, 50, 14); g.fill();
-    g.fillStyle = '#f6f0e1'; g.font = '700 28px Mulish, sans-serif'; g.textAlign = 'center'; g.fillText((name || '').slice(0, 14), 128, 106);
+    if (name) { g.fillStyle = 'rgba(5,9,15,.82)'; roundRect(g, 8, 70, 240, 50, 14); g.fill(); }
+    g.fillStyle = '#f6f0e1'; g.font = '700 28px Mulish, sans-serif'; g.textAlign = 'center'; if (name) g.fillText(name.slice(0, 14), 128, 106);
     g.fillStyle = kit[1]; g.beginPath(); g.arc(128, 36, 30, 0, Math.PI * 2); g.fill(); g.strokeStyle = kit[2]; g.lineWidth = 5; g.stroke();
     g.fillStyle = kit[2]; g.font = '900 30px Mulish, sans-serif'; g.fillText(String(num), 128, 47);
     return c;
@@ -1122,6 +1125,19 @@
       var my = ++token, b = base(), spec = teamLieu(); place = null; renderChip(); geo.clear(); attr.textContent = '';
       resolvePlace(spec, b).then(function (P) { if (my !== token) return; place = P; buildField(); build(); loadMap(); });
     }
+    function oppOn() { var x = sp(); return x.id !== 'athle' && !!(L.opp && L.opp[x.id]); }
+    function oppForm() { var x = sp(), f = L.oppForm && L.oppForm[x.id]; return x.forms[f] ? f : x.def; }
+    function oppKit() { return L.oppKit != null && +L.oppKit !== +L.kit ? +L.oppKit : (+L.kit + 3) % KITS.length; }
+    function oppBase() { var x = sp(), f = oppForm(), P = L.oppPos && L.oppPos[x.id] && L.oppPos[x.id].length === x.forms[f].length ? L.oppPos[x.id] : x.forms[f].map(function (p) { return [100 - p[0], 100 - p[1]]; }); return P; }
+    // placement défensif de l'adversaire selon le ballon : il recule et coulisse quand on attaque, il presse quand on relance
+    function oppAt(bpct) {
+      var x = sp(), net = x.id === 'volley' || x.id === 'tennis', bx = bpct[0], by = bpct[1];
+      return oppBase().map(function (p, j) {
+        if (j === x.gk) return [Math.max(38, Math.min(62, 50 + (bx - 50) * 0.2)), p[1]];
+        var px = p[0] + (bx - p[0]) * (x.id === 'tennis' ? 0.8 : 0.25), d = by - 50, py = d < 0 ? p[1] + d * 0.45 * p[1] / 50 : p[1] + d * 0.3;
+        return [Math.max(3, Math.min(97, px)), Math.max(2, Math.min(net ? 46 : 97, py))];
+      });
+    }
     function build() {
       if (sim) { sim = null; hush(); setSimBtn(); }
       tokens.forEach(function (t) { S.root.remove(t.g); dispose(t.g); }); tokens = [];
@@ -1140,13 +1156,24 @@
         grp.userData.index = i; S.root.add(grp); tokens.push({ g: grp });
       });
       ball = buildBall(K, x.ball); var bs = Math.max(1, hs * u / 1.75) * 1.25 / u; ball.scale.setScalar(bs);
+      // équipe adverse en face (à la demande) : système miroir, maillot d'une autre couleur, déplaçable au doigt
+      if (oppOn()) oppBase().forEach(function (pct, j) {
+        var ok = KITS[oppKit()], ogk = j === x.gk;
+        var fig = buildPlayer(K, { gender: L.gender === 'mixte' ? (j % 2 ? 'h' : 'f') : L.gender, skin: SKINS[(j * 5 + 3) % SKINS.length], hair: HAIRS[(j * 3 + 1) % HAIRS.length], style: j + 3,
+          shirt: ogk ? (x.pool ? ok[1] : '#e05a2a') : ok[1], shorts: ogk ? '#222222' : lerpCol(ok[1], '#000000', 0.35), sock: ogk ? '#222222' : ok[1], trim: ok[2], swim: !!x.pool, cap: x.pool ? (ogk ? '#d0473e' : ok[1]) : null, gear: x.id === 'roller' ? 'roller' : x.id === 'tennis' ? 'tennis' : null });
+        fig.scale.setScalar(hs);
+        var grp = new THREE.Group(); grp.add(fig); grp.position.copy(toPos(pct));
+        var ring = new THREE.Mesh(new THREE.RingGeometry(hs * 0.22, hs * 0.3, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: new THREE.Color(ok[2]).convertSRGBToLinear(), transparent: true, opacity: 0.85, depthWrite: false })); ring.position.y = 0.0015; grp.add(ring);
+        var spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: texFromCanvas(THREE, labelCanvas(j + 1, '', ok), true), depthTest: false })); spr.scale.set(0.09, 0.045, 1); spr.position.y = hs * (x.pool ? 0.85 : 1.1) + 0.025; grp.add(spr);
+        grp.userData.index = 'o' + j; S.root.add(grp); tokens.push({ g: grp, opp: j });
+      });
       var bp = L.ball[x.id] || x.ballAt || [50, 50]; ball.position.copy(toPos(bp)); ball.userData.index = 'ball'; S.root.add(ball); tokens.push({ g: ball });
     }
     buildField(); build(); locate();
     var ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), drag = null;
     function ndc(e) { var r = stage.getBoundingClientRect(); return new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); }
     function pick(e) { if (sim) return null; ray.setFromCamera(ndc(e), S.camera); var hits = ray.intersectObjects(tokens.map(function (t) { return t.g; }), true); if (!hits.length) return null; var o = hits[0].object; while (o && o.userData.index == null) o = o.parent; return o; }
-    stage.addEventListener('pointerdown', function (e) { var o = pick(e); if (o) { drag = o; stage.setPointerCapture(e.pointerId); setHint(o.userData.index === 'ball' ? 'Déplacez ' + (BALLS[sp().ball] || {}).label.toLowerCase() : 'Déplacez ' + names()[o.userData.index]); } });
+    stage.addEventListener('pointerdown', function (e) { var o = pick(e); if (o) { drag = o; stage.setPointerCapture(e.pointerId); setHint(o.userData.index === 'ball' ? 'Déplacez ' + (BALLS[sp().ball] || {}).label.toLowerCase() : String(o.userData.index).charAt(0) === 'o' ? 'Déplacez l’adversaire n° ' + (+String(o.userData.index).slice(1) + 1) : 'Déplacez ' + names()[o.userData.index]); } });
     stage.addEventListener('pointermove', function (e) {
       if (!drag) return; plane.constant = -y0u * S.root.scale.y - S.root.position.y; ray.setFromCamera(ndc(e), S.camera); var p = new THREE.Vector3(); if (!ray.ray.intersectPlane(plane, p)) return; S.root.worldToLocal(p);
       var mx = W / 2 + (drag.userData.index === 'ball' ? sp().mg / u : 0), mz = H / 2 + (drag.userData.index === 'ball' ? sp().mg / u : 0);
@@ -1155,6 +1182,7 @@
     stage.addEventListener('pointerup', function () {
       if (!drag) return; var x = sp();
       if (drag.userData.index === 'ball') { L.ball[x.id] = fromPos(drag.position); bounce(drag); }
+      else if (String(drag.userData.index).charAt(0) === 'o') { var O = oppBase().slice(); O[+String(drag.userData.index).slice(1)] = fromPos(drag.position); L.oppPos = L.oppPos || {}; L.oppPos[x.id] = O; }
       else { var F = ((L.pos[x.id] && L.pos[x.id].length === x.forms[form()].length) ? L.pos[x.id] : x.forms[form()]).slice(); F[drag.userData.index] = fromPos(drag.position); L.pos[x.id] = F; }
       save(); drag = null; setHint('Faites glisser un joueur ou le ballon · deux doigts pour zoomer');
     });
@@ -1326,14 +1354,14 @@
     }
     function hush() { try { if (tts()) tts().cancel(); } catch (e) {} }
     if (tts() && tts().getVoices && !tts().getVoices().length) try { tts().addEventListener('voiceschanged', function () {}); } catch (e) {}
-    var sim = null, simBtn = el('button', { type: 'button', class: 'cbar-btn', onclick: function () { if (sim) stopSim(); else startSim(); } }, '▶ Simuler le jeu');
+    var sim = null, simBtn = el('button', { type: 'button', class: 'cbar-btn', onclick: function () { if (sim) stopSim(); else startSim(); } }, '▶ Simuler');
     var voiceSel = el('select', { 'aria-label': 'Commentaire audio', title: 'Commentaire audio' });
     Object.keys(VOIX).forEach(function (k) { var op = el('option', { value: k }, (k === 'off' ? '🔇 ' : '🎙 ') + VOIX[k]); voiceSel.appendChild(op); });
     voiceSel.value = L.voice || 'off'; voiceSel.onchange = function () { L.voice = voiceSel.value; save(); hush();
       if (L.voice !== 'off' && !tts()) toast('Ce navigateur ne sait pas lire à voix haute');
       else if (L.voice !== 'off' && tts().getVoices().length && !pickVoice(L.voice)) toast(L.voice === 'ar' ? 'Pas de voix arabe sur cet appareil : ajoutez-la dans Réglages › Accessibilité › Contenu énoncé › Voix' : 'Pas de voix pour cette langue sur cet appareil');
       if (sim) sayStep(sim.steps[(sim.i + 1) % sim.steps.length]); };
-    function setSimBtn() { simBtn.innerHTML = sim ? '■ Arrêter' : '▶ Simuler le jeu'; simBtn.setAttribute('aria-pressed', String(!!sim)); }
+    function setSimBtn() { simBtn.innerHTML = sim ? '■ Arrêter' : '▶ Simuler'; simBtn.setAttribute('aria-pressed', String(!!sim)); }
     function stepText(s) { var lg = L.voice && L.voice !== 'off' ? L.voice : 'fr'; return (s.say && s.say[lg]) || s.label || ''; }
     function sayStep(s) {
       var txt = stepText(s); if (txt) setHint(txt);
@@ -1343,6 +1371,7 @@
     function startSim() {
       var x = sp(), F = (L.pos[x.id] && L.pos[x.id].length === x.forms[form()].length) ? L.pos[x.id] : x.forms[form()];
       var steps = simSteps(x, F, form()); if (!steps || steps.length < 2 || !tokens.length) { toast('Simulation indisponible pour cette discipline'); return; }
+      steps.forEach(function (s) { s.opp = oppAt(s.ball); });
       drag = null; bounceT = null; sim = { steps: steps, i: 0, t0: performance.now() }; setSimBtn();
       sayStep(steps[1]); // lancé dans le geste du doigt : indispensable pour que l'iPhone accepte de parler
     }
@@ -1356,15 +1385,93 @@
       var A = s.steps[s.i], B = s.steps[(s.i + 1) % n], still = B.still == null ? 0.3 : B.still, m = Math.min(1, k / (1 - still || 1));
       var e = B.lin ? m : m * m * (3 - 2 * m), moving = m < 1, hs = hScale();
       tokens.forEach(function (tk, i) {
-        var g = tk.g; if (g === ball || !A.pos[i] || !B.pos[i]) return;
-        var a = toPos(A.pos[i]), b = toPos(B.pos[i]), dx = b.x - a.x, dz = b.z - a.z, run = moving && Math.hypot(dx, dz) > 0.004;
+        var g = tk.g, op = tk.opp != null, pa = op ? A.opp && A.opp[tk.opp] : A.pos[i], pb = op ? B.opp && B.opp[tk.opp] : B.pos[i]; if (g === ball || !pa || !pb) return;
+        var a = toPos(pa), b = toPos(pb), dx = b.x - a.x, dz = b.z - a.z, run = moving && Math.hypot(dx, dz) > 0.004;
         g.position.lerpVectors(a, b, e); g.position.y = y0u + (run ? Math.abs(Math.sin(now / 85)) * hs * 0.12 : 0);
-        g.rotation.y = angTo(g.rotation.y, run ? Math.atan2(-dx, -dz) : 0, 0.18);
+        g.rotation.y = angTo(g.rotation.y, run ? (op ? Math.atan2(dx, dz) : Math.atan2(-dx, -dz)) : 0, 0.18);
       });
       if (ball) { var ba = toPos(A.ball), bb = toPos(B.ball), d = ba.distanceTo(bb); ball.position.lerpVectors(ba, bb, e); ball.position.y = y0u + Math.sin(Math.PI * Math.min(1, e)) * Math.min(0.08, d * 0.12) * (B.lob == null ? 0.15 : B.lob) * (moving ? 1 : 0); }
     }
-    S.stageButtons = [simBtn];
-    S.stop = function () { sim = null; hush(); };
+    /* ----- Outils du coach : vidéo (montage avec pause), affichage sur la TV ----- */
+    var rec = null, recBtn = el('button', { type: 'button', class: 'cbar-btn', title: 'Enregistrer une vidéo', onclick: function () { if (rec) stopRec(); else startRec(); } }, '⏺ Vidéo');
+    var recPause = el('button', { type: 'button', class: 'cbar-btn', style: 'display:none', onclick: function () { if (!rec || !rec.mr) return; if (rec.paused) { rec.mr.resume(); rec.paused = false; rec.t0 = performance.now() - rec.acc; } else { rec.mr.pause(); rec.paused = true; rec.acc = performance.now() - rec.t0; } setRecUi(); } }, '⏸ Pause');
+    var tvBtn = el('button', { type: 'button', class: 'cbar-btn', title: 'Afficher sur la télévision', onclick: function () { showTv(); } }, '📺 TV');
+    function recMime() { var c = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']; for (var i = 0; i < c.length; i++) try { if (MediaRecorder.isTypeSupported(c[i])) return c[i]; } catch (e) {} return ''; }
+    function mmss(ms) { var s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+    function setRecUi() {
+      if (!rec) { recBtn.innerHTML = '⏺ Vidéo'; recBtn.setAttribute('aria-pressed', 'false'); recPause.style.display = 'none'; return; }
+      var ms = rec.paused ? rec.acc : performance.now() - rec.t0; rec.shown = Math.floor(ms / 1000);
+      recBtn.innerHTML = '⏹ Terminer ' + mmss(ms); recBtn.setAttribute('aria-pressed', 'true'); recBtn.style.background = rec.paused ? '' : '#c8282e'; recBtn.style.borderColor = rec.paused ? '' : '#c8282e'; recBtn.style.color = rec.paused ? '' : '#fff';
+      recPause.style.display = ''; recPause.innerHTML = rec.paused ? '⏵ Reprendre' : '⏸ Pause';
+    }
+    function startRec() {
+      var gl = S.renderer.domElement;
+      if (!window.MediaRecorder || !document.createElement('canvas').captureStream) { toast('Enregistrement vidéo indisponible sur ce navigateur'); return; }
+      var sc = Math.min(1, 1280 / Math.max(gl.width, gl.height)), c = document.createElement('canvas'); c.width = Math.max(2, Math.round(gl.width * sc / 2) * 2); c.height = Math.max(2, Math.round(gl.height * sc / 2) * 2);
+      var stream = c.captureStream(30); rec = { c: c, g: c.getContext('2d'), chunks: [], t0: performance.now(), acc: 0, paused: false, shown: -1 }; var my = rec;
+      function go(mic) {
+        if (my !== rec) { if (mic) mic.getTracks().forEach(function (t) { t.stop(); }); return; }
+        if (mic) mic.getAudioTracks().forEach(function (t) { stream.addTrack(t); }); rec.mic = mic;
+        var mt = recMime(), mr; try { mr = new MediaRecorder(stream, mt ? { mimeType: mt, videoBitsPerSecond: 4000000 } : undefined); } catch (e) { mr = new MediaRecorder(stream); }
+        rec.mr = mr; rec.type = (mr.mimeType || mt || 'video/webm').split(';')[0];
+        mr.ondataavailable = function (e) { if (e.data && e.data.size) my.chunks.push(e.data); };
+        mr.onstop = function () { finishRec(my); };
+        mr.start(1000); rec.t0 = performance.now(); setRecUi();
+        toast(mic ? 'Enregistrement avec votre voix' : 'Enregistrement (sans son)');
+      }
+      setRecUi(); drawFrame();
+      if (L.recMic !== 'off' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true } }).then(go, function () { go(null); });
+      else go(null);
+    }
+    function stopRec() { var r = rec; if (!r) return; rec = null; setRecUi(); recBtn.style.background = recBtn.style.borderColor = recBtn.style.color = ''; if (r.mr && r.mr.state !== 'inactive') r.mr.stop(); else finishRec(r); if (r.mic) r.mic.getTracks().forEach(function (t) { t.stop(); }); }
+    function drawFrame() {
+      var r = rec; if (!r || r.paused) return; var g = r.g, c = r.c, gl = S.renderer.domElement;
+      if (st.video && st.video.videoWidth) { var v = st.video, k = Math.max(c.width / v.videoWidth, c.height / v.videoHeight); g.drawImage(v, (c.width - v.videoWidth * k) / 2, (c.height - v.videoHeight * k) / 2, v.videoWidth * k, v.videoHeight * k); }
+      else { var grd = g.createLinearGradient(0, 0, 0, c.height); grd.addColorStop(0, '#0b1520'); grd.addColorStop(1, '#1b2a3c'); g.fillStyle = grd; g.fillRect(0, 0, c.width, c.height); }
+      g.drawImage(gl, 0, 0, c.width, c.height);
+      var fs = Math.round(c.height / 26), hint = stage.querySelector('.cbar-hint'), txt = hint && hint.style.display !== 'none' ? hint.textContent : '';
+      g.font = '800 ' + Math.round(fs * 0.8) + 'px Mulish, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'top'; var info = (L.team || '') + ' · ' + sp().label + ' · ' + form(), two = g.measureText('CASA BESPORTS  ' + info).width + fs * 1.2 > c.width;
+      g.fillStyle = 'rgba(5,9,15,.6)'; g.fillRect(0, 0, c.width, fs * (two ? 2.6 : 1.6)); g.fillStyle = '#e8a830'; g.fillText('CASA BESPORTS', fs * 0.6, fs * 0.4);
+      g.fillStyle = '#f6f0e1'; if (two) g.fillText(info, fs * 0.6, fs * 1.4, c.width - fs * 1.2); else { g.textAlign = 'right'; g.fillText(info, c.width - fs * 0.6, fs * 0.4); }
+      if (txt && !/glisser|zoomer|posés sur/.test(txt)) { g.font = '700 ' + fs + 'px Mulish, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; var tw = Math.min(c.width - fs, g.measureText(txt).width + fs * 1.4); g.fillStyle = 'rgba(5,9,15,.75)'; roundRect(g, (c.width - tw) / 2, c.height - fs * 2.6, tw, fs * 1.8, fs * 0.5); g.fill(); g.fillStyle = '#fff'; g.direction = /[؀-ۿ]/.test(txt) ? 'rtl' : 'ltr'; g.fillText(txt, c.width / 2, c.height - fs * 1.7, c.width - fs * 2); g.direction = 'ltr'; }
+      if (Math.floor((performance.now() - r.t0) / 1000) !== r.shown) setRecUi();
+    }
+    S.afterRender = drawFrame;
+    function finishRec(r) {
+      if (!r.chunks.length) { toast('Vidéo vide'); return; }
+      var type = r.type || 'video/webm', blob = new Blob(r.chunks, { type: type }), url = URL.createObjectURL(blob), ext = /mp4/.test(type) ? 'mp4' : 'webm';
+      var name = 'casabesports-' + sp().id + '-' + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '') + '.' + ext;
+      var o = el('div', { class: 'cbar-shot', role: 'dialog', 'aria-label': 'Votre vidéo', style: 'justify-content:flex-start;overflow-y:auto;padding-top:calc(env(safe-area-inset-top,0px) + 1rem)' });
+      var vid = el('video', { src: url, controls: '', playsinline: '', style: 'position:relative;inset:auto;flex:none;width:100%;max-width:720px;height:44vh;object-fit:contain;border-radius:8px;background:#000' }); o.appendChild(vid);
+      o.appendChild(el('div', { style: 'font-size:13px;color:#c9d6e3;text-align:center;max-width:520px' }, 'Votre montage est prêt. « Enregistrer » le garde sur l’appareil (sur iPhone : Partager › Enregistrer la vidéo). Le commentaire de la voix du téléphone apparaît en sous-titres ; votre voix est enregistrée si le micro était autorisé.'));
+      var row = el('div', { class: 'cbar-row', style: 'justify-content:center' });
+      row.appendChild(btn('Enregistrer / Partager', function () {
+        var f = null; try { f = new File([blob], name, { type: type }); } catch (e) {}
+        if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Casa Besports · ' + sp().label }).catch(function () {});
+        else { var a = el('a', { href: url, download: name }); document.body.appendChild(a); a.click(); a.remove(); }
+      }, true));
+      if ((vid.remote && vid.remote.prompt) || vid.webkitShowPlaybackTargetPicker) row.appendChild(btn('📺 Envoyer sur la TV', function () {
+        if (vid.webkitShowPlaybackTargetPicker) vid.webkitShowPlaybackTargetPicker(); else vid.remote.prompt().catch(function () { toast('Aucune TV trouvée : utilisez la recopie de l’écran'); });
+      }));
+      row.appendChild(btn('Fermer', function () { o.remove(); URL.revokeObjectURL(url); }));
+      o.appendChild(row); st.root.appendChild(o);
+    }
+    function showTv() {
+      var ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1), android = /Android/.test(ua);
+      var tips = [
+        ['iPhone / iPad', ios, 'Ouvrez le Centre de contrôle (glissez depuis le coin en haut à droite), touchez <b>Recopie de l’écran</b> et choisissez votre Apple TV ou votre TV compatible AirPlay. L’iPhone ne diffuse pas directement vers un Chromecast : pour un Chromecast, ouvrez le site sur un ordinateur avec Chrome (ci-dessous) ou enregistrez la vidéo puis lisez-la sur la TV.'],
+        ['Android', android, 'Ouvrez les réglages rapides (glissez deux fois depuis le haut de l’écran), touchez <b>Caster l’écran</b> (ou <b>Smart View</b> sur Samsung) et choisissez la TV ou le Chromecast.'],
+        ['Ordinateur (Chrome ou Edge)', !ios && !android, 'Menu <b>⋮</b> › <b>Caster…</b> › <b>Sources</b> › <b>Caster l’onglet</b>, puis choisissez le Chromecast. La salle de réunion voit tout ce que vous faites, en direct.']
+      ].sort(function (a, b) { return b[1] - a[1]; });
+      var sh = el('div', { class: 'cbar-sheet', role: 'dialog', 'aria-label': 'Afficher sur la TV' }), d = el('div');
+      d.innerHTML = '<div class="cbar-lbl">Causerie, séance, avant-match</div><h3>Afficher sur la TV</h3><p style="color:#c9d6e3;line-height:1.5;margin:0 0 .4rem">Trois étapes : 1. passez en mode TV ci-dessous ; 2. lancez la diffusion depuis votre appareil ; 3. tournez le téléphone à l’horizontale. Le terrain, la simulation et les sous-titres du commentaire s’affichent en grand.</p>' +
+        tips.map(function (t) { return '<h4>' + t[0] + (t[1] ? ' · votre appareil' : '') + '</h4><p style="color:#dfe7ee;line-height:1.5;margin:0">' + t[2] + '</p>'; }).join('');
+      var row = el('div', { class: 'cbar-row', style: 'margin-top:1rem' });
+      row.appendChild(btn('Passer en mode TV', function () { sh.remove(); if (st.setFull) st.setFull(true); }, true));
+      row.appendChild(btn('Fermer', function () { sh.remove(); })); d.appendChild(row); sh.appendChild(d); stage.parentNode.appendChild(sh);
+    }
+    S.stageButtons = [simBtn, recBtn, recPause, tvBtn];
+    S.stop = function () { sim = null; hush(); if (rec) stopRec(); };
     function sel(label, opts, cur0, fn) { var s = el('select', { 'aria-label': label, title: label }); opts.forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (String(o[0]) === String(cur0)) op.selected = true; s.appendChild(op); }); s.onchange = function () { fn(s.value); }; return s; }
     function compoText(sep) { var x = sp(), N = names(), C = cap(); return L.team + ' · ' + x.label + ' (' + form() + ')' + sep + N.map(function (n, i) { return (sep === '\n' ? (i + 1) + '. ' : '') + n + (i === C ? ' (C)' : ''); }).join(sep === '\n' ? '\n' : ', '); }
     function setView(p, d, y) { S.view.pitch = p; S.view.dist = d; if (y != null) S.view.yaw = y; S.placeCam(); }
@@ -1391,7 +1498,20 @@
       if (Object.keys(x.forms).length > 1) r1.appendChild(sel('Système de jeu', Object.keys(x.forms).map(function (f) { return [f, f]; }), form(), function (v) { L.forms[x.id] = v; L.pos[x.id] = null; save(); build(); renderPanel(); }));
       r1.appendChild(sel('Maillot', KITS.map(function (k, i) { return [i, 'Maillot ' + k[0]]; }), L.kit, function (v) { L.kit = +v; save(); build(); if (x.kind === 'stade') buildField(); }));
       panel.appendChild(r1);
-      var r3 = el('div', { class: 'cbar-row' }); r3.appendChild(el('div', { class: 'cbar-lbl' }, 'Le lieu et le décor'));
+      // l'adversaire et les outils du coach, en premier : c'est ce qu'on utilise le plus
+      var ro = el('div', { class: 'cbar-row' }); ro.appendChild(el('div', { class: 'cbar-lbl' }, 'Adversaire, simulation et outils du coach'));
+      if (x.id !== 'athle') {
+        ro.appendChild(sel('Adversaire', [['0', 'Sans adversaire'], ['1', 'Avec une équipe adverse']], oppOn() ? '1' : '0', function (v) { L.opp = L.opp || {}; L.opp[x.id] = v === '1'; save(); build(); renderPanel(); }));
+        if (oppOn()) {
+          if (Object.keys(x.forms).length > 1) ro.appendChild(sel('Système adverse', Object.keys(x.forms).map(function (f) { return [f, 'Adversaire en ' + f]; }), oppForm(), function (v) { L.oppForm = L.oppForm || {}; L.oppForm[x.id] = v; if (L.oppPos) L.oppPos[x.id] = null; save(); build(); }));
+          ro.appendChild(sel('Maillot adverse', KITS.map(function (k, i) { return [i, 'Adversaire en ' + k[0].toLowerCase()]; }).filter(function (o) { return +o[0] !== +L.kit; }), oppKit(), function (v) { L.oppKit = +v; save(); build(); }));
+        }
+      }
+      ro.appendChild(voiceSel);
+      ro.appendChild(sel('Son de la vidéo', [['on', '🎤 Vidéo avec ma voix'], ['off', 'Vidéo sans son']], L.recMic === 'off' ? 'off' : 'on', function (v) { L.recMic = v; save(); }));
+      panel.appendChild(ro);
+      var r3w = el('details', { class: 'cbar-more' }); r3w.appendChild(el('summary', null, 'Le lieu et le décor'));
+      var r3 = el('div', { class: 'cbar-row' });
       var cl = teamLieu(), lopts = lieux().map(function (l) { return [l.id, l.nom]; }).concat([['+pos', '📍 Autour de moi…'], ['+cherche', '🔎 Autre commune…']]);
       r3.appendChild(sel('Lieu', lopts, cl.id, function (v) { if (v === '+pos') return myPosition(); if (v === '+cherche') return addPlace(); L.lieux = L.lieux || {}; L.lieux[L.team] = v; save(); locate(); }));
       r3.appendChild(sel('Carte', Object.keys(MAPS).filter(function (k) { return !MAPS[k].hidden; }).map(function (k) { return [k, MAPS[k].label]; }), L.map, function (v) { L.map = v; save(); loadMap(); }));
@@ -1399,8 +1519,7 @@
       if (x.kind === 'stade') r3.appendChild(sel('Stade', [['reel', 'Stade de club (comme en vrai)'], ['grand', 'Grand stade 4 tribunes']], L.style, function (v) { L.style = v; save(); buildField(); loadMap(); }));
       if (x.id === 'tennis') r3.appendChild(sel('Surface', Object.keys(TENNIS_SURF).map(function (k) { return [k, TENNIS_SURF[k]]; }), L.surface, function (v) { L.surface = v; save(); buildField(); }));
       r3.appendChild(sel('Taille des joueurs', [['agrandie', 'Joueurs agrandis (lisibles)'], ['reelle', 'Taille réelle']], L.scale, function (v) { L.scale = v; save(); build(); }));
-      panel.appendChild(r3);
-      var rv = el('div', { class: 'cbar-row' }); rv.appendChild(el('div', { class: 'cbar-lbl' }, 'Simulation et commentaire audio')); rv.appendChild(voiceSel); panel.appendChild(rv);
+      r3w.appendChild(r3); panel.appendChild(r3w);
       var r4 = el('div', { class: 'cbar-row' });
       r4.appendChild(btn('📖 Règlement', function () { showRules(x.id); }, true));
       r4.appendChild(btn('Vue tribune', function () { setView(0.26, x.kind === 'stade' ? (L.style === 'grand' ? 0.62 : 0.9) : 1.1); }));
@@ -1547,7 +1666,7 @@
     }).catch(function () { return false; });
   }
 
-  function loop(S) { (function f(t) { if (!st || st.S !== S || st.xr) return; if (S.tick) S.tick(t || 0); S.renderer.render(S.scene, S.camera); st.raf = requestAnimationFrame(f); })(); }
+  function loop(S) { (function f(t) { if (!st || st.S !== S || st.xr) return; if (S.tick) S.tick(t || 0); S.renderer.render(S.scene, S.camera); if (S.afterRender) S.afterRender(); st.raf = requestAnimationFrame(f); })(); }
 
   /* ---------- Ouverture / fermeture ---------- */
   var TITLES = { hub: 'Expériences immersives', lineup: 'Ma compo en réalité augmentée', regles: 'Règlements des disciplines', score: 'Tableau d’affichage AR', phare: 'Le phare de Gatteville en 3D', photo: 'Photo supporter' };
@@ -1599,6 +1718,7 @@
     (S.stageButtons || []).forEach(function (b) { modes.appendChild(b); });
     // plein écran : on masque les barres et la scène prend tout l'écran (l'iPhone n'a pas le vrai plein écran du navigateur)
     var bFull = btn('⛶ Plein écran', function () { setFull(!root.classList.contains('cbar-full')); });
+    st.setFull = setFull;
     function setFull(on) {
       root.classList.toggle('cbar-full', on); bFull.innerHTML = on ? '✕ Quitter le plein écran' : '⛶ Plein écran'; bFull.setAttribute('aria-pressed', String(on));
       try {
