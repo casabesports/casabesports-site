@@ -12,7 +12,7 @@ cd "$(dirname "$0")/.."
 OUT=_site
 rm -rf "$OUT"
 mkdir -p "$OUT"
-for f in index.html icon.svg manifest.webmanifest robots.txt sitemap.xml _headers _redirects; do
+for f in index.html icon.svg manifest.webmanifest sw.js hors-ligne.html robots.txt sitemap.xml _headers _redirects; do
   [ -e "$f" ] && cp "$f" "$OUT/"
 done
 for d in assets js contenus; do
@@ -25,7 +25,7 @@ for f in index.html robots.txt sitemap.xml; do
 done
 REF="${CF_PAGES_COMMIT_SHA:-${COMMIT_REF:-$(date +%s)}}"
 VER=$(printf '%s' "$REF" | cut -c1-8)
-sed -i "s#__VERSION__#$VER#g" "$OUT/index.html"
+sed -i "s#__VERSION__#$VER#g" "$OUT/index.html" "$OUT/sw.js"
 TODAY=$(date +%Y-%m-%d)
 sed -i "s#<changefreq>#<lastmod>$TODAY</lastmod><changefreq>#" "$OUT/sitemap.xml"
 # 4. Référencement : données lues par la fonction Cloudflare (functions/[[path]].js) et liste des adresses qu'elle traite
