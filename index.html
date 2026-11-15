@@ -307,6 +307,7 @@ html{scroll-behavior:smooth}
 .lv-r-h{text-align:right}
 .lv-r-s{font-family:'Cormorant Garamond',Georgia,serif;font-variant-numeric:lining-nums tabular-nums;font-size:24px;font-weight:500;color:var(--muted);display:inline-flex;gap:.45rem;min-width:84px;justify-content:center}
 .lv-r-sep{color:var(--line-2)}
+@media (min-width:641px){.lv-res-club .lv-r{grid-template-columns:minmax(64px,96px) minmax(0,1fr) auto minmax(0,1fr) minmax(140px,220px)}}
 .lv-r .is-win{color:var(--ink);font-weight:700}
 .lv-r-v{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;text-align:right}
 @media (max-width:640px){.lv-r{grid-template-columns:minmax(0,1fr) auto;gap:.15rem .8rem;align-items:center}.lv-r-d{grid-column:1/-1;margin-bottom:.2rem}.lv-r-h{text-align:left;grid-column:1;grid-row:2}.lv-r-a{grid-column:1;grid-row:3}.lv-r-s{grid-column:2;grid-row:2/4;flex-direction:column;gap:0;align-items:flex-end;min-width:0}.lv-r-sep{display:none}.lv-r-v{display:none}.lv-comp{font-size:17px}}
@@ -2773,7 +2774,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
           <sc-if value="{{hm.isTable}}" hint-placeholder-val="{{ false }}">
             <div class="b-card">
               <div class="b-head"><span class="cond" style="color: var(--gold-text)">Régional 2</span><button type="button" class="b-more" onClick="{{goTable}}">Complet</button></div>
-              <sc-for list="{{dashTable}}" as="r" hint-placeholder-count="4"><div style="display: flex; align-items: center; gap: .6rem; padding: .35rem 0; border-bottom: 1px solid var(--line); font-size: 14px"><span class="num" style="width: 18px; color: var(--muted)">{{r.rank}}</span><span style="flex: 1; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.team}}</span><span class="num" style="color: var(--ink)">{{r.pts}}</span></div></sc-for>
+              <sc-for list="{{dashTable}}" as="r" hint-placeholder-count="4"><div style="display: flex; align-items: center; gap: .6rem; padding: .35rem 0; border-bottom: 1px solid var(--line); font-size: 14px"><span class="lv-serif" style="width: 18px; color: var(--muted); font-style: italic; font-weight: 500; font-size: 16px">{{r.rank}}</span><span class="lv-serif" style="flex: 1; font-size: 17px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.team}}</span><span class="lv-serif" style="color: var(--ink); font-weight: 700; font-size: 17px">{{r.pts}}</span></div></sc-for>
             </div>
           </sc-if>
           <!-- Gazette du mois -->
@@ -3323,9 +3324,15 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <sc-if value="{{club.noPlayers}}" hint-placeholder-val="{{ false }}"><p style="color: var(--text-2)">Aucun profil joueur pour ce club pour l’instant. <button type="button" class="lnk" onClick="{{proposePlayer}}" style="font-size: 15px">Faire briller un talent</button></p></sc-if>
     </sc-if>
     <sc-if value="{{tabMatches}}" hint-placeholder-val="{{ false }}">
-      <div style="display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 0; overflow: hidden">
+      <div class="lv-res lv-res-club">
         <sc-for list="{{club.matches}}" as="m" hint-placeholder-count="3">
-          <button type="button" onClick="{{m.open}}" style="display: flex; flex-wrap: wrap; gap: .75rem; justify-content: space-between; align-items: center; padding: .9rem 1rem; background: var(--surface); border: 0; border-bottom: 1px solid var(--line); cursor: pointer; text-align: left; min-height: 60px"><span style="font-size: 13px; color: var(--muted); min-width: 90px">{{m.dateLabel}}</span><span style="flex: 1 1 240px; font-weight: 700; color: var(--text)">{{m.home}} {{m.scoreMid}} {{m.away}}</span><span class="cond" style="font-size: 12px; color: {{m.vColor}}">{{m.comp}} · {{m.vLabel}}</span></button>
+          <button type="button" class="lv-r" onClick="{{m.open}}" aria-label="{{m.homeN}} {{m.hs}}, {{m.awayN}} {{m.as}}">
+            <span class="lv-r-d">{{m.dateLabel}}</span>
+            <span class="lv-r-n lv-r-h {{m.homeWin}}">{{m.homeN}}</span>
+            <span class="lv-r-s"><span class="{{m.homeWin}}">{{m.hs}}</span><span class="lv-r-sep">–</span><span class="{{m.awayWin}}">{{m.as}}</span></span>
+            <span class="lv-r-n lv-r-a {{m.awayWin}}">{{m.awayN}}</span>
+            <span class="lv-r-v" style="color: {{m.vColor}}">{{m.comp}} · {{m.vLabel}}</span>
+          </button>
         </sc-for>
       </div>
       <sc-if value="{{club.noMatches}}" hint-placeholder-val="{{ false }}"><p style="color: var(--text-2)">Aucun match référencé. <button type="button" class="lnk" onClick="{{submitResult}}" style="font-size: 15px">Transmettre un résultat</button></p></sc-if>
@@ -3746,7 +3753,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
             <div class="eb" style="margin-bottom: .5rem">{{calDayLabel}}</div>
             <div style="display: flex; flex-direction: column; gap: .6rem">
               <sc-for list="{{calDayMatches}}" as="m" hint-placeholder-count="2">
-                <button type="button" onClick="{{m.open}}" style="text-align: left; border: 1px solid var(--line); border-radius: 0; background: var(--surface); padding: .9rem 1rem; cursor: pointer"><span class="cond" style="display: block; font-size: 12px; color: var(--gold-text)">{{m.comp}} · {{m.time}}</span><span class="ttl" style="display: block; font-size: 20px">{{m.home}} {{m.scoreMid}} {{m.away}}</span></button>
+                <button type="button" onClick="{{m.open}}" style="text-align: left; border: 1px solid var(--line); border-radius: 0; background: var(--surface); padding: .9rem 1rem; cursor: pointer"><span class="cond" style="display: block; font-size: 12px; color: var(--gold-text)">{{m.comp}} · {{m.time}}</span><span class="ttl lv-serif" style="display: block; font-size: 21px">{{m.homeN}} {{m.scoreMid}} {{m.awayN}}</span></button>
               </sc-for>
               <sc-if value="{{calDayEmpty}}" hint-placeholder-val="{{ false }}"><p style="color: var(--muted); margin: 0">Aucun match ce jour-là.</p></sc-if>
             </div>
@@ -6720,9 +6727,9 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         <button type="button" onClick="{{closeMatch}}" aria-label="Fermer" style="position: absolute; top: .75rem; right: .75rem; width: 44px; height: 44px; border: 0; background: var(--inv-bg-2); border-radius: 50%; cursor: pointer; font-size: 20px; color: var(--on-inv)">×</button>
         <div class="cond" style="font-size: 13px; color: var(--gold-on-inv); margin-bottom: 1rem">{{mx.comp}} · {{mx.dateLabel}} · {{mx.time}}</div>
         <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: .75rem; align-items: center; text-align: center">
-          <button type="button" onClick="{{mx.openHome}}" class="ttl" style="font-size: 24px; color: var(--on-inv); background: none; border: 0; cursor: pointer; min-height: 44px">{{mx.home}}</button>
-          <span class="num" style="font-size: 44px; color: {{accent}}">{{mx.scoreMid}}</span>
-          <button type="button" onClick="{{mx.openAway}}" class="ttl" style="font-size: 24px; color: var(--on-inv); background: none; border: 0; cursor: pointer; min-height: 44px">{{mx.away}}</button>
+          <button type="button" onClick="{{mx.openHome}}" class="ttl lv-serif" style="font-size: 26px; text-transform: none; color: var(--on-inv); background: none; border: 0; cursor: pointer; min-height: 44px">{{mx.homeN}}</button>
+          <span class="lv-serif" style="font-size: 46px; font-weight: 700; color: {{accent}}">{{mx.scoreMid}}</span>
+          <button type="button" onClick="{{mx.openAway}}" class="ttl lv-serif" style="font-size: 26px; text-transform: none; color: var(--on-inv); background: none; border: 0; cursor: pointer; min-height: 44px">{{mx.awayN}}</button>
         </div>
         <div class="cond" style="text-align: center; margin-top: .75rem; font-size: 13px; color: {{mx.stColor}}">{{mx.statusLabel}}</div>
       </div>
