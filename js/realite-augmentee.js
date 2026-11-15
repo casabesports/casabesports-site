@@ -1190,7 +1190,7 @@
     orbitControls(S, stage, function (e) { return !!pick(e); });
     S.tick = function (t) {
       env.tick(); if (stad) stad.ticks.forEach(function (f) { f(t); });
-      if (sim) { simTick(performance.now()); return; }
+      if (sim) simTick(performance.now()); camTick(); if (sim) return;
       if (bounceT) { var k = (performance.now() - bounceT.t0) / 700; if (k > 1) { bounceT.g.position.y = y0u; bounceT = null; } else bounceT.g.position.y = y0u + Math.abs(Math.sin(k * Math.PI * 2.5)) * (1 - k) * 0.03; }
     };
     S.onCamera = function (on) { dioOn = on; geo.group.visible = !on; env.setDiorama(on); if (catcher) catcher.visible = on; if (stad) stad.group.visible = !on; if (lines) lines.visible = on; placeChip.style.display = attr.style.display = on ? 'none' : ''; setHint(on ? 'Joueurs, ballon et lignes du terrain posés sur l’image de votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); };
@@ -1470,11 +1470,43 @@
       row.appendChild(btn('Passer en mode TV', function () { sh.remove(); if (st.setFull) st.setFull(true); }, true));
       row.appendChild(btn('Fermer', function () { sh.remove(); })); d.appendChild(row); sh.appendChild(d); stage.parentNode.appendChild(sh);
     }
-    S.stageButtons = [simBtn, recBtn, recPause, tvBtn];
+    /* ----- Angles de vue façon retransmission TV (avant et pendant la simulation) ----- */
+    var ANGLES = [['libre', '🖐 Vue libre (au doigt)'], ['auto', '🎬 Réalisation TV automatique'], ['tv', '📺 Caméra principale TV'], ['large', '🏟 Plan large'], ['but', '🥅 Derrière le but'], ['sol', '📷 Bord du terrain'], ['spider', '🕷 Spidercam (au-dessus du jeu)'], ['ciel', '🛰 Vue du ciel (tactique)']];
+    var angleSel = el('select', { 'aria-label': 'Angle de vue', title: 'Angle de vue' }); ANGLES.forEach(function (a) { angleSel.appendChild(el('option', { value: a[0] }, a[1])); });
+    if (!L.angle) L.angle = 'libre'; angleSel.value = L.angle;
+    angleSel.onchange = function () { setAngle(angleSel.value); };
+    var camShot = null, wpos = new THREE.Vector3();
+    function setAngle(a) { L.angle = a; angleSel.value = a; camShot = null; save(); if (a !== 'libre' && dioOn) toast('En mode Caméra, c’est votre téléphone qui fait l’angle : coupez la caméra pour les vues TV'); }
+    function shotFor() {
+      if (L.angle !== 'auto') return L.angle;
+      if (!sim) return 'tv'; var n = sim.steps.length, j = (sim.i + 1) % n, B = sim.steps[j];
+      return B.goal ? 'but' : j === n - 1 ? 'large' : (B.lob || 0) >= 1 ? 'spider' : j === 3 ? 'sol' : 'tv';
+    }
+    function camTick() {
+      if (L.angle === 'libre' || dioOn || st.xr || drag) return;
+      var m = shotFor(), cut = m !== camShot; camShot = m;
+      var bx = 0, bz = 0; if (ball) { ball.getWorldPosition(wpos); S.root.worldToLocal(wpos); bx = wpos.x; bz = wpos.z; }
+      var big = sp().kind === 'stade', W2 = W || 0.6, H2 = H || 1.05, want;
+      var side = -Math.PI / 2, land = stage.clientWidth > stage.clientHeight; // côté opposé à la tribune principale, comme la caméra TV
+      if (m === 'tv') want = [side, 0.5, big ? 0.95 : 0.9, bx * 0.15, bz * 0.85];
+      else if (m === 'large') want = [side, 0.6, big ? 1.45 : 1.35, 0, 0];
+      else if (m === 'but') want = [Math.PI, 0.3, 0.72, bx * 0.5, -H2 * 0.28];
+      else if (m === 'sol') want = [side - 0.25, 0.13, 0.55, bx * 0.6, bz];
+      else if (m === 'spider') want = [0.15, 0.88, 0.55, bx, bz + 0.05];
+      else want = [land ? side : 0, 1.52, land ? 1.0 : Math.max(1.35, H2 * 1.35), 0, 0];
+      var k = cut ? 1 : 0.07, v = S.view;
+      v.yaw += Math.atan2(Math.sin(want[0] - v.yaw), Math.cos(want[0] - v.yaw)) * k; v.pitch += (want[1] - v.pitch) * k; v.dist += (want[2] - v.dist) * k;
+      S.target.x += (want[3] - S.target.x) * k; S.target.z += (want[4] - S.target.z) * k; S.placeCam();
+    }
+    // un glissé du doigt sur le terrain reprend la main : on repasse en vue libre
+    (function () { var p0 = null; stage.addEventListener('pointerdown', function (e) { p0 = pick(e) ? null : { x: e.clientX, y: e.clientY }; });
+      stage.addEventListener('pointermove', function (e) { if (p0 && L.angle !== 'libre' && Math.hypot(e.clientX - p0.x, e.clientY - p0.y) > 12) { p0 = null; setAngle('libre'); setHint('Vue libre : tournez et zoomez au doigt'); } });
+      stage.addEventListener('pointerup', function () { p0 = null; }); })();
+    S.stageButtons = [simBtn, recBtn, recPause, tvBtn, angleSel];
     S.stop = function () { sim = null; hush(); if (rec) stopRec(); };
     function sel(label, opts, cur0, fn) { var s = el('select', { 'aria-label': label, title: label }); opts.forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (String(o[0]) === String(cur0)) op.selected = true; s.appendChild(op); }); s.onchange = function () { fn(s.value); }; return s; }
     function compoText(sep) { var x = sp(), N = names(), C = cap(); return L.team + ' · ' + x.label + ' (' + form() + ')' + sep + N.map(function (n, i) { return (sep === '\n' ? (i + 1) + '. ' : '') + n + (i === C ? ' (C)' : ''); }).join(sep === '\n' ? '\n' : ', '); }
-    function setView(p, d, y) { S.view.pitch = p; S.view.dist = d; if (y != null) S.view.yaw = y; S.placeCam(); }
+    function setView(p, d, y) { setAngle('libre'); S.target.set(0, S.target.y, 0); S.view.pitch = p; S.view.dist = d; if (y != null) S.view.yaw = y; S.placeCam(); }
     function addPlace() {
       var q = window.prompt('Nom de la commune (en France) :'); if (!q) return;
       fetch('https://geo.api.gouv.fr/communes?nom=' + encodeURIComponent(q) + '&fields=nom,centre,codeDepartement&boost=population&limit=1').then(function (r) { return r.json(); }).then(function (a) {
