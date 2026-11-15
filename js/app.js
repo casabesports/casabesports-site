@@ -202,7 +202,11 @@ class Component extends DCLogic {
     const clubs = ((typeof window !== 'undefined' && Array.isArray(window.CASA_CLUBS)) ? window.CASA_CLUBS : []).filter((c) => c && c.id && c.name).map((c) => Object.assign(C(c.id, c.name, c.sport || 'Football', c.city || '', c.img || null), { logo: c.logo || '', niveau: c.niveau || '', fondation: c.fondation || '', stade: c.stade || '' }));
     const P = (id, num, name, role, club, clubLabel, img) => ({ id, num, name, role, club, clubLabel, img: img || null });
     // Joueurs : contenus/joueurs.js (modifiable dans l'espace administrateur)
-    const players = ((typeof window !== 'undefined' && Array.isArray(window.CASA_JOUEURS)) ? window.CASA_JOUEURS : []).filter((p) => p && p.id && p.name).map((p) => P(p.id, String(p.num == null ? '' : p.num), p.name, p.role || '', p.club || null, p.clubLabel || ((clubs.find((c) => c.id === p.club) || {}).name) || '', p.img || null));
+    const JM = ((typeof window !== 'undefined' && Array.isArray(window.CASA_JOUEURS)) ? window.CASA_JOUEURS : []).filter((p) => p && p.id && p.name);
+    // Joueurs des clubs normands lus dans des sources libres (contenus/joueurs-libres.js, outil outils/import_joueurs_libres.py).
+    // Un joueur de l'admin avec le même identifiant passe avant ; « masquer » le retire du site.
+    const JL = ((typeof window !== 'undefined' && Array.isArray(window.CASA_JOUEURS_LIBRES)) ? window.CASA_JOUEURS_LIBRES : []).filter((p) => p && p.id && p.name && !JM.some((m) => m.id === p.id));
+    const players = JM.filter((p) => !p.masquer).concat(JL).map((p) => Object.assign(P(p.id, String(p.num == null ? '' : p.num), p.name, p.role || '', p.club || null, p.clubLabel || ((clubs.find((c) => c.id === p.club) || {}).name) || '', p.img || null), { sport: p.sport || '', ville: p.ville || '', departement: p.departement || '', normand: !!p.normand, credit: p.credit || null, source: p.source || null }));
     const cities = { 'Cherbourg': [49.639, -1.616], 'Tourlaville': [49.638, -1.565], 'Équeurdreville': [49.655, -1.68], 'Beaumont-Hague': [49.664, -1.84], 'Urville-Nacqueville': [49.674, -1.74], 'Gréville-Hague': [49.677, -1.80], 'Digosville': [49.632, -1.525], 'Tollevast': [49.575, -1.628], 'Bricquebec': [49.47, -1.633], 'Valognes': [49.509, -1.47], 'Barfleur': [49.671, -1.264], 'Barneville-Carteret': [49.383, -1.75], 'Carentan': [49.303, -1.248], 'Saint-Lô': [49.116, -1.09], 'Avranches': [48.684, -1.357], 'Bayeux': [49.276, -0.703], 'Flers': [48.75, -0.57], 'Mondeville': [49.175, -0.32] };
     const sports = ['Football', 'Basketball', 'Handball', 'Rugby', 'Water-polo', 'Trail', 'Natation', 'Pétanque', 'Roller', 'Équitation', 'Ping-pong', 'Kitesurf', 'Karting', 'Judo', 'Volley-ball', 'Tennis', 'Golf', 'Wing foil', 'Hockey', 'Boxe'];
     // Articles ajoutés par la rédaction ou l'automatisation : contenus/articles.js (les plus récents en premier)
@@ -1449,7 +1453,11 @@ class Component extends DCLogic {
         fLabel: f ? 'Suivi ✓' : 'Suivre', fBg: f ? 'var(--inv-bg)' : 'var(--surface)', fFg: f ? 'var(--on-inv)' : 'var(--ink)'
       });
     };
-    const playerV = (p) => Object.assign({}, p, { club: p.clubLabel, hasImg: !!p.img, noImg: !p.img, open: () => this.go('player', { playerId: p.id }) });
+    const playerV = (p) => Object.assign({}, p, { club: p.clubLabel, hasImg: !!p.img, noImg: !p.img, ph: p.num || String(p.name || '').split(/\s+/).map((w) => w.charAt(0)).join('').slice(0, 3).toUpperCase(), open: () => this.go('player', { playerId: p.id }),
+      hasCredit: !!(p.credit && p.img), creditTxt: p.credit ? ('Photo : ' + p.credit.auteur + ' · ' + p.credit.licence + ' · Wikimedia Commons') : '', creditUrl: (p.credit && p.credit.lien) || '',
+      hasSource: !!p.source, noSource: !p.source, sourceWp: (p.source && p.source.wikipedia) || '', sourceWd: (p.source && p.source.wikidata) || '',
+      sourceDate: p.source && p.source.verifie ? new Date(p.source.verifie + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '',
+      isNormand: !!p.normand, lieu: [p.ville, p.departement].filter(Boolean).join(' · ') });
     const vidV = (v) => { const dm = RXD && RXD.media.find((m) => m.id === 'video:' + v.id); const duree = (dm && dm.duree) || v.duree || ''; return Object.assign({}, v, { open: () => this.go('video', { videoId: v.id }), duree, hasDuree: !!duree }); };
 
     // ---------- matchs ----------
@@ -1597,10 +1605,18 @@ class Component extends DCLogic {
     const clubTabs = tabs.map(([id, label]) => ({ label, sel: s.clubTab === id ? 'true' : 'false', color: s.clubTab === id ? 'var(--ink)' : 'var(--muted)', line: s.clubTab === id ? accent : 'transparent', pick: () => this.setState({ clubTab: id }) }));
 
     // ---------- joueurs ----------
-    const roles = ['Tous', 'Attaquant', 'Milieu', 'Défenseur', 'Staff & arbitres'];
+    const roles = ['Tous', 'Attaquant', 'Milieu', 'Défenseur', 'Gardien', 'Staff & arbitres'];
     const roleChips = roles.map((r) => Object.assign(pill(r === s.plRole), { label: r, pick: () => this.setState({ plRole: r }) }));
     const isStaff = (p) => /Arbitre|Entraîneur|VP/.test(p.role);
-    const playerList = D.players.filter((p) => s.plRole === 'Tous' || (s.plRole === 'Staff & arbitres' ? isStaff(p) : p.role === s.plRole)).map(playerV);
+    // filtres discipline et zone (Manche / toute la Normandie)
+    const plSport = s.plSport || 'Toutes', plZone = s.plZone || 'Normandie';
+    const sportOf = (p) => p.sport || (((D.clubs.find((c) => c.id === p.club) || {}).sport) || (/basket/i.test(p.clubLabel) ? 'Basketball' : 'Football'));
+    const zoneOk = (p) => plZone === 'Normandie' || (p.departement ? p.departement === 'Manche' : true);
+    const plSports = ['Toutes'].concat(Array.from(new Set(D.players.map(sportOf))).sort());
+    const sportChips = plSports.length > 2 ? plSports.map((x) => Object.assign(pill(x === plSport), { label: x, pick: () => this.setState({ plSport: x }) })) : [];
+    const zoneChips = [['Manche', 'Manche'], ['Normandie', 'Toute la Normandie']].map(([v, l]) => Object.assign(pill(v === plZone), { label: l, pick: () => this.setState({ plZone: v }) }));
+    const playerList = D.players.filter((p) => (s.plRole === 'Tous' || (s.plRole === 'Staff & arbitres' ? isStaff(p) : p.role === s.plRole)) && (plSport === 'Toutes' || sportOf(p) === plSport) && zoneOk(p)).map(playerV);
+    const hasLibres = D.players.some((p) => p.source);
     const curP = D.players.find((p) => p.id === s.playerId) || D.players[0] || { id: '', num: '', name: 'Aucun joueur', role: '', club: null, clubLabel: '', img: null };
     const pf = s.followPlayers.indexOf(curP.id) >= 0;
     const pl = Object.assign(playerV(curP), {
@@ -2729,7 +2745,7 @@ class Component extends DCLogic {
       togglePremiumOnly: () => this.setState({ premiumOnly: !s.premiumOnly }), premiumPressed: s.premiumOnly ? 'true' : 'false', premBg: s.premiumOnly ? 'var(--inv-bg)' : 'var(--surface)', premFg: s.premiumOnly ? 'var(--on-inv)' : 'var(--ink)',
       toggleSavedOnly: () => this.setState({ savedOnly: !s.savedOnly }), savedPressed: s.savedOnly ? 'true' : 'false', savBg: s.savedOnly ? 'var(--inv-bg)' : 'var(--surface)', savFg: s.savedOnly ? 'var(--on-inv)' : 'var(--ink)', savedCount: String(s.saved.length),
       proposeTopic: () => this.go('contact', { subject: 'Proposition de sujet', profile: 'Autre', contactSent: false }),
-      proposePlayer: () => this.go('contact', { subject: 'Faire briller un talent', profile: 'Joueur', contactSent: false }),
+      proposePlayer: () => this.go('contact', { subject: 'Ma fiche joueur', profile: 'Joueur', contactSent: false, formError: '' }),
       submitResult: () => this.go('contact', { subject: 'Transmettre un résultat — ' + s.dSport, profile: 'Club', contactSent: false }),
       orderRecap: () => this.go('contact', { subject: 'Devis résumé de match (290 €)' + (s.view === 'club' ? ' — ' + curC.name : ''), profile: 'Club', contactSent: false }),
       art: artObj, gzSide, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
@@ -2746,7 +2762,7 @@ class Component extends DCLogic {
       vid: curV, otherVideos: videos.filter((v) => v.id !== curV.id), playing: s.playing, notPlaying: !s.playing, togglePlay: () => this.setState({ playing: !s.playing }),
       playLabel: s.playing ? 'Pause' : 'Lire la vidéo', playState: s.playing ? 'Lecture en cours' : 'Prêt à lire', vidDim: s.playing ? 0.9 : 0.75,
       disciplines, disc, clubChips, clubList, club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs',
-      roleChips, playerList, pl, cityName: s.city, cityClubs,
+      roleChips, sportChips, hasSportChips: sportChips.length > 0, zoneChips, playerList, playerCount: playerList.length + (playerList.length > 1 ? ' profils' : ' profil'), noPlayerList: playerList.length === 0, hasLibres, pl, cityName: s.city, cityClubs,
       // terrain
       dSports, dComps, hasComps: dComps.length > 0, dZones, hasZones: dZones.length > 0, dNivs, hasNivs: dNivs.length > 0, dSportName: s.dSport, dTabs, sportEmpty: !sportHasData, sportHasData,
       isDemo: sportHasData, srcLabel: (spMaj ? 'Données officielles' + (spAuto.source ? ' (' + spAuto.source.replace(/\s*\(.*\)$/, '') + ')' : '') + ' · mise à jour ' + new Date(spMaj).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : 'Résultats vérifiés par la rédaction'), srcColor: 'var(--gold-text)', updatedAgo: spMaj ? new Date(spMaj).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—',
@@ -2835,7 +2851,16 @@ class Component extends DCLogic {
       onName: (e) => this.setState({ name: e.target.value }), onEmail: (e) => this.setState({ email: e.target.value }), onAddress: (e) => this.setState({ address: e.target.value }), onSubject: (e) => this.setState({ subject: e.target.value }),
       onProfile: (e) => this.setState({ profile: e.target.value }), onMessage: (e) => this.setState({ message: e.target.value }),
       contactOpen: !s.contactSent, contactSent: s.contactSent,
-      sendContact: () => { if (!s.name.trim() || !validEmail || !s.message.trim()) { this.setState({ formError: 'Nom, e-mail valide et message sont requis.' }); return; } this.setState({ contactSent: true, formError: '' }); this.crmCapture({ name: s.name.trim(), email: s.email, source: /olisto/i.test(s.subject || '') ? 'Formulaire OlistO' : 'Formulaire contact', type: ({ Club: 'Club', Annonceur: 'Annonceur', Partenaire: 'Partenaire' })[s.profile] || 'Supporter', consent: '?', subject: s.subject, profile: s.profile, message: s.message.trim(), note: (s.subject ? s.subject + ' — ' : '') + s.message.trim().slice(0, 200) }); },
+      // Fiche joueur (profil « Joueur ») : accord explicite avant toute publication (RGPD, droit à l'image)
+      isJoueurForm: s.profile === 'Joueur', jDisc: s.jDisc || '', jClub: s.jClub || '', jPoste: s.jPoste || '', jPhoto: s.jPhoto || '', jAge: !!s.jAge, jPub: !!s.jPub, jDroits: !!s.jDroits,
+      onJDisc: (e) => this.setState({ jDisc: e.target.value }), onJClub: (e) => this.setState({ jClub: e.target.value }), onJPoste: (e) => this.setState({ jPoste: e.target.value }), onJPhoto: (e) => this.setState({ jPhoto: e.target.value }),
+      onJAge: (e) => this.setState({ jAge: !!e.target.checked }), onJPub: (e) => this.setState({ jPub: !!e.target.checked }), onJDroits: (e) => this.setState({ jDroits: !!e.target.checked }),
+      sendContact: () => { const joueur = s.profile === 'Joueur';
+        if (joueur && (!s.name.trim() || !validEmail || !(s.jDisc || '').trim() || !(s.jClub || '').trim())) { this.setState({ formError: 'Nom, e-mail valide, discipline et club sont requis.' }); return; }
+        if (joueur && (!s.jAge || !s.jPub)) { this.setState({ formError: 'Cochez les deux accords obligatoires pour que votre fiche puisse être publiée.' }); return; }
+        if (joueur) { const fiche = 'FICHE JOUEUR — à ajouter dans Admin › Contenus › Joueurs après vérification\nNom : ' + s.name.trim() + '\nDiscipline : ' + s.jDisc.trim() + '\nClub : ' + s.jClub.trim() + '\nPoste : ' + ((s.jPoste || '').trim() || '—') + '\nPhoto : ' + ((s.jPhoto || '').trim() || 'à envoyer en réponse à ce message') + '\nAccords donnés le ' + new Date().toLocaleString('fr-FR') + ' : 15 ans ou plus, ou accord du représentant légal ✓ · publication du nom, club, poste et photo ✓ · droits sur la photo ' + (s.jDroits ? '✓' : 'non confirmés (ne pas publier la photo)') + '\n\n' + (s.message || '').trim();
+          this.setState({ contactSent: true, formError: '' }); this.crmCapture({ name: s.name.trim(), email: s.email, source: 'Fiche joueur', type: 'Joueur', consent: 'oui', subject: s.subject || 'Fiche joueur', profile: 'Joueur', message: fiche, note: 'Fiche joueur — ' + s.jDisc.trim() + ' · ' + s.jClub.trim() }); return; }
+        if (!s.name.trim() || !validEmail || !s.message.trim()) { this.setState({ formError: 'Nom, e-mail valide et message sont requis.' }); return; } this.setState({ contactSent: true, formError: '' }); this.crmCapture({ name: s.name.trim(), email: s.email, source: /olisto/i.test(s.subject || '') ? 'Formulaire OlistO' : 'Formulaire contact', type: ({ Club: 'Club', Annonceur: 'Annonceur', Partenaire: 'Partenaire' })[s.profile] || 'Supporter', consent: '?', subject: s.subject, profile: s.profile, message: s.message.trim(), note: (s.subject ? s.subject + ' — ' : '') + s.message.trim().slice(0, 200) }); },
       newMessage: () => this.setState({ contactSent: false, message: '', subject: '' }),
       goals, partnerContact: () => this.go('contact', { subject: 'Partenariat — ' + s.goal, profile: 'Entreprise', contactSent: false }),
       nlOpen: !s.nlDone, nlDone: s.nlDone, nlEmail: s.nlEmail, onNl: (e) => this.setState({ nlEmail: e.target.value }),
