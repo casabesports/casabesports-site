@@ -3902,7 +3902,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         <div class="bn-sect"><span class="bn-etiq">{{maillots.titre}}</span><span class="mc-lead">{{maillots.texte}}</span></div>
         <div class="mc-grid">
           <sc-for list="{{maillots.items}}" as="mc" hint-placeholder-count="6">
-            <a class="mc-card" href="{{mc.href}}" target="_blank" rel="noopener" aria-label="{{mc.aria}}">
+            <a class="mc-card" href="{{mc.href}}" target="_blank" rel="noopener" aria-label="{{mc.aria}}" onClick="{{mc.track}}">
               <span class="mc-logo"><span class="mc-mono" aria-hidden="true">{{mc.mono}}</span><sc-if value="{{mc.hasLogo}}" hint-placeholder-val="{{ false }}"><img class="mc-img" src="{{mc.logo}}" alt="" loading="lazy" referrerpolicy="no-referrer"></sc-if></span>
               <span class="mc-txt"><sc-if value="{{mc.partenaire}}" hint-placeholder-val="{{ false }}"><span class="mc-part">Partenaire</span></sc-if><b>{{mc.nom}}</b><span class="mc-meta">{{mc.meta}}</span><sc-if value="{{mc.hasPlat}}" hint-placeholder-val="{{ false }}"><span class="mc-plat">Boutique en ligne · {{mc.plateforme}}</span></sc-if><sc-if value="{{mc.hasCode}}" hint-placeholder-val="{{ false }}"><span class="mc-code">Code <b>{{mc.code}}</b> {{mc.avantage}}</span></sc-if></span>
               <span class="mc-go" aria-hidden="true">Voir la boutique ↗</span>

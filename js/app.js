@@ -1740,6 +1740,8 @@ class Component extends DCLogic {
       return { nom: m.nom, meta: [m.sport, m.city].filter(Boolean).join(' · '), plateforme: m.plateforme || '', hasPlat: !!m.plateforme, logo, hasLogo: !!logo, noLogo: !logo,
         mono: String(m.nom).replace(/^(AS|US|FC|CS|SC|PL|ES|JS|UC|RC)\s+/i, '').charAt(0).toUpperCase() || '?',
         code: String(m.codePromo || '').trim(), hasCode: !!String(m.codePromo || '').trim(), avantage: m.avantage || '', partenaire: !!m.partenaire,
+        clubKey: String(m.club || m.nom).slice(0, 80),
+        track: () => { try { const A = window.CasaAuth; if (A && A.db) A.db((c) => c.from('clics_boutiques').insert({ club: String(m.club || m.nom).slice(0, 80), page: 'maillots-de-coeur' })).catch(() => {}); } catch (e) {} },
         href: cbPartnerLink(m.boutiqueUrl, 'maillots-' + (m.club || i), 'boutique-club'), aria: 'Boutique officielle de ' + m.nom + (m.partenaire ? ', lien partenaire' : '') + ' (nouvel onglet)' };
     }).filter((m) => m.href);
     // Clubs partenaires (accord signé) en premier ; mention obligatoire des liens commerciaux dès qu'un accord existe

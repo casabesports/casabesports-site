@@ -262,6 +262,7 @@
     if (t === 'msg') { loadMsgs(); loadContacts(); }
     else if (t === 'team') loadTeam();
     else if (t === 'subs') loadSubs();
+    else if (t === 'clics') loadClics();
     else if (t === 'img') loadImages();
     render();
   }
@@ -280,7 +281,7 @@
     if (!root) return;
     var y = body ? body.scrollTop : 0;
     root.textContent = '';
-    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['subs', 'Abonnés', 0], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
+    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['subs', 'Abonnés', 0], ['clics', 'Clics boutiques', 0], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
     add(root, E('div', { class: 'cba-top' },
       E('span', { class: 'cba-brand' }, E('span', { class: 'long' }, 'Casa Besports · '), 'Administration'),
       E('div', { class: 'cba-tabs', role: 'tablist' }, tabs.map(function (t) {
@@ -291,7 +292,7 @@
     var w = E('div', { class: 'cba-wrap' });
     if (S.setup === 'sql') add(w, E('div', { class: 'cba-note' }, E('strong', {}, 'Une étape à faire une seule fois. '), 'La base de l’espace administrateur n’est pas encore installée : ouvrez Supabase › SQL Editor › New query, collez le contenu du fichier supabase/administration.sql du dépôt, puis cliquez « Run ». Rechargez ensuite cette page. (Guide : docs/ESPACE-ADMIN.md)'));
     else if (S.setup === 'norole') add(w, E('div', { class: 'cba-note' }, 'Votre compte n’est pas reconnu comme administrateur par Supabase : vérifiez que votre adresse e-mail est confirmée et qu’elle figure dans la table « equipe » avec le rôle admin.'));
-    add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, subs: viewSubs, team: viewTeam, help: viewHelp })[S.tab]());
+    add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, subs: viewSubs, clics: viewClics, team: viewTeam, help: viewHelp })[S.tab]());
     add(body, w); add(root, body);
     body.scrollTop = y;
   }
@@ -1312,6 +1313,40 @@
         E('button', { type: 'button', class: 'cba-btn sm', style: 'margin-left:auto', onclick: function () { loadSubs(); } }, 'Actualiser')),
       E('input', { class: 'cba-in', type: 'search', placeholder: 'Rechercher un nom, un e-mail, un téléphone, une carte membre…', value: S.subQ || '', 'aria-label': 'Rechercher un abonné', oninput: function (e) { S.subQ = e.target.value; holder.textContent = ''; add(holder, subList()); } }),
       holder);
+  }
+
+  // ================= CLICS VERS LES BOUTIQUES DES CLUBS =================
+  // Le relevé à montrer aux clubs : combien de visiteurs Casa Besports a envoyés vers leur boutique (supabase/clics.sql)
+  function loadClics() {
+    S.loaded.clics = false; S.clicsErr = '';
+    var depuis = new Date(); depuis.setMonth(depuis.getMonth() - 12); depuis.setDate(1);
+    db(function (c) { return c.from('clics_boutiques').select('club, cree_le').gte('cree_le', depuis.toISOString()).order('cree_le', { ascending: false }).limit(20000); }).then(function (d) {
+      S.clics = d || []; S.loaded.clics = true; render();
+    }, function (e) { var m = String((e && e.message) || e || ''); S.clicsErr = /relation|does not exist|schema cache|404/i.test(m) ? 'sql' : m; S.loaded.clics = true; render(); });
+  }
+  function viewClics() {
+    var head = [E('h1', { class: 'cba-h' }, 'Clics vers les boutiques des clubs'),
+      E('p', { class: 'cba-sub' }, 'Combien de visiteurs Casa Besports a envoyés vers la boutique de chaque club (rubrique « Vos maillots de cœur »). C’est votre preuve chiffrée pour proposer un partenariat à un club ou à son équipementier : montrez-leur ce relevé chaque mois. Aucun nom, e-mail ni adresse IP n’est enregistré.')];
+    if (!S.loaded.clics) return head.concat(E('p', {}, 'Chargement…'));
+    if (S.clicsErr === 'sql') return head.concat(E('div', { class: 'cba-note' }, E('strong', {}, 'Une étape à faire une seule fois. '), 'Ouvrez Supabase › SQL Editor › New query, collez le contenu du fichier supabase/clics.sql du dépôt, puis cliquez sur Run. Les clics seront comptés à partir de ce moment.'), E('button', { type: 'button', class: 'cba-btn', onclick: loadClics }, 'Réessayer'));
+    if (S.clicsErr) return head.concat(E('div', { class: 'cba-note' }, 'Le relevé n’a pas pu être chargé : ' + S.clicsErr), E('button', { type: 'button', class: 'cba-btn', onclick: loadClics }, 'Réessayer'));
+    var now = new Date(), mk = function (d) { return d.getFullYear() + '-' + d.getMonth(); };
+    var prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    var names = {}; (((window.CASA_BOUTIQUE || {}).maillots) || []).forEach(function (m) { if (m) names[String(m.club || m.nom)] = m.nom; });
+    var rows = {};
+    (S.clics || []).forEach(function (c) { var r = rows[c.club] || (rows[c.club] = { club: c.club, mois: 0, avant: 0, an: 0 }); var d = new Date(c.cree_le); r.an++; if (mk(d) === mk(now)) r.mois++; else if (mk(d) === mk(prev)) r.avant++; });
+    var list = Object.keys(rows).map(function (k) { return rows[k]; }).sort(function (a, b) { return b.an - a.an; });
+    var MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    var tot = list.reduce(function (n, r) { return n + r.an; }, 0);
+    var releve = 'Relevé Casa Besports : visiteurs envoyés vers votre boutique\n' + list.map(function (r) { return (names[r.club] || r.club) + ' : ' + r.mois + ' en ' + MOIS[now.getMonth()] + ', ' + r.avant + ' en ' + MOIS[prev.getMonth()] + ', ' + r.an + ' sur 12 mois'; }).join('\n');
+    return head.concat(
+      E('div', { class: 'cba-row', style: 'margin-bottom:.8rem' }, E('strong', {}, tot + ' clic' + (tot > 1 ? 's' : '') + ' sur 12 mois'),
+        E('button', { type: 'button', class: 'cba-btn sm', style: 'margin-left:auto', onclick: function () { try { navigator.clipboard.writeText(releve); alert('Relevé copié : collez-le dans votre courriel au club.'); } catch (e) { prompt('Copiez le relevé :', releve); } } }, 'Copier le relevé'),
+        E('button', { type: 'button', class: 'cba-btn sm', onclick: loadClics }, 'Actualiser')),
+      list.length ? E('table', { class: 'cba-table', style: 'width:100%;border-collapse:collapse' },
+        E('thead', {}, E('tr', {}, ['Club', MOIS[now.getMonth()], MOIS[prev.getMonth()], '12 derniers mois'].map(function (h, i) { return E('th', { style: 'text-align:' + (i ? 'right' : 'left') + ';padding:.45rem;border-bottom:1px solid var(--line, #ddd)' }, h); }))),
+        E('tbody', {}, list.map(function (r) { return E('tr', {}, [names[r.club] || r.club, r.mois, r.avant, r.an].map(function (v, i) { return E('td', { style: 'text-align:' + (i ? 'right' : 'left') + ';padding:.45rem;border-bottom:1px solid var(--line, #eee)' }, String(v)); })); })))
+        : E('p', {}, 'Aucun clic enregistré pour l’instant. Les clics apparaissent ici dès qu’un visiteur ouvre la boutique d’un club depuis votre site.'));
   }
 
   // ================= AIDE =================
