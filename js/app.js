@@ -1739,9 +1739,14 @@ class Component extends DCLogic {
       const logo = m.logo || clubLogo(m.club);
       return { nom: m.nom, meta: [m.sport, m.city].filter(Boolean).join(' · '), plateforme: m.plateforme || '', hasPlat: !!m.plateforme, logo, hasLogo: !!logo, noLogo: !logo,
         mono: String(m.nom).replace(/^(AS|US|FC|CS|SC|PL|ES|JS|UC|RC)\s+/i, '').charAt(0).toUpperCase() || '?',
-        href: cbPartnerLink(m.boutiqueUrl, 'maillots-' + (m.club || i), 'boutique-club'), aria: 'Boutique officielle de ' + m.nom + ' (nouvel onglet)' };
+        code: String(m.codePromo || '').trim(), hasCode: !!String(m.codePromo || '').trim(), avantage: m.avantage || '', partenaire: !!m.partenaire,
+        href: cbPartnerLink(m.boutiqueUrl, 'maillots-' + (m.club || i), 'boutique-club'), aria: 'Boutique officielle de ' + m.nom + (m.partenaire ? ', lien partenaire' : '') + ' (nouvel onglet)' };
     }).filter((m) => m.href);
+    // Clubs partenaires (accord signé) en premier ; mention obligatoire des liens commerciaux dès qu'un accord existe
+    mcItems.sort((a, b) => (b.partenaire ? 1 : 0) - (a.partenaire ? 1 : 0));
+    const mcPart = mcItems.some((m) => m.partenaire);
     const maillots = { show: mcItems.length > 0, titre: BQ.maillotsTitre || 'Vos maillots de cœur', texte: BQ.maillotsTexte || '', items: mcItems,
+      hasMention: mcPart, mention: BQ.maillotsMention || 'Liens partenaires : pour les clubs signalés « Partenaire », Casa Besports perçoit une commission sur les achats faits depuis ce site, sans surcoût pour vous. Elle finance la couverture du sport local.',
       voir: () => { try { const el = document.getElementById('maillots-de-coeur'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} } };
     const nuitP = X.products.find((p) => p.id === 'kit-nuit');
     const trailer = nuitP ? { name: nuitP.name, title: 'Nuit', sub: 'Le maillot third des Vikings du Cotentin : noir profond à fines rayures, médaillon et écusson pentagone dorés.', img: nuitP.img, price: eur0(nuitP.price), open: () => this.go('product', { productId: 'kit-nuit', color: 0, size: null, qty: 1, persoName: '', persoNum: '', sizeGuide: false, prodImg: 0 }) } : {};
