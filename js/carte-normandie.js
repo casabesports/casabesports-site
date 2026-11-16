@@ -201,7 +201,7 @@ var CasaCarte = (function () {
       if (g.length === 1) {
         var c = g[0];
         var m = L.marker([c.lat, c.lon], { pane: 'cbPins', keyboard: true, title: c.aria, riseOnHover: true, zIndexOffset: c.sel ? 1000 : 0,
-          icon: L.divIcon({ className: 'cb-pin-club' + (c.sel ? ' is-sel' : ''), html: '<span class="n">' + esc(c.count) + '</span><span class="v">' + esc(c.name) + '</span>', iconSize: [34, 34], iconAnchor: [17, 17] }) });
+          icon: L.divIcon({ className: 'cb-pin-club' + (c.sel ? ' is-sel' : '') + (c.wk ? ' is-wk' : ''), html: '<span class="n">' + esc(c.count) + '</span><span class="v">' + esc(c.name) + '</span>', iconSize: [34, 34], iconAnchor: [17, 17] }) });
         m.on('click', function (e) { window.L.DomEvent.stop(e); if (S.api.pickCity) S.api.pickCity(c.name); });
         S.clubs.addLayer(m); return;
       }
@@ -209,7 +209,7 @@ var CasaCarte = (function () {
       var n = g.reduce(function (a, c) { return a + (+c.count || 0); }, 0), lat = 0, lon = 0;
       g.forEach(function (c) { lat += c.lat; lon += c.lon; }); lat /= g.length; lon /= g.length;
       var mm = L.marker([lat, lon], { pane: 'cbPins', keyboard: true, title: n + ' clubs : ' + g.map(function (c) { return c.name; }).join(', '), riseOnHover: true,
-        icon: L.divIcon({ className: 'cb-pin-club is-grp', html: '<span class="n">' + n + '</span><span class="v">' + esc(g[0].name) + ' +' + (g.length - 1) + '</span>', iconSize: [34, 34], iconAnchor: [17, 17] }) });
+        icon: L.divIcon({ className: 'cb-pin-club is-grp' + (g.some(function (c) { return c.wk; }) ? ' is-wk' : ''), html: '<span class="n">' + n + '</span><span class="v">' + esc(g[0].name) + ' +' + (g.length - 1) + '</span>', iconSize: [34, 34], iconAnchor: [17, 17] }) });
       mm.on('click', function (e) { window.L.DomEvent.stop(e); S.map.flyToBounds(L.latLngBounds(g.map(function (c) { return [c.lat, c.lon]; })).pad(0.6), { maxZoom: 12, duration: 0.5 }); });
       S.clubs.addLayer(mm);
     });
