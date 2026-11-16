@@ -29,6 +29,7 @@
     { key: 'CASA_PRODUITS', label: 'Boutique : produits', desc: 'Fiches produits : nom, prix, photos, tailles, couleurs.', item: 'name' },
     { key: 'CASA_VIDEOS', label: 'Vidéos', desc: 'Vidéos et vignettes.', item: 'title' },
     { key: 'CASA_PODCAST', label: 'Podcast', desc: 'Les épisodes du podcast BE+ (page « Le podcast »). Type : « Émission » ou « Réaction » (après-match). Qui : Joueur, Coach, Staff ou Supporter. Date au format 2026-11-16. Envoyez le fichier audio (.mp3 ou .m4a, 50 Mo maximum). Publiez une réaction seulement avec l’accord de la personne enregistrée.', item: 'title' },
+    { key: 'CASA_QUIZ', label: 'Jeux : questions du quiz', desc: 'Vos questions pour le « Quiz de la Marée » (rubrique Jeux). Une bonne réponse et trois mauvaises ; l’explication s’affiche après la réponse. Jusqu’à 2 de vos questions passent chaque jour, les autres sont tirées des fiches clubs et joueurs. N’ajoutez que des faits vérifiés.', item: 'question' },
     { key: 'CASA_CULTURE', label: 'Culture', desc: 'Œuvres et photographies des salles Culture.', item: 'title' },
     { key: 'CASA_FONDS', label: 'Fonds de page', desc: 'L’image derrière chaque page du site.' },
     { key: 'CASA_APROPOS', label: 'À propos', desc: 'L’histoire de Casa Besports : ouverture, manifeste, étapes, piliers, conviction et appel final.' },
@@ -45,6 +46,7 @@
     CASA_LIEUX: { id: '', name: '', short: '', where: '', year: '', img: '', photo: '', hook: '', desc: '', moment: '', sport: '' },
     CASA_PRODUITS: { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: '', gallery: [], colors: ['marine'], sizes: ['S', 'M', 'L', 'XL'], flag: '', isNew: false, desc: '' },
     CASA_PODCAST: { id: '', type: 'Réaction', qui: 'Joueur', nom: '', club: '', date: '', title: '', dek: '', audio: '', duree: '', img: '', actif: true },
+    CASA_QUIZ: { id: '', question: '', bonne: '', faux1: '', faux2: '', faux3: '', explication: '', actif: true },
     CASA_VIDEOS: { id: '', tag: '', date: '', img: '', alt: '', title: '', dek: '', url: '', dur: '' },
     CASA_CLUBS: { id: '', name: '', sport: 'Football', city: '', niveau: '', fondation: '', stade: '', logo: '', img: '' },
     CASA_JOUEURS: { id: '', num: '', name: '', role: 'Attaquant', club: '', clubLabel: '', sport: '', img: '', masquer: false },
@@ -551,7 +553,7 @@
 
   // ---------- Aperçu sur le site, avant publication ----------
   var PV = null, pvBar = null;
-  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_PODCAST: 'podcast', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home', CASA_RESEAUX: 'home', CASA_ENCARTS: 'news' };
+  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_PODCAST: 'podcast', CASA_QUIZ: 'jeux', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home', CASA_RESEAUX: 'home', CASA_ENCARTS: 'news' };
   function openCardIdx(k) { if (k === 'CASA_GAZETTE' && S.gzSel != null) return S.gzSel; var m = null; Object.keys(S.openCards || {}).forEach(function (p) { var r = p.match(new RegExp('^' + k + '\\[(\\d+)\\]$')); if (r && S.openCards[p]) m = Number(r[1]); }); return m; }
   function startPreview(k, value) {
     var site = window.CasaSite; if (!site || PV) return;
