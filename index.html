@@ -2662,6 +2662,91 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 .al-st { font: 700 10.5px/1 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; margin-top: .1rem; }
 .al-v.is-ok .al-st { color: #f2b33d; }
 </style>
+<style>
+/* ===== Accueil encore plus épuré : Mon essentiel, une cliquable, rubrique Clubs fusionnée, podcast, thèmes de la Gazette ===== */
+.bn-une-cta { display: inline-flex; align-items: center; gap: .35rem; margin-top: .2rem; font: 800 12.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .06em; color: #10283a; background: var(--sun, #f2b33d); padding: .55rem .75rem .45rem; }
+.bn-une { cursor: pointer; }
+.bn-une:hover .bn-une-cta, .bn-une:focus-visible .bn-une-cta { background: #fff; }
+.ess { width: 100%; }
+.ess-h { font: 800 13px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 0 0 .7rem; }
+.ess-g { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .6rem; }
+.ess-c { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; min-width: 0; min-height: 104px; padding: .85rem .85rem .8rem; text-align: left; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-top: 3px solid var(--sun, #f2b33d); cursor: pointer; border-radius: 0; font-family: inherit; }
+.ess-c:hover, .ess-c:focus-visible { border-color: var(--rade, #10283a); border-top-color: var(--sun, #f2b33d); }
+.ess-i { color: var(--rade, #10283a); margin-bottom: .15rem; }
+[data-cb-theme="dark"] .ess-i, [data-cb-theme="noir"] .ess-i, [data-cb-theme="oled"] .ess-i, [data-cb-theme="maree-sombre"] .ess-i { color: var(--sun, #f2b33d); }
+.ess-k { font: 800 15px/1.1 var(--bn-font, sans-serif); color: var(--ink); }
+.ess-t { font-size: 12.5px; line-height: 1.35; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+@media (max-width: 1060px) { .ess-g { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .ess-g { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; } .ess-c { min-height: 92px; padding: .7rem; } }
+/* Clubs + Club House : une seule rubrique, deux onglets */
+.cl-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 560px; margin: 0 0 1.4rem; border: 1.5px solid var(--rade, #10283a); background: var(--surface); }
+.cl-sw { display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; min-width: 0; min-height: 56px; padding: .6rem .85rem; border: 0; background: transparent; color: var(--text); text-align: left; cursor: pointer; font-family: inherit; border-radius: 0; }
+.cl-sw.is-on { background: var(--rade, #10283a); color: #fff; }
+.cl-sw-t { font: 800 15px/1.1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .03em; }
+.cl-sw-s { font-size: 12px; line-height: 1.3; color: var(--muted); }
+.cl-sw.is-on .cl-sw-s { color: rgba(255, 255, 255, .78); }
+/* Le podcast */
+.pod-intro { max-width: 40rem; font-size: 1.02rem; line-height: 1.6; color: var(--text-2); margin: 0 0 1.6rem; }
+.pod-une, .pod-bientot { display: grid; grid-template-columns: minmax(0, 1fr); background: #10283a; color: #fff; margin-bottom: 1.4rem; border-left: 4px solid var(--sun, #f2b33d); }
+.pod-une { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .pod-une:has(.pod-une-img) { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); } }
+.pod-une-img { width: 100%; height: 100%; min-height: 200px; max-height: 320px; object-fit: cover; display: block; }
+.pod-une-txt, .pod-bientot { padding: 1.3rem 1.3rem 1.2rem; display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; }
+.pod-k { display: block; font: 700 11.5px/1.2 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; color: var(--sun, #f2b33d); }
+.pod-it .pod-k { color: var(--gold-text); }
+.pod-une-t { font: 800 clamp(1.4rem, 3vw, 2rem)/1.08 var(--bn-font, sans-serif); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.pod-who { margin: 0; font-weight: 700; font-size: 14px; color: rgba(255, 255, 255, .85); }
+.pod-dek { margin: 0; font-size: 14.5px; line-height: 1.55; max-width: 46rem; }
+.pod-une .pod-dek, .pod-bientot .pod-dek { color: rgba(255, 255, 255, .82); }
+.pod-act { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: .4rem; }
+.pod-meta { font-size: 12.5px; color: var(--muted); }
+.pod-une .pod-meta { color: rgba(255, 255, 255, .7); }
+.pod-f { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; margin: 0 0 .8rem; padding-bottom: .2rem; }
+.pod-l { list-style: none; margin: 0 0 1.6rem; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 2rem; }
+@media (min-width: 900px) { .pod-l { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.pod-it { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: .75rem; align-items: center; padding: .7rem 0; border-bottom: 1px solid var(--line); }
+.pod-play { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--rade, #10283a); background: var(--sun, #f2b33d); color: #10283a; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.pod-play[aria-pressed="true"] { background: #10283a; color: #fff; }
+.pod-it-t { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.pod-it-h { font: 700 15.5px/1.25 var(--bn-font, sans-serif); color: var(--ink); overflow-wrap: anywhere; }
+.pod-bas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: .8rem; }
+.pod-box { display: flex; flex-direction: column; align-items: flex-start; gap: .55rem; border: 1px solid var(--line); background: var(--surface); padding: 1rem 1.1rem; }
+.pod-box .pod-k { color: var(--gold-text); }
+.pod-box .pod-dek { color: var(--text-2); }
+.rdo-go { background: none; border: 0; color: inherit; text-align: left; cursor: pointer; padding: 0; font-family: inherit; }
+.rdo-pp { background: #f2b33d !important; color: #10283a !important; }
+/* Thèmes de La Gazette : Marée par défaut, Papier journal (noir et blanc), Couchant */
+.gz-ths { display: inline-flex; gap: .1rem; align-items: center; }
+.gz-th { width: 34px; height: 40px; padding: 0; border: 0; background: transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.gz-th i { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .5); display: block; }
+.gz-th.is-on i { border-color: #fff; box-shadow: 0 0 0 2px rgba(255, 255, 255, .35); }
+.gz-th-maree i { background: linear-gradient(135deg, #10283a 50%, #f2b33d 50%); }
+.gz-th-papier i { background: linear-gradient(135deg, #000 50%, #fff 50%); }
+.gz-th-couchant i { background: linear-gradient(135deg, #5a2416 50%, #e8774a 50%); }
+.gz-desk.gz-th-maree { background: #0c1f2e; }
+.gz-desk.gz-th-maree .gz-bar { background: #10283a; border-bottom-color: #23415a; }
+.gz-desk.gz-th-maree .gz-prog { background: #183247; }
+.gz-desk.gz-th-maree .gz-nav { background: #10283a; border-top-color: #23415a; }
+.gz-desk.gz-th-maree .gz-tool { border-color: #3a5a74; }
+.gz-desk.gz-th-couchant .gz-nav { background: #3a1a10; border-top-color: #5a2b1c; }
+.gz-desk.gz-th-couchant .gz-tool { border-color: #6b3624; }
+.gz-desk.gz-th-maree .gz-prog > div { background: #f2b33d !important; }
+.gz-desk.gz-th-maree .gz-page { --gz-ink: #10283a; --gz-paper: #f8f3e8; --gz-mut: #4d5f6c; --gz-rule: #10283a; --gz-hair: #d6cdb8; --gz-tint: #efe6d2; }
+.gz-desk.gz-th-maree .gz-page .gz-etiq { background: #f2b33d; color: #10283a; }
+.gz-desk.gz-th-maree .gz-page.is-noir { --gz-ink: #f8f3e8; --gz-paper: #10283a; --gz-mut: #b8c6cf; --gz-rule: #f2b33d; --gz-hair: #2b4a63; --gz-tint: #163248; outline-color: #23415a; }
+.gz-desk.gz-th-couchant { background: #2a130c; }
+.gz-desk.gz-th-couchant .gz-bar { background: #3a1a10; border-bottom-color: #5a2b1c; }
+.gz-desk.gz-th-couchant .gz-prog > div { background: #e8774a !important; }
+.gz-desk.gz-th-couchant .gz-page { --gz-ink: #4a1d10; --gz-paper: #fbf1e4; --gz-mut: #7a5040; --gz-rule: #c4552e; --gz-hair: #ead2bd; --gz-tint: #f6e2cf; }
+.gz-desk.gz-th-couchant .gz-page .gz-etiq { background: #c4552e; color: #fff; }
+.gz-desk.gz-th-couchant .gz-page.is-noir { --gz-ink: #fbf1e4; --gz-paper: #4a1d10; --gz-mut: #e3bfa8; --gz-rule: #e8774a; --gz-hair: #6b3624; --gz-tint: #5a2616; outline-color: #5a2b1c; }
+/* Bonne taille sur chaque téléphone et tablette */
+html, body { max-width: 100%; overflow-x: clip; }
+img, video, canvas, svg { max-width: 100%; }
+@media (max-width: 380px) { .wrap { padding-left: 1rem; padding-right: 1rem; } .wk-it { grid-template-columns: 46px minmax(0, 1fr); gap: .3rem .5rem; } .rs-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
+@media (max-width: 1100px) { .fab-lieu { padding: 0 .3rem !important; min-height: 44px !important; border-radius: 50% !important; width: 44px; justify-content: center; } .fab-lieu .fab-lieu-txt { display: none; } }
+@media (min-width: 600px) and (max-width: 1100px) { .wrap { padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); } }
+</style>
 </head>
 <body>
 <noscript>Casa Besports nécessite JavaScript pour fonctionner.</noscript>
@@ -2814,7 +2899,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <div>
         <div class="cond" style="font-size: 13px; color: var(--muted)">{{todayLabel}} · {{wx.cityTemp}}</div>
         <h1 class="h1 bn-bh"><span class="sr">Casa Besports, le média du sport dans le Cotentin et la Manche. </span><span class="bn-bandeau">{{greeting}}</span></h1>
-        <p class="bn-qui">Média sportif indépendant né à Cherbourg en 2024 : actualités, portraits, vidéos et clubs du Cotentin et de la Manche.</p>
+        <sc-if value="{{loggedOut}}" hint-placeholder-val="{{ true }}"><p class="bn-qui">Média sportif indépendant né à Cherbourg en 2024 : actualités, portraits, vidéos et clubs du Cotentin et de la Manche.</p></sc-if>
       </div>
       <div class="bn-accueil-act">
         <button type="button" class="btn btn-ghost" onClick="{{openCustomize}}" style="min-height: 44px; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Personnaliser mon accueil</button>
@@ -2827,6 +2912,17 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     <div class="bento">
       <sc-for list="{{homeMods}}" as="hm" hint-placeholder-count="10">
         <div class="bento-item {{hm.cls}}">
+          <!-- Mon essentiel (abonné connecté) -->
+          <sc-if value="{{hm.isEssentiel}}" hint-placeholder-val="{{ false }}">
+            <section class="ess" aria-labelledby="ess-t">
+              <h2 id="ess-t" class="ess-h">Mon essentiel</h2>
+              <div class="ess-g">
+                <sc-for list="{{essentiel}}" as="e" hint-placeholder-count="6">
+                  <button type="button" class="ess-c" onClick="{{e.go}}"><svg class="ess-i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{e.ico}}"></path></svg><span class="ess-k">{{e.k}}</span><span class="ess-t">{{e.t}}</span></button>
+                </sc-for>
+              </div>
+            </section>
+          </sc-if>
           <!-- À la une -->
           <sc-if value="{{hm.isUne}}" hint-placeholder-val="{{ false }}">
             <button type="button" onClick="{{une.open}}" class="b-card b-img bn-une" style="padding: 0; color: #fff">
@@ -2835,6 +2931,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
                 <span class="bn-etiq inv">À la une · {{une.tag}}</span>
                 <span class="bn-une-t">{{une.title}}</span>
                 <span class="bn-une-d">{{une.dek}}</span>
+                <span class="bn-une-cta">{{une.cta}} <span aria-hidden="true">→</span></span>
               </span>
             </button>
           </sc-if>
@@ -3474,9 +3571,57 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 </sc-if>
 
 <!-- ================= CLUBS ================= -->
+<!-- ================= LE PODCAST ================= -->
+<sc-if value="{{isPodcast}}" hint-placeholder-val="{{ false }}">
+  <section class="wrap pod" style="padding-top: 2rem; padding-bottom: 5rem">
+    <div class="eb" style="margin-bottom: .5rem">Le podcast BE+</div>
+    <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem); margin-bottom: .8rem">Écouter le sport du Cotentin</h1>
+    <p class="pod-intro">L’émission de la rédaction et les réactions d’après-match, au micro : joueurs, coachs, staffs et supporters.</p>
+    <sc-if value="{{podcast.hasUne}}" hint-placeholder-val="{{ false }}">
+      <article class="pod-une {{podcast.une.cls}}">
+        <sc-if value="{{podcast.une.hasImg}}" hint-placeholder-val="{{ false }}"><img class="pod-une-img" src="{{podcast.une.img}}" alt="" loading="lazy"></sc-if>
+        <div class="pod-une-txt">
+          <span class="pod-k">Dernier épisode · {{podcast.une.kind}}</span>
+          <h2 class="pod-une-t">{{podcast.une.title}}</h2>
+          <sc-if value="{{podcast.une.hasWho}}" hint-placeholder-val="{{ false }}"><p class="pod-who">{{podcast.une.who}}</p></sc-if>
+          <sc-if value="{{podcast.une.hasDek}}" hint-placeholder-val="{{ false }}"><p class="pod-dek">{{podcast.une.dek}}</p></sc-if>
+          <div class="pod-act"><sc-if value="{{podcast.une.hasAudio}}" hint-placeholder-val="{{ true }}"><button type="button" class="wk-radio" onClick="{{podcast.une.play}}" aria-pressed="{{podcast.une.pressed}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg><span>{{podcast.une.playLabel}}</span></button></sc-if><span class="pod-meta">{{podcast.une.meta}}</span></div>
+        </div>
+      </article>
+    </sc-if>
+    <sc-if value="{{podcast.has}}" hint-placeholder-val="{{ false }}">
+      <div class="pod-f" role="tablist" aria-label="Filtrer les épisodes"><sc-for list="{{podcast.filtres}}" as="f" hint-placeholder-count="4"><button type="button" role="tab" class="wk-jour {{f.cls}}" aria-selected="{{f.sel}}" onClick="{{f.pick}}">{{f.label}}</button></sc-for></div>
+      <sc-if value="{{podcast.hasList}}" hint-placeholder-val="{{ false }}">
+        <ol class="pod-l">
+          <sc-for list="{{podcast.list}}" as="e" hint-placeholder-count="4">
+            <li class="pod-it {{e.cls}}">
+              <sc-if value="{{e.hasAudio}}" hint-placeholder-val="{{ true }}"><button type="button" class="pod-play" onClick="{{e.play}}" aria-pressed="{{e.pressed}}" aria-label="{{e.playLabel}} : {{e.title}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></button></sc-if>
+              <div class="pod-it-t"><span class="pod-k">{{e.kind}}<sc-if value="{{e.hasWho}}" hint-placeholder-val="{{ false }}"> · {{e.who}}</sc-if></span><span class="pod-it-h">{{e.title}}</span><span class="pod-meta">{{e.meta}}</span></div>
+            </li>
+          </sc-for>
+        </ol>
+      </sc-if>
+      <sc-if value="{{podcast.vide}}" hint-placeholder-val="{{ false }}"><p class="rs-vide">Pas encore d’épisode dans cette catégorie.</p></sc-if>
+    </sc-if>
+    <sc-if value="{{podcast.none}}" hint-placeholder-val="{{ true }}">
+      <div class="pod-bientot">
+        <span class="pod-k">Bientôt</span>
+        <h2 class="pod-une-t">Le premier épisode se prépare</h2>
+        <p class="pod-dek">Les émissions de la rédaction et les réactions d’après-match arrivent ici dès leur enregistrement.</p>
+      </div>
+    </sc-if>
+    <div class="pod-bas">
+      <sc-if value="{{wk.has}}" hint-placeholder-val="{{ false }}">
+        <div class="pod-box"><span class="pod-k">Le résumé lu</span><p class="pod-dek">Les scores du week-end lus à voix haute, en deux minutes.</p><button type="button" class="btn btn-ghost" onClick="{{wk.journal}}" aria-pressed="{{wk.journalPressed}}">{{wk.journalLabel}}</button></div>
+      </sc-if>
+      <div class="pod-box"><span class="pod-k">Au micro</span><p class="pod-dek">Joueur, coach, staff ou supporter ? Proposez votre réaction d’après-match à la rédaction.</p><button type="button" class="btn btn-dark" onClick="{{podcast.envoyer}}">Proposer ma réaction</button></div>
+    </div>
+  </section>
+</sc-if>
+
 <sc-if value="{{isClubs}}" hint-placeholder-val="{{ false }}">
   <section class="wrap" style="padding-top: 2rem; padding-bottom: 5rem">
-    <div class="eb" style="margin-bottom: .5rem">Clubs</div>
+    <div class="cl-switch" role="tablist" aria-label="Rubrique Clubs"><sc-for list="{{clubsSwitch}}" as="cs" hint-placeholder-count="2"><button type="button" role="tab" class="cl-sw {{cs.cls}}" aria-selected="{{cs.sel}}" onClick="{{cs.go}}"><span class="cl-sw-t">{{cs.label}}</span><span class="cl-sw-s">{{cs.sub}}</span></button></sc-for></div>
     <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem); margin-bottom: 1.5rem">Les clubs de la Manche</h1>
     <div style="display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; align-items: center">
       <sc-for list="{{clubChips}}" as="c" hint-placeholder-count="5">
@@ -6419,7 +6564,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     <img class="hero-img" src="assets/gz_scarf.jpg" alt="" style="position: absolute; top: 0; right: 0; width: 58%; height: 100%; object-fit: cover; opacity: {{heroOpacity}}; filter: var(--img-filter)">
     <div class="veilL" style="position: absolute; inset: 0"></div>
     <div class="wrap" style="position: relative; padding-top: 2rem; padding-bottom: 2rem">
-      <div class="eb" style="margin-bottom: .5rem">Club House</div>
+      <div class="cl-switch" role="tablist" aria-label="Rubrique Clubs"><sc-for list="{{clubsSwitch}}" as="cs" hint-placeholder-count="2"><button type="button" role="tab" class="cl-sw {{cs.cls}}" aria-selected="{{cs.sel}}" onClick="{{cs.go}}"><span class="cl-sw-t">{{cs.label}}</span><span class="cl-sw-s">{{cs.sub}}</span></button></sc-for></div>
       <h1 class="h1" style="font-size: clamp(2.6rem, 6vw, 4.8rem); max-width: 760px; margin-bottom: .8rem">La tribune des supporters du <em class="bn-em">Cotentin</em></h1>
       <p style="max-width: 36rem; font-size: 1.08rem; line-height: 1.6; color: var(--text-2); margin: 0 0 1.25rem">Discuter, s’entraider, se retrouver au bord des terrains et gagner des points de fidélité.</p>
       <div style="display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.25rem">
@@ -7275,6 +7420,14 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <sc-if value="{{showToTop}}" hint-placeholder-val="{{ false }}">
   <button type="button" class="fab lift22" onClick="{{toTop}}" aria-label="Revenir en haut" style="right: 92px; bottom: 22px; width: 48px; height: 48px; border-radius: 50%; background: var(--surface); color: var(--text); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
 </sc-if>
+<!-- ================= LE PODCAST (mini-lecteur) ================= -->
+<sc-if value="{{podcast.mini.on}}" hint-placeholder-val="{{ false }}">
+  <div class="rdo lift16" role="region" aria-label="Le podcast BE+">
+    <button type="button" class="rdo-x rdo-pp" onClick="{{podcast.mini.toggle}}" aria-label="{{podcast.mini.label}}"><sc-if value="{{podcast.mini.playing}}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg></sc-if><sc-if value="{{podcast.mini.paused}}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></sc-if></button>
+    <button type="button" class="rdo-t rdo-go" onClick="{{goPodcast}}"><span class="rdo-k">Le podcast BE+</span><span class="rdo-n">{{podcast.mini.titre}}</span><span class="rdo-bar"><span style="width: {{podcast.mini.pct}}"></span></span></button>
+    <button type="button" class="rdo-x" onClick="{{podcast.mini.stop}}" aria-label="Fermer le lecteur"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+  </div>
+</sc-if>
 <!-- ================= RADIO DU TERRAIN (mini-lecteur) ================= -->
 <sc-if value="{{rdo.on}}" hint-placeholder-val="{{ false }}">
   <div class="rdo lift16" role="region" aria-label="Radio du terrain">
@@ -7369,7 +7522,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 
 <!-- ================= LISEUSE : LA GAZETTE DU COTENTIN (édition « Le bandeau » : noir et blanc, comme le logo) ================= -->
 <sc-if value="{{readerOpen}}" hint-placeholder-val="{{ false }}">
-  <div role="dialog" aria-modal="true" aria-label="La Gazette du Cotentin, numéro d’essai" class="cb-scope-light gz-desk">
+  <div role="dialog" aria-modal="true" aria-label="La Gazette du Cotentin, numéro d’essai" class="cb-scope-light gz-desk {{gzThemeCls}}">
     <div class="gz-bar">
       <span class="gz-mast">La Gazette <span>du Cotentin</span></span>
       <span class="gz-folio">{{gzCover.numero}} · page {{pageNo}} / {{pageTotal}}</span>
@@ -7377,6 +7530,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
       <sc-if value="{{gzCanEdit}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{gzEdit}}" class="gz-tool gz-tool-choc" title="Ouvre cette page dans l’espace administrateur">Modifier<span class="gz-tool-l"> cette page</span></button></sc-if>
       <button type="button" onClick="{{gotoToc}}" class="gz-tool">Sommaire</button>
       <sc-if value="{{hasChoc}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{gotoChoc}}" class="gz-tool gz-tool-choc" aria-label="Le détail choc, page {{chocPage}}"><span aria-hidden="true">🔥</span><span class="gz-tool-l"> Détail choc</span></button></sc-if>
+      <span class="gz-ths" role="radiogroup" aria-label="Thème de la Gazette"><sc-for list="{{gzThemes}}" as="gt" hint-placeholder-count="3"><button type="button" role="radio" class="gz-th gz-th-{{gt.id}} {{gt.cls}}" aria-checked="{{gt.sel}}" aria-label="Thème {{gt.label}}" title="{{gt.label}}" onClick="{{gt.pick}}"><i aria-hidden="true"></i></button></sc-for></span>
       <button type="button" onClick="{{readerFont}}" class="gz-tool gz-tool-aa" aria-label="Taille du texte">Aa {{readerFontLabel}}</button>
       <button type="button" onClick="{{closeReader}}" aria-label="Fermer la liseuse" class="gz-tool gz-x">×</button>
     </div>
@@ -7946,6 +8100,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/reglements.js?v=__VERSION__"></script>
 <script src="contenus/boutique.js?v=__VERSION__"></script>
 <script src="contenus/videos.js?v=__VERSION__"></script>
+<script src="contenus/podcast.js?v=__VERSION__"></script>
 <script src="contenus/culture.js?v=__VERSION__"></script>
 <script src="contenus/fonds.js?v=__VERSION__"></script>
 <script src="contenus/legal.js?v=__VERSION__"></script>
