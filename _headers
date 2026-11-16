@@ -22,3 +22,7 @@
 /manifest.webmanifest
   Content-Type: application/manifest+json
   Cache-Control: no-cache
+
+# Numéro de la dernière mise en ligne : jamais gardé en copie (mise à jour automatique de l'appli)
+/version.json
+  Cache-Control: no-store
