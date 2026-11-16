@@ -17,6 +17,14 @@ Les connexions, paiements, messages et données en ligne (Supabase, Stripe, mét
 
 Pour refaire les icônes à partir d'un autre logo : demander à Claude (script de rendu dans le fil « Préparer la sortie de l'application »).
 
+## Mises à jour automatiques
+
+Rien à faire : à chaque mise en ligne (push sur `main`), l'appli déjà installée sur téléphone, tablette ou ordinateur récupère la nouvelle version toute seule, sans désinstaller ni vider le cache.
+
+- `outils/build.sh` donne un nouveau numéro de version à chaque mise en ligne (`sw.js`, `version.json`, `?v=` des scripts).
+- `js/pwa.js` vérifie ce numéro à l'ouverture, quand on revient sur l'appli (important sur iPhone, où l'appli reste en veille) et toutes les 30 minutes.
+- Si la nouvelle version arrive juste à l'ouverture et que personne n'écrit : l'appli se recharge seule. Sinon un petit bandeau « Nouvelle version disponible » propose « Mettre à jour » (rien n'est perdu pendant une saisie ou en mode Retoucher).
+
 ## Comment les gens installent l'appli
 
 - **Android (Chrome)** : ouvrir le site, toucher « Installer l'application » sur la page L'application (ou la bannière de Chrome).

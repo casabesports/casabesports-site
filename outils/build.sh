@@ -5,7 +5,8 @@
 # 1. Copie dans _site/ uniquement les fichiers publics du site (pas docs/, supabase/, automatisations/…).
 # 2. Remplace __SITE_URL__ par l'adresse du site (balises de partage, plan du site).
 #    Adresse utilisée : variable SITE_URL si elle existe, sinon https://casabesports.fr
-# 3. Ajoute un numéro de version aux scripts : chaque mise en ligne force les navigateurs à recharger js/ et contenus/.
+# 3. Ajoute un numéro de version aux scripts : chaque mise en ligne force les navigateurs à recharger js/ et contenus/,
+#    et écrit version.json : l'appli déjà installée voit qu'une nouvelle version existe et se met à jour seule.
 # 4. Prépare le référencement (contenus/seo.json et _routes.json, voir functions/[[path]].js).
 set -e
 cd "$(dirname "$0")/.."
@@ -26,6 +27,8 @@ done
 REF="${CF_PAGES_COMMIT_SHA:-${COMMIT_REF:-$(date +%s)}}"
 VER=$(printf '%s' "$REF" | cut -c1-8)
 sed -i "s#__VERSION__#$VER#g" "$OUT/index.html" "$OUT/sw.js"
+# Numéro de version lu par l'appli installée pour se mettre à jour toute seule (js/pwa.js)
+printf '{"version":"%s"}\n' "$VER" > "$OUT/version.json"
 TODAY=$(date +%Y-%m-%d)
 sed -i "s#<changefreq>#<lastmod>$TODAY</lastmod><changefreq>#" "$OUT/sitemap.xml"
 # 4. Référencement : données lues par la fonction Cloudflare (functions/[[path]].js) et liste des adresses qu'elle traite

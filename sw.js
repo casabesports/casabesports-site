@@ -10,6 +10,8 @@
  *
  * Le numéro __VERSION__ est remplacé à chaque mise en ligne (outils/build.sh) :
  * l'ancienne copie est alors effacée et la nouvelle version s'installe toute seule.
+ * js/pwa.js détecte ensuite la nouvelle version (à l'ouverture, au retour sur l'appli, toutes les 30 min)
+ * et recharge l'appli ou affiche le bandeau « Nouvelle version disponible ».
  */
 const VERSION = '__VERSION__';
 const CACHE = 'casa-' + VERSION;
@@ -46,12 +48,13 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;               // Supabase, Stripe, météo… : jamais en cache
+  if (url.pathname === '/version.json' || url.pathname === '/sw.js') return;   // numéro de version : toujours lu en direct
   if (req.headers.has('range')) return;                           // vidéos lues par morceaux
   if (/\.(mp4|webm|mov|m4v|mp3)$/i.test(url.pathname)) return;     // vidéos et sons : trop lourds pour la copie
 
   // Pages : d'abord le réseau (contenu frais), sinon la dernière copie, sinon la page « hors ligne »
   if (req.mode === 'navigate') {
-    e.respondWith(fetch(req).then((res) => { garder(req, res); return res; })
+    e.respondWith(fetch(req, { cache: 'no-cache' }).catch(() => fetch(req)).then((res) => { garder(req, res); return res; })
       .catch(() => caches.match(req, { ignoreSearch: true })
         .then((r) => r || caches.match('/'))
         .then((r) => r || caches.match('/hors-ligne.html'))));
