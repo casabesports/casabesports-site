@@ -2920,7 +2920,7 @@ img, video, canvas, svg { max-width: 100%; }
         <sc-if value="{{loggedOut}}" hint-placeholder-val="{{ true }}"><p class="bn-qui">Média sportif indépendant né à Cherbourg en 2024 : actualités, portraits, vidéos et clubs du Cotentin et de la Manche.</p></sc-if>
       </div>
       <div class="bn-accueil-act">
-        <sc-if value="{{loggedIn}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{openCustomize}}" style="min-height: 44px; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Personnaliser mon accueil</button></sc-if>
+        <button type="button" class="btn btn-ghost" onClick="{{openCustomize}}" style="min-height: 44px; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Personnaliser mon accueil</button>
       </div>
     </div>
     <sc-if value="{{hp.hasFav}}" hint-placeholder-val="{{ false }}"><p class="ac-fav"><span class="cond">Vos favoris</span> {{hp.favLabel}}</p></sc-if>

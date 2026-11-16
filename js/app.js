@@ -1539,7 +1539,7 @@ class Component extends DCLogic {
     // ---------- navigation ----------
     // Barre épurée : Clubs et Club House ne font qu'une rubrique, Culture passe dans « Plus », les offres et les partenaires sont en accès direct
     const navDefs = [['Le Terrain', 'live'], ['Actualités', 'news'], ['Clubs', 'clubs'], ['Boutique', 'shop'], ['Offres', 'offers'], ['Partenaires', 'partners']];
-    const sectionOf = { clubhouse: 'clubs', players: 'clubs', podcast: 'news', article: 'news', video: 'videos', discipline: 'clubs', disciplines: 'clubs', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
+    const sectionOf = { clubhouse: 'clubs', players: 'clubs', article: 'news', video: 'videos', discipline: 'clubs', disciplines: 'clubs', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
     const activeSec = sectionOf[s.view] || s.view;
     const nav = navDefs.map(([label, v]) => ({ label, color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
     // Menu « Plus » regroupé en trois familles (les mêmes rubriques alimentent l'accès direct de l'accueil)
@@ -2925,8 +2925,8 @@ class Component extends DCLogic {
       ['Sur iPhone', 'Ouvrez l’application dans Safari, touchez le bouton Partager puis « Sur l’écran d’accueil ».'],
       ['Sur ordinateur', 'Dans Chrome ou Edge, cliquez sur l’icône d’installation dans la barre d’adresse.']].map(([title, text]) => ({ title, text }));
     // ---------- barre d'onglets mobile ----------
-    const TAB_ICONS = { clubs: 'M3 21V10l9-6 9 6v11 M9 21v-6h6v6 M7 11h.01 M17 11h.01', home: 'M4 11l8-7 8 7v9h-5v-6H9v6H4z', live: 'M4 20V10M10 20V4M16 20v-7M22 20H2', news: 'M5 4h12v16H5z M17 8h2v10a2 2 0 0 1-2 2 M8 8h6 M8 12h6 M8 16h4', meteo: 'M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z', private: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4 M8 13h3 M8 16h6' };
-    const tabBar = [['home', 'Accueil'], ['live', 'Terrain'], ['news', 'Actus'], ['clubs', 'Clubs'], ['private', 'Quotidien']].map(([id, label]) => { const on = activeSec === id || (id === 'home' && s.view === 'home'); return { label, ico: TAB_ICONS[id], sym: id === 'home', pic: id !== 'home', color: on ? 'var(--ink)' : 'var(--muted)', bar: on ? 'var(--acc)' : 'transparent', cur: on ? 'page' : 'false', go: () => this.go(id) }; });
+    const TAB_ICONS = { podcast: 'M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z M5 11a7 7 0 0 0 14 0 M12 18v3 M8 21h8', clubs: 'M3 21V10l9-6 9 6v11 M9 21v-6h6v6 M7 11h.01 M17 11h.01', home: 'M4 11l8-7 8 7v9h-5v-6H9v6H4z', live: 'M4 20V10M10 20V4M16 20v-7M22 20H2', news: 'M5 4h12v16H5z M17 8h2v10a2 2 0 0 1-2 2 M8 8h6 M8 12h6 M8 16h4', meteo: 'M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z', private: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4 M8 13h3 M8 16h6' };
+    const tabBar = [['home', 'Accueil'], ['live', 'Terrain'], ['news', 'Actus'], ['podcast', 'Podcast'], ['clubs', 'Clubs']].map(([id, label]) => { const on = activeSec === id || (id === 'home' && s.view === 'home'); return { label, ico: TAB_ICONS[id], sym: id === 'home', pic: id !== 'home', color: on ? 'var(--ink)' : 'var(--muted)', bar: on ? 'var(--acc)' : 'transparent', cur: on ? 'page' : 'false', go: () => this.go(id) }; });
     const V = s.view === 'disciplines' ? 'clubs' : s.view; // ancienne page Disciplines → Clubs
     const n = newsArticles.length;
     // ---------- réseau local (carte, commerces, espace club, administration) et profil membre (photo, CV, certification) ----------
