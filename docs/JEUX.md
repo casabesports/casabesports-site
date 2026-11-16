@@ -1,34 +1,31 @@
 # Les jeux de l'application (rubrique « Jeux »)
 
-Adresse : `#/jeux` (menu ☰ › Vos services › Jeux, page L'application, et bouton « Pronostiquer le score exact » dans Le Terrain › Pronos).
+Adresse : `#/jeux` (menu ☰ › Vos services › Jeux, et page L'application).
 
-## Les trois jeux
+## 1. Le quiz du bus (Quiz foot)
 
-| Jeu | Principe | Points |
-|---|---|---|
-| **Le Prono du week-end** | Le score exact des matchs des clubs du site et des clubs de la Manche, jusqu’au dimanche qui vient. Fermé au coup d'envoi (à midi si l'horaire n'est pas connu). | 3 pts score exact · 1 pt bon vainqueur ou bon nul |
-| **Le Quiz de la Marée** | 5 questions par jour, les mêmes pour tout le monde, une partie par jour. | 1 pt par bonne réponse |
-| **Devine le joueur** | Un joueur du site à retrouver ; un indice de plus à chaque erreur (discipline, poste, ville, numéro, club, initiales). | 6 pts au 1er essai … 1 pt au 6e |
+Culture générale du football international, pensée pour les trajets en bus entre coéquipiers.
 
-Les points du Prono se calculent tout seuls quand le score du match est saisi (Admin › Résultats, ou automatisation « Résultats et classements »).
+- **Les joueurs** : on ajoute les prénoms (jusqu'à 10). Sans prénom, on joue en solo.
+- **Les thèmes** : Coupe du monde, Euro, Ligue des champions, France, Angleterre, Espagne, Italie, Allemagne, Amérique du Sud, Afrique, reste de l'Europe, légendes et records. Un, plusieurs, ou « Tout mélanger ».
+- **La partie** : 3, 5 ou 10 questions par joueur. On se passe le téléphone : « Au tour de Lucas ». Chrono de 20 secondes (désactivable).
+- **Les points** : 10 par bonne réponse, plus un bonus de rapidité avec le chrono (jusqu'à 10). Classement final avec podium, partage des scores.
+- Les questions déjà vues sur le téléphone repassent en dernier, pour varier d'un trajet à l'autre.
+- Tout est dans l'appli : **ça marche sans réseau** une fois l'appli ouverte une première fois.
 
-## D'où viennent les questions du quiz
+### Ajouter des questions
 
-- Toutes seules, des fiches du site : commune et discipline des clubs, année de fondation et stade (si remplis dans Admin › Clubs), club et poste des joueurs. Rien n'est inventé : une question n'existe que si la réponse est dans une fiche.
-- De vos propres questions : **Admin › Contenus du site › Jeux : questions du quiz**. Une bonne réponse, trois mauvaises, une explication. Jusqu'à 2 de vos questions passent chaque jour.
+- Le plus simple : **Admin › Contenus du site › Jeux : questions du quiz** (une bonne réponse, trois mauvaises, une explication). Elles forment le thème « Questions de la rédaction ».
+- La banque principale est dans `contenus/quiz-foot.js` (une ligne par question). N'ajoutez que des faits vérifiés et qui ne bougent plus (palmarès passés, records établis), pas des effectifs ou des entraîneurs actuels.
 
-## Le classement commun du Prono (une seule fois)
+## 2. Devine le joueur
 
-Sans ce réglage, chacun voit ses propres points (gardés sur son téléphone). Pour le classement entre abonnés :
-
-1. Ouvrez Supabase › **SQL Editor** › **New query**.
-2. Collez tout le fichier `supabase/jeux.sql`, puis **Run**. Le message attendu : « Success. No rows returned ».
-
-Ensuite, les pronos des abonnés connectés sont enregistrés en ligne et le classement du mois apparaît dans le jeu.
-Sécurité : on ne peut pronostiquer qu'avant le coup d'envoi, on ne voit les pronos des autres qu'après, et seul un pseudo (prénom + initiale) est affiché.
+Un joueur du site par jour, à retrouver en 6 essais ; un indice de plus à chaque erreur (discipline, poste, ville, numéro, club, initiales). 6 points au premier essai, 1 au sixième.
 
 ## Où sont les fichiers
 
-- `js/jeux.js` : les trois jeux (règles, tirage du jour, points, classement).
-- `contenus/quiz.js` : vos questions de quiz (aussi modifiables dans l'admin).
-- `supabase/jeux.sql` : la table du classement.
+- `js/jeux.js` : les jeux.
+- `contenus/quiz-foot.js` : la banque de questions et les thèmes.
+- `contenus/quiz.js` : vos questions (aussi modifiables dans l'admin).
+
+Aucun réglage Supabase n'est nécessaire : réglages, prénoms et parties restent sur le téléphone.

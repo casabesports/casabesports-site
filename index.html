@@ -2762,15 +2762,15 @@ img, video, canvas, svg { max-width: 100%; }
 @media (min-width: 600px) and (max-width: 1100px) { .wrap { padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); } }
 </style>
 <style>
-/* ===== Jeux (#/jeux) : Prono du week-end, Quiz de la Marée, Devine le joueur — couleurs Marée ===== */
+/* ===== Jeux (#/jeux) : le Quiz foot du bus et Devine le joueur — couleurs Marée ===== */
 .jx { --jx-rade: var(--rade, #10283a); --jx-sun: var(--sun, #f2b33d); }
-.jx-hero { background: var(--jx-rade); color: #f8f3e8; position: relative; overflow: hidden; border-bottom: 4px solid var(--jx-sun); }
-.jx-hero .wrap { padding-top: 2.2rem; padding-bottom: 2.6rem; }
+.jx-hero { background: var(--jx-rade); color: #f8f3e8; border-bottom: 4px solid var(--jx-sun); }
+.jx-hero .wrap { padding-top: 2.2rem; padding-bottom: 2.8rem; }
 .jx-k { font: 800 12.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .12em; color: var(--jx-sun); }
 .jx-h1 { font: 800 clamp(2.3rem, 5.2vw, 4rem)/.95 var(--bn-font, sans-serif); letter-spacing: -.01em; margin: .5rem 0 .7rem; color: #fff; }
 .jx-intro { margin: 0; max-width: 620px; font-size: 1.02rem; line-height: 1.55; color: #c7d3dc; }
-.jx-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: -1.4rem 0 1.6rem; position: relative; z-index: 1; border: 1.5px solid var(--jx-rade); background: var(--surface); box-shadow: 0 10px 30px -18px rgba(16,40,58,.6); }
-.jx-tab { display: flex; flex-direction: column; align-items: flex-start; gap: .2rem; min-width: 0; min-height: 62px; padding: .7rem .9rem; border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--text); text-align: left; cursor: pointer; font-family: inherit; border-radius: 0; position: relative; }
+.jx-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 640px; margin: -1.4rem 0 1.6rem; position: relative; z-index: 1; border: 1.5px solid var(--jx-rade); background: var(--surface); box-shadow: 0 10px 30px -18px rgba(16,40,58,.6); }
+.jx-tab { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: .2rem; min-width: 0; min-height: 60px; padding: .7rem .9rem; border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--text); text-align: left; cursor: pointer; font-family: inherit; border-radius: 0; position: relative; }
 .jx-tab:last-child { border-right: 0; }
 .jx-tab.is-on { background: var(--jx-rade); color: #fff; }
 .jx-tab.is-on::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--jx-sun); }
@@ -2778,45 +2778,41 @@ img, video, canvas, svg { max-width: 100%; }
 .jx-tab-s { font-size: 12px; line-height: 1.3; color: var(--muted); }
 .jx-tab.is-on .jx-tab-s { color: #b9c7d2; }
 .jx-ok { display: inline-grid; place-items: center; width: 18px; height: 18px; background: var(--jx-sun); color: #10283a; font-size: 11px; }
-.jx-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.6rem; align-items: start; }
 .jx-card { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--jx-sun); padding: 1.1rem 1.2rem; }
 .jx-card + .jx-card { margin-top: 1rem; }
-.jx-card h2, .jx-h2 { font: 800 20px/1.1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .02em; margin: 0 0 .7rem; color: var(--ink); }
+.jx-card h2, .jx-h2 { font: 800 20px/1.1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .02em; margin: 0 0 .5rem; color: var(--ink); }
+.jx-p { font-size: 14px; line-height: 1.5; color: var(--text-2); margin: 0 0 .8rem; }
 .jx-note { font-size: 13px; line-height: 1.5; color: var(--muted); margin: .6rem 0 0; }
-.jx-chips { display: flex; gap: .4rem; flex-wrap: wrap; margin: 0 0 1rem; }
-.jx-day { font: 800 13px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 1.2rem 0 .5rem; }
-.jx-day:first-child { margin-top: 0; }
-.jx-m { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: .6rem; padding: .7rem .8rem; border: 1px solid var(--line); border-left: 4px solid var(--line-2); background: var(--surface); margin-bottom: .45rem; }
-.jx-m.is-fait { border-left-color: var(--jx-sun); }
-.jx-eq { font-weight: 800; font-size: 14.5px; line-height: 1.2; color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
-.jx-eq.is-ext { text-align: right; }
-.jx-sc { display: flex; align-items: center; gap: .3rem; }
-.jx-sc input { width: 52px; height: 48px; text-align: center; font: 800 22px/1 var(--bn-font, sans-serif); border: 1.5px solid var(--line-2); background: var(--bg); color: var(--ink); border-radius: 0; -moz-appearance: textfield; padding: 0; }
-.jx-sc input::-webkit-outer-spin-button, .jx-sc input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.jx-sc input:focus { outline: 3px solid var(--jx-sun); outline-offset: 0; border-color: var(--jx-rade); }
-.jx-sep { font-weight: 800; color: var(--muted); }
-.jx-meta { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: .5rem; font-size: 12px; color: var(--muted); }
-.jx-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
-.jx-st { background: var(--jx-rade); color: #fff; padding: .7rem .6rem; }
-.jx-st b { display: block; font: 800 28px/1 var(--bn-font, sans-serif); color: var(--jx-sun); }
-.jx-st span { font-size: 11.5px; line-height: 1.25; color: #c7d3dc; }
-.jx-rk { list-style: none; margin: 0; padding: 0; }
-.jx-rk li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: .5rem; align-items: baseline; padding: .45rem 0; border-bottom: 1px solid var(--line); font-size: 14px; }
-.jx-rk li.is-moi { background: rgba(242,179,61,.18); }
-.jx-rk .r { font: 800 15px/1 var(--bn-font, sans-serif); color: var(--muted); }
-.jx-rk .p { font: 800 17px/1 var(--bn-font, sans-serif); color: var(--ink); }
-.jx-rk small { color: var(--muted); font-size: 11.5px; margin-left: .3rem; }
-.jx-res { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .6rem; padding: .5rem 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
-.jx-res em { font-style: normal; color: var(--muted); font-size: 12px; }
-.jx-pt { font: 800 14px/1 var(--bn-font, sans-serif); padding: .3rem .45rem; align-self: center; }
-.jx-pt.is-exact { background: var(--jx-sun); color: #10283a; } .jx-pt.is-bon { background: var(--jx-rade); color: #fff; } .jx-pt.is-rate { background: var(--surface-2); color: var(--muted); }
-.jx-vide { border: 1px dashed var(--line-2); padding: 1.4rem; color: var(--text-2); line-height: 1.55; }
-/* Quiz */
+.jx-chips { display: flex; gap: .4rem; flex-wrap: wrap; margin: 0; }
+.jx-chips .wk-jour { min-height: 40px; }
+.jx-n { font-size: 11px; font-weight: 700; opacity: .6; margin-left: .15rem; }
+.jx-set { max-width: 760px; }
+.jx-pl { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+.jx-pl-c { display: inline-flex; align-items: center; gap: .3rem; padding: .35rem .35rem .35rem .7rem; background: var(--jx-rade); color: #fff; font: 800 14px/1 var(--bn-font, sans-serif); }
+.jx-pl-c button { width: 28px; height: 28px; border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 18px; line-height: 1; cursor: pointer; border-radius: 0; }
+.jx-row { display: flex; justify-content: space-between; align-items: center; gap: .8rem; flex-wrap: wrap; padding: .55rem 0; border-bottom: 1px solid var(--line); }
+.jx-row:last-child { border-bottom: 0; }
+.jx-sw { width: 54px; height: 30px; border: 0; border-radius: 0; background: var(--line-2); position: relative; cursor: pointer; padding: 0; flex: none; }
+.jx-sw span { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; background: #fff; transition: left .2s; }
+.jx-sw[aria-checked="true"] { background: var(--jx-rade); } .jx-sw[aria-checked="true"] span { left: 27px; background: var(--jx-sun); }
+.jx-go { display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; margin-top: 1.2rem; }
+.jx-cta { background: var(--jx-sun); color: #10283a; border: 2px solid var(--jx-sun); min-height: 54px; padding: .6rem 1.6rem; font-size: 17px; }
+.jx-cta:hover { background: #fff; }
+.jx-form { display: flex; gap: .5rem; flex-wrap: wrap; }
+.jx-form input { flex: 1 1 200px; min-height: 50px; padding: 0 .9rem; font-size: 16px; border: 1.5px solid var(--line-2); background: var(--bg); color: var(--ink); border-radius: 0; }
+.jx-form input:focus { outline: 3px solid var(--jx-sun); border-color: var(--jx-rade); }
+/* En jeu */
 .jx-quiz { max-width: 720px; }
-.jx-prog { height: 6px; background: var(--surface-2); margin: 0 0 1rem; } .jx-prog > div { height: 100%; background: var(--jx-sun); transition: width .3s; }
-.jx-q { font: 800 clamp(1.4rem, 3.2vw, 2rem)/1.15 var(--bn-font, sans-serif); color: var(--ink); margin: .4rem 0 1.1rem; }
+.jx-tour { display: flex; align-items: baseline; gap: .6rem; background: var(--jx-rade); color: #c7d3dc; padding: .8rem 1rem; margin-bottom: 1rem; border-left: 6px solid var(--jx-sun); }
+.jx-tour span { font: 800 13px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .1em; }
+.jx-tour b { font: 800 clamp(1.6rem, 5vw, 2.2rem)/1 var(--bn-font, sans-serif); color: #fff; }
+.jx-qh { display: flex; justify-content: space-between; align-items: center; gap: .6rem; margin-bottom: .4rem; }
+.jx-sec { font: 800 18px/1 var(--bn-font, sans-serif); color: var(--ink); min-width: 46px; text-align: right; }
+.jx-sec.is-urgent { color: var(--danger); }
+.jx-prog { height: 6px; background: var(--surface-2); margin: 0 0 1rem; } .jx-prog > div { height: 100%; background: var(--jx-sun); transition: width 1s linear; } .jx-prog > div.is-urgent { background: var(--danger); }
+.jx-q { font: 800 clamp(1.4rem, 3.2vw, 2rem)/1.15 var(--bn-font, sans-serif); color: var(--ink); margin: .2rem 0 1.1rem; }
 .jx-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
-.jx-opt { min-height: 58px; padding: .7rem .9rem; text-align: left; border: 1.5px solid var(--line-2); background: var(--surface); color: var(--ink); font: 700 15px/1.25 var(--font-body, sans-serif); cursor: pointer; border-radius: 0; }
+.jx-opt { min-height: 60px; padding: .7rem .9rem; text-align: left; border: 1.5px solid var(--line-2); background: var(--surface); color: var(--ink); font: 700 16px/1.25 var(--font-body, sans-serif); cursor: pointer; border-radius: 0; }
 .jx-opt:hover:not([disabled]) { border-color: var(--jx-rade); background: var(--surface-2); }
 .jx-opt.is-juste { background: var(--jx-sun); border-color: var(--jx-sun); color: #10283a; }
 .jx-opt.is-faux { background: var(--jx-rade); border-color: var(--jx-rade); color: #fff; text-decoration: line-through; }
@@ -2824,32 +2820,36 @@ img, video, canvas, svg { max-width: 100%; }
 .jx-opt[disabled] { cursor: default; }
 .jx-verdict { margin: 1rem 0 .3rem; font: 800 18px/1.2 var(--bn-font, sans-serif); text-transform: uppercase; }
 .jx-verdict.is-juste { color: var(--herbe, #2f6b4f); } .jx-verdict.is-faux { color: var(--danger); }
-.jx-big { font: 800 clamp(3rem, 9vw, 5rem)/1 var(--bn-font, sans-serif); color: var(--ink); }
-.jx-grille { font-size: 26px; letter-spacing: .1em; margin: .3rem 0 .8rem; }
-.jx-cor { list-style: none; margin: 1rem 0 0; padding: 0; }
-.jx-cor li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: .4rem; padding: .45rem 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.4; }
-.jx-cor li b { display: block; color: var(--ink); }
-.jx-cor .is-juste > span:first-child { color: var(--herbe, #2f6b4f); font-weight: 800; } .jx-cor .is-faux > span:first-child { color: var(--danger); font-weight: 800; }
-.jx-act { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.1rem; } .jx-act .btn { min-height: 48px; }
+.jx-act { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.1rem; } .jx-act .btn { min-height: 50px; }
+.jx-sb { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1.6rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.jx-sb span { font-size: 13.5px; padding: .35rem .6rem; background: var(--surface-2); color: var(--text-2); }
+.jx-sb span.is-on { background: var(--jx-rade); color: #fff; } .jx-sb b { font-family: var(--bn-font, sans-serif); margin-left: .2rem; }
+.jx-quit { margin-top: 1rem; font-size: 14px; color: var(--muted); }
+/* Classement */
+.jx-fin { background: var(--jx-rade); color: #fff; padding: 1.4rem 1.3rem 1rem; border-bottom: 4px solid var(--jx-sun); }
+.jx-big { font: 800 clamp(2rem, 7vw, 3.4rem)/1 var(--bn-font, sans-serif); color: #fff; margin: .5rem 0 .3rem; }
+.jx-pod { list-style: none; margin: .8rem 0 0; padding: 0; }
+.jx-pod li { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: .6rem; align-items: center; padding: .6rem 0; border-top: 1px solid rgba(255,255,255,.12); }
+.jx-pod .r { font-size: 22px; text-align: center; color: #c7d3dc; font-weight: 800; }
+.jx-pod .n { font: 800 17px/1.2 var(--bn-font, sans-serif); } .jx-pod .n small { display: block; font: 400 12px/1.3 var(--font-body, sans-serif); color: #9fb1bf; }
+.jx-pod .p { font: 800 24px/1 var(--bn-font, sans-serif); color: var(--jx-sun); }
+.jx-pod li.is-top .n { font-size: 20px; }
 /* Devine le joueur */
 .jx-ind { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .4rem; }
 .jx-ind li { display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; min-height: 48px; border: 1px solid var(--line); background: var(--surface); }
 .jx-ind .n { align-self: stretch; display: grid; place-items: center; background: var(--jx-rade); color: var(--jx-sun); font: 800 15px/1 var(--bn-font, sans-serif); }
 .jx-ind .t { padding: .45rem .7rem; font-size: 15px; } .jx-ind .t small { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .jx-ind li.is-cache { border-style: dashed; color: var(--muted); } .jx-ind li.is-cache .n { background: var(--surface-2); color: var(--muted); }
-.jx-form { display: flex; gap: .5rem; flex-wrap: wrap; }
-.jx-form input { flex: 1 1 220px; min-height: 50px; padding: 0 .9rem; font-size: 16px; border: 1.5px solid var(--line-2); background: var(--bg); color: var(--ink); border-radius: 0; }
-.jx-form input:focus { outline: 3px solid var(--jx-sun); border-color: var(--jx-rade); }
 .jx-rates { display: flex; flex-wrap: wrap; gap: .35rem; margin: .8rem 0 0; } .jx-rates span { font-size: 13px; padding: .3rem .5rem; background: var(--surface-2); color: var(--muted); text-decoration: line-through; }
 .jx-rev { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 1rem; align-items: center; }
 .jx-rev img { width: 110px; height: 130px; object-fit: cover; filter: grayscale(1); border-bottom: 4px solid var(--jx-sun); }
-@media (max-width: 900px) { .jx-grid { grid-template-columns: 1fr; } }
+.jx-vide { border: 1px dashed var(--line-2); padding: 1.4rem; color: var(--text-2); line-height: 1.55; }
 @media (max-width: 640px) {
-  .jx-hero .wrap { padding-top: 1.4rem; padding-bottom: 2.2rem; } .jx-intro { font-size: 14.5px; line-height: 1.5; }
+  .jx-hero .wrap { padding-top: 1.4rem; padding-bottom: 2.3rem; } .jx-intro { font-size: 14.5px; line-height: 1.5; }
   .jx-tabs { margin-top: -1.2rem; }
-  .jx-tab { padding: .6rem .55rem; min-height: 48px; justify-content: center; } .jx-tab-t { font-size: 13px; } .jx-tab-s { display: none; }
+  .jx-tab { padding: .6rem .7rem; min-height: 52px; } .jx-tab-t { font-size: 13.5px; } .jx-tab-s { font-size: 11px; }
   .jx-opts { grid-template-columns: 1fr; }
-  .jx-m { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); padding: .6rem; gap: .4rem; } .jx-eq { font-size: 13px; } .jx-sc input { width: 44px; height: 44px; font-size: 20px; }
+  .jx-cta, .jx-act .btn { width: 100%; }
   .jx-rev { grid-template-columns: 84px minmax(0, 1fr); } .jx-rev img { width: 84px; height: 100px; }
 }
 </style>
@@ -3725,86 +3725,76 @@ img, video, canvas, svg { max-width: 100%; }
   </section>
 </sc-if>
 
-<!-- ================= JEUX : le Prono du week-end, le Quiz de la Marée, Devine le joueur (js/jeux.js) ================= -->
+<!-- ================= JEUX : le Quiz foot (seul ou à plusieurs) et Devine le joueur (js/jeux.js) ================= -->
 <sc-if value="{{isJeux}}" hint-placeholder-val="{{ false }}">
   <div class="jx">
     <section class="jx-hero">
       <div class="wrap">
-        <div class="jx-k">Les jeux BE+ · {{jx.date}}</div>
-        <h1 class="jx-h1">Jouer le sport du Cotentin</h1>
-        <p class="jx-intro">Pronostiquez les matchs des clubs, testez vos connaissances et retrouvez les joueurs. Une partie par jour, quelques minutes, et un classement entre abonnés.</p>
+        <div class="jx-k">Les jeux BE+</div>
+        <h1 class="jx-h1">Le quiz du bus</h1>
+        <p class="jx-intro">Culture foot du monde entier, à jouer seul ou entre coéquipiers sur la route du match. On se passe le téléphone, chacun son tour. Ça marche même sans réseau.</p>
       </div>
     </section>
     <section class="wrap" style="padding-bottom: 5rem">
-      <div class="jx-tabs" role="tablist" aria-label="Les jeux"><sc-for list="{{jx.tabs}}" as="t" hint-placeholder-count="3"><button type="button" role="tab" class="jx-tab {{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.go}}"><span class="jx-tab-t">{{t.label}}<sc-if value="{{t.hasBadge}}" hint-placeholder-val="{{ false }}"><span class="jx-ok" aria-label="joué aujourd’hui">{{t.badge}}</span></sc-if></span><span class="jx-tab-s">{{t.sub}}</span></button></sc-for></div>
+      <div class="jx-tabs" role="tablist" aria-label="Les jeux"><sc-for list="{{jx.tabs}}" as="t" hint-placeholder-count="2"><button type="button" role="tab" class="jx-tab {{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.go}}"><span class="jx-tab-t">{{t.label}}<sc-if value="{{t.hasBadge}}" hint-placeholder-val="{{ false }}"><span class="jx-ok" aria-label="joué aujourd’hui">{{t.badge}}</span></sc-if></span><span class="jx-tab-s">{{t.sub}}</span></button></sc-for></div>
 
-      <!-- ===== Le Prono du week-end ===== -->
-      <sc-if value="{{jx.isProno}}" hint-placeholder-val="{{ true }}">
-        <div class="jx-grid">
-          <div>
-            <h2 class="jx-h2">Le Prono du week-end</h2>
-            <sc-if value="{{jx.prono.hasSports}}" hint-placeholder-val="{{ false }}"><div class="jx-chips" role="tablist" aria-label="Filtrer par sport"><sc-for list="{{jx.prono.sports}}" as="f" hint-placeholder-count="3"><button type="button" role="tab" class="wk-jour {{f.cls}}" aria-selected="{{f.sel}}" onClick="{{f.pick}}">{{f.label}}</button></sc-for></div></sc-if>
-            <sc-if value="{{jx.prono.has}}" hint-placeholder-val="{{ true }}">
-              <sc-for list="{{jx.prono.jours}}" as="j" hint-placeholder-count="2">
-                <div class="jx-day">{{j.label}}</div>
-                <sc-for list="{{j.matchs}}" as="m" hint-placeholder-count="3">
-                  <div class="jx-m {{m.cls}}">
-                    <span class="jx-eq">{{m.dom}}</span>
-                    <span class="jx-sc"><input type="number" inputmode="numeric" min="0" max="300" value="{{m.d}}" onChange="{{m.onD}}" aria-label="{{m.aria1}}" placeholder="–"><span class="jx-sep">:</span><input type="number" inputmode="numeric" min="0" max="300" value="{{m.e}}" onChange="{{m.onE}}" aria-label="{{m.aria2}}" placeholder="–"></span>
-                    <span class="jx-eq is-ext">{{m.ext}}</span>
-                    <span class="jx-meta"><span>{{m.sport}}</span><span>{{m.heure}}</span></span>
-                  </div>
-                </sc-for>
-              </sc-for>
-            </sc-if>
-            <sc-if value="{{jx.prono.vide}}" hint-placeholder-val="{{ false }}"><p class="jx-vide">Pas de match des clubs suivis à pronostiquer pour l’instant. Les prochaines affiches arrivent ici dès que le calendrier est publié.</p></sc-if>
-            <p class="jx-note">{{jx.prono.bareme}} Vos pronos sont gardés automatiquement.</p>
+      <!-- ===== Quiz foot : réglages ===== -->
+      <sc-if value="{{jx.isQuiz}}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{jx.quiz.reglage}}" hint-placeholder-val="{{ true }}">
+          <div class="jx-set">
+            <div class="jx-card">
+              <h2>1. Les joueurs</h2>
+              <p class="jx-p">Ajoutez les prénoms de ceux qui jouent. Personne ? Vous jouez en solo.</p>
+              <div class="jx-form"><input type="text" value="{{jx.quiz.nom}}" onChange="{{jx.quiz.onNom}}" onKeyDown="{{jx.quiz.onTouche}}" placeholder="Prénom d’un joueur" aria-label="Prénom d’un joueur" maxlength="20" autocomplete="off"><button type="button" class="btn btn-dark" onClick="{{jx.quiz.ajouter}}" style="min-height: 50px">Ajouter</button></div>
+              <sc-if value="{{jx.quiz.hasJoueurs}}" hint-placeholder-val="{{ false }}"><div class="jx-pl"><sc-for list="{{jx.quiz.joueurs}}" as="p" hint-placeholder-count="3"><span class="jx-pl-c">{{p.nom}}<button type="button" onClick="{{p.retirer}}" aria-label="{{p.aria}}">×</button></span></sc-for></div></sc-if>
+            </div>
+            <div class="jx-card">
+              <h2>2. Les thèmes</h2>
+              <p class="jx-p">Un thème, plusieurs, ou tout mélangé au hasard.</p>
+              <div class="jx-chips"><sc-for list="{{jx.quiz.themes}}" as="t" hint-placeholder-count="6"><button type="button" class="wk-jour {{t.cls}}" aria-pressed="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}<span class="jx-n">{{t.n}}</span></button></sc-for></div>
+            </div>
+            <div class="jx-card">
+              <h2>3. La partie</h2>
+              <div class="jx-row"><span class="jx-p" style="margin: 0">{{jx.quiz.nbLabel}}</span><div class="jx-chips" style="margin: 0"><sc-for list="{{jx.quiz.nbs}}" as="n" hint-placeholder-count="3"><button type="button" class="wk-jour {{n.cls}}" aria-pressed="{{n.sel}}" onClick="{{n.pick}}">{{n.label}}</button></sc-for></div></div>
+              <div class="jx-row"><span class="jx-p" style="margin: 0">{{jx.quiz.chronoLabel}}</span><button type="button" class="jx-sw" role="switch" aria-checked="{{jx.quiz.chronoPressed}}" onClick="{{jx.quiz.basculerChrono}}" aria-label="Chrono de 20 secondes"><span></span></button></div>
+            </div>
+            <div class="jx-go">
+              <button type="button" class="btn jx-cta" onClick="{{jx.quiz.lancer}}">C’est parti</button>
+              <span class="jx-p" style="margin: 0">{{jx.quiz.resume}} · {{jx.quiz.total}} questions en tout</span>
+            </div>
           </div>
-          <aside>
-            <div class="jx-card">
-              <h2>Mes points</h2>
-              <div class="jx-stats"><div class="jx-st"><b>{{jx.prono.totalMois}}</b><span>points en {{jx.prono.moisLabel}}</span></div><div class="jx-st"><b>{{jx.prono.exacts}}</b><span>scores exacts</span></div><div class="jx-st"><b>{{jx.prono.nbFaits}}</b><span>pronos en cours</span></div></div>
-              <sc-if value="{{jx.prono.hasRes}}" hint-placeholder-val="{{ false }}"><div style="margin-top: .8rem"><sc-for list="{{jx.prono.mesRes}}" as="r" hint-placeholder-count="2"><div class="jx-res"><span>{{r.match}}<br><em>Score {{r.score}} · mon prono {{r.prono}}</em></span><span class="jx-pt {{r.cls}}">{{r.pts}}</span></div></sc-for></div></sc-if>
-            </div>
-            <div class="jx-card">
-              <h2>Classement de {{jx.prono.moisLabel}}</h2>
-              <sc-if value="{{jx.prono.pasConnecte}}" hint-placeholder-val="{{ true }}"><p style="margin: 0 0 .8rem; color: var(--text-2); line-height: 1.5; font-size: 14px">Connectez-vous pour entrer au classement et retrouver vos pronos sur tous vos appareils.</p><button type="button" class="btn btn-dark" onClick="{{jx.prono.seConnecter}}" style="width: 100%; min-height: 46px">Me connecter</button></sc-if>
-              <sc-if value="{{jx.prono.chargement}}" hint-placeholder-val="{{ false }}"><p class="jx-note">Chargement du classement…</p></sc-if>
-              <sc-if value="{{jx.prono.hasLignes}}" hint-placeholder-val="{{ false }}"><ol class="jx-rk"><sc-for list="{{jx.prono.lignes}}" as="l" hint-placeholder-count="3"><li class="{{l.moi}}"><span class="r">{{l.rang}}</span><span>{{l.pseudo}}<small>{{l.exacts}}</small></span><span class="p">{{l.pts}}</span></li></sc-for></ol><p class="jx-note">{{jx.prono.rangLabel}}</p></sc-if>
-              <sc-if value="{{jx.prono.classementVide}}" hint-placeholder-val="{{ false }}"><p class="jx-note">Le classement démarre avec les premiers matchs joués du mois.</p></sc-if>
-              <sc-if value="{{jx.prono.classementAbsent}}" hint-placeholder-val="{{ false }}"><p class="jx-note">Le classement commun arrive bientôt. Vos pronos et vos points sont déjà gardés sur cet appareil.</p></sc-if>
-            </div>
-          </aside>
-        </div>
-      </sc-if>
+        </sc-if>
 
-      <!-- ===== Le Quiz de la Marée ===== -->
-      <sc-if value="{{jx.isQuiz}}" hint-placeholder-val="{{ false }}">
-        <div class="jx-quiz">
-          <sc-if value="{{jx.quiz.joue}}" hint-placeholder-val="{{ true }}">
-            <div class="jx-k" style="color: var(--muted)">{{jx.quiz.num}}</div>
-            <div class="jx-prog" aria-hidden="true"><div style="width: {{jx.quiz.pct}}"></div></div>
+        <!-- ===== Quiz foot : en jeu ===== -->
+        <sc-if value="{{jx.quiz.enJeu}}" hint-placeholder-val="{{ false }}">
+          <div class="jx-quiz">
+            <sc-if value="{{jx.quiz.multi}}" hint-placeholder-val="{{ false }}"><div class="jx-tour"><span>Au tour de</span><b>{{jx.quiz.tourDe}}</b></div></sc-if>
+            <div class="jx-qh"><span class="jx-k" style="color: var(--muted)">{{jx.quiz.num}} · {{jx.quiz.theme}}</span><sc-if value="{{jx.quiz.chrono}}" hint-placeholder-val="{{ false }}"><span class="jx-sec {{jx.quiz.urgent}}" aria-live="off">{{jx.quiz.reste}} s</span></sc-if></div>
+            <div class="jx-prog" aria-hidden="true"><sc-if value="{{jx.quiz.chrono}}" hint-placeholder-val="{{ false }}"><div class="{{jx.quiz.urgent}}" style="width: {{jx.quiz.chronoPct}}"></div></sc-if></div>
             <h2 class="jx-q">{{jx.quiz.q}}</h2>
             <div class="jx-opts"><sc-for list="{{jx.quiz.options}}" as="o" hint-placeholder-count="4"><button type="button" class="jx-opt {{o.cls}}" disabled="{{o.dis}}" onClick="{{o.pick}}">{{o.label}}</button></sc-for></div>
             <sc-if value="{{jx.quiz.repondu}}" hint-placeholder-val="{{ false }}">
               <div class="jx-verdict {{jx.quiz.verdictCls}}" role="status">{{jx.quiz.verdict}}</div>
               <sc-if value="{{jx.quiz.hasWhy}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; color: var(--text-2); line-height: 1.5">{{jx.quiz.why}}</p></sc-if>
-              <div class="jx-act"><button type="button" class="btn btn-dark" onClick="{{jx.quiz.suivant}}">{{jx.quiz.suivantLabel}}</button></div>
+              <div class="jx-act"><button type="button" class="btn jx-cta" onClick="{{jx.quiz.suivant}}">{{jx.quiz.suivantLabel}}</button></div>
             </sc-if>
-          </sc-if>
-          <sc-if value="{{jx.quiz.fini}}" hint-placeholder-val="{{ false }}">
-            <div class="jx-card">
-              <div class="jx-k" style="color: var(--muted)">Le Quiz de la Marée · terminé</div>
-              <div class="jx-big">{{jx.quiz.score}}</div>
-              <div class="jx-grille" aria-hidden="true">{{jx.quiz.grille}}</div>
-              <p style="margin: 0; line-height: 1.5; color: var(--text-2)">{{jx.quiz.message}} Série : {{jx.quiz.serie}} jour(s) d’affilée.</p>
-              <div class="jx-act"><button type="button" class="btn btn-dark" onClick="{{jx.quiz.partager}}">Partager mon résultat</button></div>
-              <ol class="jx-cor"><sc-for list="{{jx.quiz.corrige}}" as="c" hint-placeholder-count="5"><li class="{{c.cls}}"><span>{{c.mark}}</span><span><b>{{c.q}}</b>{{c.rep}}</span></li></sc-for></ol>
+            <div class="jx-sb"><sc-for list="{{jx.quiz.scores}}" as="x" hint-placeholder-count="3"><span class="{{x.cls}}">{{x.nom}} <b>{{x.pts}}</b></span></sc-for></div>
+            <button type="button" class="lnk jx-quit" onClick="{{jx.quiz.quitter}}">Arrêter la partie</button>
+          </div>
+        </sc-if>
+
+        <!-- ===== Quiz foot : classement ===== -->
+        <sc-if value="{{jx.quiz.fini}}" hint-placeholder-val="{{ false }}">
+          <div class="jx-quiz">
+            <div class="jx-fin">
+              <div class="jx-k">Fin de partie</div>
+              <div class="jx-big">{{jx.quiz.titre}}</div>
+              <p class="jx-p" style="color: #c7d3dc">{{jx.quiz.sous}}</p>
+              <ol class="jx-pod"><sc-for list="{{jx.quiz.podium}}" as="p" hint-placeholder-count="3"><li class="{{p.cls}}"><span class="r">{{p.rang}}</span><span class="n">{{p.nom}}<small>{{p.detail}} bonnes réponses</small></span><span class="p">{{p.pts}}</span></li></sc-for></ol>
             </div>
-          </sc-if>
-          <sc-if value="{{jx.quiz.vide}}" hint-placeholder-val="{{ false }}"><p class="jx-vide">Le quiz se prépare : il a besoin de quelques clubs et joueurs sur le site.</p></sc-if>
-          <p class="jx-note">5 nouvelles questions chaque jour, les mêmes pour tout le monde. Elles viennent des fiches clubs et joueurs du site.</p>
-        </div>
+            <div class="jx-act"><button type="button" class="btn jx-cta" onClick="{{jx.quiz.rejouer}}">Nouvelle partie</button><button type="button" class="btn" onClick="{{jx.quiz.partager}}" style="background: transparent; color: var(--ink); border: 2px solid var(--ink)">Partager les scores</button><button type="button" class="btn" onClick="{{jx.quiz.reglages}}" style="background: transparent; color: var(--ink); border: 2px solid var(--ink)">Changer les réglages</button></div>
+          </div>
+        </sc-if>
       </sc-if>
 
       <!-- ===== Devine le joueur ===== -->
@@ -4448,7 +4438,6 @@ img, video, canvas, svg { max-width: 100%; }
             <div class="num" style="font-size: 54px; color: var(--on-inv); line-height: 1">{{pronoCount}}</div>
             <div style="margin-bottom: 1.25rem">pronostic(s) enregistré(s)</div>
             <p style="font-size: 14px; line-height: 1.6; color: var(--on-inv-2); margin: 0 0 1rem">Chaque bon prono rapporte des points. Les meilleurs du mois gagnent des articles de la boutique.</p>
-            <button type="button" class="btn btn-gold" onClick="{{goJeux}}" style="width: 100%; min-height: 44px; margin-bottom: 1rem">Pronostiquer le score exact</button>
             <button type="button" class="btn btn-gold" onClick="{{goShop}}" style="width: 100%">Voir les lots</button>
           </div>
         </div>
@@ -8360,6 +8349,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/videos.js?v=__VERSION__"></script>
 <script src="contenus/podcast.js?v=__VERSION__"></script>
 <script src="contenus/quiz.js?v=__VERSION__"></script>
+<script src="contenus/quiz-foot.js?v=__VERSION__"></script>
 <script src="contenus/culture.js?v=__VERSION__"></script>
 <script src="contenus/fonds.js?v=__VERSION__"></script>
 <script src="contenus/legal.js?v=__VERSION__"></script>

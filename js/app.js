@@ -1546,7 +1546,7 @@ class Component extends DCLogic {
     const goV = (v, extra) => () => this.go(v, extra || {});
     const menuGroups = [
       { titre: 'Le sport', items: [['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Autour de moi', 'map', 'La carte vivante du week-end'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine']] },
-      { titre: 'Vos services', items: [['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Jeux', 'jeux', 'Prono du week-end, quiz, devine le joueur'], ['Mon quotidien', 'private', 'Agenda, listes, activité, budget sport']] },
+      { titre: 'Vos services', items: [['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Jeux', 'jeux', 'Le quiz foot du bus, devine le joueur'], ['Mon quotidien', 'private', 'Agenda, listes, activité, budget sport']] },
       { titre: 'La maison', items: [['Casa PRO', 'work', 'Clubs, marques, collectivités, sportifs, médias'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
@@ -2891,7 +2891,7 @@ class Component extends DCLogic {
     const appUrl = (typeof window !== 'undefined' && window.CASA_APP_URL) || 'https://claude.ai/artifact/3Z1QbNeNwNDmCizUsTPHJ6';
     const inApp = typeof window !== 'undefined' && !!window.CASA_APP;
     const arModes = [['lineup', 'Réalité augmentée', 'Ma compo en AR', 'Neuf disciplines, votre équipe sur le vrai terrain, à son vrai emplacement (photos aériennes, bâtiments, soleil réel), avec le ballon et le règlement. Posez-le sur votre table et proposez la compo au Club House.']].map(([id, tag, title, text]) => ({ tag, title, text, open: () => this.openAR(id) }))
-      .concat([{ tag: 'Jeux', title: 'Prono, quiz et devine le joueur', text: 'Pronostiquez le score des matchs du week-end, 5 questions par jour sur le sport du Cotentin, un joueur à retrouver en 6 indices. Classement du mois entre abonnés.', open: () => this.go('jeux') }]);
+      .concat([{ tag: 'Jeux', title: 'Le quiz foot du bus', text: 'Culture foot du monde entier, à jouer entre coéquipiers sur la route du match : on se passe le téléphone, chacun son tour, avec chrono et classement. Marche sans réseau. Et un joueur à deviner chaque jour.', open: () => this.go('jeux') }]);
     const PWA = typeof window !== 'undefined' && window.CasaPWA;
     const pwaIn = !!(PWA && PWA.installee());
     const installLabel = pwaIn ? 'Application installée' : 'Installer l’application';
@@ -2956,8 +2956,8 @@ class Component extends DCLogic {
     };
     return {
       podcast, essentiel, isPodcast: V === 'podcast', goPodcast: () => this.go('podcast'),
-      // Jeux : Prono du week-end, Quiz de la Marée, Devine le joueur (js/jeux.js)
-      isJeux: V === 'jeux', goJeux: () => this.go('jeux'), jx: V === 'jeux' && typeof CasaJeux !== 'undefined' ? CasaJeux.vals(this, { D, X, nomEquipe: cbNomEquipe }) : { tabs: [], prono: {}, quiz: {}, devine: {} },
+      // Jeux : le Quiz foot du bus et Devine le joueur (js/jeux.js)
+      isJeux: V === 'jeux', goJeux: () => this.go('jeux'), jx: V === 'jeux' && typeof CasaJeux !== 'undefined' ? CasaJeux.vals(this, { D }) : { tabs: [], quiz: {}, devine: {} },
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
         ok: s.mbRes === 'ok', off: s.mbRes === 'off', none: s.mbRes === 'none', bad: s.mbRes === 'bad', format: s.mbRes === 'format',
         prenom: (s.mbInfo && s.mbInfo.prenom) || 'Membre', depuis: s.mbInfo && s.mbInfo.depuis ? 'Membre depuis ' + new Date(s.mbInfo.depuis).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '' },
