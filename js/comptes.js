@@ -93,6 +93,22 @@
     myAccessRequest: function () {
       return use(function (c) { return c.from('demandes_acces').select('statut, cree_le').order('cree_le', { ascending: false }).limit(1); }).then(function (d) { return d && d[0] || null; });
     },
+    // ---------- Espace rédaction : articles enregistrés en ligne (voir supabase/redaction.sql) ----------
+    // Supabase ne renvoie à un membre de la rédaction QUE ses propres articles ; l'administrateur les reçoit tous.
+    redacListe: function () {
+      return use(function (c) { return c.from('redaction_articles').select('id, auteur_id, auteur_nom, statut, contenu, en_ligne, publier_le, modifie_le').order('modifie_le', { ascending: false }).limit(1000); });
+    },
+    redacEnregistrer: function (row) {
+      return use(function (c) { return c.from('redaction_articles').upsert(row, { onConflict: 'id' }); });
+    },
+    // Renvoie true si l'article a bien été supprimé, false si Supabase a refusé (article d'un autre, déjà publié…)
+    redacSupprimer: function (id) {
+      return use(function (c) { return c.from('redaction_articles').delete().eq('id', id).select('id'); }).then(function (d) { return !!(d && d.length); });
+    },
+    // Articles publiés depuis l'espace rédaction, pour tous les visiteurs (version en ligne seulement)
+    articlesEnLigne: function () {
+      return use(function (c) { return c.rpc('articles_en_ligne'); }).then(function (d) { return d || []; });
+    },
     // Accès direct à la base pour l'espace administrateur (les droits sont vérifiés par Supabase)
     db: function (fn) { return use(fn); },
     client: function () { return ready; },

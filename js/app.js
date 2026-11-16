@@ -134,6 +134,7 @@ class Component extends DCLogic {
     try { window.CasaSite = this; } catch (e) {} // accès console / tests : CasaSite.go('shop')
     try { this._onPwa = () => this.setState({ pwaTick: Date.now() }); window.addEventListener('casa-pwa', this._onPwa); } catch (e) {} // application installable (js/pwa.js)
     try { this._onNotif = () => this.setState({ notifEtat: window.CasaNotif ? window.CasaNotif.dernier() : null }); window.addEventListener('casa-notif', this._onNotif); } catch (e) {} // notifications (js/notifications.js)
+    this.rxLoadPublic(); // articles publiés depuis l'espace rédaction (supabase/redaction.sql)
     // Comptes abonnés (js/comptes.js) : la session Supabase pilote l'état connecté
     if (window.CasaAuth && window.CasaAuth.on) {
       window.CasaAuth.onChange((u) => {
@@ -146,7 +147,8 @@ class Component extends DCLogic {
             // Étiquettes données dans l'admin (onglet Abonnés) : chef d'édition, rédacteur, correspondant de club
             const role = r === 'admin' ? 'admin' : (r === 'redacteur' || r === 'collaborateur') ? 'writer' : (r === 'correspondant' && a.club) ? 'club' : (fileRole === 'admin' ? 'admin' : null);
             const extra = role === 'writer' ? { staffRole: r } : role === 'club' ? { clubRoleId: a.club } : {};
-            if (role !== this.state.role || Object.keys(extra).length) this.setState(Object.assign({ role }, extra)); }, () => this.setState({ srvRole: 'erreur' }));
+            if (role !== this.state.role || Object.keys(extra).length) this.setState(Object.assign({ role }, extra));
+            this.rxLoad(); }, () => this.setState({ srvRole: 'erreur' }));
           if (firstFor) this.loadPaid(this._waitPaid ? 5 : 0);
           if (firstFor) { if (u.prefs) this.applyPrefs(u.prefs); else if (this.state.mods || (this.state.favSports || []).length || (this.state.favClubs || []).length) this.syncPrefs(); }
           if (firstFor && window.CasaAuth.myAccessRequest) window.CasaAuth.myAccessRequest().then((d) => this.setState({ accReq: d || null }), () => {});
@@ -156,7 +158,7 @@ class Component extends DCLogic {
           const needPw = !u.hasPassword || window.CasaAuth.recovery;
           this.setState({ hasPassword: !!u.hasPassword, pwOpen: needPw && !this.readLS('cb-pw-later-' + u.id, false) || window.CasaAuth.recovery, pw: '', pw2: '', pwDone: false });
           if (!wasIn) this.say('Connecté. Bienvenue !');
-        } else if (this.state.loggedIn) { this._authFor = null; this.setState({ loggedIn: false, role: null, accReq: null, subs: { casab: false, gazette: null }, paidSubs: false, orders: this.state.orders.filter((o) => !o.srv) }); if (this.state.view === 'studio') this.go('home'); }
+        } else if (this.state.loggedIn) { this._authFor = null; this.rxReset(); this.setState({ loggedIn: false, role: null, accReq: null, subs: { casab: false, gazette: null }, paidSubs: false, orders: this.state.orders.filter((o) => !o.srv) }); if (this.state.view === 'studio') this.go('home'); }
       });
     }
     this._crmIv = setInterval(() => { if (this.state.role === 'admin') { const A = this.crmData().agents; ['qualif', 'hygiene', 'relance', 'fidel', 'rapport'].forEach((k) => { if (A[k] && A[k].on) this.runAgent(k); }); } }, 20000);
@@ -539,6 +541,86 @@ class Component extends DCLogic {
     top(); try { (window.requestAnimationFrame || setTimeout)(top); } catch (e) { /* facultatif */ }
   }
 
+  // ---------- rédaction : enregistrement en ligne (supabase/redaction.sql) ----------
+  // Chaque changement de la liste des articles (écriture, statut, suppression) est envoyé à Supabase
+  // quelques instants plus tard. Supabase ne renvoie à chacun QUE ses propres articles (l'administrateur voit tout)
+  // et refuse toute action non autorisée : publier sans être administrateur, toucher à l'article d'un autre…
+  setState(patch, cb) {
+    super.setState(patch, cb);
+    if (patch && typeof patch === 'object' && Object.prototype.hasOwnProperty.call(patch, 'posts') && !this._rxApplying) this.rxQueue();
+  }
+  rxApi() { const A = window.CasaAuth; return A && A.on && A.redacListe ? A : null; }
+  rxRow(p) {
+    const contenu = Object.assign({}, p); delete contenu.authorId;
+    let en_ligne = null, publier_le = null;
+    if (p.online) en_ligne = Object.assign({}, p.online, { id: p.id, author: p.author || '' });
+    else if (p.status === 'scheduled' && p.schedule && typeof CasaRedac !== 'undefined') {
+      const d = new Date(p.schedule);
+      if (!isNaN(d)) { publier_le = d.toISOString(); en_ligne = Object.assign(CasaRedac.snapOf(p), { at: publier_le, id: p.id, author: p.author || '' }); }
+    }
+    return { id: p.id, auteur_nom: p.author || null, statut: p.status || 'draft', contenu, en_ligne, publier_le };
+  }
+  rxQueue() {
+    if (!this._rxLoaded || !this.rxApi()) return;
+    clearTimeout(this._rxT); this._rxT = setTimeout(() => this.rxFlush(), 1200);
+  }
+  rxFlush() {
+    const A = this.rxApi(); if (!A || !this._rxLoaded || !this.state.loggedIn) return;
+    if (this._rxBusy) { this._rxAgain = true; return; }
+    const saved = this._rxSaved || {}; const posts = this.state.posts || []; const cur = {};
+    posts.forEach((p) => { cur[p.id] = JSON.stringify(this.rxRow(p)); });
+    const ups = posts.filter((p) => cur[p.id] !== saved[p.id]);
+    const dels = Object.keys(saved).filter((id) => !(id in cur));
+    if (!ups.length && !dels.length) return;
+    this._rxBusy = true; const errs = [];
+    let chain = Promise.resolve();
+    ups.forEach((p) => { const row = JSON.parse(cur[p.id]); chain = chain.then(() => A.redacEnregistrer(row).then(() => { saved[p.id] = cur[p.id]; }, (e) => errs.push(e.message))); });
+    dels.forEach((id) => { chain = chain.then(() => A.redacSupprimer(id).then((ok) => { if (ok) delete saved[id]; else errs.push('suppression refusée'); }, (e) => errs.push(e.message))); });
+    chain.then(() => {
+      this._rxBusy = false; this._rxSaved = saved;
+      if (errs.length) { this.say('Rédaction : action refusée par le serveur (' + errs[0] + '). Liste rechargée.'); this.rxLoad(); return; }
+      super.setState({ rxSavedAt: new Date().toISOString() });
+      if (this._rxAgain) { this._rxAgain = false; this.rxQueue(); }
+    });
+  }
+  rxLoad() {
+    const A = this.rxApi(); if (!A || !this.state.loggedIn || !this.state.role) return;
+    A.redacListe().then((rows) => {
+      if (!this.state.loggedIn) return;
+      const saved = {};
+      const fromSrv = (rows || []).map((r) => {
+        const p = Object.assign({ log: [], clubs: [], title: '', dek: '', body: '', alt: '', tag: '', sport: 'Autre', img: '', schedule: '' }, r.contenu || {}, { id: r.id, status: r.statut, authorId: r.auteur_id });
+        if (!p.author) p.author = r.auteur_nom || '';
+        saved[r.id] = JSON.stringify(this.rxRow(p)); return p;
+      });
+      const ids = new Set(fromSrv.map((p) => p.id)); const prev = this._rxSaved || {};
+      // articles commencés avant le chargement (ou avant le lancement du script SQL) : on les garde et on les enregistre
+      const localOnly = (this.state.posts || []).filter((p) => !ids.has(p.id) && !(p.id in prev));
+      this._rxSaved = saved; this._rxLoaded = true;
+      this._rxApplying = true; this.setState({ posts: localOnly.concat(fromSrv), rxSrv: 'ok' }); this._rxApplying = false;
+      if (localOnly.length) this.rxQueue();
+    }, (e) => this.setState({ rxSrv: /redaction_articles|schema cache|does not exist|relation/i.test(e.message || '') ? 'sql' : 'erreur', rxSrvMsg: e.message || '' }));
+  }
+  rxReset() { clearTimeout(this._rxT); this._rxSaved = null; this._rxLoaded = false; this._rxApplying = true; this.setState({ posts: null, rxSrv: null }); this._rxApplying = false; }
+  rxLoadPublic() {
+    const A = this.rxApi(); if (!A || !A.articlesEnLigne) return;
+    A.articlesEnLigne().then((rows) => this.setState({ rxPublic: rows.filter((r) => r && r.article).map((r) => Object.assign({ clubs: [], body: '', dek: '', title: '' }, r.article, { id: r.id, status: 'published', online: Object.assign({}, r.article, { at: r.article.at || r.publie_le }) })) }), () => {});
+  }
+  // Supprimer un article de la rédaction : l'auteur ses brouillons jamais publiés, l'administrateur tout
+  rxCanDelete(p) {
+    if (!p || !p.id) return false;
+    if (this.state.role === 'admin') return true;
+    return this.rxMine(p) && ['draft', 'corrections', 'rejected'].indexOf(p.status) >= 0 && !p.online;
+  }
+  rxMine(p) { const u = window.CasaAuth && window.CasaAuth.user; return p.authorId && u ? p.authorId === u.id : p.author === this.me().name; }
+  rxDelete(p) {
+    if (!this.rxCanDelete(p)) { this.say('Seuls vos brouillons non publiés peuvent être supprimés'); return; }
+    if (this.state.rxDelSure !== p.id) { this.setState({ rxDelSure: p.id }); clearTimeout(this._rxDelT); this._rxDelT = setTimeout(() => { if (this.state.rxDelSure === p.id) this.setState({ rxDelSure: null }); }, 6000); return; }
+    const posts = this.posts().filter((x) => x.id !== p.id);
+    this.setState({ posts, rxDelSure: null, studioTab: this.state.studioTab === 'edit' && this.state.editId === p.id ? 'list' : this.state.studioTab, editId: this.state.editId === p.id ? null : this.state.editId });
+    this.say(p.online ? 'Article supprimé et retiré du site' : 'Brouillon supprimé');
+  }
+
   // ---------- rédaction : utilitaires ----------
   posts() { return this.state.posts || (window.CB_SERVER ? [] : this.more().seedPosts); }
   setPost(id, patch, logLine) {
@@ -790,7 +872,10 @@ class Component extends DCLogic {
   }
   allArticles() {
     const D = this.data();
-    const pub = this.posts().filter((p) => p.status === 'published' || p.online).map((p) => this.postToArticle(p.status === 'published' || !p.online ? p : Object.assign({}, p, p.online, { id: p.id })));
+    const own = this.posts(); const ids = new Set(own.map((p) => p.id)); const now = Date.now();
+    const vis = (p) => p.status === 'published' || p.online || (p.status === 'scheduled' && p.schedule && new Date(p.schedule).getTime() <= now);
+    // articles publiés depuis l'espace rédaction (supabase/redaction.sql), visibles par tous les visiteurs
+    const pub = own.filter(vis).concat((this.state.rxPublic || []).filter((p) => !ids.has(p.id))).map((p) => this.postToArticle(p.status === 'published' || !p.online ? p : Object.assign({}, p, p.online, { id: p.id })));
     return pub.concat(D.articles);
   }
   postToArticle(p) {
@@ -2084,7 +2169,7 @@ class Component extends DCLogic {
     const roleSwitch = [['admin', 'Admin', ''], ['writer', 'Chef d’édition', 'collaborateur'], ['writer', 'Rédactrice', 'redacteur'], ['club', 'Correspondant club', '']].map(([id, label, sr]) => { const on = s.role === id && (id === 'admin' || id === 'club' || (s.staffRole || 'redacteur') === sr); return { label, bg: on ? 'var(--inv-bg)' : 'var(--surface)', fg: on ? 'var(--on-inv)' : 'var(--text)', border: on ? 'var(--ink)' : 'var(--line-2)', pick: () => this.setState(Object.assign({ role: id, studioTab: id === 'club' ? 'club' : ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0 ? 'dash' : s.studioTab }, sr ? { staffRole: sr } : {})) }; });
     const kpis = [['review', 'À relire', 'var(--gold-text)'], ['corrections', 'Corrections', 'var(--danger)'], ['draft', 'Brouillons', 'var(--text-2)'], ['scheduled', 'Programmés', 'var(--text)']].map(([st, l, color]) => ({ v: String(posts.filter((p) => p.status === st).length), l, color, go: () => this.setState({ studioTab: 'list', stFilter: st }) }))
       .concat([{ v: String(D.articles.length + posts.filter((p) => p.status === 'published').length), l: 'Publiés', color: 'var(--success)', go: () => this.setState({ studioTab: 'list', stFilter: 'published' }) }]);
-    const mine = posts.filter((p) => p.author === me.name);
+    const mine = posts.filter((p) => this.rxMine(p));
     const dashSrc = isAdmin ? pending : mine.filter((p) => p.status !== 'published');
     const dashList = dashSrc.map((p) => Object.assign({ title: p.title, author: p.author, updated: p.updated, open: () => openEdit(p, isAdmin && p.status === 'review' ? 'preview' : 'write') }, stV(p)));
     const activity = posts.reduce((acc, p) => acc.concat(p.log.map((l) => ({ who: l.who, what: l.what + ' — « ' + p.title + ' »', when: l.when, dot: /Approuv|publi/i.test(l.what) ? '#18705f' : /Correction|Refus/i.test(l.what) ? 'var(--danger)' : '#e8a830' }))), []).reverse().slice(0, 7);
@@ -2096,7 +2181,7 @@ class Component extends DCLogic {
     const queue = pending.map((p) => ({ title: p.title, author: p.author, updated: p.updated, words: String(this.checksOf(p).words), score: String(this.checksOf(p).score), review: () => openEdit(p, 'preview'), isClub: p.source === 'club', club: p.clubName || ((clubById(p.clubId) || {}).name || '') }));
     const edRaw = posts.find((p) => p.id === s.editId) || posts[0] || { id: '', author: '', status: 'draft', updated: '', sport: 'Football', tag: '', clubs: [], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '', title: 'Aucun article', dek: '', body: '', log: [] };
     const chk = this.checksOf(edRaw);
-    const edLocked = !isAdmin && (edRaw.author !== me.name || ['review', 'scheduled', 'published', 'rejected'].indexOf(edRaw.status) >= 0);
+    const edLocked = !isAdmin && (!this.rxMine(edRaw) || ['review', 'scheduled', 'published', 'rejected'].indexOf(edRaw.status) >= 0);
     const ed = Object.assign({}, edRaw, stV(edRaw), {
       titleLen: String(edRaw.title.length), titleColor: edRaw.title.length > 80 ? 'var(--danger)' : 'var(--muted)',
       words: String(chk.words), read: Math.max(1, Math.round(chk.words / 200)) + ' min de lecture', blocks: this.blocksOf(edRaw.body),
@@ -3257,16 +3342,20 @@ class Component extends DCLogic {
       stCrm: s.studioTab === 'crm' && s.role === 'admin', crm,
       stDash: s.studioTab === 'dash' && !isClubRole, stList: s.studioTab === 'list' && !isClubRole, stQueue: s.studioTab === 'queue' && !isClubRole, stEdit: s.studioTab === 'edit' && !isClubRole, stMedia: s.studioTab === 'media' && !isClubRole, stTeam: s.studioTab === 'team' && !isClubRole,
       rx: RXV, stRowsEmpty: (RXV.list && RXV.list.rows || []).length === 0,
-      stRows: (RXV.list && RXV.list.rows ? RXV.list.rows : []).map((r) => { const p = posts.find((x) => x.id === r.id); return Object.assign({}, r, stV(p), { canReview: isAdmin && p.status === 'review', edit: () => openEdit(p, 'write'), review: () => openEdit(p, 'preview') }); }),
+      stRows: (RXV.list && RXV.list.rows ? RXV.list.rows : []).map((r) => { const p = posts.find((x) => x.id === r.id); return Object.assign({}, r, stV(p), { title: String(r.title || '').trim() || '(Sans titre)', canReview: isAdmin && p.status === 'review', edit: () => openEdit(p, 'write'), review: () => openEdit(p, 'preview'), canDelete: this.rxCanDelete(p), delSure: s.rxDelSure === p.id, delLabel: s.rxDelSure === p.id ? (p.online ? 'Confirmer : supprimer et retirer du site' : 'Confirmer la suppression') : 'Supprimer', del: () => this.rxDelete(p) }); }),
       stFilters, stQ: s.stQ, onStQ: (e) => this.setState({ stQ: e.target.value }), goStudioList: () => this.setState({ studioTab: 'list' }),
       queue, queueEmpty: queue.length === 0, queueHint: isAdmin ? 'En tant qu’administrateur principal, vous seul pouvez approuver et publier.' : 'Vos articles soumis attendent la validation de l’administrateur principal.',
-      newPost: () => { if (isClubRole) { this.setState({ studioTab: 'club' }); return; } const id = 'n' + Date.now(); const at = new Date().toISOString(); const p = { id, author: me.name, status: 'draft', updated: 'à l’instant', updatedAt: at, type: 'article', sport: 'Football', tag: '', clubs: [], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '', title: 'Nouvel article', dek: '', body: '', log: [{ who: me.name, when: 'à l’instant', at, what: 'Brouillon créé.' }] }; if (typeof CasaRedac !== 'undefined') p.versions = CasaRedac.addVersion(p, me.name, 'Brouillon créé'); this.setState({ posts: [p].concat(posts), studioTab: 'edit', editId: id, edMode: 'write', aiOutKind: null }); },
+      newPost: () => { if (isClubRole) { this.setState({ studioTab: 'club' }); return; } const id = 'n' + Date.now(); const at = new Date().toISOString(); const p = { id, author: me.name, authorId: window.CasaAuth && window.CasaAuth.user ? window.CasaAuth.user.id : undefined, status: 'draft', updated: 'à l’instant', updatedAt: at, type: 'article', sport: 'Football', tag: '', clubs: [], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '', title: 'Nouvel article', dek: '', body: '', log: [{ who: me.name, when: 'à l’instant', at, what: 'Brouillon créé.' }] }; if (typeof CasaRedac !== 'undefined') p.versions = CasaRedac.addVersion(p, me.name, 'Brouillon créé'); this.setState({ posts: [p].concat(posts), studioTab: 'edit', editId: id, edMode: 'write', aiOutKind: null }); },
       ed, edLocked, edLockMsg: edRaw.status === 'review' ? 'En attente de validation par l’administrateur principal.' : edRaw.status === 'published' ? 'Article publié.' : edRaw.status === 'scheduled' ? 'Publication programmée.' : 'Lecture seule : article d’un autre membre.',
       edWrite: s.edMode === 'write', edPreview: s.edMode === 'preview', edModes, sportOpts, edClubs, edImgs, toolbar,
       edTitle: (e) => upd({ title: e.target.value }), edDek: (e) => upd({ dek: e.target.value }), edSport: (e) => upd({ sport: e.target.value }), edTag: (e) => upd({ tag: e.target.value }),
       edSchedule: (e) => upd({ schedule: e.target.value }), edAlt: (e) => upd({ alt: e.target.value }), edBody: (e) => upd({ body: e.target.value }), edPremium: () => upd({ premium: !edRaw.premium }),
       edCanSave: !edLocked, edCanSubmit: !isAdmin && !edLocked && ['draft', 'corrections'].indexOf(edRaw.status) >= 0, edCanPublishDirect: isAdmin && edRaw.author === me.name && ['draft', 'corrections'].indexOf(edRaw.status) >= 0,
-      edSave: () => { this.setPost(edRaw.id, {}, 'Brouillon enregistré.'); this.say('Brouillon enregistré'); },
+      edSave: () => { this.setPost(edRaw.id, {}, 'Brouillon enregistré.'); this.say(s.rxSrv === 'ok' ? 'Brouillon enregistré en ligne' : 'Brouillon enregistré'); },
+      edCanDelete: !!edRaw.id && this.rxCanDelete(edRaw), edDelSure: s.rxDelSure === edRaw.id, edDelete: () => this.rxDelete(edRaw),
+      edDelLabel: s.rxDelSure === edRaw.id ? (edRaw.online ? 'Confirmer : supprimer et retirer du site' : 'Confirmer la suppression') : (edRaw.status === 'draft' ? 'Supprimer ce brouillon' : 'Supprimer cet article'),
+      rxSrvSql: !!s.role && s.rxSrv === 'sql', rxSrvErr: !!s.role && s.rxSrv === 'erreur', rxSrvMsg: s.rxSrvMsg || '', rxSrvOk: !!s.role && s.rxSrv === 'ok',
+      rxSrvLabel: s.rxSavedAt ? 'Articles enregistrés en ligne · dernier enregistrement à ' + new Date(s.rxSavedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'Articles enregistrés en ligne' + (isAdmin ? ' · vous voyez ceux de toute l’équipe' : ' · vous seul voyez vos articles (et l’administrateur)'),
       edSubmit: () => this.rxGuard('soumettre', edRaw, (lev) => { this.setPost(edRaw.id, { status: 'review' }, 'Article soumis à la relecture.' + (lev ? ' Contraintes levées : ' + lev + '.' : '')); this.say('Soumis à l’administrateur principal'); }),
       edPublish: () => this.rxGuard('publier', edRaw, () => { this.setPost(edRaw.id, { status: 'published' }, 'Publié par l’administrateur principal.'); this.say('Article publié dans Actualités'); }),
       showDecision: isAdmin && edRaw.status === 'review', reviewNote: s.reviewNote, onReviewNote: (e) => this.setState({ reviewNote: e.target.value }),
