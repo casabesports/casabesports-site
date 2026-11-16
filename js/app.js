@@ -1967,7 +1967,7 @@ class Component extends DCLogic {
     const placeOpacity = showPlaces && bgMode !== 'aucun' ? (s.view === 'studio' ? 0.06 : Math.min(0.5, k * 0.55)) : 0;
 
     // ---------- partenaires ----------
-    const partners = X.partners.map((p) => Object.assign({}, p, { logo: p.logo || '', hasLogo: !!p.logo, noLogo: !p.logo, open: () => this.setState({ partnerId: p.id }) }));
+    const partners = X.partners.map((p) => Object.assign({}, p, { logo: p.logo || '', logoFond: p.logoFond || '#ffffff', hasLogo: !!p.logo, noLogo: !p.logo, open: () => this.setState({ partnerId: p.id }) }));
     const tiersDef = [['Platinum', 'Partenaire Platinum', '#e8a830', '360px', '130px'], ['Or', 'Partenaires Or', '#9a6410', '300px', '110px'], ['Club', 'Partenaires Club', '#8f9aa8', '260px', '100px']];
     // un niveau inconnu (ou vide) range le partenaire avec les partenaires Club, pour qu'il ne disparaisse jamais de la page
     const tierOf = (p) => (tiersDef.some((t) => t[0] === p.tier) ? p.tier : 'Club');
@@ -1985,7 +1985,9 @@ class Component extends DCLogic {
       logo: ptBase.logo || '', hasLogo: !!ptBase.logo, noLogo: !ptBase.logo,
       hasPerk: !!ptBase.perk,
       hasAdresse: !!ptBase.adresse, mapsHref: ptBase.adresse ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ptBase.name + ', ' + ptBase.adresse) : '',
-      hasTel: !!ptBase.telephone, telHref: 'tel:' + String(ptBase.telephone || '').replace(/[^0-9+]/g, '').replace(/^0/, '+33'),
+      // un numéro par ligne : « 07 00 00 00 00 - Prénom Nom »
+      tels: String(ptBase.telephone || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => { const m = l.match(/^([+0-9][0-9 .+()]*[0-9])\s*(?:[-–—:·]\s*)?(.*)$/); const num = m ? m[1].trim() : l; return { num, nom: m ? m[2].trim() : '', hasNom: !!(m && m[2].trim()), href: 'tel:' + num.replace(/[^0-9+]/g, '').replace(/^0/, '+33') }; }),
+      hasTel: !!String(ptBase.telephone || '').trim(), logoFond: ptBase.logoFond || '#ffffff',
       horaires: ptHoraires, hasHoraires: ptHoraires.length > 0, hasInfos: !!(ptBase.adresse || ptBase.telephone || ptHoraires.length),
       note: 'Partenaire Casa Besports.',
       // OlistO : page dédiée ; autres vrais partenaires : bouton seulement s'ils offrent un avantage
