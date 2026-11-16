@@ -40,6 +40,10 @@ async function formule(id: string): Promise<any> {
       const w: Record<string, unknown> = {};
       new Function('window', await (await fetch(SITE + '/contenus/abonnements.js')).text())(w);
       if (Array.isArray(w.CASA_ABONNEMENTS)) liste = liste.concat(w.CASA_ABONNEMENTS as any[]);
+      if (!liste.some((p) => p?.id === id)) {
+        new Function('window', await (await fetch(SITE + '/contenus/offres-pro.js')).text())(w);
+        if (Array.isArray(w.CASA_OFFRES_PRO)) liste = liste.concat(w.CASA_OFFRES_PRO as any[]);
+      }
     } catch (_) { /* site injoignable */ }
   }
   return liste.find((p) => p?.id === id) || { id, name: id, perks: [] };

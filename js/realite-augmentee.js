@@ -1701,11 +1701,12 @@
   function loop(S) { (function f(t) { if (!st || st.S !== S || st.xr) return; if (S.tick) S.tick(t || 0); S.renderer.render(S.scene, S.camera); if (S.afterRender) S.afterRender(); st.raf = requestAnimationFrame(f); })(); }
 
   /* ---------- Ouverture / fermeture ---------- */
-  var TITLES = { hub: 'Expériences immersives', lineup: 'Ma compo en réalité augmentée', regles: 'Règlements des disciplines', score: 'Tableau d’affichage AR', phare: 'Le phare de Gatteville en 3D', photo: 'Photo supporter' };
+  var TITLES = { hub: 'Expériences immersives', analyse: 'Analyse vidéo Pro', lineup: 'Ma compo en réalité augmentée', regles: 'Règlements des disciplines', score: 'Tableau d’affichage AR', phare: 'Le phare de Gatteville en 3D', photo: 'Photo supporter' };
   function close() {
     if (!st) return; try { if (st.xr) st.xr.end(); } catch (e) {} cancelAnimationFrame(st.raf);
     if (st.stream) st.stream.getTracks().forEach(function (t) { t.stop(); });
     if (st.stopGyro) st.stopGyro(); if (st.S && st.S.stop) st.S.stop(); if (st.S) { window.removeEventListener('resize', st.S.resize); st.S.renderer.dispose(); }
+    if (st.av) st.av.close();
     st.root.remove(); document.documentElement.style.overflow = ''; st = null;
   }
   function open(mode, data) {
@@ -1722,6 +1723,7 @@
     if (mode === 'hub') {
       var hub = el('div', { class: 'cbar-hub' });
       [['lineup', 'Réalité augmentée', 'Ma compo en AR', 'Football, rugby, basket, hand, volley, water-polo, tennis, roller hockey ou athlétisme : votre équipe sur le vrai terrain, à son vrai emplacement, au milieu des photos aériennes et des bâtiments du quartier. Avec le ballon et le règlement.'],
+       ['analyse', (data && data.pro ? '★ Pro actif' : 'Pro · essai gratuit'), 'Analyse vidéo', 'Déposez la vidéo d’un match ou d’un entraînement : ralenti, image par image, dessins tactiques, actions marquées, rapport, montage des temps forts et questions sur le match. La vidéo reste sur votre appareil.'],
        ['regles', 'Règlements', 'Les règles de chaque sport', 'L’essentiel du règlement de nos neuf disciplines : effectifs, durée, dimensions, points, fautes.']].forEach(function (x) {
         hub.appendChild(el('button', { type: 'button', class: 'cbar-card', onclick: function () { open(x[0], data); } }, '<i>' + x[1] + '</i><b>' + x[2] + '</b><span>' + x[3] + '</span>'));
       });
@@ -1729,6 +1731,7 @@
       root.appendChild(el('div', { style: 'padding:0 1rem 1rem;font-size:12.5px;color:#9aa6b4' }, 'Réalité augmentée complète (pose sur une surface) : Chrome sur Android compatible ARCore. Sur iPhone et ailleurs : caméra + 3D, ou 3D seule. Cartes : photos aériennes et plan IGN (Géoplateforme), bâtiments et terrains OpenStreetMap.'));
       return;
     }
+    if (mode === 'analyse') { if (window.CasaAnalyse) st.av = window.CasaAnalyse.mount(root, { pro: !!(data && data.pro), offre: data && data.offre ? function () { close(); data.offre(); } : null }); return; }
     if (mode === 'regles') { var pageR = el('div', { class: 'cbar-hub', style: 'display:block' }); root.appendChild(pageR); var sid = (data && SPORT_OF[data.sport]) || 'football'; showRules(sid, null, function () { open('hub', data); }); return; }
     var stage = el('div', { class: 'cbar-stage' }); root.appendChild(stage);
     var hint = el('div', { class: 'cbar-hint', dir: 'auto', 'aria-live': 'polite' }, ''); stage.appendChild(hint);
