@@ -12,6 +12,7 @@ window.CASA_PARTENAIRES = [
     "id": "olisto",
     "name": "OlistO",
     "mono": "O",
+    "logo": "assets/partenaires/olisto.png",
     "sector": "Crédit immobilier · regroupement de crédits · assurance emprunteur",
     "city": "Réseau de courtage",
     "tier": "Platinum",
@@ -40,6 +41,25 @@ window.CASA_PARTENAIRES = [
     "site": "https://www.facebook.com/103204388895005",
     "app": "",
     "desc": "Bar-tabac du quai de Caligny, à Cherbourg-en-Cotentin. Partenaire Casa Besports.",
+    "real": true
+  },
+  {
+    "id": "driver50",
+    "name": "Driver50",
+    "mono": "D",
+    "logo": "assets/partenaires/driver50.png",
+    "sector": "VTC · chauffeur privé",
+    "city": "Cherbourg-en-Cotentin",
+    "tier": "Club",
+    "color": "#111111",
+    "since": 2026,
+    "perk": "",
+    "adresse": "",
+    "telephone": "07 81 07 24 71",
+    "horaires": "",
+    "site": "",
+    "app": "",
+    "desc": "VTC à Cherbourg, avec Boris Rachine. Partenaire Casa Besports.",
     "real": true
   }
 ];
