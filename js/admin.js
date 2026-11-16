@@ -28,6 +28,7 @@
     { key: 'CASA_BOUTIQUE', label: 'Boutique : présentation', desc: 'Bandeau de la boutique, affiches des collections et « Vos maillots de cœur » (les boutiques officielles des clubs du Cotentin : nom, club lié, logo, adresse de la boutique).' },
     { key: 'CASA_PRODUITS', label: 'Boutique : produits', desc: 'Fiches produits : nom, prix, photos, tailles, couleurs.', item: 'name' },
     { key: 'CASA_VIDEOS', label: 'Vidéos', desc: 'Vidéos et vignettes.', item: 'title' },
+    { key: 'CASA_PODCAST', label: 'Podcast', desc: 'Les épisodes du podcast BE+ (page « Le podcast »). Type : « Émission » ou « Réaction » (après-match). Qui : Joueur, Coach, Staff ou Supporter. Date au format 2026-11-16. Envoyez le fichier audio (.mp3 ou .m4a, 50 Mo maximum). Publiez une réaction seulement avec l’accord de la personne enregistrée.', item: 'title' },
     { key: 'CASA_CULTURE', label: 'Culture', desc: 'Œuvres et photographies des salles Culture.', item: 'title' },
     { key: 'CASA_FONDS', label: 'Fonds de page', desc: 'L’image derrière chaque page du site.' },
     { key: 'CASA_APROPOS', label: 'À propos', desc: 'L’histoire de Casa Besports : ouverture, manifeste, étapes, piliers, conviction et appel final.' },
@@ -43,6 +44,7 @@
     CASA_GAZETTE: { id: '', sec: 'À la une', kind: 'article', rubric: '', title: '', script: '', kicker: '', img: '', imgCap: '', imgFormat: 'auto', mise: 'auto', paras: [{ t: '' }], colonnes: 'auto', quote: '', quoteBy: '' },
     CASA_LIEUX: { id: '', name: '', short: '', where: '', year: '', img: '', photo: '', hook: '', desc: '', moment: '', sport: '' },
     CASA_PRODUITS: { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: '', gallery: [], colors: ['marine'], sizes: ['S', 'M', 'L', 'XL'], flag: '', isNew: false, desc: '' },
+    CASA_PODCAST: { id: '', type: 'Réaction', qui: 'Joueur', nom: '', club: '', date: '', title: '', dek: '', audio: '', duree: '', img: '', actif: true },
     CASA_VIDEOS: { id: '', tag: '', date: '', img: '', alt: '', title: '', dek: '', url: '', dur: '' },
     CASA_CLUBS: { id: '', name: '', sport: 'Football', city: '', niveau: '', fondation: '', stade: '', logo: '', img: '' },
     CASA_JOUEURS: { id: '', num: '', name: '', role: 'Attaquant', club: '', clubLabel: '', sport: '', img: '', masquer: false },
@@ -549,7 +551,7 @@
 
   // ---------- Aperçu sur le site, avant publication ----------
   var PV = null, pvBar = null;
-  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home', CASA_RESEAUX: 'home', CASA_ENCARTS: 'news' };
+  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_PODCAST: 'podcast', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home', CASA_RESEAUX: 'home', CASA_ENCARTS: 'news' };
   function openCardIdx(k) { if (k === 'CASA_GAZETTE' && S.gzSel != null) return S.gzSel; var m = null; Object.keys(S.openCards || {}).forEach(function (p) { var r = p.match(new RegExp('^' + k + '\\[(\\d+)\\]$')); if (r && S.openCards[p]) m = Number(r[1]); }); return m; }
   function startPreview(k, value) {
     var site = window.CasaSite; if (!site || PV) return;
@@ -733,6 +735,7 @@
       } }, opts.map(function (o) { return E('option', { value: o[0], selected: o[0] === str || null }, o[1]); }));
       return [lab, sel];
     }
+    if (k === 'audio') return [lab, audioField(parent, k)];
     if (isImg(k, str)) return [lab, imgField(parent, k)];
     var long = LONG.test(String(k)) || str.length > 70 || str.indexOf('\n') >= 0;
     var inp = long ? E('textarea', { class: 'cba-in', value: str, rows: String(Math.min(18, Math.max(3, Math.ceil(str.length / 90) + (str.match(/\n/g) || []).length))) }) : E('input', { class: 'cba-in', value: str });
@@ -761,6 +764,35 @@
       E('div', { class: 'cba-row', style: 'margin-top:.35rem' }, upBtn, file, cropBtn, backBtn,
         E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { pickImage(set); } }, 'Bibliothèque'),
         parent[k] ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { set(''); } }, 'Retirer') : null)));
+  }
+  // Fichier audio du podcast : envoi dans le stockage du site (dossier podcast/) ou adresse collée
+  function audioField(parent, k) {
+    var player = E('audio', { controls: true, preload: 'none', src: parent[k] || null, style: 'width:100%;margin-top:.35rem' + (parent[k] ? '' : ';display:none') });
+    var inp = E('input', { class: 'cba-in', value: parent[k] || '', placeholder: 'Adresse du fichier .mp3 ou bouton « Envoyer un fichier audio »', oninput: function (e) { parent[k] = e.target.value; player.src = e.target.value; player.style.display = e.target.value ? '' : 'none'; mark(); } });
+    var btn = E('button', { type: 'button', class: 'cba-btn sm' }, 'Envoyer un fichier audio');
+    var file = E('input', { type: 'file', accept: 'audio/*,.mp3,.m4a', style: 'display:none', onchange: function (e) {
+      var f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+      btn.disabled = true; btn.textContent = 'Envoi…';
+      uploadAudio(f).then(function (u) { parent[k] = u; inp.value = u; player.src = u; player.style.display = ''; mark(); btn.disabled = null; btn.textContent = 'Envoyer un fichier audio'; toast('Fichier audio enregistré : pensez à « Enregistrer et publier »'); },
+        function (er) { btn.disabled = null; btn.textContent = 'Envoyer un fichier audio'; err(er); });
+    } });
+    btn.addEventListener('click', function () { file.click(); });
+    return E('div', {}, inp, E('div', { class: 'cba-row', style: 'margin-top:.35rem' }, btn, file), player);
+  }
+  function uploadAudio(file) {
+    if (!A.uploadImage) return Promise.reject(new Error('Stockage non configuré'));
+    if (!/^audio\//.test(file.type || '') && !/\.(mp3|m4a|aac|wav|ogg)$/i.test(file.name || '')) return Promise.reject(new Error('Choisissez un fichier audio (.mp3 ou .m4a)'));
+    if (file.size > 50 * 1024 * 1024) return Promise.reject(new Error('Fichier trop lourd (50 Mo maximum) : exportez-le en .mp3 à 96 ou 128 kbit/s'));
+    var ext = (/\.(mp3|m4a|aac|wav|ogg)$/i.exec(file.name || '') || [0, 'mp3'])[1].toLowerCase();
+    var mime = { mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav', ogg: 'audio/ogg' }[ext];
+    var d = new Date(), stamp = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+    var path = 'podcast/' + stamp + '-' + slug(file.name.replace(/\.[^.]+$/, '')) + '-' + Math.random().toString(36).slice(2, 6) + '.' + ext;
+    var blob = (file.type && /^audio\//.test(file.type)) ? file : new Blob([file], { type: mime });
+    return A.uploadImage(blob, path).catch(function (e) {
+      var m = String((e && e.message) || e);
+      if (/mime|type|size|large|exceed/i.test(m)) throw new Error('Le stockage refuse les fichiers audio : lancez une fois le fichier supabase/podcast.sql dans Supabase (voir docs/ESPACE-ADMIN.md)');
+      throw e;
+    });
   }
   function itemTitle(x, i) {
     if (x == null) return 'Élément ' + (i + 1);

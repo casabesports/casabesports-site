@@ -164,8 +164,15 @@ Conseils : fichier .mp4, moins de 15 secondes, 1080p au plus, 50 Mo maximum (id�
 
 À faire une seule fois avant le premier envoi : Supabase › SQL Editor › New query, collez le contenu de `supabase/videos.sql`, puis « Run ». Sans cette étape, le stockage refuse les vidéos. Vous pouvez aussi coller l’adresse d’une vidéo .mp4 déjà en ligne.
 
+## Le podcast
+
+Contenus du site › **Podcast** : un épisode = un titre, une phrase de présentation, le type (« Émission » pour le podcast de la rédaction, « Réaction » pour l'après-match), qui parle (Joueur, Coach, Staff ou Supporter), son nom, son club, la date (2026-11-16), la durée et le fichier audio (bouton « Envoyer un fichier audio », .mp3 ou .m4a, 50 Mo maximum). Le bouton « Écouter le podcast » de l'accueil ouvre la page « Le podcast » ; l'épisode joue dans un petit lecteur qui suit la navigation.
+
+À faire une seule fois avant le premier envoi : Supabase › SQL Editor › New query, collez le contenu de `supabase/podcast.sql`, puis « Run ». Sans cette étape, le stockage refuse les fichiers audio. Publiez une réaction seulement avec l'accord de la personne enregistrée.
+
 ## Accueil épuré et couleurs des fonds
 
+- **Mon essentiel** : un abonné connecté voit d'abord six raccourcis (mes clubs, le podcast, la Gazette, ma compo AR, mon quotidien, mon abonnement) ; la porte « passionné / pro » ne lui est plus montrée.
 - **Accueil** : 5 blocs essentiels s'affichent pour tout le monde (grand bandeau à la une, résultats du week-end, portes « passionné » / « pro », Casa × Cherwood, Gazette du mois). Les autres rubriques (actus, vidéos, météo, Club House, culture…) sont proposées aux abonnés connectés dans **Personnaliser mon accueil** : sports et clubs favoris (ils passent en tête du bandeau, des résultats et des actus), rubriques à afficher et leur ordre, disposition, arrière-plan. Ces choix sont gardés dans le compte de l'abonné (Supabase, aucune table à créer) et le suivent sur tous ses appareils.
 - **Couleurs des fonds** (Contenus du site › Fonds de page) : photos de fond en noir et blanc ou en couleur, couleur de fond pour tout le site, et couleur propre à une page. Chaque abonné peut aussi choisir sa couleur dans Personnaliser mon accueil ou Mon espace › Apparence. Par défaut : noir et blanc, sans teinte.
 
