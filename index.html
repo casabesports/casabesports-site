@@ -2770,7 +2770,7 @@ img, video, canvas, svg { max-width: 100%; }
 @media (min-width: 600px) and (max-width: 1100px) { .wrap { padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); } }
 </style>
 <style>
-/* ===== Jeux (#/jeux) : le Quiz foot du bus et Devine le joueur — couleurs Marée ===== */
+/* ===== Jeux (#/jeux) : le quiz du bus et Devine le joueur — couleurs Marée ===== */
 .jx { --jx-rade: var(--rade, #10283a); --jx-sun: var(--sun, #f2b33d); }
 .jx-hero { background: var(--jx-rade); color: #f8f3e8; border-bottom: 4px solid var(--jx-sun); }
 .jx-hero .wrap { padding-top: 2.2rem; padding-bottom: 2.8rem; }
@@ -2851,12 +2851,26 @@ img, video, canvas, svg { max-width: 100%; }
 .jx-rates { display: flex; flex-wrap: wrap; gap: .35rem; margin: .8rem 0 0; } .jx-rates span { font-size: 13px; padding: .3rem .5rem; background: var(--surface-2); color: var(--muted); text-decoration: line-through; }
 .jx-rev { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 1rem; align-items: center; }
 .jx-rev img { width: 110px; height: 130px; object-fit: cover; filter: grayscale(1); border-bottom: 4px solid var(--jx-sun); }
+.jx-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-bottom: 1rem; }
+.jx-mode { display: flex; flex-direction: column; align-items: flex-start; gap: .25rem; min-height: 72px; padding: .8rem .9rem; border: 1.5px solid var(--line-2); background: var(--surface); color: var(--ink); text-align: left; cursor: pointer; font-family: inherit; border-radius: 0; }
+.jx-mode b { font: 800 16px/1.1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .02em; }
+.jx-mode span { font-size: 13px; line-height: 1.35; color: var(--muted); }
+.jx-mode.is-on { background: var(--jx-rade); border-color: var(--jx-rade); color: #fff; box-shadow: inset 0 4px 0 var(--jx-sun); }
+.jx-mode.is-on span { color: #b9c7d2; }
+.jx-code-in { text-transform: uppercase; letter-spacing: .3em; font: 800 22px/1 var(--bn-font, sans-serif) !important; flex: 0 1 160px !important; text-align: center; }
+.jx-code { font: 800 clamp(3.4rem, 14vw, 5.5rem)/1 var(--bn-font, sans-serif); letter-spacing: .14em; color: var(--jx-sun); margin: .4rem 0 .5rem; }
+.jx-lobby { list-style: none; margin: 1rem 0 .4rem; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.jx-lobby li { padding: .45rem .7rem; background: rgba(255,255,255,.1); font: 800 15px/1 var(--bn-font, sans-serif); }
+.jx-lobby li.is-moi { background: var(--jx-sun); color: #10283a; }
+.jx-opt.is-choisi { background: var(--jx-rade); border-color: var(--jx-rade); color: #fff; }
+.jx-sb span.is-moi { background: var(--jx-rade); color: #fff; } .jx-sb span.is-ok { box-shadow: inset 0 -3px 0 var(--jx-sun); }
 .jx-vide { border: 1px dashed var(--line-2); padding: 1.4rem; color: var(--text-2); line-height: 1.55; }
 @media (max-width: 640px) {
   .jx-hero .wrap { padding-top: 1.4rem; padding-bottom: 2.3rem; } .jx-intro { font-size: 14.5px; line-height: 1.5; }
   .jx-tabs { margin-top: -1.2rem; }
   .jx-tab { padding: .6rem .7rem; min-height: 52px; } .jx-tab-t { font-size: 13.5px; } .jx-tab-s { font-size: 11px; }
   .jx-opts { grid-template-columns: 1fr; }
+  .jx-mode { min-height: 64px; padding: .7rem; } .jx-mode b { font-size: 14px; } .jx-mode span { font-size: 12px; }
   .jx-cta, .jx-act .btn { width: 100%; }
   .jx-rev { grid-template-columns: 84px minmax(0, 1fr); } .jx-rev img { width: 84px; height: 100px; }
 }
@@ -4088,33 +4102,44 @@ img, video, canvas, svg { max-width: 100%; }
   </section>
 </sc-if>
 
-<!-- ================= JEUX : le Quiz foot (seul ou à plusieurs) et Devine le joueur (js/jeux.js) ================= -->
+<!-- ================= JEUX : le quiz du bus (un téléphone ou chacun le sien) et Devine le joueur (js/jeux.js) ================= -->
 <sc-if value="{{isJeux}}" hint-placeholder-val="{{ false }}">
   <div class="jx">
     <section class="jx-hero">
       <div class="wrap">
         <div class="jx-k">Les jeux BE+</div>
         <h1 class="jx-h1">Le quiz du bus</h1>
-        <p class="jx-intro">Culture foot du monde entier, à jouer seul ou entre coéquipiers sur la route du match. On se passe le téléphone, chacun son tour. Ça marche même sans réseau.</p>
+        <p class="jx-intro">Foot, basket, hand, volley et hockey : de la culture sport à jouer entre coéquipiers sur la route du match. Sur un seul téléphone qu’on se passe, ou chacun sur le sien, tous en même temps.</p>
       </div>
     </section>
     <section class="wrap" style="padding-bottom: 5rem">
       <div class="jx-tabs" role="tablist" aria-label="Les jeux"><sc-for list="{{jx.tabs}}" as="t" hint-placeholder-count="2"><button type="button" role="tab" class="jx-tab {{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.go}}"><span class="jx-tab-t">{{t.label}}<sc-if value="{{t.hasBadge}}" hint-placeholder-val="{{ false }}"><span class="jx-ok" aria-label="joué aujourd’hui">{{t.badge}}</span></sc-if></span><span class="jx-tab-s">{{t.sub}}</span></button></sc-for></div>
 
-      <!-- ===== Quiz foot : réglages ===== -->
+      <!-- ===== Quiz du bus : réglages ===== -->
       <sc-if value="{{jx.isQuiz}}" hint-placeholder-val="{{ true }}">
         <sc-if value="{{jx.quiz.reglage}}" hint-placeholder-val="{{ true }}">
           <div class="jx-set">
+            <div class="jx-modes" role="radiogroup" aria-label="Comment jouer"><sc-for list="{{jx.quiz.modes}}" as="m" hint-placeholder-count="2"><button type="button" role="radio" class="jx-mode {{m.cls}}" aria-checked="{{m.sel}}" onClick="{{m.pick}}"><b>{{m.label}}</b><span>{{m.sub}}</span></button></sc-for></div>
             <div class="jx-card">
-              <h2>1. Les joueurs</h2>
+              <h2>1. Le sport</h2>
+              <p class="jx-p">Un sport, ou tous mélangés au hasard.</p>
+              <div class="jx-chips"><sc-for list="{{jx.quiz.sports}}" as="t" hint-placeholder-count="6"><button type="button" class="wk-jour {{t.cls}}" aria-pressed="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}<span class="jx-n">{{t.n}}</span></button></sc-for></div>
+              <sc-if value="{{jx.quiz.hasThemes}}" hint-placeholder-val="{{ false }}">
+                <p class="jx-p" style="margin: 1rem 0 .6rem">Les thèmes (un, plusieurs, ou tout) :</p>
+                <div class="jx-chips"><sc-for list="{{jx.quiz.themes}}" as="t" hint-placeholder-count="6"><button type="button" class="wk-jour {{t.cls}}" aria-pressed="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}<span class="jx-n">{{t.n}}</span></button></sc-for></div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== Un téléphone : réglages ===== -->
+        <sc-if value="{{jx.quiz.reglageTour}}" hint-placeholder-val="{{ true }}">
+          <div class="jx-set">
+            <div class="jx-card">
+              <h2>2. Les joueurs</h2>
               <p class="jx-p">Ajoutez les prénoms de ceux qui jouent. Personne ? Vous jouez en solo.</p>
               <div class="jx-form"><input type="text" value="{{jx.quiz.nom}}" onChange="{{jx.quiz.onNom}}" onKeyDown="{{jx.quiz.onTouche}}" placeholder="Prénom d’un joueur" aria-label="Prénom d’un joueur" maxlength="20" autocomplete="off"><button type="button" class="btn btn-dark" onClick="{{jx.quiz.ajouter}}" style="min-height: 50px">Ajouter</button></div>
               <sc-if value="{{jx.quiz.hasJoueurs}}" hint-placeholder-val="{{ false }}"><div class="jx-pl"><sc-for list="{{jx.quiz.joueurs}}" as="p" hint-placeholder-count="3"><span class="jx-pl-c">{{p.nom}}<button type="button" onClick="{{p.retirer}}" aria-label="{{p.aria}}">×</button></span></sc-for></div></sc-if>
-            </div>
-            <div class="jx-card">
-              <h2>2. Les thèmes</h2>
-              <p class="jx-p">Un thème, plusieurs, ou tout mélangé au hasard.</p>
-              <div class="jx-chips"><sc-for list="{{jx.quiz.themes}}" as="t" hint-placeholder-count="6"><button type="button" class="wk-jour {{t.cls}}" aria-pressed="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}<span class="jx-n">{{t.n}}</span></button></sc-for></div>
             </div>
             <div class="jx-card">
               <h2>3. La partie</h2>
@@ -4123,12 +4148,87 @@ img, video, canvas, svg { max-width: 100%; }
             </div>
             <div class="jx-go">
               <button type="button" class="btn jx-cta" onClick="{{jx.quiz.lancer}}">C’est parti</button>
-              <span class="jx-p" style="margin: 0">{{jx.quiz.resume}} · {{jx.quiz.total}} questions en tout</span>
+              <span class="jx-p" style="margin: 0">{{jx.quiz.resume}} · {{jx.quiz.dispo}} questions dans le choix</span>
             </div>
           </div>
         </sc-if>
 
-        <!-- ===== Quiz foot : en jeu ===== -->
+        <!-- ===== Chacun son téléphone : réglages ===== -->
+        <sc-if value="{{jx.quiz.reglageReseau}}" hint-placeholder-val="{{ false }}">
+          <div class="jx-set">
+            <div class="jx-card">
+              <h2>2. Votre prénom</h2>
+              <p class="jx-p">Tout le monde joue en même temps sur son propre téléphone, avec les mêmes questions. Il faut un peu de réseau.</p>
+              <div class="jx-form"><input type="text" value="{{jx.net.prenom}}" onChange="{{jx.net.onPrenom}}" placeholder="Votre prénom" aria-label="Votre prénom" maxlength="20" autocomplete="given-name"></div>
+            </div>
+            <div class="jx-card">
+              <h2>3. Créer la partie</h2>
+              <p class="jx-p">Une seule personne crée la partie et choisit les réglages. Elle donne ensuite le code aux autres.</p>
+              <div class="jx-row"><span class="jx-p" style="margin: 0">Nombre de questions</span><div class="jx-chips" style="margin: 0"><sc-for list="{{jx.net.nbs}}" as="n" hint-placeholder-count="3"><button type="button" class="wk-jour {{n.cls}}" aria-pressed="{{n.sel}}" onClick="{{n.pick}}">{{n.label}}</button></sc-for></div></div>
+              <div class="jx-row"><span class="jx-p" style="margin: 0">{{jx.quiz.chronoLabel}}</span><button type="button" class="jx-sw" role="switch" aria-checked="{{jx.quiz.chronoPressed}}" onClick="{{jx.quiz.basculerChrono}}" aria-label="Chrono de 20 secondes"><span></span></button></div>
+              <div class="jx-go" style="margin-top: .8rem"><button type="button" class="btn jx-cta" onClick="{{jx.net.creer}}">Créer une partie</button></div>
+            </div>
+            <div class="jx-card">
+              <h2>Ou rejoindre une partie</h2>
+              <p class="jx-p">Tapez le code à 4 lettres affiché sur le téléphone de l’organisateur.</p>
+              <div class="jx-form"><input type="text" class="jx-code-in" value="{{jx.net.code}}" onInput="{{jx.net.onCode}}" onKeyDown="{{jx.net.onToucheCode}}" placeholder="CODE" aria-label="Code de la partie" maxlength="4" autocomplete="off" autocapitalize="characters"><button type="button" class="btn btn-dark" onClick="{{jx.net.rejoindre}}" style="min-height: 50px">Rejoindre</button></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== Chacun son téléphone : la partie ===== -->
+        <sc-if value="{{jx.net.actif}}" hint-placeholder-val="{{ false }}">
+          <div class="jx-quiz">
+            <sc-if value="{{jx.net.connexion}}" hint-placeholder-val="{{ false }}"><div class="jx-card"><h2>Connexion…</h2><p class="jx-p">On cherche la partie {{jx.net.code}}. Gardez l’appli ouverte.</p></div></sc-if>
+            <sc-if value="{{jx.net.introuvable}}" hint-placeholder-val="{{ false }}"><div class="jx-card"><h2>Partie introuvable</h2><p class="jx-p">Vérifiez le code {{jx.net.code}} avec l’organisateur, et que son appli est bien ouverte.</p></div></sc-if>
+            <sc-if value="{{jx.net.erreur}}" hint-placeholder-val="{{ false }}"><div class="jx-card"><h2>Pas de connexion</h2><p class="jx-p">Le jeu à plusieurs téléphones a besoin de réseau. Sans réseau, jouez sur un seul téléphone en vous le passant.</p></div></sc-if>
+            <sc-if value="{{jx.net.ferme}}" hint-placeholder-val="{{ false }}"><div class="jx-card"><h2>Partie terminée</h2><p class="jx-p">L’organisateur a fermé la partie.</p></div></sc-if>
+
+            <sc-if value="{{jx.net.salle}}" hint-placeholder-val="{{ false }}">
+              <div class="jx-fin">
+                <div class="jx-k">Code de la partie</div>
+                <div class="jx-code">{{jx.net.code}}</div>
+                <p class="jx-p" style="color: #c7d3dc; margin: 0">{{jx.net.total}} · {{jx.net.nbJoueurs}}</p>
+                <ul class="jx-lobby"><sc-for list="{{jx.net.joueurs}}" as="p" hint-placeholder-count="3"><li class="{{p.cls}}">{{p.nom}}</li></sc-for></ul>
+              </div>
+              <sc-if value="{{jx.net.hote}}" hint-placeholder-val="{{ false }}">
+                <p class="jx-note">Les autres ouvrent Jeux, choisissent « Chacun son téléphone » et tapent ce code.</p>
+                <div class="jx-act"><button type="button" class="btn jx-cta" onClick="{{jx.net.lancer}}">{{jx.net.lancerLabel}}</button></div>
+              </sc-if>
+              <sc-if value="{{jx.net.invite}}" hint-placeholder-val="{{ false }}"><p class="jx-note" role="status">{{jx.net.attente}}</p></sc-if>
+            </sc-if>
+
+            <sc-if value="{{jx.net.num}}" hint-placeholder-val="{{ false }}">
+              <div class="jx-qh"><span class="jx-k" style="color: var(--muted)">{{jx.net.num}} · {{jx.net.theme}}</span><sc-if value="{{jx.net.chrono}}" hint-placeholder-val="{{ false }}"><span class="jx-sec {{jx.net.urgent}}" aria-live="off">{{jx.net.reste}} s</span></sc-if></div>
+              <div class="jx-prog" aria-hidden="true"><sc-if value="{{jx.net.chrono}}" hint-placeholder-val="{{ false }}"><div class="{{jx.net.urgent}}" style="width: {{jx.net.chronoPct}}"></div></sc-if></div>
+              <h2 class="jx-q">{{jx.net.q}}</h2>
+              <div class="jx-opts"><sc-for list="{{jx.net.options}}" as="o" hint-placeholder-count="4"><button type="button" class="jx-opt {{o.cls}}" disabled="{{o.dis}}" onClick="{{o.pick}}">{{o.label}}</button></sc-for></div>
+              <sc-if value="{{jx.net.aRepondu}}" hint-placeholder-val="{{ false }}"><p class="jx-note" role="status">{{jx.net.attenteRep}}</p></sc-if>
+              <sc-if value="{{jx.net.revele}}" hint-placeholder-val="{{ false }}">
+                <div class="jx-verdict {{jx.net.verdictCls}}" role="status">{{jx.net.verdict}}</div>
+                <p class="jx-note" style="margin-top: 0">{{jx.net.trouve}}</p>
+                <sc-if value="{{jx.net.hasWhy}}" hint-placeholder-val="{{ false }}"><p style="margin: .4rem 0 0; color: var(--text-2); line-height: 1.5">{{jx.net.why}}</p></sc-if>
+                <sc-if value="{{jx.net.hote}}" hint-placeholder-val="{{ false }}"><div class="jx-act"><button type="button" class="btn jx-cta" onClick="{{jx.net.suivant}}">{{jx.net.suivantLabel}}</button></div></sc-if>
+                <sc-if value="{{jx.net.invite}}" hint-placeholder-val="{{ false }}"><p class="jx-note">{{jx.net.attenteSuite}}</p></sc-if>
+              </sc-if>
+              <div class="jx-sb"><sc-for list="{{jx.net.joueurs}}" as="x" hint-placeholder-count="3"><span class="{{x.cls}}">{{x.nom}} <b>{{x.pts}}</b> {{x.etat}}</span></sc-for></div>
+            </sc-if>
+
+            <sc-if value="{{jx.net.fin}}" hint-placeholder-val="{{ false }}">
+              <div class="jx-fin">
+                <div class="jx-k">Fin de partie · {{jx.net.code}}</div>
+                <div class="jx-big">{{jx.net.titre}}</div>
+                <p class="jx-p" style="color: #c7d3dc">{{jx.net.sous}}</p>
+                <ol class="jx-pod"><sc-for list="{{jx.net.podium}}" as="p" hint-placeholder-count="3"><li class="{{p.cls}}"><span class="r">{{p.rang}}</span><span class="n">{{p.nom}}<small>{{p.detail}} bonnes réponses</small></span><span class="p">{{p.pts}}</span></li></sc-for></ol>
+              </div>
+              <div class="jx-act"><sc-if value="{{jx.net.hote}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn jx-cta" onClick="{{jx.net.rejouer}}">Rejouer avec les mêmes</button></sc-if><button type="button" class="btn" onClick="{{jx.net.partager}}" style="background: transparent; color: var(--ink); border: 2px solid var(--ink)">Partager les scores</button></div>
+            </sc-if>
+
+            <button type="button" class="lnk jx-quit" onClick="{{jx.net.quitter}}">Quitter la partie</button>
+          </div>
+        </sc-if>
+
+        <!-- ===== Quiz du bus : en jeu ===== -->
         <sc-if value="{{jx.quiz.enJeu}}" hint-placeholder-val="{{ false }}">
           <div class="jx-quiz">
             <sc-if value="{{jx.quiz.multi}}" hint-placeholder-val="{{ false }}"><div class="jx-tour"><span>Au tour de</span><b>{{jx.quiz.tourDe}}</b></div></sc-if>
@@ -4146,7 +4246,7 @@ img, video, canvas, svg { max-width: 100%; }
           </div>
         </sc-if>
 
-        <!-- ===== Quiz foot : classement ===== -->
+        <!-- ===== Quiz du bus : classement ===== -->
         <sc-if value="{{jx.quiz.fini}}" hint-placeholder-val="{{ false }}">
           <div class="jx-quiz">
             <div class="jx-fin">
@@ -8718,7 +8818,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/videos.js?v=__VERSION__"></script>
 <script src="contenus/podcast.js?v=__VERSION__"></script>
 <script src="contenus/quiz.js?v=__VERSION__"></script>
-<script src="contenus/quiz-foot.js?v=__VERSION__"></script>
+<script src="contenus/quiz-sports.js?v=__VERSION__"></script>
 <script src="contenus/culture.js?v=__VERSION__"></script>
 <script src="contenus/fonds.js?v=__VERSION__"></script>
 <script src="contenus/legal.js?v=__VERSION__"></script>

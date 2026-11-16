@@ -2981,7 +2981,7 @@ class Component extends DCLogic {
     const appUrl = (typeof window !== 'undefined' && window.CASA_APP_URL) || 'https://claude.ai/artifact/3Z1QbNeNwNDmCizUsTPHJ6';
     const inApp = typeof window !== 'undefined' && !!window.CASA_APP;
     const arModes = [['lineup', 'Réalité augmentée', 'Ma compo en AR', 'Neuf disciplines, votre équipe sur le vrai terrain, à son vrai emplacement (photos aériennes, bâtiments, soleil réel), avec le ballon et le règlement. Posez-le sur votre table et proposez la compo au Club House.']].map(([id, tag, title, text]) => ({ tag, title, text, open: () => this.openAR(id) }))
-      .concat([{ tag: 'Jeux', title: 'Le quiz foot du bus', text: 'Culture foot du monde entier, à jouer entre coéquipiers sur la route du match : on se passe le téléphone, chacun son tour, avec chrono et classement. Marche sans réseau. Et un joueur à deviner chaque jour.', open: () => this.go('jeux') }]);
+      .concat([{ tag: 'Jeux', title: 'Le quiz du bus', text: 'Foot, basket, hand, volley et hockey : un quiz entre coéquipiers sur la route du match, sur un seul téléphone qu’on se passe ou chacun sur le sien en même temps, avec chrono et classement. Et un joueur à deviner chaque jour.', open: () => this.go('jeux') }]);
     const PWA = typeof window !== 'undefined' && window.CasaPWA;
     const pwaIn = !!(PWA && PWA.installee());
     const installLabel = pwaIn ? 'Application installée' : 'Installer l’application';
@@ -3048,8 +3048,8 @@ class Component extends DCLogic {
     };
     return {
       podcast, essentiel, isPodcast: V === 'podcast', goPodcast: () => this.go('podcast'),
-      // Jeux : le Quiz foot du bus et Devine le joueur (js/jeux.js)
-      isJeux: V === 'jeux', goJeux: () => this.go('jeux'), jx: V === 'jeux' && typeof CasaJeux !== 'undefined' ? CasaJeux.vals(this, { D }) : { tabs: [], quiz: {}, devine: {} },
+      // Jeux : le quiz du bus (tous sports) et Devine le joueur (js/jeux.js)
+      isJeux: V === 'jeux', goJeux: () => this.go('jeux'), jx: V === 'jeux' && typeof CasaJeux !== 'undefined' ? CasaJeux.vals(this, { D }) : { tabs: [], quiz: {}, net: {}, devine: {} },
       isVestiaire: V === 'vestiaire', vs: VS.page, vsHome: VS.home, goVestiaire: () => this.go('vestiaire'), goVestiaireClub: () => this.go('vestiaire', { vsClub: s.clubId }),
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
         ok: s.mbRes === 'ok', off: s.mbRes === 'off', none: s.mbRes === 'none', bad: s.mbRes === 'bad', format: s.mbRes === 'format',

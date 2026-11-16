@@ -186,6 +186,8 @@
   (function () { var c = readCache(); if (Object.keys(c).length) applyContent(c, true); })();
   if (!A.on) return;
   A.memberLive = true;
+  // Client Supabase brut (canaux temps réel du quiz en réseau, js/jeux.js)
+  A.client = function () { return ready; };
 
   function emit(u) { A.user = u; listeners.forEach(function (cb) { try { cb(u); } catch (e) {} }); }
   function toUser(session) {

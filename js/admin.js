@@ -29,7 +29,7 @@
     { key: 'CASA_PRODUITS', label: 'Boutique : produits', desc: 'Fiches produits : nom, prix, photos, tailles, couleurs.', item: 'name' },
     { key: 'CASA_VIDEOS', label: 'Vidéos', desc: 'Vidéos et vignettes.', item: 'title' },
     { key: 'CASA_PODCAST', label: 'Podcast', desc: 'Les épisodes du podcast BE+ (page « Le podcast »). Type : « Émission » ou « Réaction » (après-match). Qui : Joueur, Coach, Staff ou Supporter. Date au format 2026-11-16. Envoyez le fichier audio (.mp3 ou .m4a, 50 Mo maximum). Publiez une réaction seulement avec l’accord de la personne enregistrée.', item: 'title' },
-    { key: 'CASA_QUIZ', label: 'Jeux : questions du quiz', desc: 'Vos questions pour le « Quiz foot » (rubrique Jeux). Une bonne réponse et trois mauvaises ; l’explication s’affiche après la réponse. Elles forment le thème « Questions de la rédaction » et passent aussi dans « Tout mélanger ». N’ajoutez que des faits vérifiés.', item: 'question' },
+    { key: 'CASA_QUIZ', label: 'Jeux : questions du quiz', desc: 'Vos questions pour le « Quiz du bus » (rubrique Jeux). Une bonne réponse et trois mauvaises ; l’explication s’affiche après la réponse. Elles forment le thème « Questions de la rédaction » et passent aussi dans « Tous les sports ». N’ajoutez que des faits vérifiés.', item: 'question' },
     { key: 'CASA_CULTURE', label: 'Culture', desc: 'Œuvres et photographies des salles Culture.', item: 'title' },
     { key: 'CASA_FONDS', label: 'Fonds de page', desc: 'L’image derrière chaque page du site.' },
     { key: 'CASA_APROPOS', label: 'À propos', desc: 'L’histoire de Casa Besports : ouverture, manifeste, étapes, piliers, conviction et appel final.' },

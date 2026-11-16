@@ -1,27 +1,33 @@
 /*
- * Casa Besports — banque de questions du « Quiz foot » (rubrique Jeux, #/jeux).
- * Culture générale du football international, rangée par thème (pays, championnat ou compétition).
- * Le jeu tire les questions au hasard : un thème, plusieurs, ou tout mélangé.
+ * Casa Besports — banque de questions du « Quiz du bus » (rubrique Jeux, #/jeux).
+ * Culture générale du sport international : football, basket, handball, volley et hockey sur glace,
+ * rangée par sport puis par thème (pays, championnat ou compétition).
+ * Le jeu tire les questions au hasard : un sport, un ou plusieurs thèmes, ou tout mélangé.
  * Les questions restent dans l'appli : le quiz marche aussi sans réseau (dans le bus).
  *
  * Une ligne = [ thème, question, bonne réponse, mauvaise 1, mauvaise 2, mauvaise 3, explication ]
- * Thèmes : monde, euro, ldc, france, angleterre, espagne, italie, allemagne, sudam, afrique, europe, legendes
+ * Thèmes : voir CASA_QUIZ_FOOT_THEMES ci-dessous (chaque thème appartient à un sport)
  * N'ajoutez que des faits vérifiés et qui ne bougent plus (palmarès passés, records établis).
  * Vos propres questions peuvent aussi s'ajouter dans Admin › Contenus › « Jeux : questions du quiz ».
  */
 window.CASA_QUIZ_FOOT_THEMES = [
-  { id: 'monde', label: 'Coupe du monde' },
-  { id: 'euro', label: 'Euro' },
-  { id: 'ldc', label: 'Ligue des champions' },
-  { id: 'france', label: 'France · Ligue 1' },
-  { id: 'angleterre', label: 'Angleterre · Premier League' },
-  { id: 'espagne', label: 'Espagne · Liga' },
-  { id: 'italie', label: 'Italie · Serie A' },
-  { id: 'allemagne', label: 'Allemagne · Bundesliga' },
-  { id: 'sudam', label: 'Amérique du Sud' },
-  { id: 'afrique', label: 'Afrique' },
-  { id: 'europe', label: 'Reste de l’Europe' },
-  { id: 'legendes', label: 'Légendes et records' }
+  { id: 'monde', sport: 'Football', label: 'Coupe du monde' },
+  { id: 'euro', sport: 'Football', label: 'Euro' },
+  { id: 'ldc', sport: 'Football', label: 'Ligue des champions' },
+  { id: 'france', sport: 'Football', label: 'France · Ligue 1' },
+  { id: 'angleterre', sport: 'Football', label: 'Angleterre · Premier League' },
+  { id: 'espagne', sport: 'Football', label: 'Espagne · Liga' },
+  { id: 'italie', sport: 'Football', label: 'Italie · Serie A' },
+  { id: 'allemagne', sport: 'Football', label: 'Allemagne · Bundesliga' },
+  { id: 'sudam', sport: 'Football', label: 'Amérique du Sud' },
+  { id: 'afrique', sport: 'Football', label: 'Afrique' },
+  { id: 'europe', sport: 'Football', label: 'Reste de l’Europe' },
+  { id: 'legendes', sport: 'Football', label: 'Légendes et records' },
+  { id: 'nba', sport: 'Basket', label: 'NBA' },
+  { id: 'basket', sport: 'Basket', label: 'Basket : France, Europe et règles' },
+  { id: 'hand', sport: 'Handball', label: 'Handball' },
+  { id: 'volley', sport: 'Volley-ball', label: 'Volley-ball' },
+  { id: 'hockey', sport: 'Hockey', label: 'Hockey sur glace' }
 ];
 window.CASA_QUIZ_FOOT = [
   // ----- Coupe du monde -----
@@ -163,5 +169,86 @@ window.CASA_QUIZ_FOOT = [
   ['legendes', 'Combien de Ballons d’Or Cristiano Ronaldo a-t-il gagnés ?', '5', '4', '6', '3', '2008, 2013, 2014, 2016 et 2017.'],
   ['legendes', 'Quel Français a gagné le Ballon d’Or 1998 ?', 'Zinédine Zidane', 'Thierry Henry', 'Didier Deschamps', 'Lilian Thuram', 'L’année du premier titre mondial des Bleus.'],
   ['legendes', 'À quel club Johan Cruyff est-il le plus associé, comme joueur et comme entraîneur ?', 'Ajax et FC Barcelone', 'Ajax et Feyenoord', 'PSV et Real Madrid', 'Barcelone et AC Milan', 'Il a façonné le jeu du Barça.'],
-  ['legendes', 'Quel gardien soviétique est le seul gardien à avoir gagné le Ballon d’Or ?', 'Lev Yachine', 'Rinat Dassaev', 'Igor Akinfeev', 'Oleksandr Chovkovsky', 'En 1963. Le trophée du meilleur gardien porte son nom.']
+  ['legendes', 'Quel gardien soviétique est le seul gardien à avoir gagné le Ballon d’Or ?', 'Lev Yachine', 'Rinat Dassaev', 'Igor Akinfeev', 'Oleksandr Chovkovsky', 'En 1963. Le trophée du meilleur gardien porte son nom.'],
+
+  // ----- Basket · NBA -----
+  ['nba', 'Combien de titres NBA Michael Jordan a-t-il gagnés ?', '6', '5', '4', '7', 'Trois de suite en 1991-1993, puis en 1996-1998.'],
+  ['nba', 'Avec quelle franchise Michael Jordan a-t-il gagné ses titres NBA ?', 'Chicago Bulls', 'Los Angeles Lakers', 'Boston Celtics', 'Detroit Pistons', 'Six titres avec les Bulls, entraînés par Phil Jackson.'],
+  ['nba', 'Qui a marqué 100 points dans un seul match NBA, en 1962 ?', 'Wilt Chamberlain', 'Kobe Bryant', 'Michael Jordan', 'Bill Russell', 'Un record jamais approché depuis.'],
+  ['nba', 'Combien de points Kobe Bryant a-t-il marqués contre Toronto en 2006 ?', '81', '71', '64', '92', 'Le deuxième plus gros total de l’histoire, derrière les 100 de Chamberlain.'],
+  ['nba', 'Qui est le meilleur marqueur de l’histoire de la NBA ?', 'LeBron James', 'Kareem Abdul-Jabbar', 'Karl Malone', 'Kobe Bryant', 'Il a dépassé Kareem Abdul-Jabbar en 2023.'],
+  ['nba', 'Quelle franchise compte le plus de titres NBA ?', 'Boston Celtics', 'Los Angeles Lakers', 'Chicago Bulls', 'Golden State Warriors', 'Les Celtics devancent de peu les Lakers.'],
+  ['nba', 'Combien de titres NBA Bill Russell a-t-il gagnés avec Boston ?', '11', '8', '9', '13', 'Le record absolu pour un joueur ; le trophée de MVP des Finales porte son nom.'],
+  ['nba', 'Avec quelle franchise Tony Parker a-t-il gagné ses quatre titres NBA ?', 'San Antonio Spurs', 'Charlotte Hornets', 'Dallas Mavericks', 'Miami Heat', '2003, 2005, 2007 et 2014.'],
+  ['nba', 'Quel Français a été élu meilleur joueur (MVP) des Finales NBA en 2007 ?', 'Tony Parker', 'Boris Diaw', 'Joakim Noah', 'Nicolas Batum', 'Le premier Européen à recevoir ce titre.'],
+  ['nba', 'Quelle franchise a choisi Victor Wembanyama en premier choix de la draft 2023 ?', 'San Antonio Spurs', 'Charlotte Hornets', 'Houston Rockets', 'Detroit Pistons', 'Il est élu meilleur débutant (rookie) de la saison 2023-2024.'],
+  ['nba', 'Combien de fois Rudy Gobert a-t-il été élu meilleur défenseur de la NBA ?', '4', '2', '3', '5', '2018, 2019, 2021 et 2024.'],
+  ['nba', 'Qui détient le record de paniers à 3 points en carrière NBA ?', 'Stephen Curry', 'Ray Allen', 'James Harden', 'Klay Thompson', 'Le meneur des Golden State Warriors.'],
+  ['nba', 'Combien de temps dure un quart-temps en NBA ?', '12 minutes', '10 minutes', '15 minutes', '8 minutes', 'En compétition FIBA (Europe, JO), c’est 10 minutes.'],
+  ['nba', 'Combien de secondes une équipe a-t-elle pour tirer en NBA ?', '24', '30', '20', '35', 'La règle des 24 secondes, adoptée en 1954.'],
+  ['nba', 'Avec quelle franchise Nikola Jokić a-t-il été champion NBA en 2023 ?', 'Denver Nuggets', 'Phoenix Suns', 'Miami Heat', 'Boston Celtics', 'Le premier titre de l’histoire de Denver.'],
+  ['nba', 'Avec quelle franchise Dirk Nowitzki a-t-il fait toute sa carrière ?', 'Dallas Mavericks', 'Houston Rockets', 'San Antonio Spurs', 'Milwaukee Bucks', 'Champion en 2011, 21 saisons au même club.'],
+  ['nba', 'Avec quelle franchise Larry Bird a-t-il fait toute sa carrière ?', 'Boston Celtics', 'Indiana Pacers', 'Los Angeles Lakers', 'New York Knicks', 'Trois titres dans les années 1980, face aux Lakers de Magic Johnson.'],
+  ['nba', 'Comment appelait-on l’équipe des États-Unis aux JO de Barcelone 1992 ?', 'La Dream Team', 'La Golden Team', 'La Redeem Team', 'Le Showtime', 'Jordan, Magic, Bird… la première équipe olympique avec des joueurs NBA.'],
+
+  // ----- Basket : France, Europe et règles -----
+  ['basket', 'Qui a inventé le basket, en 1891 ?', 'James Naismith', 'William Morgan', 'Walter Camp', 'Pierre de Coubertin', 'Un professeur d’éducation physique, aux États-Unis.'],
+  ['basket', 'À quelle hauteur se trouve le panier ?', '3,05 m', '2,90 m', '3,20 m', '3,50 m', 'Dix pieds, la même hauteur depuis l’invention du jeu.'],
+  ['basket', 'Combien de joueurs par équipe sont sur le terrain ?', '5', '6', '7', '4', 'Et 3 contre 3 dans la version olympique « 3x3 ».'],
+  ['basket', 'Contre quelle équipe la France a-t-elle perdu la finale olympique de basket en 2024 ?', 'États-Unis', 'Serbie', 'Allemagne', 'Canada', 'À Paris, à Bercy, après une deuxième médaille d’argent de suite.'],
+  ['basket', 'En quelle année l’équipe de France masculine a-t-elle été championne d’Europe pour la première fois ?', '2013', '2011', '2015', '2005', 'En Slovénie, avec Tony Parker.'],
+  ['basket', 'Quel a été le premier club français vainqueur de la Coupe d’Europe des clubs champions de basket, en 1993 ?', 'Limoges CSP', 'ASVEL', 'Pau-Orthez', 'Nanterre', 'Une victoire contre Trévise en finale, à Athènes.'],
+  ['basket', 'Quel club compte le plus de titres de champion de France de basket ?', 'ASVEL', 'Limoges CSP', 'Pau-Orthez', 'AS Monaco', 'Le club de Lyon-Villeurbanne.'],
+  ['basket', 'Quel club a gagné le plus d’Euroligues ?', 'Real Madrid', 'CSKA Moscou', 'Panathinaïkos', 'Maccabi Tel-Aviv', 'La section basket du Real est aussi la plus titrée d’Europe.'],
+  ['basket', 'Combien vaut un panier marqué derrière la ligne à 3 points ?', '3 points', '2 points', '4 points', '1 point', 'Un lancer franc vaut 1 point.'],
+
+  // ----- Handball -----
+  ['hand', 'Combien de joueurs par équipe sur le terrain au handball ?', '7', '6', '5', '8', 'Six joueurs de champ et un gardien.'],
+  ['hand', 'Combien de temps dure un match de handball ?', '2 x 30 minutes', '2 x 25 minutes', '2 x 35 minutes', '4 x 15 minutes', 'Une heure de jeu effectif.'],
+  ['hand', 'À combien de mètres du but se tire un jet de 7 mètres ?', '7 m', '6 m', '9 m', '5 m', 'Le penalty du handball.'],
+  ['hand', 'Comment s’appelle la ligne qui entoure la zone du gardien ?', 'La ligne des 6 mètres', 'La ligne des 9 mètres', 'La ligne médiane', 'La ligne de fond', 'Seul le gardien peut s’y tenir. Les 9 m, en pointillés, servent aux jets francs.'],
+  ['hand', 'Combien de pas un joueur peut-il faire ballon en main ?', '3', '2', '4', '5', 'Et il ne peut garder le ballon que 3 secondes sans jouer.'],
+  ['hand', 'Combien de temps dure une exclusion temporaire ?', '2 minutes', '1 minute', '5 minutes', '10 minutes', 'L’équipe joue alors en infériorité numérique.'],
+  ['hand', 'Comment surnommait-on l’équipe de France championne du monde en 1995 ?', 'Les Barjots', 'Les Experts', 'Les Costauds', 'Les Bronzés', 'Les Bronzés : médaillés de bronze en 1992. Les Costauds : champions du monde 2001. Les Experts : depuis 2009.'],
+  ['hand', 'Combien de titres olympiques l’équipe de France masculine de handball a-t-elle gagnés ?', '3', '2', '4', '1', 'Pékin 2008, Londres 2012 et Tokyo 2021.'],
+  ['hand', 'Quel Français a été élu trois fois meilleur handballeur du monde ?', 'Nikola Karabatić', 'Thierry Omeyer', 'Daniel Narcisse', 'Jackson Richardson', 'En 2007, 2014 et 2016.'],
+  ['hand', 'Quel Français a été le premier élu meilleur handballeur du monde, en 1995 ?', 'Jackson Richardson', 'Nikola Karabatić', 'Jérôme Fernandez', 'Thierry Omeyer', 'Le meneur réunionnais des Barjots.'],
+  ['hand', 'À quel poste jouait Thierry Omeyer ?', 'Gardien', 'Pivot', 'Ailier', 'Demi-centre', 'Un des meilleurs gardiens de l’histoire.'],
+  ['hand', 'Lors de quels Jeux olympiques les handballeuses françaises ont-elles gagné l’or pour la première fois ?', 'Tokyo 2021', 'Rio 2016', 'Londres 2012', 'Paris 2024', 'À Paris en 2024, elles ont pris l’argent.'],
+  ['hand', 'Quel club français a gagné la Ligue des champions de handball en 2003 et en 2018 ?', 'Montpellier', 'Paris Saint-Germain', 'Chambéry', 'Nantes', 'En 2018, Montpellier bat Nantes en finale.'],
+  ['hand', 'Quel pays a été champion du monde masculin en 2019, 2021 et 2023 ?', 'Danemark', 'France', 'Suède', 'Espagne', 'Une série menée par Mikkel Hansen puis Mathias Gidsel.'],
+  ['hand', 'Dans quel pays joue le célèbre club du THW Kiel ?', 'Allemagne', 'Danemark', 'Suède', 'Norvège', 'Le club le plus titré de la Bundesliga de handball.'],
+  ['hand', 'Quel pays a organisé et gagné le championnat du monde masculin 2017 ?', 'France', 'Allemagne', 'Danemark', 'Croatie', 'Finale gagnée contre la Norvège à Paris.'],
+  ['hand', 'Que mettent les handballeurs sur leurs mains pour mieux tenir le ballon ?', 'De la résine', 'Du talc', 'De la cire', 'De l’huile', 'On l’appelle aussi « colle ».'],
+
+  // ----- Volley-ball -----
+  ['volley', 'Combien de joueurs par équipe sur le terrain au volley-ball ?', '6', '5', '7', '4', 'Ils tournent d’une position à chaque récupération du service.'],
+  ['volley', 'En combien de points se gagne un set (hors 5e set) ?', '25', '21', '15', '30', 'Avec deux points d’écart ; le 5e set se joue en 15.'],
+  ['volley', 'Combien de touches de balle une équipe a-t-elle au maximum avant de renvoyer ?', '3', '2', '4', '5', 'Le contre ne compte pas comme une touche.'],
+  ['volley', 'Quel joueur porte un maillot d’une couleur différente ?', 'Le libéro', 'Le passeur', 'Le pointu', 'Le central', 'Spécialiste de la défense, il ne peut ni attaquer au-dessus du filet ni servir en compétition internationale.'],
+  ['volley', 'À quelle hauteur est le filet en volley masculin ?', '2,43 m', '2,24 m', '2,55 m', '2,35 m', '2,24 m chez les femmes.'],
+  ['volley', 'Combien de titres olympiques l’équipe de France masculine de volley a-t-elle gagnés ?', '2', '1', '3', '0', 'Tokyo 2021 et Paris 2024.'],
+  ['volley', 'Quel Français a été élu meilleur joueur du tournoi olympique de Tokyo 2021 ?', 'Earvin Ngapeth', 'Jenia Grebennikov', 'Benjamin Toniutti', 'Trévor Clevenot', 'Fils d’Éric Ngapeth, ancien international.'],
+  ['volley', 'À quel poste joue Jenia Grebennikov en équipe de France ?', 'Libéro', 'Passeur', 'Central', 'Pointu', 'Considéré comme l’un des meilleurs libéros du monde.'],
+  ['volley', 'Combien de joueurs par équipe au beach-volley ?', '2', '3', '4', '6', 'Sur un terrain de sable plus petit.'],
+  ['volley', 'Quelles sont les dimensions d’un terrain de volley ?', '18 m x 9 m', '20 m x 10 m', '16 m x 8 m', '24 m x 12 m', 'Deux carrés de 9 m de côté.'],
+  ['volley', 'Quel pays a été champion du monde masculin en 2014 et en 2018 ?', 'Pologne', 'Brésil', 'Italie', 'Russie', 'L’Italie succède à la Pologne en 2022.'],
+  ['volley', 'Dans quel pays le volley-ball a-t-il été inventé, en 1895 ?', 'États-Unis', 'Brésil', 'Japon', 'France', 'Par William G. Morgan, dans le Massachusetts.'],
+  ['volley', 'Quel joueur fait la deuxième touche pour préparer l’attaque ?', 'Le passeur', 'Le libéro', 'Le réceptionneur', 'Le central', 'Le « meneur de jeu » du volley.'],
+
+  // ----- Hockey sur glace -----
+  ['hockey', 'Combien de joueurs par équipe sur la glace au hockey ?', '6', '5', '7', '11', 'Cinq joueurs et un gardien.'],
+  ['hockey', 'Combien de périodes compte un match de hockey sur glace ?', '3', '2', '4', '5', 'Trois périodes de 20 minutes.'],
+  ['hockey', 'Comment s’appelle l’objet que les joueurs se disputent ?', 'Le palet', 'La balle', 'La rondelle de bois', 'Le volant', 'En caoutchouc ; les Québécois disent « la rondelle ».'],
+  ['hockey', 'Combien de temps dure une pénalité mineure ?', '2 minutes', '1 minute', '5 minutes', '10 minutes', 'Le joueur va au banc des pénalités, son équipe joue en infériorité.'],
+  ['hockey', 'Quel trophée récompense le champion de la NHL ?', 'La Coupe Stanley', 'Le Trophée Hart', 'La Coupe Spengler', 'La Coupe Magnus', 'Le plus vieux trophée du sport professionnel nord-américain.'],
+  ['hockey', 'Quelle équipe a gagné le plus de Coupes Stanley ?', 'Canadiens de Montréal', 'Maple Leafs de Toronto', 'Red Wings de Détroit', 'Bruins de Boston', 'Plus de vingt titres pour le « Tricolore ».'],
+  ['hockey', 'Quel joueur canadien était surnommé « The Great One » ?', 'Wayne Gretzky', 'Mario Lemieux', 'Sidney Crosby', 'Gordie Howe', 'Il détient encore de nombreux records de la NHL.'],
+  ['hockey', 'Quel est le surnom de l’équipe de hockey de Rouen ?', 'Les Dragons', 'Les Brûleurs de loups', 'Les Gothiques', 'Les Ducs', 'Les Brûleurs de loups, c’est Grenoble ; les Gothiques, Amiens ; les Ducs, Angers.'],
+  ['hockey', 'Quel est le surnom de l’équipe de hockey de Caen ?', 'Les Drakkars', 'Les Dragons', 'Les Rapaces', 'Les Pingouins', 'Un club normand, comme les Dragons de Rouen.'],
+  ['hockey', 'Comment s’appelle le championnat de France élite de hockey sur glace ?', 'La Ligue Magnus', 'La Pro A', 'La Starligue', 'Le Top 14', 'La Starligue, c’est le handball ; le Top 14, le rugby.'],
+  ['hockey', 'Quel pays a gagné le plus de titres olympiques en hockey masculin ?', 'Canada', 'Suède', 'États-Unis', 'Finlande', 'Neuf médailles d’or.'],
+  ['hockey', 'En 1980, quel pays bat l’URSS lors du « Miracle sur glace » ?', 'États-Unis', 'Canada', 'Suède', 'Tchécoslovaquie', 'Aux JO de Lake Placid, une équipe d’étudiants bat les Soviétiques.'],
+  ['hockey', 'Quel gardien français a été le premier à gagner la Coupe Stanley, en 2010 ?', 'Cristobal Huet', 'Florian Hardy', 'Fabrice Lhenry', 'Henri-Corentin Buysse', 'Avec les Blackhawks de Chicago.'],
+  ['hockey', 'Comment s’appelle la remise en jeu entre deux joueurs face à face ?', 'La mise au jeu', 'L’entre-deux', 'La touche', 'Le bully', 'L’arbitre lâche le palet entre les deux crosses.']
 ];
