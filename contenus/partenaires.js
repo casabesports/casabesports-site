@@ -4,7 +4,8 @@
  *   « vient de Casa Besports » (utm_source=casabesports, utm_campaign=partenaire-<id>, ref=casabesports)
  * tier : Platinum, Or ou Club · color : couleur du logo (#xxxxxx) · mono : lettre du logo (si pas d’image) · logo : image du logo (assets/partenaires/…)
  * perk : avantage offert (vide = pas d’encadré) · real : true pour un vrai partenaire
- * adresse, telephone : infos pratiques · horaires : une ligne par jour (« Lundi : fermé »)
+ * logoFond : couleur derrière le logo, pour qu’il remplisse son cadre (#ffffff blanc par défaut, #000000 noir…)
+ * adresse · telephone : un numéro par ligne, avec le nom après un tiret (« 07 00 00 00 00 - Prénom Nom ») · horaires : une ligne par jour (« Lundi : fermé »)
  * Modifiable depuis l’espace administrateur (Contenus du site). Une version modifiée en ligne passe avant ce fichier.
  */
 window.CASA_PARTENAIRES = [
@@ -36,8 +37,8 @@ window.CASA_PARTENAIRES = [
     "since": 2026,
     "perk": "",
     "adresse": "38 quai de Caligny, 50100 Cherbourg-en-Cotentin",
-    "telephone": "02 33 43 97 71",
-    "horaires": "Lundi : fermé\nMardi : 14h – 22h\nMercredi : 10h – 22h\nJeudi : 10h – minuit\nVendredi : 10h – 1h\nSamedi : 11h – 1h\nDimanche : fermé",
+    "telephone": "07 67 98 25 66 - Axel Le Moing\n07 69 64 39 05 - Mahé Le Moing",
+    "horaires": "Lundi : 10h – 23h\nMardi : 10h – 23h\nMercredi : 10h – 23h\nJeudi : 10h – minuit\nVendredi : 10h – minuit\nSamedi : 10h – minuit\nDimanche : 10h – 23h",
     "site": "https://www.facebook.com/103204388895005",
     "app": "",
     "desc": "Bar-tabac du quai de Caligny, à Cherbourg-en-Cotentin. Partenaire Casa Besports.",
@@ -48,6 +49,7 @@ window.CASA_PARTENAIRES = [
     "name": "Driver50",
     "mono": "D",
     "logo": "assets/partenaires/driver50.png",
+    "logoFond": "#000000",
     "sector": "VTC · chauffeur privé",
     "city": "Cherbourg-en-Cotentin",
     "tier": "Club",
