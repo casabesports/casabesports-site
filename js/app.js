@@ -34,7 +34,7 @@ function cbQr(text) {
 function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(location.protocol) ? location.origin + location.pathname : 'https://casabesports.fr/')).replace(/index\.html$/, ''); }
 
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
-const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
+const CB_ROUTE_ID = { vestiaire: 'vsClub', article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
 // Nom d'équipe lisible : « AS ISIGNY LE BUAT 1 » ou « as isigny le buat 1 » → « AS Isigny le Buat 1 » (sigles gardés en capitales)
 const CB_SIGLES = /^(AS|US|CS|JS|FC|SC|HB|HBC|BC|RC|CL|AL|ES|SM|ASPTT|ENT|USM|AJ|AC|OC|UL|ASC|CA|SU|AAJ|CHB|UST|VB|EC|SA|OM|PL|AG|ASL|USO|ESM|UC|SCO|CMS|SMV|GCO|CC)$/;
 function cbNomEquipe(n) {
@@ -50,7 +50,7 @@ function cbNomEquipe(n) {
     return w.charAt(0).toUpperCase() + w.slice(1);
   });
 }
-const CB_TITLES = { home: '', podcast: 'Le podcast', trophees: 'Les Marées d’or', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Autour de moi', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+const CB_TITLES = { home: '', vestiaire: 'Le Vestiaire', podcast: 'Le podcast', trophees: 'Les Marées d’or', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Clubs et disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Autour de moi', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
 // Logos des boutiques de clubs (images hébergées chez les clubs) : si l'un ne charge pas, l'initiale du club reste affichée
 if (typeof document !== 'undefined') document.addEventListener('error', (e) => { const t = e.target; if (t && t.classList && t.classList.contains('mc-img')) t.classList.add('mc-off'); }, true);
 // Lien vers le site d'un partenaire, marqué « vient de Casa Besports » (paramètres utm_ lus par Google Analytics, Matomo, HubSpot…)
@@ -134,6 +134,7 @@ class Component extends DCLogic {
     try { window.CasaSite = this; } catch (e) {} // accès console / tests : CasaSite.go('shop')
     try { this._onPwa = () => this.setState({ pwaTick: Date.now() }); window.addEventListener('casa-pwa', this._onPwa); } catch (e) {} // application installable (js/pwa.js)
     try { this._onNotif = () => this.setState({ notifEtat: window.CasaNotif ? window.CasaNotif.dernier() : null }); window.addEventListener('casa-notif', this._onNotif); } catch (e) {} // notifications (js/notifications.js)
+    this.rxLoadPublic(); // articles publiés depuis l'espace rédaction (supabase/redaction.sql)
     // Comptes abonnés (js/comptes.js) : la session Supabase pilote l'état connecté
     if (window.CasaAuth && window.CasaAuth.on) {
       window.CasaAuth.onChange((u) => {
@@ -146,7 +147,8 @@ class Component extends DCLogic {
             // Étiquettes données dans l'admin (onglet Abonnés) : chef d'édition, rédacteur, correspondant de club
             const role = r === 'admin' ? 'admin' : (r === 'redacteur' || r === 'collaborateur') ? 'writer' : (r === 'correspondant' && a.club) ? 'club' : (fileRole === 'admin' ? 'admin' : null);
             const extra = role === 'writer' ? { staffRole: r } : role === 'club' ? { clubRoleId: a.club } : {};
-            if (role !== this.state.role || Object.keys(extra).length) this.setState(Object.assign({ role }, extra)); }, () => this.setState({ srvRole: 'erreur' }));
+            if (role !== this.state.role || Object.keys(extra).length) this.setState(Object.assign({ role }, extra));
+            this.rxLoad(); }, () => this.setState({ srvRole: 'erreur' }));
           if (firstFor) this.loadPaid(this._waitPaid ? 5 : 0);
           if (firstFor) { if (u.prefs) this.applyPrefs(u.prefs); else if (this.state.mods || (this.state.favSports || []).length || (this.state.favClubs || []).length) this.syncPrefs(); }
           if (firstFor && window.CasaAuth.myAccessRequest) window.CasaAuth.myAccessRequest().then((d) => this.setState({ accReq: d || null }), () => {});
@@ -156,7 +158,7 @@ class Component extends DCLogic {
           const needPw = !u.hasPassword || window.CasaAuth.recovery;
           this.setState({ hasPassword: !!u.hasPassword, pwOpen: needPw && !this.readLS('cb-pw-later-' + u.id, false) || window.CasaAuth.recovery, pw: '', pw2: '', pwDone: false });
           if (!wasIn) this.say('Connecté. Bienvenue !');
-        } else if (this.state.loggedIn) { this._authFor = null; this.setState({ loggedIn: false, role: null, accReq: null, subs: { casab: false, gazette: null }, paidSubs: false, orders: this.state.orders.filter((o) => !o.srv) }); if (this.state.view === 'studio') this.go('home'); }
+        } else if (this.state.loggedIn) { this._authFor = null; this.rxReset(); this.setState({ loggedIn: false, role: null, accReq: null, subs: { casab: false, gazette: null }, paidSubs: false, orders: this.state.orders.filter((o) => !o.srv) }); if (this.state.view === 'studio') this.go('home'); }
       });
     }
     this._crmIv = setInterval(() => { if (this.state.role === 'admin') { const A = this.crmData().agents; ['qualif', 'hygiene', 'relance', 'fidel', 'rapport'].forEach((k) => { if (A[k] && A[k].on) this.runAgent(k); }); } }, 20000);
@@ -539,6 +541,86 @@ class Component extends DCLogic {
     top(); try { (window.requestAnimationFrame || setTimeout)(top); } catch (e) { /* facultatif */ }
   }
 
+  // ---------- rédaction : enregistrement en ligne (supabase/redaction.sql) ----------
+  // Chaque changement de la liste des articles (écriture, statut, suppression) est envoyé à Supabase
+  // quelques instants plus tard. Supabase ne renvoie à chacun QUE ses propres articles (l'administrateur voit tout)
+  // et refuse toute action non autorisée : publier sans être administrateur, toucher à l'article d'un autre…
+  setState(patch, cb) {
+    super.setState(patch, cb);
+    if (patch && typeof patch === 'object' && Object.prototype.hasOwnProperty.call(patch, 'posts') && !this._rxApplying) this.rxQueue();
+  }
+  rxApi() { const A = window.CasaAuth; return A && A.on && A.redacListe ? A : null; }
+  rxRow(p) {
+    const contenu = Object.assign({}, p); delete contenu.authorId;
+    let en_ligne = null, publier_le = null;
+    if (p.online) en_ligne = Object.assign({}, p.online, { id: p.id, author: p.author || '' });
+    else if (p.status === 'scheduled' && p.schedule && typeof CasaRedac !== 'undefined') {
+      const d = new Date(p.schedule);
+      if (!isNaN(d)) { publier_le = d.toISOString(); en_ligne = Object.assign(CasaRedac.snapOf(p), { at: publier_le, id: p.id, author: p.author || '' }); }
+    }
+    return { id: p.id, auteur_nom: p.author || null, statut: p.status || 'draft', contenu, en_ligne, publier_le };
+  }
+  rxQueue() {
+    if (!this._rxLoaded || !this.rxApi()) return;
+    clearTimeout(this._rxT); this._rxT = setTimeout(() => this.rxFlush(), 1200);
+  }
+  rxFlush() {
+    const A = this.rxApi(); if (!A || !this._rxLoaded || !this.state.loggedIn) return;
+    if (this._rxBusy) { this._rxAgain = true; return; }
+    const saved = this._rxSaved || {}; const posts = this.state.posts || []; const cur = {};
+    posts.forEach((p) => { cur[p.id] = JSON.stringify(this.rxRow(p)); });
+    const ups = posts.filter((p) => cur[p.id] !== saved[p.id]);
+    const dels = Object.keys(saved).filter((id) => !(id in cur));
+    if (!ups.length && !dels.length) return;
+    this._rxBusy = true; const errs = [];
+    let chain = Promise.resolve();
+    ups.forEach((p) => { const row = JSON.parse(cur[p.id]); chain = chain.then(() => A.redacEnregistrer(row).then(() => { saved[p.id] = cur[p.id]; }, (e) => errs.push(e.message))); });
+    dels.forEach((id) => { chain = chain.then(() => A.redacSupprimer(id).then((ok) => { if (ok) delete saved[id]; else errs.push('suppression refusée'); }, (e) => errs.push(e.message))); });
+    chain.then(() => {
+      this._rxBusy = false; this._rxSaved = saved;
+      if (errs.length) { this.say('Rédaction : action refusée par le serveur (' + errs[0] + '). Liste rechargée.'); this.rxLoad(); return; }
+      super.setState({ rxSavedAt: new Date().toISOString() });
+      if (this._rxAgain) { this._rxAgain = false; this.rxQueue(); }
+    });
+  }
+  rxLoad() {
+    const A = this.rxApi(); if (!A || !this.state.loggedIn || !this.state.role) return;
+    A.redacListe().then((rows) => {
+      if (!this.state.loggedIn) return;
+      const saved = {};
+      const fromSrv = (rows || []).map((r) => {
+        const p = Object.assign({ log: [], clubs: [], title: '', dek: '', body: '', alt: '', tag: '', sport: 'Autre', img: '', schedule: '' }, r.contenu || {}, { id: r.id, status: r.statut, authorId: r.auteur_id });
+        if (!p.author) p.author = r.auteur_nom || '';
+        saved[r.id] = JSON.stringify(this.rxRow(p)); return p;
+      });
+      const ids = new Set(fromSrv.map((p) => p.id)); const prev = this._rxSaved || {};
+      // articles commencés avant le chargement (ou avant le lancement du script SQL) : on les garde et on les enregistre
+      const localOnly = (this.state.posts || []).filter((p) => !ids.has(p.id) && !(p.id in prev));
+      this._rxSaved = saved; this._rxLoaded = true;
+      this._rxApplying = true; this.setState({ posts: localOnly.concat(fromSrv), rxSrv: 'ok' }); this._rxApplying = false;
+      if (localOnly.length) this.rxQueue();
+    }, (e) => this.setState({ rxSrv: /redaction_articles|schema cache|does not exist|relation/i.test(e.message || '') ? 'sql' : 'erreur', rxSrvMsg: e.message || '' }));
+  }
+  rxReset() { clearTimeout(this._rxT); this._rxSaved = null; this._rxLoaded = false; this._rxApplying = true; this.setState({ posts: null, rxSrv: null }); this._rxApplying = false; }
+  rxLoadPublic() {
+    const A = this.rxApi(); if (!A || !A.articlesEnLigne) return;
+    A.articlesEnLigne().then((rows) => this.setState({ rxPublic: rows.filter((r) => r && r.article).map((r) => Object.assign({ clubs: [], body: '', dek: '', title: '' }, r.article, { id: r.id, status: 'published', online: Object.assign({}, r.article, { at: r.article.at || r.publie_le }) })) }), () => {});
+  }
+  // Supprimer un article de la rédaction : l'auteur ses brouillons jamais publiés, l'administrateur tout
+  rxCanDelete(p) {
+    if (!p || !p.id) return false;
+    if (this.state.role === 'admin') return true;
+    return this.rxMine(p) && ['draft', 'corrections', 'rejected'].indexOf(p.status) >= 0 && !p.online;
+  }
+  rxMine(p) { const u = window.CasaAuth && window.CasaAuth.user; return p.authorId && u ? p.authorId === u.id : p.author === this.me().name; }
+  rxDelete(p) {
+    if (!this.rxCanDelete(p)) { this.say('Seuls vos brouillons non publiés peuvent être supprimés'); return; }
+    if (this.state.rxDelSure !== p.id) { this.setState({ rxDelSure: p.id }); clearTimeout(this._rxDelT); this._rxDelT = setTimeout(() => { if (this.state.rxDelSure === p.id) this.setState({ rxDelSure: null }); }, 6000); return; }
+    const posts = this.posts().filter((x) => x.id !== p.id);
+    this.setState({ posts, rxDelSure: null, studioTab: this.state.studioTab === 'edit' && this.state.editId === p.id ? 'list' : this.state.studioTab, editId: this.state.editId === p.id ? null : this.state.editId });
+    this.say(p.online ? 'Article supprimé et retiré du site' : 'Brouillon supprimé');
+  }
+
   // ---------- rédaction : utilitaires ----------
   posts() { return this.state.posts || (window.CB_SERVER ? [] : this.more().seedPosts); }
   setPost(id, patch, logLine) {
@@ -685,7 +767,7 @@ class Component extends DCLogic {
       this.setPriv({ lists: Object.assign({}, P0.lists, { [lk]: P0.lists[lk].concat([{ id: Math.random().toString(36).slice(2, 9), text: label.charAt(0).toUpperCase() + label.slice(1), done: false }]) }) });
       return { text: '« ' + label + ' » ajouté à votre liste ' + (lk === 'sac' ? 'Sac de sport' : lk === 'todo' ? 'À faire' : 'Courses') + '.', actions: [act('Voir la liste', () => { this.setState({ pvTab: 'listes', pvList: lk }); this.go('private'); })] };
     }
-    if (has(/quotidien|mon agenda|mes notes|ma liste|budget|covoiturage|covoit|certificat|mes documents|activite/)) return { text: 'Votre espace privé « Mon quotidien » regroupe agenda, listes, notes, covoiturage, budget sport, documents et suivi d’activité.', actions: [act('Ouvrir Mon quotidien', () => this.go('private'))] };
+    if (has(/quotidien|mon agenda|mes notes|ma liste|budget|covoiturage|covoit|certificat|mes documents|activite/)) return { text: 'Votre espace privé « Mon quotidien » va à l’essentiel : ma journée, agenda, listes, suivi d’activité et budget sport.', actions: [act('Ouvrir Mon quotidien', () => this.go('private'))] };
     // ajout au panier
     const prodMatch = () => {
       const keys = [['hoodie signature', 'hoodie-signature'], ['signature', 'hoodie-signature'], ['cotentin sport', 'hoodie-csc'], ['csc', 'hoodie-csc'], ['vestiaire', 'crew-vestiaire'], ['sweat', 'crew-vestiaire'], ['phare', 'tee-phare'], ['rade', 'tee-rade'], ['maillot', 'maillot-retro'], ['veste', 'veste-tribune'], ['survet', 'veste-tribune'], ['jogger', 'jogger'], ['jogging', 'jogger'], ['short', 'short-isles'], ['bob', 'bob'], ['casquette', 'casquette'], ['du ballon', 'tee-identitaire'], ['identitaire', 'tee-identitaire'], ['marin', 'pull-marin'], ['tote', 'tote'], ['sac', 'tote'], ['echarpe', 'echarpe'], ['mug', 'mug'], ['gourde', 'gourde'], ['affiche', 'affiche'], ['poster', 'affiche'], ['sticker', 'stickers'], ['porte-cle', 'porte-cles'], ['carte cadeau', 'carte-cadeau'], ['hoodie', 'hoodie-signature'], ['t-shirt', 'tee-phare'], ['tee', 'tee-phare']];
@@ -703,7 +785,7 @@ class Component extends DCLogic {
       }
     }
     // navigation
-    const pagesMap = [['boutique|shop|magasin', 'shop', 'Boutique'], ['tableau de bord|dashboard', 'home', 'l’accueil'], ['terrain', 'live', 'Le Terrain'], ['actu|article|news', 'news', 'Actualités'], ['video', 'videos', 'Vidéos'], ['club', 'clubs', 'Clubs'], ['joueur', 'players', 'Joueurs'], ['discipline|sport', 'disciplines', 'Disciplines'], ['carte|territoire', 'map', 'Territoire'], ['abonnement|offre', 'offers', 'Abonnements'], ['partenaire|sponsor', 'partners', 'Partenaires'], ['contact|ecrire', 'contact', 'Contact'], ['propos|histoire de casa', 'about', 'À propos'], ['panier', 'cart', 'Panier'], ['espace|compte', 'account', 'Mon espace'], ['redaction|studio|relecture', 'studio', 'Espace rédaction'], ['club ?house|communaute', 'clubhouse', 'le Club House'], ['culture|musee|exposition', 'culture', 'Culture'], ['meteo|temps', 'meteo', 'Météo'], ['quotidien|agenda|liste', 'private', 'Mon quotidien'], ['curriculum|mon cv|\\bcv\\b', 'cv', 'votre CV'], ['certificat|verifier', 'verifier', 'la vérification des certificats'], ['accueil|home', 'home', 'Accueil']];
+    const pagesMap = [['boutique|shop|magasin', 'shop', 'Boutique'], ['tableau de bord|dashboard', 'home', 'l’accueil'], ['terrain', 'live', 'Le Terrain'], ['actu|article|news', 'news', 'Actualités'], ['video', 'videos', 'Vidéos'], ['club', 'clubs', 'Clubs'], ['joueur', 'players', 'Joueurs'], ['discipline|sport', 'clubs', 'Clubs et disciplines'], ['carte|territoire', 'map', 'Territoire'], ['abonnement|offre', 'offers', 'Abonnements'], ['partenaire|sponsor', 'partners', 'Partenaires'], ['contact|ecrire', 'contact', 'Contact'], ['propos|histoire de casa', 'about', 'À propos'], ['panier', 'cart', 'Panier'], ['espace|compte', 'account', 'Mon espace'], ['redaction|studio|relecture', 'studio', 'Espace rédaction'], ['club ?house|communaute', 'clubhouse', 'le Club House'], ['culture|musee|exposition', 'culture', 'Culture'], ['meteo|temps', 'meteo', 'Météo'], ['quotidien|agenda|liste', 'private', 'Mon quotidien'], ['curriculum|mon cv|\\bcv\\b', 'cv', 'votre CV'], ['certificat|verifier', 'verifier', 'la vérification des certificats'], ['accueil|home', 'home', 'Accueil']];
     if (has(/\b(ouvre|ouvrir|va |aller|emmene|montre|affiche|direction|navigue)/)) {
       if (has(/gazette|mag/)) { const pm = q.match(/page\s*(\d+)/); const pg = pm ? Math.min(this.gazette().pages.length, Math.max(1, +pm[1])) - 1 : 0; this.setState({ aiOpen: false }); this.gzGo(pg); return { text: 'J’ouvre La Gazette du Cotentin' + (pm ? ' à la page ' + (pg + 1) : '') + '.', actions: [] }; }
       const m = pagesMap.find(([re]) => new RegExp(re).test(q));
@@ -790,7 +872,10 @@ class Component extends DCLogic {
   }
   allArticles() {
     const D = this.data();
-    const pub = this.posts().filter((p) => p.status === 'published' || p.online).map((p) => this.postToArticle(p.status === 'published' || !p.online ? p : Object.assign({}, p, p.online, { id: p.id })));
+    const own = this.posts(); const ids = new Set(own.map((p) => p.id)); const now = Date.now();
+    const vis = (p) => p.status === 'published' || p.online || (p.status === 'scheduled' && p.schedule && new Date(p.schedule).getTime() <= now);
+    // articles publiés depuis l'espace rédaction (supabase/redaction.sql), visibles par tous les visiteurs
+    const pub = own.filter(vis).concat((this.state.rxPublic || []).filter((p) => !ids.has(p.id))).map((p) => this.postToArticle(p.status === 'published' || !p.online ? p : Object.assign({}, p, p.online, { id: p.id })));
     return pub.concat(D.articles);
   }
   postToArticle(p) {
@@ -832,7 +917,7 @@ class Component extends DCLogic {
   // Accueil épuré : 5 blocs essentiels affichés d'office, les autres rubriques sont proposées
   // dans « Personnaliser mon accueil » (abonnés connectés). [id, libellé, largeur, affiché par défaut]
   modDefs() {
-    return [['essentiel', 'Mon essentiel : mes raccourcis d’abonné', 'full', false], ['une', 'Le grand bandeau : l’actu du moment', 'full', true], ['resultats', 'Résultats du week-end', 'full', true], ['portes', 'Passionné ou pro : vos accès', 'full', true], ['cherwood', 'Boutique Casa × Cherwood', 'full', true], ['gazette', 'La Gazette du mois', 'full', true],
+    return [['essentiel', 'Mon essentiel : mes raccourcis d’abonné', 'full', false], ['une', 'Le grand bandeau : l’actu du moment', 'full', true], ['vestiaire', 'Le Vestiaire : planning, présences et fil de mon club', 'full', true], ['resultats', 'Résultats du week-end', 'full', true], ['portes', 'Passionné ou pro : vos accès', 'full', true], ['cherwood', 'Boutique Casa × Cherwood', 's2', true], ['gazette', 'La Gazette du mois', 's2', true],
       ['actus', 'Dernières actus', 's2', false], ['videos', 'Vidéos', 's2', false], ['rdv', 'Le prochain rendez-vous', '', false], ['table', 'Classement Régional 2', '', false], ['meteo', 'Météo', '', false], ['private', 'Mon quotidien', '', false],
       ['clubhouse', 'Club House', '', false], ['culture', 'Culture & sorties', '', false], ['oeuvre', 'Œuvre du jour', '', false], ['lieu', 'Lieu du jour', '', false], ['shop', 'Boutique : la collection', 's2', false], ['rubriques', 'Toutes les rubriques du site', 'full', false]];
   }
@@ -844,7 +929,7 @@ class Component extends DCLogic {
   setMods(mods) { this.setState({ mods }); this.writeLS('cb-accueil-v2', mods); this.syncPrefs(); }
   setLayout(l) { this.setState({ homeLayout: l }); this.writeLS('cb-home-layout', l); this.syncPrefs(); }
   setFav(kind, list) { const sp = kind === 'sports'; this.setState(sp ? { favSports: list } : { favClubs: list }); this.writeLS(sp ? 'cb-fav-sports' : 'cb-fav-clubs', list); this.syncPrefs(); }
-  // Couleur des arrière-plans : bgCouleur = 'nb' | 'couleur' | null (réglage du site), bgTeinte = '#rrggbb' | 'aucune' | null (réglage du site)
+  // Couleur des arrière-plans : bgCouleur = 'maree' | 'nb' | 'couleur' | null (réglage du site), bgTeinte = '#rrggbb' | 'aucune' | null (réglage du site)
   setBg(patch) {
     this.setState(patch);
     if ('bgMode' in patch) this.writeLS('cb-bg-mode', patch.bgMode);
@@ -866,7 +951,7 @@ class Component extends DCLogic {
     if (Array.isArray(p.sports)) put('favSports', 'cb-fav-sports', p.sports.filter((x) => typeof x === 'string'));
     if (Array.isArray(p.clubs)) put('favClubs', 'cb-fav-clubs', p.clubs.filter((x) => typeof x === 'string'));
     if (['photo', 'lieux', 'aucun'].indexOf(p.bgMode) >= 0) put('bgMode', 'cb-bg-mode', p.bgMode);
-    if ('bgCouleur' in p) put('bgCouleur', 'cb-bg-couleur', p.bgCouleur === 'couleur' || p.bgCouleur === 'nb' ? p.bgCouleur : null);
+    if ('bgCouleur' in p) put('bgCouleur', 'cb-bg-couleur', ['maree', 'nb', 'couleur'].indexOf(p.bgCouleur) >= 0 ? p.bgCouleur : null);
     if ('bgTeinte' in p) put('bgTeinte', 'cb-bg-teinte', typeof p.bgTeinte === 'string' && (p.bgTeinte === 'aucune' || /^#[0-9a-f]{6}$/i.test(p.bgTeinte)) ? p.bgTeinte : null);
     this.setState(st);
   }
@@ -1292,6 +1377,7 @@ class Component extends DCLogic {
     if (this.state.listening) this.setState({ listening: false, voixPct: '0%', radioT: '' });
   }
   go(view, extra) {
+    if (view === 'disciplines') view = 'clubs'; // Disciplines est fusionnée dans Clubs
     if (this.state.listening && !this.state.radioT) this.stopVoix();
     if (view === 'admin') {
       if (this.state.role === 'admin' && window.CasaAdmin) { window.CasaAdmin.open(); return; }
@@ -1537,18 +1623,21 @@ class Component extends DCLogic {
 
     // ---------- navigation ----------
     // Barre épurée : Clubs et Club House ne font qu'une rubrique, Culture passe dans « Plus », les offres et les partenaires sont en accès direct
-    const navDefs = [['Le Terrain', 'live'], ['Actualités', 'news'], ['Clubs', 'clubs'], ['Boutique', 'shop'], ['Offres', 'offers'], ['Partenaires', 'partners']];
-    const sectionOf = { clubhouse: 'clubs', podcast: 'news', article: 'news', video: 'videos', discipline: 'disciplines', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
+    const navDefs = [['Le Terrain', 'live'], ['Actualités', 'news'], ['Clubs', 'clubs'], ['Vestiaire', 'vestiaire'], ['Boutique', 'shop'], ['Offres', 'offers'], ['Partenaires', 'partners']];
+    const sectionOf = { clubhouse: 'clubs', players: 'clubs', article: 'news', video: 'videos', discipline: 'clubs', disciplines: 'clubs', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
     const activeSec = sectionOf[s.view] || s.view;
     const nav = navDefs.map(([label, v]) => ({ label, color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
     // Menu « Plus » regroupé en trois familles (les mêmes rubriques alimentent l'accès direct de l'accueil)
     const goV = (v, extra) => () => this.go(v, extra || {});
     const menuGroups = [
-      { titre: 'Le sport', items: [['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Les Marées d’or', 'trophees', 'La soirée des trophées du sport local'], ['Vidéos', 'videos', 'Highlights et interviews'], ['Joueurs', 'players', 'Les profils du Cotentin'], ['Disciplines', 'disciplines', 'Tous les sports suivis'], ['Autour de moi', 'map', 'La carte vivante du week-end'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine']] },
-      { titre: 'Vos services', items: [['L’application', 'app', 'Scores, Club House et réalité augmentée'], ['Mon quotidien', 'private', 'Agenda, listes, budget, documents']] },
-      { titre: 'La maison', items: [['Casa PRO', 'work', 'Clubs, marques, collectivités, sportifs, médias'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
+      // Menu « Plus » allégé : 10 rubriques en trois familles courtes (les joueurs sont dans la rubrique Clubs)
+      { titre: 'À voir, à écouter', items: [['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Vidéos', 'videos', 'Highlights et interviews'], ['Les Marées d’or', 'trophees', 'La soirée des trophées du sport local'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine']] },
+      { titre: 'Au quotidien', items: [['Mon quotidien', 'private', 'Agenda, listes, activité, budget sport'], ['Autour de moi', 'map', 'La carte vivante du week-end'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['L’application', 'app', 'Installer BE+ sur le téléphone']] },
+      { titre: 'Casa Besports', items: [['Casa PRO', 'work', 'Clubs, marques, collectivités, sportifs, médias'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
+    // Le Vestiaire : en tête des services du quotidien
+    menuGroups.forEach((g) => { if (g.items.some((it) => it[1] === 'private')) g.items.unshift(['Le Vestiaire', 'vestiaire', 'Planning, présences et fil de mon club']); });
     menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
     const moreNav = [].concat(...menuGroups.map((g) => g.items));
     // Accueil : toutes les rubriques du site, en accès direct
@@ -1623,13 +1712,19 @@ class Component extends DCLogic {
       openBoard: () => this.go('live', { dSport: dName, dComp: firstComp(dName), dTab: 'results' }), openShop: () => this.go('shop') };
 
     // ---------- clubs ----------
-    const clubSports = ['Tous', 'Football', 'Basketball', 'Handball', 'Volley-ball', 'Rugby', 'Water-polo', 'Multisport'].filter((sp) => ['Tous', 'Football', 'Basketball', 'Water-polo', 'Multisport'].indexOf(sp) >= 0 || D.clubs.some((c) => c.sport === sp));
-    const clubChips = clubSports.map((c) => Object.assign(pill(c === s.clubSport), { label: c, pick: () => this.setState({ clubSport: c }) }));
-    const clubList = D.clubs.filter((c) => s.clubSport === 'Tous' || c.sport === s.clubSport).map((c) => clubV(c));
+    // Clubs et disciplines : une seule rubrique. Les disciplines servent de filtre, avec un encart par discipline.
+    const clubSports = ['Tous'].concat(D.sports, D.clubs.map((c) => c.sport)).filter((x, i, a) => x && a.indexOf(x) === i);
+    const clubSport = clubSports.indexOf(s.clubSport) >= 0 ? s.clubSport : 'Tous';
+    const clubChips = clubSports.map((c) => Object.assign(pill(c === clubSport), { label: c === 'Tous' ? 'Toutes les disciplines' : c, pick: () => this.setState({ clubSport: c }) }));
+    const clubList = D.clubs.filter((c) => clubSport === 'Tous' || c.sport === clubSport).map((c) => clubV(c));
+    const clubDiscRaw = disciplines.find((d) => d.name === clubSport);
+    const clubDisc = { has: !!clubDiscRaw, name: clubSport, stats: clubDiscRaw ? clubDiscRaw.stats : '', noClub: clubSport !== 'Tous' && clubList.length === 0,
+      openBoard: () => this.go('live', { dSport: clubSport, dComp: ((X.comps[clubSport] || [])[0] || { id: null }).id, dTab: 'results' }),
+      openDisc: () => this.go('discipline', { discId: clubSport }), backAll: () => this.setState({ clubSport: 'Tous' }) };
     const curC = clubById(s.clubId) || D.clubs[0] || { id: '', name: 'Aucun club', sport: '', city: '', img: null };
     const club = clubV(curC);
     club.hasImg = !!curC.img;
-    club.openSport = () => this.go('discipline', { discId: curC.sport });
+    club.openSport = () => this.go('clubs', { clubSport: curC.sport });
     club.openCity = () => this.go('map', { city: curC.city });
     club.articles = allA.filter((a) => a.clubs.indexOf(curC.id) >= 0);
     club.noArticles = club.articles.length === 0;
@@ -1940,33 +2035,53 @@ class Component extends DCLogic {
     const usePhoto = bgMode === 'photo' && !s.placeOverride && !!phKey && showPlaces;
     // Couleur : photos en noir et blanc (signature) ou en couleur, et teinte de fond facultative (réglage du site, d'une page, ou du visiteur)
     const hexOk = (c) => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c);
-    const bgCouleur = s.bgCouleur === 'couleur' ? true : s.bgCouleur === 'nb' ? false : FD.photosEnCouleur === true;
-    const teinte = s.bgTeinte === 'aucune' ? '' : hexOk(s.bgTeinte) ? s.bgTeinte : hexOk(pageTeinte) ? pageTeinte : hexOk(FD.teinte) ? FD.teinte : '';
+    // Trois tons : 'maree' (la signature : photos virées au bleu de la rade), 'nb' (noir et blanc), 'couleur'
+    const TONS = ['maree', 'nb', 'couleur'];
+    const bgTon = TONS.indexOf(s.bgCouleur) >= 0 ? s.bgCouleur : TONS.indexOf(FD.photos) >= 0 ? FD.photos : FD.photosEnCouleur === true ? 'couleur' : 'maree';
+    const bgCouleur = bgTon === 'couleur', bgMaree = bgTon === 'maree';
+    const teinteChoisie = s.bgTeinte === 'aucune' ? '' : hexOk(s.bgTeinte) ? s.bgTeinte : hexOk(pageTeinte) ? pageTeinte : hexOk(FD.teinte) ? FD.teinte : '';
+    const MAREE_BLEU = '#2a6f97';
+    const teinte = teinteChoisie || (bgMaree && bgMode !== 'aucun' ? MAREE_BLEU : '');
     const bg = { isPhoto: usePhoto, isIllu: !usePhoto && bgMode !== 'aucun', img: usePhoto ? PH[phKey][0] : '', pos: usePhoto ? PH[phKey][1] : 'center', op: s.view === 'studio' ? '.35' : '1',
-      colorCls: bgCouleur ? 'is-couleur' : '', illuFilter: bgCouleur ? 'saturate(1.05)' : 'var(--place-filter)',
-      hasTeinte: !!teinte, teinte: teinte || 'transparent', teinteBlend: usePhoto ? (bgCouleur ? 'soft-light' : 'color') : 'normal', teinteOp: usePhoto ? (bgCouleur ? '.45' : '.6') : (s.view === 'studio' ? '.06' : '.2') };
+      colorCls: bgCouleur ? 'is-couleur' : bgMaree ? 'is-maree' : '', illuFilter: bgCouleur ? 'saturate(1.05)' : bgMaree ? 'grayscale(1)' : 'var(--place-filter)',
+      hasTeinte: !!teinte, teinte: teinte || 'transparent', teinteBlend: usePhoto ? (bgCouleur ? 'soft-light' : 'color') : bgMaree && !teinteChoisie && bgMode === 'lieux' ? 'color' : 'normal', teinteOp: usePhoto ? (bgCouleur ? '.45' : bgMaree && !teinteChoisie ? '.72' : '.6') : bgMaree && !teinteChoisie && bgMode === 'lieux' ? '.55' : (s.view === 'studio' ? '.06' : '.2') };
     const bgModes = [['aucun', 'Fond uni', 'Blanc ou noir, ou la teinte choisie ci-dessous'], ['photo', 'Photos du terrain', 'Vraies images des clubs'], ['lieux', 'Lieux de légende', 'Illustrations du patrimoine']].map(([id, label, sub]) => ({ label, sub, checked: id === bgMode ? 'true' : 'false', border: id === bgMode ? 'var(--acc)' : 'var(--line)', pick: () => { this.setBg({ bgMode: id }); this.setState({ placeOverride: null }); } }));
-    const bgColorOpts = [['nb', 'Noir et blanc', 'La signature Casa Besports'], ['couleur', 'En couleur', 'Les photos telles qu’elles ont été prises']].map(([id, label, sub]) => { const on = (id === 'couleur') === bgCouleur; return { label, sub, checked: on ? 'true' : 'false', border: on ? 'var(--acc)' : 'var(--line)', pick: () => this.setBg({ bgCouleur: id }) }; });
+    const bgColorOpts = [['maree', 'Marée', 'La signature Casa Besports : le bleu de la rade'], ['nb', 'Noir et blanc', 'Le classique, sans couleur'], ['couleur', 'En couleur', 'Les photos telles qu’elles ont été prises']].map(([id, label, sub]) => { const on = id === bgTon; return { label, sub, checked: on ? 'true' : 'false', border: on ? 'var(--acc)' : 'var(--line)', pick: () => this.setBg({ bgCouleur: id }) }; });
     const teintes = [['aucune', 'Aucune'], ['#1d4e89', 'Bleu Manche'], ['#0f8b8d', 'Vert d’eau'], ['#2e7d4f', 'Vert bocage'], ['#e8a830', 'Or'], ['#c2410c', 'Orange'], ['#b3261e', 'Rouge'], ['#6b3fa0', 'Violet']].map(([id, label]) => {
-      const on = id === 'aucune' ? !teinte : teinte.toLowerCase() === id;
+      const on = id === 'aucune' ? !teinteChoisie : teinteChoisie.toLowerCase() === id;
       return { label, isNone: id === 'aucune', sw: id === 'aucune' ? 'transparent' : id, checked: on ? 'true' : 'false', ring: on ? 'var(--ink)' : 'var(--line-2)', pick: () => this.setBg({ bgTeinte: id }) };
     });
-    const teinteLibre = { value: teinte || '#1d4e89', onInput: (e) => { if (hexOk(e.target.value)) this.setBg({ bgTeinte: e.target.value.toLowerCase() }); }, reset: () => this.setBg({ bgCouleur: null, bgTeinte: null }), isPerso: s.bgCouleur != null || s.bgTeinte != null };
+    const teinteLibre = { value: teinteChoisie || '#1d4e89', onInput: (e) => { if (hexOk(e.target.value)) this.setBg({ bgTeinte: e.target.value.toLowerCase() }); }, reset: () => this.setBg({ bgCouleur: null, bgTeinte: null }), isPerso: s.bgCouleur != null || s.bgTeinte != null };
     const placeOpacity = showPlaces && bgMode !== 'aucun' ? (s.view === 'studio' ? 0.06 : Math.min(0.5, k * 0.55)) : 0;
 
     // ---------- partenaires ----------
-    const partners = X.partners.map((p) => Object.assign({}, p, { open: () => this.setState({ partnerId: p.id }) }));
+    const partners = X.partners.map((p) => Object.assign({}, p, { logo: p.logo || '', logoFond: p.logoFond || '#ffffff', hasLogo: !!p.logo, noLogo: !p.logo, open: () => this.setState({ partnerId: p.id }) }));
     const tiersDef = [['Platinum', 'Partenaire Platinum', '#e8a830', '360px', '130px'], ['Or', 'Partenaires Or', '#9a6410', '300px', '110px'], ['Club', 'Partenaires Club', '#8f9aa8', '260px', '100px']];
-    const partnerTiers = tiersDef.map(([id, label, line, min, h]) => ({ label, line, min, h, items: partners.filter((p) => p.tier === id) }));
+    // un niveau inconnu (ou vide) range le partenaire avec les partenaires Club, pour qu'il ne disparaisse jamais de la page
+    const tierOf = (p) => (tiersDef.some((t) => t[0] === p.tier) ? p.tier : 'Club');
+    const partnerTiers = tiersDef.map(([id, label, line, min, h]) => ({ label, line, min, h, items: partners.filter((p) => tierOf(p) === id) })).filter((t) => t.items.length);
     const ptRaw = X.partners.find((p) => p.id === s.partnerId);
     const claimed = ptRaw && s.claimed.indexOf(ptRaw.id) >= 0;
     const ptBase = ptRaw || X.partners[0] || {};
+    const ptOlisto = !!ptRaw && ptRaw.id === 'olisto';
+    const ptHoraires = String(ptBase.horaires || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => { const i = l.indexOf(':'); return i > 0 ? { j: l.slice(0, i).trim(), h: l.slice(i + 1).trim() } : { j: l, h: '' }; });
+    const ptSite = cbPartnerLink(ptBase.site, ptBase.id, 'site');
     const pt = Object.assign({}, ptBase, {
-      siteHref: cbPartnerLink(ptBase.site, ptBase.id, 'site'), appHref: cbPartnerLink(ptBase.app, ptBase.id, 'application'),
-      hasSite: !!cbPartnerLink(ptBase.site, ptBase.id, 'site'), hasApp: !!cbPartnerLink(ptBase.app, ptBase.id, 'application'),
-      note: ptRaw && ptRaw.real ? 'Partenaire Casa Besports.' : 'Partenaire Casa Besports.',
-      claimLabel: ptRaw && ptRaw.real ? 'Découvrir l’offre OlistO' : claimed ? 'Avantage enregistré ✓' : (subscribed ? 'Profiter de l’avantage' : 'Réservé aux abonnés BE+'),
-      claim: () => { if (ptRaw && ptRaw.real) { this.go('olisto'); return; } if (!subscribed) { this.go('offers', { offerTab: 'BE+' }); return; } if (!claimed) { this.setState({ claimed: s.claimed.concat([ptRaw.id]) }); this.say('Avantage ajouté à Mon espace'); } }
+      siteHref: ptSite, appHref: cbPartnerLink(ptBase.app, ptBase.id, 'application'),
+      hasSite: !!ptSite, hasApp: !!cbPartnerLink(ptBase.app, ptBase.id, 'application'),
+      siteLabel: /facebook\.com/i.test(ptSite) ? 'Page Facebook ↗' : /instagram\.com/i.test(ptSite) ? 'Page Instagram ↗' : 'Visiter le site ↗',
+      logo: ptBase.logo || '', hasLogo: !!ptBase.logo, noLogo: !ptBase.logo,
+      hasPerk: !!ptBase.perk,
+      hasAdresse: !!ptBase.adresse, mapsHref: ptBase.adresse ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ptBase.name + ', ' + ptBase.adresse) : '',
+      // un numéro par ligne : « 07 00 00 00 00 - Prénom Nom »
+      tels: String(ptBase.telephone || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => { const m = l.match(/^([+0-9][0-9 .+()]*[0-9])\s*(?:[-–—:·]\s*)?(.*)$/); const num = m ? m[1].trim() : l; return { num, nom: m ? m[2].trim() : '', hasNom: !!(m && m[2].trim()), href: 'tel:' + num.replace(/[^0-9+]/g, '').replace(/^0/, '+33') }; }),
+      hasTel: !!String(ptBase.telephone || '').trim(), logoFond: ptBase.logoFond || '#ffffff',
+      horaires: ptHoraires, hasHoraires: ptHoraires.length > 0, hasInfos: !!(ptBase.adresse || ptBase.telephone || ptHoraires.length),
+      note: 'Partenaire Casa Besports.',
+      // OlistO : page dédiée ; autres vrais partenaires : bouton seulement s'ils offrent un avantage
+      hasClaim: ptOlisto || !(ptRaw && ptRaw.real) || !!ptBase.perk,
+      claimLabel: ptOlisto ? 'Découvrir l’offre OlistO' : claimed ? 'Avantage enregistré ✓' : (subscribed ? 'Profiter de l’avantage' : 'Réservé aux abonnés BE+'),
+      claim: () => { if (ptOlisto) { this.go('olisto'); return; } if (!subscribed) { this.go('offers', { offerTab: 'BE+' }); return; } if (!claimed) { this.setState({ claimed: s.claimed.concat([ptRaw.id]) }); this.say('Avantage ajouté à Mon espace'); } }
     });
 
     // ---------- Gazette (liseuse, édition « Le bandeau ») ----------
@@ -2057,7 +2172,7 @@ class Component extends DCLogic {
     const roleSwitch = [['admin', 'Admin', ''], ['writer', 'Chef d’édition', 'collaborateur'], ['writer', 'Rédactrice', 'redacteur'], ['club', 'Correspondant club', '']].map(([id, label, sr]) => { const on = s.role === id && (id === 'admin' || id === 'club' || (s.staffRole || 'redacteur') === sr); return { label, bg: on ? 'var(--inv-bg)' : 'var(--surface)', fg: on ? 'var(--on-inv)' : 'var(--text)', border: on ? 'var(--ink)' : 'var(--line-2)', pick: () => this.setState(Object.assign({ role: id, studioTab: id === 'club' ? 'club' : ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0 ? 'dash' : s.studioTab }, sr ? { staffRole: sr } : {})) }; });
     const kpis = [['review', 'À relire', 'var(--gold-text)'], ['corrections', 'Corrections', 'var(--danger)'], ['draft', 'Brouillons', 'var(--text-2)'], ['scheduled', 'Programmés', 'var(--text)']].map(([st, l, color]) => ({ v: String(posts.filter((p) => p.status === st).length), l, color, go: () => this.setState({ studioTab: 'list', stFilter: st }) }))
       .concat([{ v: String(D.articles.length + posts.filter((p) => p.status === 'published').length), l: 'Publiés', color: 'var(--success)', go: () => this.setState({ studioTab: 'list', stFilter: 'published' }) }]);
-    const mine = posts.filter((p) => p.author === me.name);
+    const mine = posts.filter((p) => this.rxMine(p));
     const dashSrc = isAdmin ? pending : mine.filter((p) => p.status !== 'published');
     const dashList = dashSrc.map((p) => Object.assign({ title: p.title, author: p.author, updated: p.updated, open: () => openEdit(p, isAdmin && p.status === 'review' ? 'preview' : 'write') }, stV(p)));
     const activity = posts.reduce((acc, p) => acc.concat(p.log.map((l) => ({ who: l.who, what: l.what + ' — « ' + p.title + ' »', when: l.when, dot: /Approuv|publi/i.test(l.what) ? '#18705f' : /Correction|Refus/i.test(l.what) ? 'var(--danger)' : '#e8a830' }))), []).reverse().slice(0, 7);
@@ -2069,7 +2184,7 @@ class Component extends DCLogic {
     const queue = pending.map((p) => ({ title: p.title, author: p.author, updated: p.updated, words: String(this.checksOf(p).words), score: String(this.checksOf(p).score), review: () => openEdit(p, 'preview'), isClub: p.source === 'club', club: p.clubName || ((clubById(p.clubId) || {}).name || '') }));
     const edRaw = posts.find((p) => p.id === s.editId) || posts[0] || { id: '', author: '', status: 'draft', updated: '', sport: 'Football', tag: '', clubs: [], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '', title: 'Aucun article', dek: '', body: '', log: [] };
     const chk = this.checksOf(edRaw);
-    const edLocked = !isAdmin && (edRaw.author !== me.name || ['review', 'scheduled', 'published', 'rejected'].indexOf(edRaw.status) >= 0);
+    const edLocked = !isAdmin && (!this.rxMine(edRaw) || ['review', 'scheduled', 'published', 'rejected'].indexOf(edRaw.status) >= 0);
     const ed = Object.assign({}, edRaw, stV(edRaw), {
       titleLen: String(edRaw.title.length), titleColor: edRaw.title.length > 80 ? 'var(--danger)' : 'var(--muted)',
       words: String(chk.words), read: Math.max(1, Math.round(chk.words / 200)) + ' min de lecture', blocks: this.blocksOf(edRaw.body),
@@ -2146,7 +2261,7 @@ class Component extends DCLogic {
         .concat(D.sports.filter((x) => m(x)).map((x) => ({ label: x, sub: 'Discipline', kind: 'Discipline', go: () => this.go('discipline', { discId: x }) })))
         .concat(m('gazette') ? [{ label: 'La Gazette du Cotentin', sub: 'Abonnement numérique, papier ou les deux', kind: 'Mag', go: () => this.go('offers', { offerTab: 'La Gazette' }) }] : [])
         .concat(X.places.filter((p) => m(p.name + ' ' + p.desc + ' ' + p.moment)).map((p) => ({ label: p.name, sub: 'Lieu de légende · ' + p.year, kind: 'Histoire', go: () => this.setState({ searchOpen: false, placeOpen: true, placeIdx: X.places.indexOf(p) }) })))
-        .concat(X.partners.filter((p) => m(p.name + ' ' + p.sector + ' ' + p.city)).map((p) => ({ label: p.name, sub: p.sector + ' · partenaire fictif', kind: 'Partenaire', go: () => this.setState({ searchOpen: false, partnerId: p.id }) })))
+        .concat(X.partners.filter((p) => m(p.name + ' ' + p.sector + ' ' + p.city)).map((p) => ({ label: p.name, sub: p.sector + (p.real ? ' · partenaire' : ' · partenaire fictif'), kind: 'Partenaire', go: () => this.setState({ searchOpen: false, partnerId: p.id }) })))
         .concat(this.culture().flat.filter((w) => m(w.title + ' ' + w.author + ' ' + w.technique)).map((w, i) => ({ label: w.title, sub: 'Exposition · salle ' + w.room, kind: 'Œuvre', go: () => this.setState({ searchOpen: false, workIdx: this.culture().flat.indexOf(w) }) })))
         .concat(this.culture().venues.filter((v) => m(v.name + ' ' + v.city + ' ' + v.desc)).map((v) => ({ label: v.name, sub: v.kind + ' · ' + v.city, kind: 'Culture', go: () => this.go('culture', { cuTab: 'lieux' }) })))
         .concat(this.culture().routes.filter((r) => m(r.name + ' ' + r.area + ' ' + r.sport)).map((r) => ({ label: r.name, sub: r.sport + ' · ' + r.area, kind: 'Parcours', go: () => this.go('culture', { cuTab: 'parcours' }) })))
@@ -2303,10 +2418,12 @@ class Component extends DCLogic {
 
     // ---------- accueil épuré et personnalisable ----------
     const MD = this.modDefs();
-    const modsState0 = (s.mods && s.mods.length) ? s.mods.filter((m) => m && MD.some((x) => x[0] === m.id)).concat(MD.filter((x) => !s.mods.some((m) => m && m.id === x[0])).map((d) => ({ id: d[0], on: d[3] !== false }))) : this.defaultMods();
+    // Le Vestiaire (nouveau bloc) se place juste après la une, même pour ceux qui avaient déjà composé leur accueil
+    const mods0 = (s.mods && s.mods.length && !s.mods.some((m) => m && m.id === 'vestiaire')) ? (() => { const a = s.mods.slice(); const i = a.findIndex((m) => m && m.id === 'une'); a.splice(i + 1, 0, { id: 'vestiaire', on: true }); return a; })() : s.mods;
+    const modsState0 = (mods0 && mods0.length) ? mods0.filter((m) => m && MD.some((x) => x[0] === m.id)).concat(MD.filter((x) => !mods0.some((m) => m && m.id === x[0])).map((d) => ({ id: d[0], on: d[3] !== false }))) : this.defaultMods();
     // « Mon essentiel » arrive en tête pour les abonnés qui avaient déjà composé leur accueil
     const modsState = (s.loggedIn && s.mods && s.mods.length && !s.mods.some((m) => m && m.id === 'essentiel')) ? [{ id: 'essentiel', on: true }].concat(modsState0.filter((m) => m.id !== 'essentiel')) : modsState0;
-    const homeMods = modsState.filter((m) => m.on).map((m) => { const def = MD.find((x) => x[0] === m.id); return { id: m.id, cls: def[2], isEssentiel: m.id === 'essentiel' && !!s.loggedIn, isUne: m.id === 'une', isResultats: m.id === 'resultats', isPortes: m.id === 'portes', isCherwood: m.id === 'cherwood', isRubriques: m.id === 'rubriques', isMeteo: m.id === 'meteo', isPrivate: m.id === 'private', isRdv: m.id === 'rdv' && rdv.has, isActus: m.id === 'actus', isShop: m.id === 'shop', isTable: m.id === 'table', isGazette: m.id === 'gazette', isLieu: m.id === 'lieu', isVideos: m.id === 'videos', isOeuvre: m.id === 'oeuvre', isCultureMod: m.id === 'culture', isClubMod: m.id === 'clubhouse' }; });
+    const homeMods = modsState.filter((m) => m.on).map((m) => { const def = MD.find((x) => x[0] === m.id); return { id: m.id, cls: def[2], isEssentiel: m.id === 'essentiel' && !!s.loggedIn, isUne: m.id === 'une', isResultats: m.id === 'resultats', isPortes: m.id === 'portes', isCherwood: m.id === 'cherwood', isRubriques: m.id === 'rubriques', isMeteo: m.id === 'meteo', isPrivate: m.id === 'private', isRdv: m.id === 'rdv' && rdv.has, isActus: m.id === 'actus', isShop: m.id === 'shop', isTable: m.id === 'table', isGazette: m.id === 'gazette', isLieu: m.id === 'lieu', isVideos: m.id === 'videos', isOeuvre: m.id === 'oeuvre', isCultureMod: m.id === 'culture', isClubMod: m.id === 'clubhouse', isVestiaire: m.id === 'vestiaire' }; });
     const move = (i, dlt) => { const a = modsState.slice(); const j = i + dlt; if (j < 0 || j >= a.length) return; const t = a[i]; a[i] = a[j]; a[j] = t; this.setMods(a); };
     const modRows = modsState.map((m, i) => ({ label: MD.find((x) => x[0] === m.id)[1], on: m.on, essentiel: MD.find((x) => x[0] === m.id)[3] !== false, toggle: () => this.setMods(modsState.map((x, k) => k === i ? { id: x.id, on: !x.on } : x)), up: () => move(i, -1), down: () => move(i, 1) }));
     const layouts = [['dashboard', 'Tableau de bord', 'Blocs personnalisables'], ['magazine', 'Magazine', 'Grand visuel et récits']].map(([id, label, desc]) => ({ label, desc, checked: s.homeLayout === id ? 'true' : 'false', border: s.homeLayout === id ? 'var(--acc)' : 'var(--line)', pick: () => this.setLayout(id) }));
@@ -2374,7 +2491,7 @@ class Component extends DCLogic {
     const wkRecits = wkArts.filter((a) => String(a.pubIso).slice(0, 10) === wkDay).map(wkRecitIt);
     const wkItems = wkRecits.slice(0, 1).concat(wkDuJour.slice(0, wkMax).map(wkMatchIt), wkRecits.slice(1));
     const wkReste = Math.max(0, wkDuJour.length - wkMax);
-    const wkDernier = !wkArts.length && homeOrder[0] ? wkRecitIt(homeOrder[0]) : null;
+    const wkDernier = null; // l'article le plus récent est déjà à la une juste au-dessus : pas de doublon
     const wkJournalT = 'Le journal du terrain · ' + (wkDay ? wkJour(wkDay) : '');
     const wkJournal = () => {
       if (!wkDay) return '';
@@ -2647,12 +2764,13 @@ class Component extends DCLogic {
     const PVI = { jour: 'M12 3v2M12 19v2M5 12H3M21 12h-2M7 7l-1.4-1.4M17 7l1.4-1.4M9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0', agenda: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4', rappels: 'M12 8v5l3 2 M5 3L2 6 M19 3l3 3 M12 21a8 8 0 1 0 0-16a8 8 0 0 0 0 16z', famille: 'M9 11a3 3 0 1 0 0-6a3 3 0 0 0 0 6z M17 11a2.5 2.5 0 1 0 0-5 M3 20c.8-3.5 3.2-5 6-5s5.2 1.5 6 5 M16 15c2.6 0 4.4 1.4 5 4',
       listes: 'M9 6h11 M9 12h11 M9 18h11 M4 6h.01 M4 12h.01 M4 18h.01', repas: 'M7 3v8 M5 3v4a2 2 0 0 0 4 0V3 M7 11v10 M17 3c-2 2-2 6 0 8v10', notes: 'M5 4h14v16H5z M8 9h8 M8 13h8 M8 17h5', budget: 'M3 7h18v12H3z M3 11h18 M7 15h3', docs: 'M6 3h8l4 4v14H6z M14 3v4h4',
       activite: 'M3 12h4l3-8 4 16 3-8h4', minuteur: 'M10 2h4 M12 14l3-3 M12 22a8 8 0 1 0 0-16a8 8 0 0 0 0 16z', habitudes: 'M4 12l5 5L20 6', covoit: 'M5 16l1.5-5h11L19 16 M4 16h16v3H4z M7 19v2 M17 19v2 M7.5 13.5h.01 M16.5 13.5h.01', contacts: 'M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z M12 11a2.5 2.5 0 1 0 0-5 M8.5 15c.6-1.8 2-2.6 3.5-2.6s2.9.8 3.5 2.6' };
-    const PVL = { jour: 'Ma journée', agenda: 'Agenda', rappels: 'Rappels', famille: 'Famille', listes: 'Listes', repas: 'Repas', notes: 'Notes', budget: 'Budget sport', docs: 'Documents', activite: 'Activité', minuteur: 'Minuteur', habitudes: 'Habitudes', contacts: 'Contacts' };
+    const PVL = { jour: 'Ma journée', agenda: 'Agenda', listes: 'Listes', activite: 'Activité', budget: 'Budget sport' };
     const pvTab2 = PVL[s.pvTab] ? s.pvTab : 'jour';
-    ['tRepas', 'tHabitudes', 'tRappels', 'tMinuteur', 'tFamille'].forEach((k) => { pv[k] = false; });
+    ['tRepas', 'tHabitudes', 'tRappels', 'tMinuteur', 'tFamille', 'tNotes', 'tDocs', 'tContacts', 'tCovoit'].forEach((k) => { pv[k] = false; });
     Object.keys(PVL).forEach((k) => { pv['t' + k[0].toUpperCase() + k.slice(1)] = pvTab2 === k; });
-    const badges = { docs: docs.filter((d) => d.days <= 30).length, listes: todoLeft, rappels: pv.recursToday.filter((r) => r.mark === '').length };
-    const pvGroups = [['Organiser', ['jour', 'agenda', 'rappels', 'famille']], ['Maison', ['listes', 'repas', 'notes', 'budget', 'docs']], ['Sport & bien-être', ['activite', 'minuteur', 'habitudes']], ['Carnet', ['contacts']]]
+    const badges = { listes: todoLeft };
+    // L'essentiel : 5 outils seulement (les autres données restent gardées sur l'appareil, simplement plus affichées)
+    const pvGroups = [['Ma semaine', ['jour', 'agenda', 'listes']], ['Mon sport', ['activite', 'budget']]]
       .map(([label, ids]) => ({ label, tabs: ids.map((id) => ({ label: PVL[id], ico: PVI[id], cur: id === pvTab2 ? 'page' : 'false', bg: id === pvTab2 ? 'var(--inv-bg)' : 'transparent', fg: id === pvTab2 ? 'var(--on-inv)' : 'var(--text)', hasBadge: !!badges[id], badge: String(badges[id] || 0), pick: () => this.setState({ pvTab: id }) })) }));
     const pvTitle = PVL[pvTab2];
     // ---------- Club House ----------
@@ -2896,9 +3014,9 @@ class Component extends DCLogic {
       ['Sur iPhone', 'Ouvrez l’application dans Safari, touchez le bouton Partager puis « Sur l’écran d’accueil ».'],
       ['Sur ordinateur', 'Dans Chrome ou Edge, cliquez sur l’icône d’installation dans la barre d’adresse.']].map(([title, text]) => ({ title, text }));
     // ---------- barre d'onglets mobile ----------
-    const TAB_ICONS = { clubs: 'M3 21V10l9-6 9 6v11 M9 21v-6h6v6 M7 11h.01 M17 11h.01', home: 'M4 11l8-7 8 7v9h-5v-6H9v6H4z', live: 'M4 20V10M10 20V4M16 20v-7M22 20H2', news: 'M5 4h12v16H5z M17 8h2v10a2 2 0 0 1-2 2 M8 8h6 M8 12h6 M8 16h4', meteo: 'M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z', private: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4 M8 13h3 M8 16h6' };
-    const tabBar = [['home', 'Accueil'], ['live', 'Terrain'], ['news', 'Actus'], ['clubs', 'Clubs'], ['private', 'Quotidien']].map(([id, label]) => { const on = activeSec === id || (id === 'home' && s.view === 'home'); return { label, ico: TAB_ICONS[id], sym: id === 'home', pic: id !== 'home', color: on ? 'var(--ink)' : 'var(--muted)', bar: on ? 'var(--acc)' : 'transparent', cur: on ? 'page' : 'false', go: () => this.go(id) }; });
-    const V = s.view;
+    const TAB_ICONS = { podcast: 'M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z M5 11a7 7 0 0 0 14 0 M12 18v3 M8 21h8', clubs: 'M3 21V10l9-6 9 6v11 M9 21v-6h6v6 M7 11h.01 M17 11h.01', home: 'M4 11l8-7 8 7v9h-5v-6H9v6H4z', live: 'M4 20V10M10 20V4M16 20v-7M22 20H2', news: 'M5 4h12v16H5z M17 8h2v10a2 2 0 0 1-2 2 M8 8h6 M8 12h6 M8 16h4', meteo: 'M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z', private: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4 M8 13h3 M8 16h6' };
+    const tabBar = [['home', 'Accueil'], ['live', 'Terrain'], ['news', 'Actus'], ['podcast', 'Podcast'], ['clubs', 'Clubs']].map(([id, label]) => { const on = activeSec === id || (id === 'home' && s.view === 'home'); return { label, ico: TAB_ICONS[id], sym: id === 'home', pic: id !== 'home', color: on ? 'var(--ink)' : 'var(--muted)', bar: on ? 'var(--acc)' : 'transparent', cur: on ? 'page' : 'false', go: () => this.go(id) }; });
+    const V = s.view === 'disciplines' ? 'clubs' : s.view; // ancienne page Disciplines → Clubs
     const n = newsArticles.length;
     // ---------- réseau local (carte, commerces, espace club, administration) et profil membre (photo, CV, certification) ----------
     const rsCtx = { D, V, me, isAdmin, staffRole: s.role ? staffRole : '', role: s.role, posts, clubRoleId: s.role === 'club' ? s.clubRoleId : '', canReseau, clubId: s.clubId, wkVilles: wk.villesWk,
@@ -2907,6 +3025,8 @@ class Component extends DCLogic {
     rsCtx.cvPending = typeof CasaCV !== 'undefined' && canReseau && s.studioTab === 'reseau' ? CasaCV.pending(this) : 0;
     if (s.view === 'map') this.chargeCarte();
     const RS = typeof CasaReseau !== 'undefined' ? CasaReseau.vals(this, rsCtx) : { carte: {}, com: {}, club: {}, adm: {}, fiche: { has: false, lignes: [] } };
+    // ---------- Le Vestiaire : planning, présences et fil des clubs (js/vestiaire.js, supabase/vestiaire.sql) ----------
+    const VS = typeof CasaVestiaire !== 'undefined' ? CasaVestiaire.vals(this, { V }) : { home: { on: false }, page: { off: true } };
     // ---------- le podcast : émissions et réactions d'après-match (contenus/podcast.js, modifiable dans l'admin) ----------
     const podCat = (e) => { const t = nrm(e.type + ' ' + e.qui); if (/joueu/.test(t)) return 'joueur'; if (/coach|entraineu/.test(t)) return 'coach'; if (/staff|dirige|kine|prepa|presiden|benevol/.test(t)) return 'staff'; if (/support|fan|tribune/.test(t)) return 'supporter'; return 'emission'; };
     const POD_LAB = { emission: 'Émission', joueur: 'Réaction joueur', coach: 'Réaction coach', staff: 'Réaction staff', supporter: 'Réaction supporter' };
@@ -2928,6 +3048,7 @@ class Component extends DCLogic {
     return {
       podcast, essentiel, isPodcast: V === 'podcast', goPodcast: () => this.go('podcast'),
       isTrophees: V === 'trophees', tr: typeof CasaTrophees !== 'undefined' && V === 'trophees' ? CasaTrophees.vals(this) : { adm: {} }, goTrophees: () => this.go('trophees'),
+      isVestiaire: V === 'vestiaire', vs: VS.page, vsHome: VS.home, goVestiaire: () => this.go('vestiaire'), goVestiaireClub: () => this.go('vestiaire', { vsClub: s.clubId }),
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
         ok: s.mbRes === 'ok', off: s.mbRes === 'off', none: s.mbRes === 'none', bad: s.mbRes === 'bad', format: s.mbRes === 'format',
         prenom: (s.mbInfo && s.mbInfo.prenom) || 'Membre', depuis: s.mbInfo && s.mbInfo.depuis ? 'Membre depuis ' + new Date(s.mbInfo.depuis).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '' },
@@ -2978,7 +3099,7 @@ class Component extends DCLogic {
       },
       vid: curV, otherVideos: videos.filter((v) => v.id !== curV.id), playing: s.playing, notPlaying: !s.playing, togglePlay: () => this.setState({ playing: !s.playing }),
       playLabel: s.playing ? 'Pause' : 'Lire la vidéo', playState: s.playing ? 'Lecture en cours' : 'Prêt à lire', vidDim: s.playing ? 0.9 : 0.75,
-      disciplines, disc, clubChips, clubList, club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs', tabAlbum: s.clubTab === 'album',
+      disciplines, disc, clubChips, clubList, clubDisc, goClubsAll: () => this.go('clubs', { clubSport: 'Tous' }), club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs', tabAlbum: s.clubTab === 'album',
       roleChips, sportChips: plSportChips, hasSportChips: plSportChips.length > 0, zoneChips, playerList, playerCount: playerList.length + (playerList.length > 1 ? ' profils' : ' profil'), noPlayerList: playerList.length === 0, hasLibres, pl, cityName: s.city, cityClubs,
       // terrain
       dSports, dComps, hasComps: dComps.length > 0, dZones, hasZones: dZones.length > 0, dNivs, hasNivs: dNivs.length > 0, dSportName: s.dSport, dTabs, sportEmpty: !sportHasData, sportHasData,
@@ -3207,7 +3328,7 @@ class Component extends DCLogic {
       isPrivate: V === 'private', pv, pf: pfm, pvTabs, tabBar,
       isApp: V === 'app', appUrl, arModes, notif, installSteps, installApp, installLabel, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: pwaIn ? 'Vous êtes dans l’application.' : 'Gratuite, sans passer par un store. Fonctionne sur téléphone, tablette et ordinateur.',
       isOlisto: V === 'olisto', ol, goOlisto: () => this.go('olisto'),
-      clubsSwitch: [['clubs', 'Les clubs', 'Annuaire, fiches et résultats'], ['clubhouse', 'Club House', 'La communauté des supporters']].map(([v, label, sub]) => ({ label, sub, sel: V === v ? 'true' : 'false', cls: V === v ? 'is-on' : '', go: () => this.go(v) })),
+      clubsSwitch: [['clubs', 'Clubs et disciplines', 'Tous les sports, les clubs et leurs résultats'], ['players', 'Joueurs', 'Les profils du Cotentin'], ['clubhouse', 'Club House', 'La communauté des supporters']].map(([v, label, sub]) => ({ label, sub, sel: V === v ? 'true' : 'false', cls: V === v ? 'is-on' : '', go: () => this.go(v) })),
       isClubhouse: V === 'clubhouse', card, cardColors, chTabs, ch, chf, chMe, chLevelColor: LV[lvIdx][2], chHome, goClubhouse: () => this.go('clubhouse'),
       pvGroups, pvTitle, tm, isCulture: V === 'culture', cuTabs, cu, cuf, workOpen: !!woRaw, wo, closeWork: () => this.setState({ workIdx: null }), oeuvre, cultureHome, goCulture: () => this.go('culture'),
       hdrY: s.hdrY, showToTop: s.scrolled, toTop: () => { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} },
@@ -3230,16 +3351,20 @@ class Component extends DCLogic {
       stCrm: s.studioTab === 'crm' && s.role === 'admin', crm,
       stDash: s.studioTab === 'dash' && !isClubRole, stList: s.studioTab === 'list' && !isClubRole, stQueue: s.studioTab === 'queue' && !isClubRole, stEdit: s.studioTab === 'edit' && !isClubRole, stMedia: s.studioTab === 'media' && !isClubRole, stTeam: s.studioTab === 'team' && !isClubRole,
       rx: RXV, stRowsEmpty: (RXV.list && RXV.list.rows || []).length === 0,
-      stRows: (RXV.list && RXV.list.rows ? RXV.list.rows : []).map((r) => { const p = posts.find((x) => x.id === r.id); return Object.assign({}, r, stV(p), { canReview: isAdmin && p.status === 'review', edit: () => openEdit(p, 'write'), review: () => openEdit(p, 'preview') }); }),
+      stRows: (RXV.list && RXV.list.rows ? RXV.list.rows : []).map((r) => { const p = posts.find((x) => x.id === r.id); return Object.assign({}, r, stV(p), { title: String(r.title || '').trim() || '(Sans titre)', canReview: isAdmin && p.status === 'review', edit: () => openEdit(p, 'write'), review: () => openEdit(p, 'preview'), canDelete: this.rxCanDelete(p), delSure: s.rxDelSure === p.id, delLabel: s.rxDelSure === p.id ? (p.online ? 'Confirmer : supprimer et retirer du site' : 'Confirmer la suppression') : 'Supprimer', del: () => this.rxDelete(p) }); }),
       stFilters, stQ: s.stQ, onStQ: (e) => this.setState({ stQ: e.target.value }), goStudioList: () => this.setState({ studioTab: 'list' }),
       queue, queueEmpty: queue.length === 0, queueHint: isAdmin ? 'En tant qu’administrateur principal, vous seul pouvez approuver et publier.' : 'Vos articles soumis attendent la validation de l’administrateur principal.',
-      newPost: () => { if (isClubRole) { this.setState({ studioTab: 'club' }); return; } const id = 'n' + Date.now(); const at = new Date().toISOString(); const p = { id, author: me.name, status: 'draft', updated: 'à l’instant', updatedAt: at, type: 'article', sport: 'Football', tag: '', clubs: [], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '', title: 'Nouvel article', dek: '', body: '', log: [{ who: me.name, when: 'à l’instant', at, what: 'Brouillon créé.' }] }; if (typeof CasaRedac !== 'undefined') p.versions = CasaRedac.addVersion(p, me.name, 'Brouillon créé'); this.setState({ posts: [p].concat(posts), studioTab: 'edit', editId: id, edMode: 'write', aiOutKind: null }); },
+      newPost: () => { if (isClubRole) { this.setState({ studioTab: 'club' }); return; } const id = 'n' + Date.now(); const at = new Date().toISOString(); const p = { id, author: me.name, authorId: window.CasaAuth && window.CasaAuth.user ? window.CasaAuth.user.id : undefined, status: 'draft', updated: 'à l’instant', updatedAt: at, type: 'article', sport: 'Football', tag: '', clubs: [], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '', title: 'Nouvel article', dek: '', body: '', log: [{ who: me.name, when: 'à l’instant', at, what: 'Brouillon créé.' }] }; if (typeof CasaRedac !== 'undefined') p.versions = CasaRedac.addVersion(p, me.name, 'Brouillon créé'); this.setState({ posts: [p].concat(posts), studioTab: 'edit', editId: id, edMode: 'write', aiOutKind: null }); },
       ed, edLocked, edLockMsg: edRaw.status === 'review' ? 'En attente de validation par l’administrateur principal.' : edRaw.status === 'published' ? 'Article publié.' : edRaw.status === 'scheduled' ? 'Publication programmée.' : 'Lecture seule : article d’un autre membre.',
       edWrite: s.edMode === 'write', edPreview: s.edMode === 'preview', edModes, sportOpts, edClubs, edImgs, toolbar,
       edTitle: (e) => upd({ title: e.target.value }), edDek: (e) => upd({ dek: e.target.value }), edSport: (e) => upd({ sport: e.target.value }), edTag: (e) => upd({ tag: e.target.value }),
       edSchedule: (e) => upd({ schedule: e.target.value }), edAlt: (e) => upd({ alt: e.target.value }), edBody: (e) => upd({ body: e.target.value }), edPremium: () => upd({ premium: !edRaw.premium }),
       edCanSave: !edLocked, edCanSubmit: !isAdmin && !edLocked && ['draft', 'corrections'].indexOf(edRaw.status) >= 0, edCanPublishDirect: isAdmin && edRaw.author === me.name && ['draft', 'corrections'].indexOf(edRaw.status) >= 0,
-      edSave: () => { this.setPost(edRaw.id, {}, 'Brouillon enregistré.'); this.say('Brouillon enregistré'); },
+      edSave: () => { this.setPost(edRaw.id, {}, 'Brouillon enregistré.'); this.say(s.rxSrv === 'ok' ? 'Brouillon enregistré en ligne' : 'Brouillon enregistré'); },
+      edCanDelete: !!edRaw.id && this.rxCanDelete(edRaw), edDelSure: s.rxDelSure === edRaw.id, edDelete: () => this.rxDelete(edRaw),
+      edDelLabel: s.rxDelSure === edRaw.id ? (edRaw.online ? 'Confirmer : supprimer et retirer du site' : 'Confirmer la suppression') : (edRaw.status === 'draft' ? 'Supprimer ce brouillon' : 'Supprimer cet article'),
+      rxSrvSql: !!s.role && s.rxSrv === 'sql', rxSrvErr: !!s.role && s.rxSrv === 'erreur', rxSrvMsg: s.rxSrvMsg || '', rxSrvOk: !!s.role && s.rxSrv === 'ok',
+      rxSrvLabel: s.rxSavedAt ? 'Articles enregistrés en ligne · dernier enregistrement à ' + new Date(s.rxSavedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'Articles enregistrés en ligne' + (isAdmin ? ' · vous voyez ceux de toute l’équipe' : ' · vous seul voyez vos articles (et l’administrateur)'),
       edSubmit: () => this.rxGuard('soumettre', edRaw, (lev) => { this.setPost(edRaw.id, { status: 'review' }, 'Article soumis à la relecture.' + (lev ? ' Contraintes levées : ' + lev + '.' : '')); this.say('Soumis à l’administrateur principal'); }),
       edPublish: () => this.rxGuard('publier', edRaw, () => { this.setPost(edRaw.id, { status: 'published' }, 'Publié par l’administrateur principal.'); this.say('Article publié dans Actualités'); }),
       showDecision: isAdmin && edRaw.status === 'review', reviewNote: s.reviewNote, onReviewNote: (e) => this.setState({ reviewNote: e.target.value }),

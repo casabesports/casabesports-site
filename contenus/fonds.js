@@ -15,12 +15,14 @@
    Chaque visiteur peut ensuite choisir dans « Mon espace › Apparence ».
 
    COULEURS
-     photosEnCouleur = false  photos de fond en noir et blanc (signature) ; true = en couleur
+     photos = 'maree'         ton des photos de fond : 'maree' (la signature, bleu de la rade),
+                              'nb' (noir et blanc) ou 'couleur' (telles qu'elles ont été prises)
      teinte = ''              couleur de fond de tout le site, par exemple '#1d4e89' (vide = blanc ou noir)
      Une page peut avoir sa propre couleur en 3e réglage : accueil: ['assets/…jpg', 'center 35%', '#1d4e89'],
    ================================================================ */
 window.CASA_FONDS = {
   modeParDefaut: 'aucun',
+  photos: 'maree',
   photosEnCouleur: false,
   teinte: '',
   pages: {
