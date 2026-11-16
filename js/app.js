@@ -1955,18 +1955,31 @@ class Component extends DCLogic {
     const placeOpacity = showPlaces && bgMode !== 'aucun' ? (s.view === 'studio' ? 0.06 : Math.min(0.5, k * 0.55)) : 0;
 
     // ---------- partenaires ----------
-    const partners = X.partners.map((p) => Object.assign({}, p, { open: () => this.setState({ partnerId: p.id }) }));
+    const partners = X.partners.map((p) => Object.assign({}, p, { logo: p.logo || '', hasLogo: !!p.logo, noLogo: !p.logo, open: () => this.setState({ partnerId: p.id }) }));
     const tiersDef = [['Platinum', 'Partenaire Platinum', '#e8a830', '360px', '130px'], ['Or', 'Partenaires Or', '#9a6410', '300px', '110px'], ['Club', 'Partenaires Club', '#8f9aa8', '260px', '100px']];
-    const partnerTiers = tiersDef.map(([id, label, line, min, h]) => ({ label, line, min, h, items: partners.filter((p) => p.tier === id) }));
+    // un niveau inconnu (ou vide) range le partenaire avec les partenaires Club, pour qu'il ne disparaisse jamais de la page
+    const tierOf = (p) => (tiersDef.some((t) => t[0] === p.tier) ? p.tier : 'Club');
+    const partnerTiers = tiersDef.map(([id, label, line, min, h]) => ({ label, line, min, h, items: partners.filter((p) => tierOf(p) === id) })).filter((t) => t.items.length);
     const ptRaw = X.partners.find((p) => p.id === s.partnerId);
     const claimed = ptRaw && s.claimed.indexOf(ptRaw.id) >= 0;
     const ptBase = ptRaw || X.partners[0] || {};
+    const ptOlisto = !!ptRaw && ptRaw.id === 'olisto';
+    const ptHoraires = String(ptBase.horaires || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => { const i = l.indexOf(':'); return i > 0 ? { j: l.slice(0, i).trim(), h: l.slice(i + 1).trim() } : { j: l, h: '' }; });
+    const ptSite = cbPartnerLink(ptBase.site, ptBase.id, 'site');
     const pt = Object.assign({}, ptBase, {
-      siteHref: cbPartnerLink(ptBase.site, ptBase.id, 'site'), appHref: cbPartnerLink(ptBase.app, ptBase.id, 'application'),
-      hasSite: !!cbPartnerLink(ptBase.site, ptBase.id, 'site'), hasApp: !!cbPartnerLink(ptBase.app, ptBase.id, 'application'),
-      note: ptRaw && ptRaw.real ? 'Partenaire Casa Besports.' : 'Partenaire Casa Besports.',
-      claimLabel: ptRaw && ptRaw.real ? 'Découvrir l’offre OlistO' : claimed ? 'Avantage enregistré ✓' : (subscribed ? 'Profiter de l’avantage' : 'Réservé aux abonnés BE+'),
-      claim: () => { if (ptRaw && ptRaw.real) { this.go('olisto'); return; } if (!subscribed) { this.go('offers', { offerTab: 'BE+' }); return; } if (!claimed) { this.setState({ claimed: s.claimed.concat([ptRaw.id]) }); this.say('Avantage ajouté à Mon espace'); } }
+      siteHref: ptSite, appHref: cbPartnerLink(ptBase.app, ptBase.id, 'application'),
+      hasSite: !!ptSite, hasApp: !!cbPartnerLink(ptBase.app, ptBase.id, 'application'),
+      siteLabel: /facebook\.com/i.test(ptSite) ? 'Page Facebook ↗' : /instagram\.com/i.test(ptSite) ? 'Page Instagram ↗' : 'Visiter le site ↗',
+      logo: ptBase.logo || '', hasLogo: !!ptBase.logo, noLogo: !ptBase.logo,
+      hasPerk: !!ptBase.perk,
+      hasAdresse: !!ptBase.adresse, mapsHref: ptBase.adresse ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ptBase.name + ', ' + ptBase.adresse) : '',
+      hasTel: !!ptBase.telephone, telHref: 'tel:' + String(ptBase.telephone || '').replace(/[^0-9+]/g, '').replace(/^0/, '+33'),
+      horaires: ptHoraires, hasHoraires: ptHoraires.length > 0, hasInfos: !!(ptBase.adresse || ptBase.telephone || ptHoraires.length),
+      note: 'Partenaire Casa Besports.',
+      // OlistO : page dédiée ; autres vrais partenaires : bouton seulement s'ils offrent un avantage
+      hasClaim: ptOlisto || !(ptRaw && ptRaw.real) || !!ptBase.perk,
+      claimLabel: ptOlisto ? 'Découvrir l’offre OlistO' : claimed ? 'Avantage enregistré ✓' : (subscribed ? 'Profiter de l’avantage' : 'Réservé aux abonnés BE+'),
+      claim: () => { if (ptOlisto) { this.go('olisto'); return; } if (!subscribed) { this.go('offers', { offerTab: 'BE+' }); return; } if (!claimed) { this.setState({ claimed: s.claimed.concat([ptRaw.id]) }); this.say('Avantage ajouté à Mon espace'); } }
     });
 
     // ---------- Gazette (liseuse, édition « Le bandeau ») ----------
@@ -2146,7 +2159,7 @@ class Component extends DCLogic {
         .concat(D.sports.filter((x) => m(x)).map((x) => ({ label: x, sub: 'Discipline', kind: 'Discipline', go: () => this.go('discipline', { discId: x }) })))
         .concat(m('gazette') ? [{ label: 'La Gazette du Cotentin', sub: 'Abonnement numérique, papier ou les deux', kind: 'Mag', go: () => this.go('offers', { offerTab: 'La Gazette' }) }] : [])
         .concat(X.places.filter((p) => m(p.name + ' ' + p.desc + ' ' + p.moment)).map((p) => ({ label: p.name, sub: 'Lieu de légende · ' + p.year, kind: 'Histoire', go: () => this.setState({ searchOpen: false, placeOpen: true, placeIdx: X.places.indexOf(p) }) })))
-        .concat(X.partners.filter((p) => m(p.name + ' ' + p.sector + ' ' + p.city)).map((p) => ({ label: p.name, sub: p.sector + ' · partenaire fictif', kind: 'Partenaire', go: () => this.setState({ searchOpen: false, partnerId: p.id }) })))
+        .concat(X.partners.filter((p) => m(p.name + ' ' + p.sector + ' ' + p.city)).map((p) => ({ label: p.name, sub: p.sector + (p.real ? ' · partenaire' : ' · partenaire fictif'), kind: 'Partenaire', go: () => this.setState({ searchOpen: false, partnerId: p.id }) })))
         .concat(this.culture().flat.filter((w) => m(w.title + ' ' + w.author + ' ' + w.technique)).map((w, i) => ({ label: w.title, sub: 'Exposition · salle ' + w.room, kind: 'Œuvre', go: () => this.setState({ searchOpen: false, workIdx: this.culture().flat.indexOf(w) }) })))
         .concat(this.culture().venues.filter((v) => m(v.name + ' ' + v.city + ' ' + v.desc)).map((v) => ({ label: v.name, sub: v.kind + ' · ' + v.city, kind: 'Culture', go: () => this.go('culture', { cuTab: 'lieux' }) })))
         .concat(this.culture().routes.filter((r) => m(r.name + ' ' + r.area + ' ' + r.sport)).map((r) => ({ label: r.name, sub: r.sport + ' · ' + r.area, kind: 'Parcours', go: () => this.go('culture', { cuTab: 'parcours' }) })))
