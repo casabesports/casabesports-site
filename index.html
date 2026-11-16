@@ -169,6 +169,14 @@ html[data-cb-theme], body { background: var(--bg, #ffffff); }
 .pro-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem }
 .pro-list li { font-size: 13.5px; padding-left: 1.6rem; position: relative; color: var(--text) }
 .pro-list li::before { content: ''; position: absolute; left: 0; top: .2em; width: 14px; height: 14px; background: #e8a830; -webkit-mask: var(--ancre) center/contain no-repeat; mask: var(--ancre) center/contain no-repeat }
+.pro-ar { border-left: 4px solid #e8a830; margin-top: .4rem }
+#pro-ar { margin-top: 2.6rem }
+.pro-ar-prix { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; margin: 0 0 .2rem }
+.pro-ar-n { font-family: 'League Spartan', 'Arial Black', sans-serif; font-weight: 900; font-size: clamp(2rem, 5vw, 3rem); line-height: 1; color: var(--ink) }
+.pro-ar-u { font-size: 13px; color: var(--text-2) }
+.pro-ar-an { font-size: 13px; color: var(--muted); margin: 0 0 1rem }
+.pro-ar-ok { font-weight: 800; color: var(--gold-text, #e8a830); margin: 0 0 .8rem }
+.pro-ar-lien { font: inherit; font-weight: 800; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; padding: 0; cursor: pointer }
 .pro-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1rem; margin-top: 2.6rem }
 .pro-step { border-top: 2px solid var(--ink); padding-top: .8rem }
 .pro-step h3 { font-size: 15px; margin: .3rem 0 .3rem; color: var(--ink) }
@@ -4408,7 +4416,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
     </sc-if>
     <sc-if value="{{step2}}" hint-placeholder-val="{{ false }}">
       <h1 class="h2" style="margin-bottom: 1.5rem">Vos coordonnées</h1>
-      <label class="lbl" style="flex-direction: row; align-items: center; gap: .6rem; margin-bottom: 1rem; cursor: pointer"><input type="checkbox" checked="{{isGift}}" onChange="{{toggleIsGift}}" style="width: 22px; height: 22px; accent-color: var(--ink)">Offrir cet abonnement</label>
+      <sc-if value="{{giftOk}}" hint-placeholder-val="{{ true }}"><label class="lbl" style="flex-direction: row; align-items: center; gap: .6rem; margin-bottom: 1rem; cursor: pointer"><input type="checkbox" checked="{{isGift}}" onChange="{{toggleIsGift}}" style="width: 22px; height: 22px; accent-color: var(--ink)">Offrir cet abonnement</label></sc-if>
       <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem">
         <label class="lbl">{{nameLabel}}<input class="field" value="{{name}}" onChange="{{onName}}" placeholder="Prénom"></label>
         <label class="lbl">{{emailLabel}}<input class="field" type="email" value="{{email}}" onChange="{{onEmail}}" placeholder="vous@exemple.fr"></label>
@@ -5587,6 +5595,28 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
         <div class="pro-card-l"><div class="pro-num pro-num-l">{{work.cur.num}}</div><h2 class="pro-h2">{{work.cur.titre}}</h2><p class="pro-prom">{{work.cur.promesse}}</p>
           <button type="button" class="btn btn-gold" onClick="{{work.cur.go}}">{{work.cur.cta}}</button></div>
         <ul class="pro-list"><sc-for list="{{work.cur.items}}" as="it" hint-placeholder-count="4"><li>{{it.t}}</li></sc-for></ul>
+      </div>
+    </div>
+
+    <div class="wrap" id="pro-ar">
+      <div class="pro-eb pro-eb2">Nouveau · pour les clubs, coachs et éducateurs</div>
+      <div class="pro-card pro-ar">
+        <div class="pro-card-l">
+          <h2 class="pro-h2">{{work.ar.name}}</h2>
+          <p class="pro-prom">Déposez la vidéo d’un match ou d’un entraînement, dessinez sur l’image, marquez les actions et posez vos questions : « combien de pertes de balle en 2e période ? », « quel a été notre temps fort ? ».</p>
+          <div class="pro-ar-prix"><span class="pro-ar-n">{{work.ar.mois}}</span><span class="pro-ar-u">par mois, sans engagement</span></div>
+          <p class="pro-ar-an">ou {{work.ar.an}} par an ({{work.ar.economie}})</p>
+          <sc-if value="{{work.ar.actif}}" hint-placeholder-val="{{ false }}">
+            <p class="pro-ar-ok">★ Votre abonnement est actif.</p>
+            <div class="pro-cta"><button type="button" class="btn btn-gold" onClick="{{work.ar.essayer}}">Ouvrir l’analyse vidéo</button><button type="button" class="btn btn-ghost" onClick="{{work.ar.compo}}">Ma compo en AR</button></div>
+          </sc-if>
+          <sc-if value="{{work.ar.inactif}}" hint-placeholder-val="{{ true }}">
+            <div class="pro-cta"><button type="button" class="btn btn-gold" onClick="{{work.ar.mensuel}}">S’abonner au mois</button><button type="button" class="btn btn-ghost" onClick="{{work.ar.annuel}}">S’abonner à l’année</button></div>
+            <p class="pro-src" style="font-size:13px">Pas encore décidé ? <button type="button" class="pro-ar-lien" onClick="{{work.ar.essayer}}">Essayez gratuitement</button> sur les 5 premières minutes de votre vidéo.</p>
+          </sc-if>
+          <p class="pro-src">Plusieurs équipes ou un district ? <button type="button" class="pro-ar-lien" onClick="{{work.ar.devis}}">Demandez un tarif club</button>.</p>
+        </div>
+        <ul class="pro-list"><sc-for list="{{work.ar.perks}}" as="it" hint-placeholder-count="6"><li>{{it.t}}</li></sc-for></ul>
       </div>
     </div>
 
@@ -7738,7 +7768,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 <script>
   /* Chargement à la demande : la 3D (réalité augmentée) et la carte de Normandie ne sont téléchargées
      que lorsqu'on ouvre ces fonctions, pour que le site s'affiche plus vite. */
-  window.CASA_LIBS = { ar: ['js/three.min.js', 'js/realite-augmentee.js?v=__VERSION__'], carte: ['js/leaflet.js?v=__VERSION__', 'js/carte-normandie.js?v=__VERSION__'] };
+  window.CASA_LIBS = { ar: ['js/three.min.js', 'js/analyse-video.js?v=__VERSION__', 'js/realite-augmentee.js?v=__VERSION__'], carte: ['js/leaflet.js?v=__VERSION__', 'js/carte-normandie.js?v=__VERSION__'] };
   window.CasaCharge = (function () {
     var done = {};
     function one(src) {
@@ -7939,6 +7969,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/joueurs-libres.js?v=__VERSION__"></script>
 <script src="contenus/partenaires.js?v=__VERSION__"></script>
 <script src="contenus/abonnements.js?v=__VERSION__"></script>
+<script src="contenus/offres-pro.js?v=__VERSION__"></script>
 <script src="contenus/clubhouse.js?v=__VERSION__"></script>
 <script src="contenus/articles.js?v=__VERSION__"></script>
 <script src="contenus/lieux.js?v=__VERSION__"></script>

@@ -75,12 +75,13 @@ Deno.serve(async (req) => {
   try {
     // ---------- Abonnement (pour soi : prélèvement mensuel ou annuel ; offert : paiement unique) ----------
     if (b.type === 'abonnement') {
-      const plans = await contenu(sb, 'CASA_ABONNEMENTS', 'abonnements.js');
+      // formules grand public + offres professionnelles (contenus/offres-pro.js)
+      const plans = (await contenu(sb, 'CASA_ABONNEMENTS', 'abonnements.js')).concat(await contenu(sb, 'CASA_OFFRES_PRO', 'offres-pro.js'));
       const plan = plans.find((p) => p && p.id === b.formule);
       const periode = b.periode === 'an' ? 'an' : 'mois';
       const prix = plan ? Number(plan[periode]) : 0;
       if (!plan || !(prix > 0)) return json({ error: 'Formule inconnue.' }, 400);
-      const cadeau = !!b.cadeau;
+      const cadeau = !!b.cadeau && !plan.arPro;
       const email = cadeau ? txt(b.email, 200).toLowerCase() : (user?.email || txt(b.email, 200).toLowerCase());
       if (!validEmail(email)) return json({ error: 'Adresse e-mail invalide.' }, 400);
       if (plan.paper && !txt(b.adresse, 300)) return json({ error: 'Adresse postale requise pour le magazine papier.' }, 400);

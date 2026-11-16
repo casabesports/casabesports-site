@@ -301,7 +301,7 @@ class Component extends DCLogic {
     const subPlans = {};
     // Ancien nom « Casa B+ » (copie publiée en ligne avant le renommage) → BE+
     const beplus = (t) => typeof t === 'string' ? t.replace(/Casa B\+/g, 'BE+') : t;
-    ((typeof window !== 'undefined' && window.CASA_ABONNEMENTS) || []).forEach((f) => { if (f && f.id) subPlans[f.id] = Object.assign({ name: f.id, mois: 0, an: 0, perks: [], casab: false, gazette: null, paper: false }, f, { name: beplus(f.name || f.id), gazette: f.gazette || null, perks: (f.perks || []).filter(Boolean).map(beplus) }); });
+    ((typeof window !== 'undefined' && window.CASA_ABONNEMENTS) || []).concat((typeof window !== 'undefined' && window.CASA_OFFRES_PRO) || []).forEach((f) => { if (f && f.id) subPlans[f.id] = Object.assign({ name: f.id, mois: 0, an: 0, perks: [], casab: false, gazette: null, paper: false }, f, { name: beplus(f.name || f.id), gazette: f.gazette || null, perks: (f.perks || []).filter(Boolean).map(beplus) }); });
     // Lieux (arrière-plans « Lieux de légende », lieu du jour) : contenus/lieux.js
     const places = (typeof window !== 'undefined' && Array.isArray(window.CASA_LIEUX) && window.CASA_LIEUX.length) ? window.CASA_LIEUX.filter((p) => p && p.id).map((p) => Object.assign({}, p, { img: p.photo || p.img, isPhoto: !!p.photo })) : [{ id: 'rade', name: 'Casa Besports', short: 'Casa Besports', where: 'Cotentin', year: '', img: 'assets/hero.jpg', hook: '', desc: '', moment: '' }];
     // Partenaires : contenus/partenaires.js (modifiable dans l'espace administrateur)
@@ -1217,7 +1217,7 @@ class Component extends DCLogic {
     if (typeof window !== 'undefined' && window.CasaAR && window.CasaAR.open) {
       const all = this.more().matches || [];
       const live = all.find((m) => m.status === 'live') || all.find((m) => m.status === 'done' && m.hs != null);
-      window.CasaAR.open(mode, { sport: (s.view === 'discipline' && s.discId) || s.dSport || 'Football', score: live ? { home: live.home, away: live.away, hs: String(live.hs != null ? live.hs : 0), as: String(live.as != null ? live.as : 0), minute: live.status === 'live' ? 'En direct' : 'Terminé', label: 'Le direct' } : null });
+      window.CasaAR.open(mode, { pro: !!(s.arPro || s.role === 'admin'), offre: () => { this.go('work'); setTimeout(() => { try { const el = document.getElementById('pro-ar'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }, 300); }, sport: (s.view === 'discipline' && s.discId) || s.dSport || 'Football', score: live ? { home: live.home, away: live.away, hs: String(live.hs != null ? live.hs : 0), as: String(live.as != null ? live.as : 0), minute: live.status === 'live' ? 'En direct' : 'Terminé', label: 'Le direct' } : null });
       return;
     }
     this.go('app'); this.say('Expérience disponible dans l’application Casa Besports');
@@ -1295,11 +1295,11 @@ class Component extends DCLogic {
       const plans = this.more().subPlans; const eur = (n) => (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace('.', ',') + ' €';
       const date = (d) => { try { return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
       const actifs = abos.filter((a) => P.estActif(a) && plans[a.formule]);
-      let casab = false, num = false, pap = false;
-      actifs.forEach((a) => { const p = plans[a.formule]; if (p.casab) casab = true; if (p.gazette === 'num' || p.gazette === 'duo') num = true; if (p.gazette === 'pap' || p.gazette === 'duo') pap = true; });
+      let casab = false, num = false, pap = false, arPro = false;
+      actifs.forEach((a) => { const p = plans[a.formule]; if (p.arPro) arPro = true; if (p.casab) casab = true; if (p.gazette === 'num' || p.gazette === 'duo') num = true; if (p.gazette === 'pap' || p.gazette === 'duo') pap = true; });
       const srv = abos.filter((a) => plans[a.formule]).map((a) => ({ srv: true, label: plans[a.formule].name + (a.cadeau ? ' (offert)' : ''), detail: eur(a.montant) + (a.cadeau ? '' : a.periode === 'an' ? ' / an' : ' / mois') + (a.fin ? (P.estActif(a) ? (a.resiliation_prevue || a.cadeau ? ' · jusqu’au ' : ' · renouvelé le ') : ' · terminé le ') + date(a.fin) : ''), status: P.estActif(a) ? (a.resiliation_prevue ? 'Résilié' : 'Actif') : 'Terminé' }))
         .concat(cmds.map((c) => ({ srv: true, label: 'Commande ' + c.numero, detail: (c.lignes || []).reduce((n, l) => n + (l.quantite || 0), 0) + ' article(s) · ' + eur(c.montant) + ' · ' + date(c.cree_le), status: { payee: 'Payée', preparee: 'En préparation', expediee: 'Expédiée', retiree: 'Retirée', remboursee: 'Remboursée', annulee: 'Annulée' }[c.statut] || c.statut })));
-      const st = { orders: srv.concat(this.state.orders.filter((o) => !o.srv)), paidSubs: actifs.length > 0 };
+      const st = { orders: srv.concat(this.state.orders.filter((o) => !o.srv)), paidSubs: actifs.length > 0, arPro };
       if (abos.length) st.subs = { casab, gazette: num && pap ? 'duo' : pap ? 'pap' : num ? 'num' : null };
       this.setState(st);
       // Retour de Stripe : l'avis de paiement peut arriver quelques secondes après la personne
@@ -2180,7 +2180,18 @@ class Component extends DCLogic {
       devis: toContact('Demande de devis', ''), partenaire: toContact('Devenir partenaire', 'Entreprise'), histoire: toContact('Proposer une histoire', ''), redaction: toContact('Message à la rédaction', ''),
       stats: proStats, hasStats: proStats.length > 0, offres: proOffres, cur: proCur, rdv: toContact('Casa PRO · rendez-vous', ''),
       voir: () => { try { const el = document.getElementById('pro-offres'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} },
-      public: () => this.go('home')
+      public: () => this.go('home'),
+      ar: (() => {
+        const P = X.subPlans['ar-pro'] || { mois: 0, an: 0, perks: [], name: 'Analyse vidéo Pro' };
+        const e2 = (n) => (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace('.', ',').replace(',00', '') + ' €';
+        const actif = !!s.arPro;
+        return { name: P.name, mois: e2(P.mois), an: e2(P.an), economie: P.mois && P.an ? 'soit ' + e2(P.an / 12) + ' par mois' : '',
+          perks: (P.perks || []).map((t) => ({ t })), actif, inactif: !actif,
+          essayer: () => this.openAR('analyse'), compo: () => this.openAR('lineup'),
+          mensuel: () => this.go('checkout', { subPlan: 'ar-pro', step: 1, isGift: false, period: 'mois' }),
+          annuel: () => this.go('checkout', { subPlan: 'ar-pro', step: 1, isGift: false, period: 'an' }),
+          devis: toContact('Analyse vidéo Pro · plusieurs équipes', 'Club') };
+      })()
     };
     // Réseaux sociaux du pied de page (contenus/reseaux.js, modifiables dans l'admin) : un réseau sans adresse est masqué
     const RSX = window.CASA_RESEAUX || {};
@@ -2958,14 +2969,14 @@ class Component extends DCLogic {
       // abonnements
       offerTabs, periods, offerCards, offerTabGazette: s.offerTab === 'La Gazette' || s.offerTab === 'Tout',
       subName: sp.name, subPrice: eur(priceOf(s.subPlan)) + ' ' + perLabel, subNote: period === 'an' ? '2 mois offerts · paiement annuel' : 'Sans engagement · résiliable à tout moment',
-      subNeedsAddress, isGift: s.isGift, toggleIsGift: () => this.setState({ isGift: !s.isGift }),
+      subNeedsAddress, isGift: s.isGift && !sp.arPro, giftOk: !sp.arPro, toggleIsGift: () => this.setState({ isGift: !s.isGift }),
       nameLabel: s.isGift ? 'Prénom du bénéficiaire' : 'Prénom', emailLabel: s.isGift ? 'E-mail du bénéficiaire' : 'E-mail',
       steps, step1: s.step === 1, step2: s.step === 2, step3: s.step === 3, step4: s.step === 4,
       nextStep: () => { if (s.subPending) this.setState({ subPending: false }); if (s.step === 2 && (!s.name.trim() || !validEmail || (sp.paper && !s.address.trim()))) { this.setState({ formError: 'Prénom, e-mail valide' + (sp.paper ? ' et adresse postale' : '') + ' requis.' }); return; } this.setState({ step: s.step + 1, formError: '' }); },
       prevStep: () => this.setState({ step: Math.max(1, s.step - 1), formError: '' }),
       confirmSub: () => {
         if (s.payBusy) return;
-        this.payOnline({ type: 'abonnement', formule: s.subPlan, periode: period === 'an' ? 'an' : 'mois', cadeau: !!s.isGift, email: s.email.trim(), nom: s.name.trim(), adresse: sp.paper ? s.address.trim() : '' }, () => {
+        this.payOnline({ type: 'abonnement', formule: s.subPlan, periode: period === 'an' ? 'an' : 'mois', cadeau: !!s.isGift && !sp.arPro, email: s.email.trim(), nom: s.name.trim(), adresse: sp.paper ? s.address.trim() : '' }, () => {
         // Paiement en ligne pas encore activé : la demande part à l'équipe, sans activer l'abonnement
         this.crmCapture({ name: s.name.trim(), email: s.email, source: 'Abonnement', type: s.isGift ? 'Supporter' : 'Abonné', consent: '?', note: sp.name + (s.isGift ? ' (cadeau)' : '') + ' · paiement à régler' });
         this.setState({ step: 4, subPending: true, orders: s.orders.concat([{ label: sp.name + (s.isGift ? ' (cadeau)' : ''), detail: eur(priceOf(s.subPlan)) + ' ' + perLabel, status: 'À régler' }]) });
@@ -2973,8 +2984,8 @@ class Component extends DCLogic {
         });
       },
       doneTitle: s.subPending ? 'Demande envoyée, merci ' + (s.name || '') : s.isGift ? 'Cadeau envoyé à ' + (s.name || 'votre proche') : 'Bienvenue, ' + (s.name || 'supporter'),
-      doneText: s.subPending ? 'Le paiement en ligne ouvre très bientôt. L’équipe Casa Besports vous écrit à ' + (s.email || 'votre adresse') + ' pour régler ' + sp.name + ' ; l’abonnement sera activé dès le paiement reçu.' : s.isGift ? 'Un e-mail avec la carte cadeau vient de partir.' : sp.gazette ? (sp.paper ? 'Votre premier numéro papier part au prochain bouclage. La liseuse est déjà ouverte.' : 'Le dernier numéro est disponible dans la liseuse.') : 'Tous les contenus Premium sont débloqués.',
-      doneCta: () => (s.subPending ? this.go('offers') : sp.gazette && !s.isGift ? this.setState({ readerOpen: true, page: 0 }) : this.go('article', { articleId: 'pointe-hague' })), doneCtaLabel: s.subPending ? 'Revenir aux abonnements' : sp.gazette && !s.isGift ? 'Ouvrir la Gazette' : 'Lire un article Premium',
+      doneText: !s.subPending && sp.arPro ? 'L’Analyse vidéo Pro est débloquée sur ce compte : vidéo entière, rapport, captures et montage des temps forts.' : s.subPending ? 'Le paiement en ligne ouvre très bientôt. L’équipe Casa Besports vous écrit à ' + (s.email || 'votre adresse') + ' pour régler ' + sp.name + ' ; l’abonnement sera activé dès le paiement reçu.' : s.isGift ? 'Un e-mail avec la carte cadeau vient de partir.' : sp.gazette ? (sp.paper ? 'Votre premier numéro papier part au prochain bouclage. La liseuse est déjà ouverte.' : 'Le dernier numéro est disponible dans la liseuse.') : 'Tous les contenus Premium sont débloqués.',
+      doneCta: () => (!s.subPending && sp.arPro ? this.openAR('analyse') : s.subPending ? this.go('offers') : sp.gazette && !s.isGift ? this.setState({ readerOpen: true, page: 0 }) : this.go('article', { articleId: 'pointe-hague' })), doneCtaLabel: !s.subPending && sp.arPro ? 'Ouvrir l’analyse vidéo' : s.subPending ? 'Revenir aux abonnements' : sp.gazette && !s.isGift ? 'Ouvrir la Gazette' : 'Lire un article Premium',
       subPayLabel: s.payBusy ? 'Ouverture du paiement sécurisé…' : 'Payer ' + eur(priceOf(s.subPlan)) + ' ' + perLabel, payError: s.step === 3 ? s.formError : '',
       cancelLabel: s.paidSubs ? 'Gérer ou résilier' : 'Résilier',
       // Abonnement payé en ligne : espace client Stripe (carte, factures, résiliation)
