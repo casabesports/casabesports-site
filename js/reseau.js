@@ -569,7 +569,7 @@ var CasaReseau = (function () {
           if (miss.length) { self.say('Il manque : ' + miss.join(', ')); return; }
           c.setPost(cur.id, { status: 'review' }, 'Envoyé à la rédaction par le correspondant de ' + club.name + '.'); self.say('Envoyé à la rédaction : vous serez prévenu ici');
         },
-        remove: function () { if (cur.status !== 'draft') return; self.setState({ posts: (c.posts || []).filter(function (p) { return p.id !== cur.id; }), studioTab: 'club', clubEditId: null }); if (srvStaff()) call('DELETE', '/studio/posts/' + encodeURIComponent(cur.id)).catch(function () {}); self.say('Brouillon supprimé'); },
+        remove: function () { if (cur.status !== 'draft') return; self.setState({ posts: (c.posts || []).filter(function (p) { return p.id !== cur.id; }), studioTab: 'club', clubEditId: null }); /* enregistré en ligne automatiquement (supabase/redaction.sql) */ self.say('Brouillon supprimé'); },
         canRemove: cur.status === 'draft', back: function () { self.setState({ studioTab: 'clist' }); }
       };
     }

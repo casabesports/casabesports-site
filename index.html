@@ -1029,6 +1029,10 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .rx-tbtn[aria-pressed="true"] { background: var(--inv-bg); color: var(--on-inv); border-color: var(--ink); }
 .rx-tbtn-dark { background: var(--inv-bg); color: var(--on-inv); border-color: var(--ink); }
 .rx-tbtn-acc { background: var(--acc); color: var(--on-acc); border-color: transparent; }
+.rx-tbtn-del, .rx-btn-del { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+.rx-tbtn-del[data-sure="true"], .rx-btn-del[data-sure="true"] { background: var(--danger); color: #fff; border-color: var(--danger); }
+.rx-srv { border-color: var(--gold-text); }
+.rx-srv-ok { font-size: 12px; color: var(--muted); margin: 0 0 .8rem; }
 .rx-link { background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); font: inherit; font-weight: 700; text-align: left; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--gold-text) 60%, transparent); text-underline-offset: 3px; }
 .rx-search { display: flex; align-items: center; gap: .5rem; border: 1.5px solid var(--line-2); border-radius: 0; padding: 0 .9rem; min-height: 44px; background: var(--surface); color: var(--muted); }
 .rx-search input { border: 0; outline: none; font-family: inherit; font-size: 14px; width: 100%; background: transparent; color: var(--text); min-width: 0; }
@@ -2451,7 +2455,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 </style>
 <style>
 /* ---------- Menu « Plus » regroupé + accès direct aux rubriques ---------- */
-.mn-drop { position: absolute; top: 56px; right: 0; z-index: 50; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 20px 50px -20px rgba(8,15,26,.4); padding: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .25rem 1rem; width: min(820px, calc(100vw - 32px)); }
+.mn-drop { position: absolute; top: 56px; right: 0; z-index: 50; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 20px 50px -20px rgba(8,15,26,.4); padding: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .25rem 1rem; width: min(620px, calc(100vw - 32px)); }
 .mn-gt { font-size: 11.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding: .35rem .6rem .4rem; }
 .mn-it { width: 100%; text-align: left; background: var(--surface); border: 0; padding: .55rem .6rem; cursor: pointer; min-height: 44px; display: flex; flex-direction: column; color: var(--text); }
 .mn-it:hover, .mn-it:focus-visible { background: var(--surface-2); }
@@ -2693,7 +2697,7 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 .cl-disc-a { display: flex; flex-wrap: wrap; gap: .5rem; }
 @media (max-width: 640px) { .cl-disc-chips { flex-wrap: nowrap !important; overflow-x: auto; margin-left: -16px; margin-right: -16px; padding: 0 16px 4px; scrollbar-width: none; } .cl-disc-chips .chip { flex: none; } .cl-disc-chips .lnk { flex: none; } .cl-disc-a { width: 100%; } .cl-disc-a .btn { flex: 1; } }
 /* Clubs + Club House : une seule rubrique, deux onglets */
-.cl-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 560px; margin: 0 0 1.4rem; border: 1.5px solid var(--rade, #10283a); background: var(--surface); }
+.cl-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 760px; margin: 0 0 1.4rem; border: 1.5px solid var(--rade, #10283a); background: var(--surface); }
 .cl-sw { display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; min-width: 0; min-height: 56px; padding: .6rem .85rem; border: 0; background: transparent; color: var(--text); text-align: left; cursor: pointer; font-family: inherit; border-radius: 0; }
 .cl-sw.is-on { background: var(--rade, #10283a); color: #fff; }
 .cl-sw-t { font: 800 15px/1.1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .03em; }
@@ -2754,6 +2758,10 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 .gz-desk.gz-th-couchant .gz-page { --gz-ink: #4a1d10; --gz-paper: #fbf1e4; --gz-mut: #7a5040; --gz-rule: #c4552e; --gz-hair: #ead2bd; --gz-tint: #f6e2cf; }
 .gz-desk.gz-th-couchant .gz-page .gz-etiq { background: #c4552e; color: #fff; }
 .gz-desk.gz-th-couchant .gz-page.is-noir { --gz-ink: #fbf1e4; --gz-paper: #4a1d10; --gz-mut: #e3bfa8; --gz-rule: #e8774a; --gz-hair: #6b3624; --gz-tint: #5a2616; outline-color: #5a2b1c; }
+/* Accueil : Cherwood et la Gazette côte à côte sur grand écran ; rubrique Clubs à trois onglets */
+.bento-item.s2 .cw-band { grid-template-columns: minmax(0, 1fr); margin-top: 0; height: 100%; }
+.bento-item.s2 .cw-img { aspect-ratio: 16 / 9; height: auto; min-height: 0; }
+@media (max-width: 560px) { .cl-switch { margin-bottom: 1rem; } .cl-sw { min-height: 48px; padding: .5rem .55rem; justify-content: center; } .cl-sw-t { font-size: 12.5px; line-height: 1.15; } .cl-sw-s { display: none; } }
 /* Bonne taille sur chaque téléphone et tablette */
 html, body { max-width: 100%; overflow-x: clip; }
 img, video, canvas, svg { max-width: 100%; }
@@ -2853,6 +2861,128 @@ img, video, canvas, svg { max-width: 100%; }
   .jx-rev { grid-template-columns: 84px minmax(0, 1fr); } .jx-rev img { width: 84px; height: 100px; }
 }
 </style>
+<style>
+/* ===== Le Vestiaire : l'espace commun des clubs et des joueurs (js/vestiaire.js) — thème Marée ===== */
+.vs-k { display: block; font: 700 11.5px/1.2 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .1em; color: var(--sun, #f2b33d); }
+/* Bloc de l'accueil */
+.vsh { display: grid; grid-template-columns: minmax(0, 1fr); background: var(--rade, #10283a); color: #fff; border-left: 4px solid var(--sun, #f2b33d); }
+@media (min-width: 900px) { .vsh { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
+.vsh-in { padding: 1.4rem 1.4rem 1.3rem; display: flex; flex-direction: column; gap: .7rem; align-items: flex-start; }
+.vsh-t { font: 800 clamp(1.7rem, 3.4vw, 2.5rem)/1 var(--bn-font, 'League Spartan', sans-serif); letter-spacing: -.02em; margin: 0; text-transform: uppercase; }
+.vsh-s { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255, 255, 255, .84); max-width: 30rem; }
+.vsh-trois { display: flex; flex-wrap: wrap; gap: .4rem; margin: .1rem 0 .2rem; padding: 0; list-style: none; }
+.vsh-trois li { display: inline-flex; align-items: center; gap: .35rem; font: 700 12.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .04em; border: 1px solid rgba(255, 255, 255, .28); padding: .45rem .6rem .38rem; }
+.vsh-trois svg { color: var(--sun, #f2b33d); }
+.vsh-go { display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; padding: .6rem 1rem .5rem; border: 0; background: var(--sun, #f2b33d); color: #10283a; font: 800 13.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; border-radius: 0; }
+.vsh-go:hover, .vsh-go:focus-visible { background: #fff; }
+.vsh-att { margin: 0; font-size: 13px; color: var(--sun, #f2b33d); font-weight: 700; }
+.vsh-col { background: rgba(255, 255, 255, .06); padding: 1rem 1.1rem 1.1rem; display: flex; flex-direction: column; gap: .6rem; min-width: 0; }
+@media (min-width: 900px) { .vsh-col { border-left: 1px solid rgba(255, 255, 255, .12); } }
+.vsh-vide { margin: 0; font-size: 14px; color: rgba(255, 255, 255, .78); line-height: 1.5; }
+/* Rendez-vous (accueil et page) */
+.vs-ev { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: .8rem; align-items: start; padding: .75rem 0; border-bottom: 1px solid var(--line); }
+.vsh .vs-ev { border-bottom-color: rgba(255, 255, 255, .14); padding: .55rem 0; }
+.vs-ev:last-child { border-bottom: 0; }
+.vs-d { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 58px; background: var(--surface-2); border-top: 3px solid var(--sun, #f2b33d); color: var(--ink); line-height: 1; }
+.vsh .vs-d { background: rgba(255, 255, 255, .1); color: #fff; }
+.vs-d-j { font: 700 10.5px/1 'Barlow Condensed', sans-serif; letter-spacing: .1em; }
+.vs-d-n { font: 800 22px/1.05 var(--bn-font, sans-serif); }
+.vs-d-m { font: 700 10.5px/1 'Barlow Condensed', sans-serif; letter-spacing: .08em; }
+.vs-ev-b { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+.vs-ev-top { display: flex; flex-wrap: wrap; gap: .35rem .5rem; align-items: center; }
+.vs-tag { display: inline-block; font: 800 10.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .06em; padding: .3rem .4rem .22rem; background: var(--surface-2); color: var(--ink); }
+.vs-t-match { background: var(--sun, #f2b33d); color: #10283a; }
+.vs-t-entrainement { background: var(--herbe, #2f6b4f); color: #fff; }
+.vsh .vs-tag:not(.vs-t-match):not(.vs-t-entrainement) { background: rgba(255, 255, 255, .16); color: #fff; }
+.vs-sec { font-size: 12px; font-weight: 700; color: var(--muted); }
+.vsh .vs-sec, .vsh .vs-meta { color: rgba(255, 255, 255, .72); }
+.vs-ev-t { font: 800 16.5px/1.2 var(--bn-font, sans-serif); color: var(--ink); overflow-wrap: anywhere; }
+.vsh .vs-ev-t { color: #fff; }
+.vs-meta { font-size: 13px; color: var(--muted); line-height: 1.4; }
+.vs-note { font-size: 13.5px; color: var(--text-2); margin: .1rem 0 0; line-height: 1.45; }
+.vs-club-l { background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.vs-ev.is-annule .vs-ev-t, .vs-ev.is-annule .vs-meta { text-decoration: line-through; opacity: .7; }
+.vs-annule { font: 800 10.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .06em; color: var(--danger); }
+.vs-cpt { font-size: 12.5px; font-weight: 700; color: var(--success); }
+.vsh .vs-cpt { color: #9fe0b9; }
+/* Présent / Peut-être / Absent */
+.vs-rep { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; margin-top: .35rem; }
+.vs-rep-n { font-size: 12px; font-weight: 700; color: var(--muted); margin-right: .2rem; }
+.vsh .vs-rep-n { color: rgba(255, 255, 255, .72); }
+.vs-r { min-height: 36px; padding: .35rem .7rem .3rem; border: 1.5px solid var(--line-2); background: var(--surface); color: var(--text); font: 800 12.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .03em; cursor: pointer; border-radius: 0; }
+.vsh .vs-r { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .4); }
+.vs-r.vs-r-present.is-on { background: var(--herbe, #2f6b4f); border-color: var(--herbe, #2f6b4f); color: #fff; }
+.vs-r.vs-r-incertain.is-on { background: var(--sun, #f2b33d); border-color: var(--sun, #f2b33d); color: #10283a; }
+.vs-r.vs-r-absent.is-on { background: var(--danger); border-color: var(--danger); color: #fff; }
+.vs-act { display: flex; flex-wrap: wrap; gap: .25rem .9rem; margin-top: .35rem; }
+.vs-lnk { background: none; border: 0; padding: .2rem 0; min-height: 32px; color: var(--ink); font: 700 13px/1 inherit; font-family: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.vs-lnk.is-danger { color: var(--danger); }
+.vs-liste { margin: .45rem 0 0; padding: .6rem .75rem; background: var(--surface-2); display: grid; gap: .35rem; font-size: 13.5px; }
+.vs-liste-l { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: .5rem; }
+.vs-liste-l b { font: 800 12px/1.4 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .03em; }
+.vs-liste-l.vs-r-present b { color: var(--success); } .vs-liste-l.vs-r-absent b { color: var(--danger); } .vs-liste-l.vs-r-sans b { color: var(--muted); }
+/* Messages du fil */
+.vs-p { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: .7rem; padding: .8rem 0; border-bottom: 1px solid var(--line); }
+.vsh .vs-p { border-bottom-color: rgba(255, 255, 255, .14); padding: .55rem 0; }
+.vs-p:last-child { border-bottom: 0; }
+.vs-p.is-pin { background: color-mix(in srgb, var(--sun, #f2b33d) 10%, transparent); padding-left: .5rem; padding-right: .5rem; border-left: 3px solid var(--sun, #f2b33d); }
+.vs-av { width: 40px; height: 40px; border-radius: 50%; background: var(--rade, #10283a); color: #fff; display: flex; align-items: center; justify-content: center; font: 800 14px/1 var(--bn-font, sans-serif); }
+.vsh .vs-av { background: var(--sun, #f2b33d); color: #10283a; }
+.vs-p-h { display: flex; flex-wrap: wrap; gap: .2rem .5rem; align-items: baseline; }
+.vs-p-a { font: 800 14.5px/1.2 var(--bn-font, sans-serif); color: var(--ink); }
+.vsh .vs-p-a { color: #fff; }
+.vs-p-r { font-size: 12px; color: var(--muted); }
+.vs-p-x { margin: .25rem 0 0; font-size: 14.5px; line-height: 1.5; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.vsh .vs-p-x { color: rgba(255, 255, 255, .9); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.vs-s-seniors { color: var(--rade, #10283a); } .vs-s-jeunes { color: var(--herbe, #2f6b4f); }
+.vsh .vs-s-seniors, .vsh .vs-s-jeunes, .vsh .vs-s-club { color: var(--sun, #f2b33d); }
+/* Page */
+.vs-head { display: flex; flex-wrap: wrap; gap: 1rem 1.4rem; align-items: center; background: var(--rade, #10283a); color: #fff; border-left: 4px solid var(--sun, #f2b33d); padding: 1.2rem 1.3rem; margin: 0 0 1rem; }
+.vs-logo { width: 72px; height: 72px; border-radius: 50%; background: #fff; color: #10283a; display: flex; align-items: center; justify-content: center; font: 800 24px/1 var(--bn-font, sans-serif); flex: none; overflow: hidden; }
+.vs-logo img { width: 100%; height: 100%; object-fit: contain; }
+.vs-head-t { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
+.vs-head-n { font: 800 clamp(1.6rem, 4vw, 2.6rem)/1.02 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: -.01em; margin: 0; }
+.vs-head-s { font-size: 14px; color: rgba(255, 255, 255, .8); }
+.vs-head .vs-lnk { color: #fff; }
+.vs-pick { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: 0 0 1rem; }
+.vs-pick .field { max-width: 420px; }
+.vs-chip { min-height: 40px; padding: .4rem .8rem; border: 1.5px solid var(--rade, #10283a); background: var(--surface); color: var(--ink); font: 700 13px/1.1 inherit; font-family: inherit; cursor: pointer; border-radius: 0; }
+.vs-chip.is-on { background: var(--rade, #10283a); color: #fff; }
+.vs-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 560px; border: 1.5px solid var(--rade, #10283a); background: var(--surface); margin: 0 0 1rem; }
+.vs-tab { min-height: 46px; border: 0; background: transparent; color: var(--text); font: 800 14px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .03em; cursor: pointer; border-radius: 0; }
+.vs-tab.is-on { background: var(--rade, #10283a); color: #fff; }
+.vs-info { margin: 0 0 1rem; padding: .7rem .9rem; background: var(--note-bg); border-left: 3px solid var(--herbe, #2f6b4f); font-size: 13.5px; line-height: 1.5; color: var(--note-fg); }
+.vs-info.is-warn { border-left-color: var(--sun, #f2b33d); }
+.vs-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.2rem; align-items: start; }
+@media (min-width: 960px) { .vs-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); } }
+.vs-box { background: var(--surface); border: 1px solid var(--line); padding: 1rem 1.1rem 1.1rem; min-width: 0; }
+.vs-box-h { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; margin: 0 0 .5rem; }
+.vs-box-t { font: 800 22px/1.05 var(--bn-font, sans-serif); text-transform: uppercase; margin: 0; color: var(--ink); }
+.vs-box .vs-k { color: var(--gold-text); }
+.vs-jour { font: 800 12.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: .9rem 0 0; padding-bottom: .3rem; border-bottom: 2px solid var(--ink); }
+.vs-jour:first-child { margin-top: .2rem; }
+.vs-vide { margin: .4rem 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
+.vs-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: .7rem; margin: .4rem 0 .8rem; padding: .9rem; background: var(--surface-2); border: 1px solid var(--line); }
+.vs-form .is-wide { grid-column: 1 / -1; }
+.vs-form textarea.field { min-height: 90px; padding: .6rem .9rem; resize: vertical; }
+.vs-check { display: flex; gap: .55rem; align-items: flex-start; font-size: 13.5px; line-height: 1.45; color: var(--text-2); }
+.vs-check input { width: 20px; height: 20px; flex: none; margin-top: 1px; accent-color: var(--rade, #10283a); }
+.vs-err { margin: 0; color: var(--danger); font-size: 13.5px; font-weight: 700; }
+.vs-ok { margin: 0 0 .6rem; font-size: 14px; font-weight: 700; color: var(--success); }
+.vs-side { display: flex; flex-direction: column; gap: 1.2rem; min-width: 0; }
+.vs-m { display: flex; flex-wrap: wrap; gap: .3rem .8rem; align-items: center; justify-content: space-between; padding: .55rem 0; border-bottom: 1px solid var(--line); }
+.vs-m:last-child { border-bottom: 0; }
+.vs-m-n { font-weight: 800; color: var(--ink); }
+.vs-m-i { font-size: 12.5px; color: var(--muted); }
+.vs-m-a { display: flex; gap: .4rem; flex-wrap: wrap; }
+.vs-m-a .btn { min-height: 38px; padding: .4rem .8rem; font-size: 13px; }
+.vs-compose { display: flex; flex-direction: column; gap: .5rem; margin: 0 0 .6rem; }
+.vs-compose textarea.field { min-height: 96px; padding: .6rem .9rem; resize: vertical; }
+.vs-compose-b { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; }
+.vs-compose-b .field { max-width: 240px; min-height: 42px; }
+.vs-reste { font-size: 12px; color: var(--muted); }
+@media (max-width: 560px) { .vs-rep-n { width: 100%; } .vs-r { flex: 1 1 0; padding-left: .3rem; padding-right: .3rem; } .vs-head { padding: 1rem; } .vs-logo { width: 56px; height: 56px; font-size: 19px; } .vs-box { padding: .9rem .85rem 1rem; } .vs-liste-l { grid-template-columns: 1fr; gap: 0; } .vsh-in { padding: 1.1rem 1rem; } .vsh-col { padding: .8rem 1rem 1rem; } }
+</style>
 </head>
 <body>
 <noscript>Casa Besports nécessite JavaScript pour fonctionner.</noscript>
@@ -2909,7 +3039,7 @@ img, video, canvas, svg { max-width: 100%; }
         <div class="mn-drop">
           <sc-for list="{{menuGroups}}" as="mg" hint-placeholder-count="3">
             <div class="mn-col"><div class="mn-gt">{{mg.titre}}</div>
-              <sc-for list="{{mg.items}}" as="n" hint-placeholder-count="3"><button type="button" class="mn-it" onClick="{{n.go}}"><span class="mn-l">{{n.label}}</span><span class="mn-s">{{n.sub}}</span></button></sc-for>
+              <sc-for list="{{mg.items}}" as="n" hint-placeholder-count="3"><button type="button" class="mn-it" onClick="{{n.go}}" title="{{n.sub}}"><span class="mn-l">{{n.label}}</span></button></sc-for>
             </div>
           </sc-for>
         </div>
@@ -3040,6 +3170,64 @@ img, video, canvas, svg { max-width: 100%; }
                 <span class="bn-une-cta">{{une.cta}} <span aria-hidden="true">→</span></span>
               </span>
             </button>
+          </sc-if>
+          <!-- Le Vestiaire : planning, présences et fil des clubs (js/vestiaire.js) -->
+          <sc-if value="{{hm.isVestiaire}}" hint-placeholder-val="{{ false }}">
+            <section class="vsh" aria-labelledby="vsh-t">
+              <div class="vsh-in">
+                <span class="vs-k">Clubs et joueurs</span>
+                <h2 id="vsh-t" class="vsh-t">{{vsHome.titre}}</h2>
+                <p class="vsh-s">{{vsHome.sous}}</p>
+                <sc-if value="{{vsHome.cta}}" hint-placeholder-val="{{ true }}">
+                  <ul class="vsh-trois">
+                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4"></path></svg>Planning</li>
+                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12l4 4 10-10"></path></svg>Présences</li>
+                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"></path></svg>Fil seniors et jeunes</li>
+                  </ul>
+                </sc-if>
+                <sc-if value="{{vsHome.pending}}" hint-placeholder-val="{{ false }}"><p class="vsh-att">Votre demande est en attente de validation par le club.</p></sc-if>
+                <button type="button" class="vsh-go" onClick="{{vsHome.ouvrir}}">{{vsHome.ouvrirLabel}} <span aria-hidden="true">→</span></button>
+              </div>
+              <div class="vsh-col">
+                <sc-if value="{{vsHome.hasEvents}}" hint-placeholder-val="{{ true }}">
+                  <span class="vs-k">Prochains rendez-vous</span>
+                  <div>
+                    <sc-for list="{{vsHome.events}}" as="e" hint-placeholder-count="3">
+                      <div class="vs-ev {{e.cls}}">
+                        <div class="vs-d" aria-hidden="true"><span class="vs-d-j">{{e.jour}}</span><span class="vs-d-n">{{e.num}}</span><span class="vs-d-m">{{e.mois}}</span></div>
+                        <div class="vs-ev-b">
+                          <div class="vs-ev-top"><span class="vs-tag {{e.typeCls}}">{{e.type}}</span><span class="vs-sec">{{e.section}}</span></div>
+                          <span class="vs-ev-t">{{e.titre}}</span>
+                          <span class="vs-meta">{{e.quand}}<sc-if value="{{e.hasLieu}}" hint-placeholder-val="{{ true }}"> · {{e.lieu}}</sc-if><sc-if value="{{e.hasClub}}" hint-placeholder-val="{{ true }}"> · <button type="button" class="vs-club-l" onClick="{{e.openClub}}">{{e.club}}</button></sc-if></span>
+                          <sc-if value="{{e.hasComptes}}" hint-placeholder-val="{{ false }}"><span class="vs-cpt">{{e.comptes}}</span></sc-if>
+                          <sc-for list="{{e.reps}}" as="r" hint-placeholder-count="0">
+                            <div class="vs-rep"><span class="vs-rep-n">{{r.nom}}</span><sc-for list="{{r.boutons}}" as="b" hint-placeholder-count="3"><button type="button" class="vs-r {{b.cls}}" aria-pressed="{{b.pressed}}" onClick="{{b.pick}}">{{b.label}}</button></sc-for></div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{vsHome.hasPosts}}" hint-placeholder-val="{{ true }}">
+                  <span class="vs-k">Dernières nouvelles des clubs</span>
+                  <div>
+                    <sc-for list="{{vsHome.posts}}" as="p" hint-placeholder-count="2">
+                      <div class="vs-p">
+                        <span class="vs-av" aria-hidden="true">{{p.ini}}</span>
+                        <div>
+                          <div class="vs-p-h"><span class="vs-p-a">{{p.auteur}}</span><span class="vs-p-r"><sc-if value="{{p.hasClub}}" hint-placeholder-val="{{ true }}"><button type="button" class="vs-club-l" onClick="{{p.openClub}}">{{p.club}}</button> · </sc-if><span class="{{p.secCls}}">{{p.section}}</span> · {{p.quand}}</span></div>
+                          <p class="vs-p-x">{{p.texte}}</p>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{vsHome.vide}}" hint-placeholder-val="{{ false }}">
+                  <span class="vs-k">Comment ça marche</span>
+                  <p class="vsh-vide">Le club publie ses entraînements et ses matchs. Chaque joueur répond « Présent », « Peut-être » ou « Absent » en un geste, et les parents répondent pour les plus jeunes. Le fil du club donne les nouvelles, séparément pour les seniors et pour les jeunes.</p>
+                </sc-if>
+              </div>
+            </section>
           </sc-if>
           <!-- Le week-end : le fil des scores et des récits, jour par jour, avec la radio du terrain -->
           <sc-if value="{{hm.isResultats}}" hint-placeholder-val="{{ false }}">
@@ -3677,6 +3865,181 @@ img, video, canvas, svg { max-width: 100%; }
 </sc-if>
 
 <!-- ================= CLUBS ================= -->
+<!-- ================= LE VESTIAIRE : l'espace commun des clubs et des joueurs (js/vestiaire.js, supabase/vestiaire.sql) ================= -->
+<sc-if value="{{isVestiaire}}" hint-placeholder-val="{{ false }}">
+  <section class="wrap" style="padding-top: 2rem; padding-bottom: 5rem">
+    <div class="eb" style="margin-bottom: .5rem">Le Vestiaire</div>
+    <h1 class="h1" style="font-size: clamp(2.2rem, 5vw, 4rem); margin-bottom: .6rem">L’espace de votre club</h1>
+    <p class="pod-intro">Le planning des entraînements et des matchs, les présences en un geste et le fil du club, pour les seniors comme pour les jeunes.</p>
+    <sc-if value="{{vs.off}}" hint-placeholder-val="{{ false }}"><p class="vs-info is-warn">Le Vestiaire a besoin des comptes abonnés pour fonctionner.</p></sc-if>
+    <sc-if value="{{vs.sqlMissing}}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{vs.isAdmin}}" hint-placeholder-val="{{ false }}"><p class="vs-info is-warn"><b>À faire une seule fois :</b> lancer le fichier supabase/vestiaire.sql dans Supabase (SQL Editor › New query › coller › Run). Le Vestiaire s’active aussitôt, sans remise en ligne du site.</p></sc-if>
+      <sc-if value="{{vs.on}}" hint-placeholder-val="{{ true }}"><p class="vs-info">Le Vestiaire ouvre très bientôt : les clubs pourront y publier leur planning et leurs nouvelles.</p></sc-if>
+    </sc-if>
+    <sc-if value="{{vs.hasErr}}" hint-placeholder-val="{{ false }}"><p class="vs-info is-warn">{{vs.err}}</p></sc-if>
+
+    <div class="vs-pick">
+      <sc-for list="{{vs.mesClubs}}" as="c" hint-placeholder-count="0"><button type="button" class="vs-chip {{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.label}}</button></sc-for>
+      <label class="lbl" style="flex: 1 1 260px"><x-select class="field" value="{{vs.club}}" onChange="{{vs.onClub}}" aria-label="Choisir un club"><sc-for list="{{vs.clubOpts}}" as="o" hint-placeholder-count="4"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+    </div>
+
+    <sc-if value="{{vs.noClub}}" hint-placeholder-val="{{ false }}">
+      <div class="vs-box"><p class="vs-vide">Choisissez votre club dans la liste pour voir son planning, ses présences et son fil.</p></div>
+    </sc-if>
+
+    <sc-if value="{{vs.hasClub}}" hint-placeholder-val="{{ true }}">
+      <div class="vs-head">
+        <span class="vs-logo"><sc-if value="{{vs.hasLogo}}" hint-placeholder-val="{{ false }}"><img src="{{vs.clubLogo}}" alt="Logo {{vs.clubName}}" loading="lazy"></sc-if><sc-if value="{{vs.noLogo}}" hint-placeholder-val="{{ true }}">{{vs.clubIni}}</sc-if></span>
+        <div class="vs-head-t"><span class="vs-k">Le vestiaire</span><h2 class="vs-head-n">{{vs.clubName}}</h2><span class="vs-head-s">{{vs.clubSport}}</span></div>
+        <button type="button" class="vs-lnk" onClick="{{vs.openFiche}}">Fiche du club</button>
+      </div>
+      <div class="vs-tabs" role="tablist" aria-label="Section"><sc-for list="{{vs.secTabs}}" as="t" hint-placeholder-count="3"><button type="button" role="tab" class="vs-tab {{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}</button></sc-for></div>
+      <sc-if value="{{vs.hasSecNote}}" hint-placeholder-val="{{ false }}"><p class="vs-info">{{vs.secNote}}</p></sc-if>
+
+      <div class="vs-grid">
+        <!-- Planning -->
+        <section class="vs-box" aria-labelledby="vs-pl">
+          <div class="vs-box-h"><div><span class="vs-k">Entraînements et matchs</span><h3 id="vs-pl" class="vs-box-t">Le planning</h3></div>
+            <sc-if value="{{vs.staff}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-dark" onClick="{{vs.evForm.toggle}}">+ Ajouter</button></sc-if></div>
+          <sc-if value="{{vs.evForm.open}}" hint-placeholder-val="{{ false }}">
+            <div class="vs-form" id="vs-ev-form">
+              <span class="vs-k is-wide" style="color: var(--gold-text)">{{vs.evForm.titreForm}}</span>
+              <label class="lbl">Type<x-select class="field" value="{{vs.evForm.type}}" onChange="{{vs.evForm.onType}}"><sc-for list="{{vs.evForm.typeOpts}}" as="o" hint-placeholder-count="3"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+              <label class="lbl">Pour qui<x-select class="field" value="{{vs.evForm.section}}" onChange="{{vs.evForm.onSection}}"><sc-for list="{{vs.evForm.secOpts}}" as="o" hint-placeholder-count="3"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+              <label class="lbl">Équipe (facultatif)<input class="field" value="{{vs.evForm.equipe}}" onChange="{{vs.evForm.onEquipe}}" placeholder="Seniors A, U13…" maxlength="30"></label>
+              <label class="lbl">Date<input class="field" type="date" value="{{vs.evForm.date}}" onChange="{{vs.evForm.onDate}}"></label>
+              <label class="lbl">Heure<input class="field" type="time" value="{{vs.evForm.heure}}" onChange="{{vs.evForm.onHeure}}"></label>
+              <label class="lbl">Durée en minutes (facultatif)<input class="field" type="number" min="0" max="600" value="{{vs.evForm.duree}}" onChange="{{vs.evForm.onDuree}}" placeholder="90"></label>
+              <sc-if value="{{vs.evForm.isMatch}}" hint-placeholder-val="{{ false }}">
+                <label class="lbl">Adversaire<input class="field" value="{{vs.evForm.adversaire}}" onChange="{{vs.evForm.onAdversaire}}" maxlength="80"></label>
+                <label class="lbl">Lieu du match<x-select class="field" value="{{vs.evForm.domicile}}" onChange="{{vs.evForm.onDomicile}}"><sc-for list="{{vs.evForm.domOpts}}" as="o" hint-placeholder-count="2"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+              </sc-if>
+              <label class="lbl">Lieu, stade, gymnase<input class="field" value="{{vs.evForm.lieu}}" onChange="{{vs.evForm.onLieu}}" maxlength="120"></label>
+              <label class="lbl">Titre (facultatif)<input class="field" value="{{vs.evForm.titre}}" onChange="{{vs.evForm.onTitre}}" maxlength="80" placeholder="Séance vitesse, tournoi…"></label>
+              <sc-if value="{{vs.evForm.canRepeat}}" hint-placeholder-val="{{ true }}"><label class="lbl">Répéter<x-select class="field" value="{{vs.evForm.repeter}}" onChange="{{vs.evForm.onRepeter}}"><sc-for list="{{vs.evForm.repOpts}}" as="o" hint-placeholder-count="3"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label></sc-if>
+              <label class="lbl is-wide">Consignes (public : rendez-vous, tenue… jamais de données personnelles)<textarea class="field" rows="2" maxlength="300" value="{{vs.evForm.note}}" onChange="{{vs.evForm.onNote}}"></textarea></label>
+              <sc-if value="{{vs.evForm.hasErr}}" hint-placeholder-val="{{ false }}"><p class="vs-err is-wide">{{vs.evForm.err}}</p></sc-if>
+              <div class="is-wide" style="display: flex; gap: .5rem; flex-wrap: wrap"><button type="button" class="btn btn-gold" onClick="{{vs.evForm.save}}" disabled="{{vs.evForm.busy}}">{{vs.evForm.saveLabel}}</button><button type="button" class="btn btn-ghost" onClick="{{vs.evForm.toggle}}">Fermer</button></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{vs.loading}}" hint-placeholder-val="{{ false }}"><p class="vs-vide">Chargement…</p></sc-if>
+          <sc-for list="{{vs.jours}}" as="j" hint-placeholder-count="2">
+            <p class="vs-jour">{{j.label}}</p>
+            <sc-for list="{{j.events}}" as="e" hint-placeholder-count="2">
+              <div class="vs-ev {{e.cls}}">
+                <div class="vs-d" aria-hidden="true"><span class="vs-d-j">{{e.jour}}</span><span class="vs-d-n">{{e.num}}</span><span class="vs-d-m">{{e.mois}}</span></div>
+                <div class="vs-ev-b">
+                  <div class="vs-ev-top"><span class="vs-tag {{e.typeCls}}">{{e.type}}</span><span class="vs-sec">{{e.section}}</span><sc-if value="{{e.annule}}" hint-placeholder-val="{{ false }}"><span class="vs-annule">Annulé</span></sc-if></div>
+                  <span class="vs-ev-t">{{e.titre}}</span>
+                  <span class="vs-meta">{{e.heure}}<sc-if value="{{e.hasLieu}}" hint-placeholder-val="{{ true }}"> · {{e.lieu}}</sc-if></span>
+                  <sc-if value="{{e.hasNote}}" hint-placeholder-val="{{ false }}"><p class="vs-note">{{e.note}}</p></sc-if>
+                  <sc-if value="{{e.hasComptes}}" hint-placeholder-val="{{ false }}"><span class="vs-cpt">{{e.comptes}}</span></sc-if>
+                  <sc-for list="{{e.reps}}" as="r" hint-placeholder-count="0">
+                    <div class="vs-rep"><span class="vs-rep-n">{{r.nom}}</span><sc-for list="{{r.boutons}}" as="b" hint-placeholder-count="3"><button type="button" class="vs-r {{b.cls}}" aria-pressed="{{b.pressed}}" onClick="{{b.pick}}">{{b.label}}</button></sc-for></div>
+                  </sc-for>
+                  <div class="vs-act">
+                    <sc-if value="{{e.canList}}" hint-placeholder-val="{{ false }}"><button type="button" class="vs-lnk" aria-expanded="{{e.listOpen}}" onClick="{{e.toggleList}}">{{e.listLabel}}</button></sc-if>
+                    <sc-if value="{{e.isStaff}}" hint-placeholder-val="{{ false }}"><button type="button" class="vs-lnk" onClick="{{e.edit}}">Modifier</button><button type="button" class="vs-lnk" onClick="{{e.annuler}}">{{e.annulerLabel}}</button><button type="button" class="vs-lnk is-danger" onClick="{{e.suppr}}">Supprimer</button></sc-if>
+                  </div>
+                  <sc-if value="{{e.listOpen}}" hint-placeholder-val="{{ false }}">
+                    <div class="vs-liste"><sc-for list="{{e.liste}}" as="l" hint-placeholder-count="3"><div class="vs-liste-l {{l.cls}}"><b>{{l.label}} · {{l.n}}</b><span>{{l.noms}}</span></div></sc-for></div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </sc-for>
+          <sc-if value="{{vs.noEvents}}" hint-placeholder-val="{{ false }}"><p class="vs-vide">Aucun entraînement ni match à venir pour le moment.</p></sc-if>
+        </section>
+
+        <div class="vs-side">
+          <!-- Mon accès -->
+          <section class="vs-box" aria-labelledby="vs-acc">
+            <span class="vs-k">Joueurs, parents, encadrants</span><h3 id="vs-acc" class="vs-box-t" style="margin-bottom: .5rem">Mon accès</h3>
+            <sc-if value="{{vs.notLogged}}" hint-placeholder-val="{{ true }}">
+              <p class="vs-vide">Connectez-vous pour rejoindre le vestiaire de votre club et annoncer votre présence.</p>
+              <button type="button" class="btn btn-gold" onClick="{{vs.login}}">Se connecter</button>
+            </sc-if>
+            <sc-if value="{{vs.staff}}" hint-placeholder-val="{{ false }}"><p class="vs-ok">Vous gérez ce vestiaire : planning, membres et fil.</p></sc-if>
+            <sc-if value="{{vs.membre}}" hint-placeholder-val="{{ false }}"><p class="vs-ok">{{vs.monStatut}}</p></sc-if>
+            <sc-if value="{{vs.attente}}" hint-placeholder-val="{{ false }}"><p class="vs-vide">Demande envoyée ({{vs.attenteNoms}}) : en attente de validation par le club.</p></sc-if>
+            <sc-if value="{{vs.refus}}" hint-placeholder-val="{{ false }}"><p class="vs-vide">Le club n’a pas validé votre demande. Contactez-le si c’est une erreur.</p></sc-if>
+            <sc-if value="{{vs.canJoin}}" hint-placeholder-val="{{ false }}">
+              <sc-if value="{{vs.join.open}}" hint-placeholder-val="{{ false }}">
+                <div class="vs-form" style="margin-bottom: .4rem">
+                  <label class="lbl is-wide">Section<x-select class="field" value="{{vs.join.section}}" onChange="{{vs.join.onSection}}"><sc-for list="{{vs.join.secOpts}}" as="o" hint-placeholder-count="2"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+                  <label class="lbl is-wide">Vous êtes<x-select class="field" value="{{vs.join.qualite}}" onChange="{{vs.join.onQualite}}"><sc-for list="{{vs.join.qualOpts}}" as="o" hint-placeholder-count="3"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+                  <sc-if value="{{vs.join.isJeunes}}" hint-placeholder-val="{{ false }}">
+                    <label class="lbl">Prénom du jeune<input class="field" value="{{vs.join.prenom}}" onChange="{{vs.join.onPrenom}}" maxlength="30" autocomplete="off"></label>
+                    <label class="lbl">Initiale du nom<input class="field" value="{{vs.join.nom}}" onChange="{{vs.join.onNom}}" maxlength="1" autocomplete="off"></label>
+                    <p class="vs-info is-wide" style="margin: 0">Seuls le prénom et l’initiale sont enregistrés : <b>{{vs.join.apercu}}</b>. Ils ne sont visibles que du club et de vous.</p>
+                    <sc-if value="{{vs.join.isJeuneJoueur}}" hint-placeholder-val="{{ false }}"><label class="vs-check is-wide"><input type="checkbox" checked="{{vs.join.age15}}" onChange="{{vs.join.onAge15}}"><span>J’ai 15 ans ou plus. Plus jeune, c’est un parent qui m’inscrit avec son compte.</span></label></sc-if>
+                  </sc-if>
+                  <sc-if value="{{vs.join.notJeunes}}" hint-placeholder-val="{{ true }}"><label class="lbl is-wide">Nom affiché dans le vestiaire<input class="field" value="{{vs.join.affiche}}" onChange="{{vs.join.onAffiche}}" maxlength="40" placeholder="Prénom N."></label></sc-if>
+                  <label class="lbl is-wide">Équipe (facultatif)<input class="field" value="{{vs.join.equipe}}" onChange="{{vs.join.onEquipe}}" maxlength="30" placeholder="Seniors A, U13…"></label>
+                  <label class="vs-check is-wide"><input type="checkbox" checked="{{vs.join.consent}}" onChange="{{vs.join.onConsent}}"><span>J’accepte que le club voie ce nom et mes réponses aux convocations. Je peux quitter le vestiaire à tout moment, tout est alors effacé.</span></label>
+                  <sc-if value="{{vs.join.hasErr}}" hint-placeholder-val="{{ false }}"><p class="vs-err is-wide">{{vs.join.err}}</p></sc-if>
+                  <div class="is-wide" style="display: flex; gap: .5rem; flex-wrap: wrap"><button type="button" class="btn btn-gold" onClick="{{vs.join.send}}" disabled="{{vs.join.busy}}">{{vs.join.sendLabel}}</button><button type="button" class="btn btn-ghost" onClick="{{vs.join.toggle}}">Fermer</button></div>
+                </div>
+              </sc-if>
+              <sc-if value="{{vs.join.closed}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-dark" onClick="{{vs.join.toggle}}">{{vs.joinLabel}}</button></sc-if>
+            </sc-if>
+            <sc-if value="{{vs.canQuit}}" hint-placeholder-val="{{ false }}"><p style="margin: .6rem 0 0"><button type="button" class="vs-lnk is-danger" onClick="{{vs.quitter}}">Quitter ce vestiaire</button></p></sc-if>
+          </section>
+
+          <!-- Gestion du club -->
+          <sc-if value="{{vs.gestion.is}}" hint-placeholder-val="{{ false }}">
+            <section class="vs-box" aria-labelledby="vs-ge">
+              <span class="vs-k">Réservé au club</span><h3 id="vs-ge" class="vs-box-t" style="margin-bottom: .4rem">Les membres</h3>
+              <sc-if value="{{vs.gestion.hasPending}}" hint-placeholder-val="{{ false }}">
+                <p class="vs-jour" style="margin-top: .2rem">Demandes à valider · {{vs.gestion.nPending}}</p>
+                <sc-for list="{{vs.gestion.pending}}" as="m" hint-placeholder-count="2">
+                  <div class="vs-m"><div><div class="vs-m-n">{{m.nom}}</div><div class="vs-m-i">{{m.info}} · {{m.quand}}</div></div><div class="vs-m-a"><button type="button" class="btn btn-gold" onClick="{{m.ok}}">Valider</button><button type="button" class="btn btn-ghost" onClick="{{m.no}}">Refuser</button></div></div>
+                </sc-for>
+              </sc-if>
+              <sc-if value="{{vs.gestion.hasMembres}}" hint-placeholder-val="{{ false }}">
+                <p style="margin: .6rem 0 0"><button type="button" class="vs-lnk" onClick="{{vs.gestion.toggle}}">{{vs.gestion.nMembres}} membres validés</button></p>
+                <sc-if value="{{vs.gestion.open}}" hint-placeholder-val="{{ false }}">
+                  <sc-for list="{{vs.gestion.membres}}" as="m" hint-placeholder-count="3">
+                    <div class="vs-m"><div><div class="vs-m-n">{{m.nom}}</div><div class="vs-m-i">{{m.info}}</div></div><div class="vs-m-a"><button type="button" class="vs-lnk" onClick="{{m.toggleStaff}}">{{m.staffLabel}}</button><button type="button" class="vs-lnk is-danger" onClick="{{m.remove}}">Retirer</button></div></div>
+                  </sc-for>
+                </sc-if>
+              </sc-if>
+            </section>
+          </sc-if>
+
+          <!-- Le fil du club -->
+          <section class="vs-box" aria-labelledby="vs-fil">
+            <span class="vs-k">Public · séparé par section</span><h3 id="vs-fil" class="vs-box-t" style="margin-bottom: .5rem">Le fil du club</h3>
+            <sc-if value="{{vs.composer.can}}" hint-placeholder-val="{{ false }}">
+              <div class="vs-compose">
+                <textarea class="field" rows="3" maxlength="1000" value="{{vs.composer.texte}}" onChange="{{vs.composer.onTexte}}" placeholder="Une nouvelle pour le club : horaire changé, covoiturage, félicitations…" aria-label="Votre message"></textarea>
+                <sc-if value="{{vs.composer.isJeunes}}" hint-placeholder-val="{{ false }}"><p class="vs-info is-warn" style="margin: 0">Fil public : n’y écrivez jamais le nom de famille, l’adresse, le téléphone ou la photo d’un jeune.</p></sc-if>
+                <sc-if value="{{vs.composer.hasErr}}" hint-placeholder-val="{{ false }}"><p class="vs-err">{{vs.composer.err}}</p></sc-if>
+                <div class="vs-compose-b">
+                  <sc-if value="{{vs.composer.multi}}" hint-placeholder-val="{{ false }}"><x-select class="field" value="{{vs.composer.section}}" onChange="{{vs.composer.onSection}}" aria-label="Fil"><sc-for list="{{vs.composer.secOpts}}" as="o" hint-placeholder-count="3"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></sc-if>
+                  <span class="vs-reste">{{vs.composer.reste}} caractères</span>
+                  <button type="button" class="btn btn-gold" onClick="{{vs.composer.send}}" disabled="{{vs.composer.busy}}">{{vs.composer.sendLabel}}</button>
+                </div>
+              </div>
+            </sc-if>
+            <sc-for list="{{vs.posts}}" as="p" hint-placeholder-count="3">
+              <div class="vs-p {{p.cls}}">
+                <span class="vs-av" aria-hidden="true">{{p.ini}}</span>
+                <div>
+                  <div class="vs-p-h"><span class="vs-p-a">{{p.auteur}}</span><span class="vs-p-r">{{p.role}} · <span class="{{p.secCls}}">{{p.section}}</span> · {{p.quand}}<sc-if value="{{p.epingle}}" hint-placeholder-val="{{ false }}"> · épinglé</sc-if></span></div>
+                  <p class="vs-p-x">{{p.texte}}</p>
+                  <div class="vs-act"><sc-if value="{{p.canPin}}" hint-placeholder-val="{{ false }}"><button type="button" class="vs-lnk" onClick="{{p.pin}}">{{p.pinLabel}}</button></sc-if><sc-if value="{{p.canDel}}" hint-placeholder-val="{{ false }}"><button type="button" class="vs-lnk is-danger" onClick="{{p.del}}">Supprimer</button></sc-if></div>
+                </div>
+              </div>
+            </sc-for>
+            <sc-if value="{{vs.noPosts}}" hint-placeholder-val="{{ false }}"><p class="vs-vide">Pas encore de message dans ce fil.</p></sc-if>
+          </section>
+        </div>
+      </div>
+    </sc-if>
+  </section>
+</sc-if>
+
 <!-- ================= LE PODCAST ================= -->
 <sc-if value="{{isPodcast}}" hint-placeholder-val="{{ false }}">
   <section class="wrap pod" style="padding-top: 2rem; padding-bottom: 5rem">
@@ -3885,6 +4248,7 @@ img, video, canvas, svg { max-width: 100%; }
       </div>
       <div style="display: flex; gap: .6rem; flex-wrap: wrap">
         <button type="button" class="btn" onClick="{{club.toggleFollow}}" style="background: {{club.fBg}}; color: {{club.fFg}}; border: 1.5px solid var(--ink)">{{club.fLabel}}</button>
+        <button type="button" class="btn btn-dark" onClick="{{goVestiaireClub}}">Le Vestiaire du club</button>
         <button type="button" class="btn btn-gold" onClick="{{orderRecap}}">Commander un résumé de match</button>
       </div>
     </div>
@@ -3967,7 +4331,7 @@ img, video, canvas, svg { max-width: 100%; }
 <!-- ================= JOUEURS ================= -->
 <sc-if value="{{isPlayers}}" hint-placeholder-val="{{ false }}">
   <section class="wrap" style="padding-top: 2rem; padding-bottom: 5rem">
-    <div class="eb" style="margin-bottom: .5rem">Joueurs</div>
+    <div class="cl-switch" role="tablist" aria-label="Rubrique Clubs"><sc-for list="{{clubsSwitch}}" as="cs" hint-placeholder-count="2"><button type="button" role="tab" class="cl-sw {{cs.cls}}" aria-selected="{{cs.sel}}" onClick="{{cs.go}}"><span class="cl-sw-t">{{cs.label}}</span><span class="cl-sw-s">{{cs.sub}}</span></button></sc-for></div>
     <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem); margin-bottom: 1rem">Les sportifs qui font vibrer la Manche</h1>
     <div style="display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0 .6rem; align-items: center">
       <sc-for list="{{zoneChips}}" as="c" hint-placeholder-count="2">
@@ -4871,6 +5235,9 @@ img, video, canvas, svg { max-width: 100%; }
 
       <div style="flex: 999 1 640px; min-width: 0">
         <div class="rx-topbar"><span class="cond rx-crumb">Espace rédaction · {{rx.crumb}}</span><button type="button" class="rx-help" onClick="{{rx.aide.open}}" aria-label="Aide en ligne" title="Aide en ligne"><span aria-hidden="true">?</span></button></div>
+        <sc-if value="{{rxSrvSql}}" hint-placeholder-val="{{ false }}"><div class="rx-alert rx-srv" role="status"><strong>Étape à faire :</strong> lancer le fichier <code>supabase/redaction.sql</code> dans Supabase (guide : docs/ESPACE-ADMIN.md, partie « Rédaction »). D’ici là, les articles écrits ici ne sont pas enregistrés et disparaissent en fermant la page.</div></sc-if>
+        <sc-if value="{{rxSrvErr}}" hint-placeholder-val="{{ false }}"><div class="rx-alert rx-srv" role="status"><strong>Articles non chargés :</strong> {{rxSrvMsg}}. Vérifiez votre connexion puis rechargez la page.</div></sc-if>
+        <sc-if value="{{rxSrvOk}}" hint-placeholder-val="{{ false }}"><div class="rx-srv-ok" role="status">{{rxSrvLabel}}</div></sc-if>
         <!-- ESPACE CLUB : accueil (correspondant de club) -->
         <sc-if value="{{rs.club.tabHome}}" hint-placeholder-val="{{ false }}">
           <div class="glass rx-card cl-card">
@@ -5122,7 +5489,7 @@ img, video, canvas, svg { max-width: 100%; }
                   <x-td style="text-align: left; max-width: 380px"><strong>{{sr.title}}</strong><sc-if value="{{sr.online}}" hint-placeholder-val="{{ false }}"> <span class="rx-badge" style="background: #d8efe6; color: #11583f">En ligne</span></sc-if><sc-if value="{{sr.hasSnip}}" hint-placeholder-val="{{ false }}"><div class="rx-snip"><sc-for list="{{sr.snip}}" as="sg" hint-placeholder-count="3"><sc-if value="{{sg.hit}}" hint-placeholder-val="{{ false }}"><mark class="rx-hit">{{sg.t}}</mark></sc-if><sc-if value="{{sg.plain}}" hint-placeholder-val="{{ true }}">{{sg.t}}</sc-if></sc-for></div></sc-if></x-td>
                   <x-td>{{sr.type}}</x-td><x-td>{{sr.author}}</x-td>
                   <x-td><span class="rx-badge" style="background: {{sr.sBg}}; color: {{sr.sFg}}">{{sr.sLabel}}</span></x-td><x-td class="num">{{sr.versions}}</x-td><x-td style="color: var(--muted); white-space: nowrap">{{sr.updated}}</x-td>
-                  <x-td><span style="display: inline-flex; gap: .3rem"><button type="button" onClick="{{sr.edit}}" class="cond rx-tbtn">Éditer</button><sc-if value="{{sr.canReview}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.review}}" class="cond rx-tbtn rx-tbtn-acc">Relire</button></sc-if></span></x-td>
+                  <x-td><span style="display: inline-flex; gap: .3rem"><button type="button" onClick="{{sr.edit}}" class="cond rx-tbtn">Éditer</button><sc-if value="{{sr.canReview}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.review}}" class="cond rx-tbtn rx-tbtn-acc">Relire</button></sc-if><sc-if value="{{sr.canDelete}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.del}}" class="cond rx-tbtn rx-tbtn-del" data-sure="{{sr.delSure}}" aria-label="Supprimer « {{sr.title}} »">{{sr.delLabel}}</button></sc-if></span></x-td>
                 </x-tr></sc-for></x-tbody>
               </x-table>
             </div>
@@ -5248,6 +5615,7 @@ img, video, canvas, svg { max-width: 100%; }
                 <sc-if value="{{rx.ed.canPlace}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{rx.ed.placeInPage}}">Placer dans une page</button></sc-if>
                 <sc-if value="{{edLocked}}" hint-placeholder-val="{{ false }}"><span style="align-self: center; font-size: 14px; color: var(--muted)">{{edLockMsg}}</span></sc-if>
                 <span style="flex: 1"></span>
+                <sc-if value="{{edCanDelete}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost rx-btn-del" data-sure="{{edDelSure}}" onClick="{{edDelete}}">{{edDelLabel}}</button></sc-if>
                 <button type="button" class="btn btn-ghost" onClick="{{goStudioList}}">Fermer</button>
               </div>
             </div>
@@ -8329,6 +8697,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 </script>
 <script src="js/reseau.js?v=__VERSION__"></script>
 <script src="js/jeux.js?v=__VERSION__"></script>
+<script src="js/vestiaire.js?v=__VERSION__"></script>
 <script src="js/profil.js?v=__VERSION__"></script>
 <script src="js/config.js?v=__VERSION__"></script>
 <script src="contenus/equipe.js?v=__VERSION__"></script>
