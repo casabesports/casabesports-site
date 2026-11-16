@@ -50,7 +50,7 @@ function cbNomEquipe(n) {
     return w.charAt(0).toUpperCase() + w.slice(1);
   });
 }
-const CB_TITLES = { home: '', vestiaire: 'Le Vestiaire', podcast: 'Le podcast', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Clubs et disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Autour de moi', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+const CB_TITLES = { home: '', vestiaire: 'Le Vestiaire', podcast: 'Le podcast', trophees: 'Les Marées d’or', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Clubs et disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Autour de moi', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
 // Logos des boutiques de clubs (images hébergées chez les clubs) : si l'un ne charge pas, l'initiale du club reste affichée
 if (typeof document !== 'undefined') document.addEventListener('error', (e) => { const t = e.target; if (t && t.classList && t.classList.contains('mc-img')) t.classList.add('mc-off'); }, true);
 // Lien vers le site d'un partenaire, marqué « vient de Casa Besports » (paramètres utm_ lus par Google Analytics, Matomo, HubSpot…)
@@ -69,7 +69,7 @@ function cbRouteOf(st) { const k = CB_ROUTE_ID[st.view]; return '#/' + st.view +
 // Le site reste piloté par les adresses « #/… » ; ces adresses-là ouvrent simplement la bonne page.
 const CB_PATHS = { news: 'actualites', article: 'actualites', videos: 'videos', video: 'videos', clubs: 'clubs', club: 'clubs', players: 'joueurs', player: 'joueurs', shop: 'boutique', product: 'boutique',
   disciplines: 'disciplines', discipline: 'disciplines', about: 'a-propos', contact: 'contact', partners: 'partenaires', offers: 'abonnements', live: 'le-terrain', clubhouse: 'club-house', culture: 'culture',
-  map: 'territoire', meteo: 'meteo', legal: 'mentions-legales', work: 'pro' };
+  map: 'territoire', meteo: 'meteo', legal: 'mentions-legales', work: 'pro', trophees: 'trophees' };
 const CB_PATH_DETAIL = { actualites: 'article', videos: 'video', clubs: 'club', joueurs: 'player', boutique: 'product', disciplines: 'discipline' };
 // Résumé express : les « points clés » saisis dans l'admin, sinon des phrases reprises telles quelles du texte
 // (chapô, puis la première phrase de chaque partie). Rien n'est inventé.
@@ -1631,7 +1631,7 @@ class Component extends DCLogic {
     const goV = (v, extra) => () => this.go(v, extra || {});
     const menuGroups = [
       // Menu « Plus » allégé : 10 rubriques en trois familles courtes (les joueurs sont dans la rubrique Clubs)
-      { titre: 'À voir, à écouter', items: [['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Vidéos', 'videos', 'Highlights et interviews'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine']] },
+      { titre: 'À voir, à écouter', items: [['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Vidéos', 'videos', 'Highlights et interviews'], ['Les Marées d’or', 'trophees', 'La soirée des trophées du sport local'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine']] },
       { titre: 'Au quotidien', items: [['Mon quotidien', 'private', 'Agenda, listes, activité, budget sport'], ['Autour de moi', 'map', 'La carte vivante du week-end'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['L’application', 'app', 'Installer BE+ sur le téléphone']] },
       { titre: 'Casa Besports', items: [['Casa PRO', 'work', 'Clubs, marques, collectivités, sportifs, médias'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
@@ -2273,7 +2273,7 @@ class Component extends DCLogic {
     const quick = [['Scores en direct', 'Le Terrain', () => this.go('live', { dTab: 'live' })], ['Classement Régional 2', 'Le Terrain', () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' })], ['Maillot personnalisé', 'Boutique', () => this.go('product', { productId: 'maillot-retro', color: 0, size: null, qty: 1 })], ['La Gazette du Cotentin', 'Abonnement', () => this.go('offers', { offerTab: 'La Gazette' })], ['Pointe-Hague défie Goliath', 'Article', () => this.go('article', { articleId: 'pointe-hague' })], ['Carte des clubs', 'Territoire', () => this.go('map')]].map(([label, kind, go]) => ({ label, kind, go }));
 
     // ---------- fil d'Ariane ----------
-    const labelOf = { podcast: 'Le podcast', news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', work: 'Casa PRO', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
+    const labelOf = { podcast: 'Le podcast', trophees: 'Les Marées d’or', news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', work: 'Casa PRO', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
     const crumbsRaw = [['Accueil', () => this.go('home')]];
     if (labelOf[activeSec] && activeSec !== 'home') crumbsRaw.push([labelOf[activeSec], () => this.go(activeSec)]);
     const leaf = { article: curA.tag, video: curV.title, discipline: dName, club: curC.name, player: curP.name, checkout: sp.name, product: curPr.name, order: 'Commande', live: s.dSport, cv: 'Mon CV' }[s.view];
@@ -3047,6 +3047,7 @@ class Component extends DCLogic {
     };
     return {
       podcast, essentiel, isPodcast: V === 'podcast', goPodcast: () => this.go('podcast'),
+      isTrophees: V === 'trophees', tr: typeof CasaTrophees !== 'undefined' && V === 'trophees' ? CasaTrophees.vals(this) : { adm: {} }, goTrophees: () => this.go('trophees'),
       isVestiaire: V === 'vestiaire', vs: VS.page, vsHome: VS.home, goVestiaire: () => this.go('vestiaire'), goVestiaireClub: () => this.go('vestiaire', { vsClub: s.clubId }),
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
         ok: s.mbRes === 'ok', off: s.mbRes === 'off', none: s.mbRes === 'none', bad: s.mbRes === 'bad', format: s.mbRes === 'format',

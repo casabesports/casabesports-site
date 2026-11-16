@@ -37,6 +37,7 @@ const SECTIONS = {
   'territoire': { t: 'Territoire', d: 'La carte des clubs et des communes de Normandie.' },
   'meteo': { t: 'Météo', d: 'Prévisions météo et conditions de jeu dans le Cotentin.' },
   'mentions-legales': { t: 'Informations légales', d: 'Mentions légales, confidentialité, conditions générales de vente et d’utilisation de Casa Besports.' },
+  'trophees': { t: 'Les Marées d’or : les trophées du sport local', d: 'La soirée des trophées du sport du Cotentin au théâtre à l’italienne de Cherbourg : dix trophées toutes disciplines, le vote du public, les barèmes et les trophées.' },
   'pro': { t: 'Casa PRO : accès professionnels', d: 'Clubs, marques, collectivités, organisateurs, sportifs et médias : l’accès professionnel de Casa Besports, le média sport du Cotentin et de la Manche.' },
 };
 const DETAIL = { actualites: 'article', videos: 'video', clubs: 'club', joueurs: 'player', disciplines: 'discipline' };

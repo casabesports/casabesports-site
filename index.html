@@ -2768,6 +2768,138 @@ img, video, canvas, svg { max-width: 100%; }
 @media (max-width: 380px) { .wrap { padding-left: 1rem; padding-right: 1rem; } .wk-it { grid-template-columns: 46px minmax(0, 1fr); gap: .3rem .5rem; } .rs-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
 @media (max-width: 1100px) { .fab-lieu { padding: 0 .3rem !important; min-height: 44px !important; border-radius: 50% !important; width: 44px; justify-content: center; } .fab-lieu .fab-lieu-txt { display: none; } }
 @media (min-width: 600px) and (max-width: 1100px) { .wrap { padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); } }
+/* ===== Les Marées d'or : la soirée des trophées (bleu rade, laiton doré, granit) ===== */
+.mo { --mo-or: #e2ad45; --mo-or-c: #fbe3a1; --mo-rade: var(--rade, #10283a); --mo-gr: #4a5761; padding-bottom: 5rem; }
+.mo-hero { position: relative; background: radial-gradient(120% 90% at 85% 10%, #1d4560 0%, #10283a 55%, #0a1b28 100%); color: #fff; overflow: hidden; }
+.mo-hero::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(170deg, transparent 0 22px, rgba(242, 179, 61, .06) 22px 23px); pointer-events: none; }
+.mo-hero-in { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; padding-top: 2.4rem; padding-bottom: 3.4rem; align-items: center; }
+@media (min-width: 820px) { .mo-hero-in { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); padding-top: 3.4rem; padding-bottom: 4.4rem; } }
+.mo-k { display: inline-block; font: 800 12px/1 var(--bn-font, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: var(--sun, #f2b33d); }
+.mo-k-d { color: #9a7322; }
+[data-cb-theme="dark"] .mo-k-d, [data-cb-theme="noir"] .mo-k-d, [data-cb-theme="oled"] .mo-k-d, [data-cb-theme="maree-sombre"] .mo-k-d { color: var(--sun, #f2b33d); }
+.mo-h1 { font: 900 clamp(2.6rem, 7vw, 5.2rem)/1.08 var(--bn-font, sans-serif); letter-spacing: -.01em; margin: .4rem 0 .6rem; padding-top: .12em; background: linear-gradient(180deg, #fde9b0 0%, #e2ad45 55%, #b9862c 100%); -webkit-background-clip: text; background-clip: text; color: transparent; text-transform: uppercase; }
+.mo-sous { max-width: 34rem; font-size: 1.08rem; line-height: 1.55; color: #d6e2e8; margin: 0 0 1.3rem; }
+.mo-infos { list-style: none; margin: 0 0 1.4rem; padding: 0; display: grid; gap: .45rem; }
+.mo-infos li { display: grid; grid-template-columns: 4.6rem minmax(0, 1fr); gap: .6rem; font-size: 15px; line-height: 1.35; color: #fff; }
+.mo-infos span { font: 800 11.5px/1.6 var(--bn-font, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: var(--sun, #f2b33d); }
+.mo-cta { display: flex; flex-wrap: wrap; gap: .5rem; }
+.mo-btn { display: inline-flex; align-items: center; min-height: 44px; padding: .5rem 1.1rem; font: 800 14px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .06em; background: var(--sun, #f2b33d); color: #10283a; border: 2px solid var(--sun, #f2b33d); text-decoration: none; cursor: pointer; border-radius: 0; }
+.mo-btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .55); }
+.mo-btn:hover, .mo-btn:focus-visible { background: #fff; border-color: #fff; color: #10283a; }
+.mo-hero-img { width: min(280px, 44vw); justify-self: center; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .45)); }
+.mo-houle { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 34px; }
+.mo-body { padding-top: 1.6rem; }
+.mo-h2 { font: 900 clamp(1.7rem, 3.6vw, 2.5rem)/1.05 var(--bn-font, sans-serif); text-transform: uppercase; color: var(--ink); margin: 3rem 0 .8rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .8rem; }
+.mo-h2::before { content: ''; flex: 0 0 100%; height: 4px; width: 56px; max-width: 56px; background: var(--mo-or); margin-bottom: .5rem; }
+.mo-h2-s { font: 700 13px/1.2 var(--bn-font, sans-serif); letter-spacing: .08em; color: var(--muted); }
+.mo-h3 { font: 800 1.15rem/1.15 var(--bn-font, sans-serif); color: var(--ink); margin: 1.6rem 0 .8rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: .6rem; text-transform: uppercase; }
+.mo-h3 span { font-size: 12.5px; letter-spacing: .08em; color: var(--muted); }
+.mo-p { max-width: 44rem; font-size: 1rem; line-height: 1.6; color: var(--text-2, var(--text)); margin: 0 0 1rem; }
+.mo-note { font-size: 13.5px; line-height: 1.55; color: var(--muted); margin: .8rem 0 0; max-width: 52rem; }
+/* calendrier */
+.mo-phases { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .5rem; }
+.mo-ph { position: relative; display: flex; flex-direction: column; gap: .25rem; padding: .85rem .8rem .9rem; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--line-2); min-width: 0; }
+.mo-ph.is-done { border-top-color: var(--mo-gr); opacity: .78; }
+.mo-ph.is-on { border-top-color: var(--sun, #f2b33d); background: var(--mo-rade); color: #fff; border-color: var(--mo-rade); }
+.mo-ph-etat { font: 800 10.5px/1 var(--bn-font, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.mo-ph.is-on .mo-ph-etat { color: var(--sun, #f2b33d); }
+.mo-ph-t { font: 800 15px/1.1 var(--bn-font, sans-serif); color: inherit; }
+.mo-ph-q { font-size: 12.5px; font-weight: 700; color: #9a7322; }
+.mo-ph.is-on .mo-ph-q { color: var(--sun, #f2b33d); }
+.mo-ph-x { font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+.mo-ph.is-on .mo-ph-x { color: #d6e2e8; }
+@media (max-width: 980px) { .mo-phases { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .mo-phases { grid-template-columns: minmax(0, 1fr); } .mo-ph { display: grid; grid-template-columns: 6.2rem minmax(0, 1fr); gap: .15rem .7rem; } .mo-ph-etat { grid-column: 1; } .mo-ph-t { grid-column: 2; grid-row: 1; } .mo-ph-q { grid-column: 1; } .mo-ph-x { grid-column: 2; grid-row: 2 / span 2; } }
+/* prix */
+.mo-f { display: flex; gap: .4rem; overflow-x: auto; margin: 0 0 .4rem; padding-bottom: .2rem; }
+.mo-discs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: .8rem; }
+.mo-disc { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--mo-or); padding: .9rem .9rem .5rem; min-width: 0; }
+.mo-disc-t { font: 900 1.25rem/1 var(--bn-font, sans-serif); text-transform: uppercase; color: var(--ink); margin: 0 0 .6rem; }
+.mo-prix { background: var(--surface); border: 1px solid var(--line); display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: .9rem; padding: .9rem; min-width: 0; }
+.mo-prix-mini { display: block; border: 0; border-top: 1px solid var(--line); padding: .7rem 0 .6rem; background: transparent; }
+.mo-prix-h { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .2rem .6rem; align-items: baseline; }
+.mo-prix-t { font: 800 15px/1.2 var(--bn-font, sans-serif); color: var(--ink); margin: .25rem 0 .35rem; }
+.mo-prix-mini .mo-prix-t { margin: 0; font-size: 14px; }
+.mo-prix-img { width: 92px; height: 120px; object-fit: contain; }
+.mo-prix-x { font-size: 13.5px; line-height: 1.45; color: var(--text-2, var(--text)); margin: 0 0 .35rem; }
+.mo-prix-m { font: 700 11.5px/1.3 var(--bn-font, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.mo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: .8rem; }
+.mo-noms { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .35rem; }
+.mo-nom { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: .6rem; align-items: center; padding: .35rem .4rem; border: 1px solid var(--line); background: var(--surface-2, var(--surface)); }
+.mo-nom.is-mine { border-color: var(--sun, #f2b33d); box-shadow: inset 3px 0 0 var(--sun, #f2b33d); }
+.mo-nom.is-win { border-color: var(--mo-or); background: linear-gradient(90deg, rgba(226, 173, 69, .22), transparent); }
+.mo-av { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; display: flex; align-items: center; justify-content: center; background: var(--mo-rade); color: var(--sun, #f2b33d); font: 800 13px/1 var(--bn-font, sans-serif); }
+.mo-nom-t { display: flex; flex-direction: column; min-width: 0; font-size: 14px; line-height: 1.25; color: var(--ink); }
+.mo-nom-t span { font-size: 12.5px; color: var(--muted); }
+.mo-vote { min-height: 36px; padding: .3rem .75rem; font: 800 12.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .05em; background: var(--mo-rade); color: #fff; border: 0; cursor: pointer; border-radius: 0; }
+.mo-vote[aria-pressed="true"] { background: var(--sun, #f2b33d); color: #10283a; }
+.mo-attente { margin: .55rem 0 0; font-size: 12.5px; color: var(--muted); font-style: italic; }
+.mo-vnote { margin: .45rem 0 0; font-size: 12px; font-weight: 700; color: #9a7322; }
+.mo-laureat { margin: .5rem 0 0; font-size: 14px; color: var(--ink); }
+/* barèmes */
+.mo-bars { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: .8rem; }
+.mo-bar { background: var(--surface); border: 1px solid var(--line); padding: 1rem; min-width: 0; }
+.mo-bar-t { font: 800 15px/1.2 var(--bn-font, sans-serif); color: var(--ink); margin: 0 0 .7rem; }
+.mo-parts { display: flex; height: 34px; margin-bottom: .8rem; }
+.mo-part { display: flex; align-items: center; justify-content: center; gap: .25rem; font-size: 11.5px; white-space: nowrap; overflow: hidden; color: #fff; padding: 0 .3rem; min-width: 0; }
+.mo-part b { font: 800 13px/1 var(--bn-font, sans-serif); }
+.mo-part-j { background: var(--mo-rade); }
+.mo-part-p { background: var(--sun, #f2b33d); color: #10283a; }
+.mo-part-r { background: var(--mo-gr); }
+.mo-grille { display: grid; gap: 0; }
+.mo-grille-c { font: 800 11px/1 var(--bn-font, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: .35rem; }
+.mo-gl { display: flex; justify-content: space-between; gap: .8rem; padding: .35rem 0; border-bottom: 1px dashed var(--line); font-size: 13.5px; line-height: 1.35; color: var(--text); }
+.mo-gl b { flex: none; font-variant-numeric: tabular-nums; }
+.mo-tot { border-bottom: 0; font-weight: 800; color: var(--ink); }
+.mo-bar-n { font-size: 12.5px; line-height: 1.45; color: var(--muted); margin: .6rem 0 0; }
+.mo-deux { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: .8rem; margin-top: .8rem; }
+.mo-box { background: var(--surface); border: 1px solid var(--line); padding: 1rem 1.1rem; min-width: 0; }
+.mo-box .mo-h3 { margin-top: .2rem; }
+.mo-regles { margin: 0; padding-left: 1.1rem; display: grid; gap: .45rem; font-size: 14px; line-height: 1.5; color: var(--text); }
+.mo-jury { list-style: none; margin: 0; padding: 0; display: grid; }
+.mo-jury li { display: flex; flex-direction: column; gap: .1rem; padding: .45rem 0; border-bottom: 1px solid var(--line); font-size: 13.5px; color: var(--muted); }
+.mo-jury li b { color: var(--ink); font-size: 14px; }
+.mo-jury li.is-vide b, .mo-rem b.is-vide { color: var(--muted); font-weight: 600; font-style: italic; }
+/* trophées */
+.mo-trophees { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: .8rem; }
+.mo-tro { margin: 0; background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2, var(--surface)) 100%); border: 1px solid var(--line); padding: .9rem .9rem 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
+.mo-tro img { width: 100%; max-width: 150px; height: 190px; object-fit: contain; margin-bottom: .6rem; }
+.mo-tro figcaption { display: flex; flex-direction: column; gap: .3rem; }
+.mo-tro b { font: 900 15px/1.1 var(--bn-font, sans-serif); text-transform: uppercase; color: var(--ink); }
+.mo-tro-p { font-size: 13px; line-height: 1.35; color: var(--text); }
+.mo-tro-d { font-size: 12px; line-height: 1.4; color: var(--muted); }
+.mo-tro-n { position: absolute; top: .6rem; right: .6rem; font: 800 12px/1 var(--bn-font, sans-serif); background: var(--mo-rade); color: var(--sun, #f2b33d); padding: .3rem .45rem; }
+@media (max-width: 560px) { .mo-trophees { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; } .mo-tro { padding: .7rem .5rem .8rem; } .mo-tro img { height: 140px; } .mo-tro-d { display: none; } }
+/* qui remet quoi à qui */
+.mo-rem { border: 1px solid var(--line); background: var(--surface); }
+.mo-rem-h, .mo-rem-l { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.4fr) minmax(0, .9fr); gap: .8rem; padding: .55rem .8rem; align-items: center; }
+.mo-rem-h { background: var(--mo-rade); color: #fff; font: 800 11.5px/1 var(--bn-font, sans-serif); letter-spacing: .1em; text-transform: uppercase; padding-top: .7rem; padding-bottom: .7rem; }
+.mo-rem-l { border-top: 1px solid var(--line); font-size: 13.5px; line-height: 1.35; }
+.mo-rem-l:nth-child(odd) { background: var(--surface-2, var(--surface)); }
+.mo-rem-p { display: flex; gap: .55rem; align-items: center; min-width: 0; }
+.mo-rem-p img { width: 30px; height: 40px; object-fit: contain; flex: none; }
+.mo-rem-p > span, .mo-rem-q { display: flex; flex-direction: column; min-width: 0; }
+.mo-rem-p b { color: var(--ink); }
+.mo-rem-p > span > span, .mo-rem-q > span { font-size: 12px; color: var(--muted); }
+.mo-rem-a { color: var(--muted); font-style: italic; }
+@media (max-width: 680px) { .mo-rem-h { display: none; } .mo-rem-l { grid-template-columns: minmax(0, 1fr); gap: .3rem; } .mo-rem-q::before { content: 'Remis par'; font: 800 10.5px/1.4 var(--bn-font, sans-serif); letter-spacing: .1em; text-transform: uppercase; color: #9a7322; } .mo-rem-a::before { content: 'À : '; font-style: normal; font-weight: 700; } }
+/* la soirée */
+.mo-lieu { background: var(--mo-rade); color: #fff; border-color: var(--mo-rade); }
+.mo-lieu .mo-h3 { color: #fff; }
+.mo-lieu .mo-p, .mo-lieu .mo-note { color: #d6e2e8; }
+.mo-lieu .mo-k-d { color: var(--sun, #f2b33d); }
+.mo-der { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; }
+.mo-der li { display: grid; grid-template-columns: 4.4rem minmax(0, 1fr); gap: .6rem; padding: .45rem 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.4; color: var(--text); }
+.mo-der b { font: 800 13.5px/1.4 var(--bn-font, sans-serif); color: #9a7322; font-variant-numeric: tabular-nums; }
+/* coulisses */
+.mo-adm { margin-top: 1rem; border: 2px dashed var(--line-2); padding: 0 1rem 1rem; }
+.mo-res { margin-top: 1rem; border: 1px solid var(--line); background: var(--surface); overflow-x: auto; }
+.mo-res-c { margin: 0; padding: .6rem .8rem; font: 800 13px/1.3 var(--bn-font, sans-serif); color: var(--ink); background: var(--surface-2, var(--surface)); }
+.mo-res-l { display: grid; grid-template-columns: minmax(8rem, 2fr) repeat(5, minmax(3.4rem, 1fr)); gap: .4rem; padding: .4rem .8rem; border-top: 1px solid var(--line); font-size: 13px; font-variant-numeric: tabular-nums; min-width: 480px; }
+.mo-res-h { font: 800 11px/1.2 var(--bn-font, sans-serif); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.mo-res-l.is-top { background: rgba(226, 173, 69, .18); }
+.mo-fin { margin-top: 3rem; padding: 1.4rem 1.2rem; border: 1px solid var(--line); background: var(--surface); }
+.mo-fin .mo-h2 { margin-top: 0; }
 </style>
 <style>
 /* ===== Le Vestiaire : l'espace commun des clubs et des joueurs (js/vestiaire.js) — thème Marée ===== */
@@ -3992,6 +4124,161 @@ img, video, canvas, svg { max-width: 100%; }
         <div class="pod-box"><span class="pod-k">Le résumé lu</span><p class="pod-dek">Les scores du week-end lus à voix haute, en deux minutes.</p><button type="button" class="btn btn-ghost" onClick="{{wk.journal}}" aria-pressed="{{wk.journalPressed}}">{{wk.journalLabel}}</button></div>
       </sc-if>
       <div class="pod-box"><span class="pod-k">Au micro</span><p class="pod-dek">Joueur, coach, staff ou supporter ? Proposez votre réaction d’après-match à la rédaction.</p><button type="button" class="btn btn-dark" onClick="{{podcast.envoyer}}">Proposer ma réaction</button></div>
+    </div>
+  </section>
+</sc-if>
+
+<!-- ================= LES MARÉES D'OR : la soirée des trophées du sport local (js/trophees.js, contenus/trophees.js) ================= -->
+<sc-if value="{{isTrophees}}" hint-placeholder-val="{{ false }}">
+  <section class="mo">
+    <header class="mo-hero">
+      <div class="wrap mo-hero-in">
+        <div class="mo-hero-txt">
+          <span class="mo-k">{{tr.edition}} · {{tr.saison}}</span>
+          <h1 class="mo-h1">{{tr.nom}}</h1>
+          <p class="mo-sous">{{tr.sousTitre}} {{tr.territoire}}, discipline par discipline.</p>
+          <ul class="mo-infos">
+            <li><span>Quand</span>{{tr.quand}} · {{tr.heure}}</li>
+            <li><span>Où</span>{{tr.lieu}}</li>
+            <li><span>Étape</span>{{tr.phaseLabel}}</li>
+          </ul>
+          <div class="mo-cta">
+            <sc-if value="{{tr.voteOuvert}}" hint-placeholder-val="{{ false }}"><button type="button" class="mo-btn" onClick="{{tr.allerVote}}">Voter maintenant</button></sc-if>
+            <button type="button" class="mo-btn mo-btn-ghost" onClick="{{tr.proposer}}">Proposer un nom</button>
+          </div>
+        </div>
+        <img class="mo-hero-img" src="assets/trophees/maree.svg" alt="Le trophée de la Marée d’or : une vague en laiton doré sur un socle en granit">
+      </div>
+      <svg class="mo-houle" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 22 C150 4 300 40 450 22 C600 4 750 40 900 22 C1050 4 1150 30 1200 20 L1200 40 L0 40 Z" fill="var(--bg)"></path></svg>
+    </header>
+
+    <div class="wrap mo-body">
+      <h2 class="mo-h2">Le calendrier</h2>
+      <ol class="mo-phases">
+        <sc-for list="{{tr.phases}}" as="ph" hint-placeholder-count="6">
+          <li class="mo-ph {{ph.cls}}"><span class="mo-ph-etat">{{ph.etat}}</span><span class="mo-ph-t">{{ph.titre}}</span><span class="mo-ph-q">{{ph.quand}}</span><span class="mo-ph-x">{{ph.texte}}</span></li>
+        </sc-for>
+      </ol>
+
+      <h2 class="mo-h2" id="mo-prix">Les {{tr.nbPrix}} prix</h2>
+      <p class="mo-p">Pour la 1re édition, dix trophées seulement, toutes disciplines confondues : les sportifs, les équipes, et tous ceux qui font vivre le sport. Trois nommé(e)s par prix, cinq minutes sur scène pour chacun.</p>
+      <sc-if value="{{tr.showSoiree}}" hint-placeholder-val="{{ true }}">
+        <div class="mo-grid">
+          <sc-for list="{{tr.soiree}}" as="p" hint-placeholder-count="6">
+            <article class="mo-prix">
+              <img class="mo-prix-img" src="{{p.img}}" alt="Trophée {{p.tropheeNom}}" loading="lazy">
+              <div class="mo-prix-c">
+                <span class="mo-k mo-k-d">{{p.tropheeNom}}</span>
+                <h4 class="mo-prix-t">{{p.titre}}</h4>
+                <p class="mo-prix-x">{{p.criteres}}</p>
+                <p class="mo-prix-m">{{p.parts}}</p>
+                <sc-if value="{{p.hasLaureat}}" hint-placeholder-val="{{ false }}"><p class="mo-laureat">Lauréat(e) : <b>{{p.laureat}}</b></p></sc-if>
+                <sc-if value="{{p.hasNommes}}" hint-placeholder-val="{{ false }}">
+                  <ul class="mo-noms">
+                    <sc-for list="{{p.nommes}}" as="n" hint-placeholder-count="3">
+                      <li class="mo-nom {{n.cls}}">
+                        <sc-if value="{{n.hasPhoto}}" hint-placeholder-val="{{ false }}"><img class="mo-av" src="{{n.photo}}" alt="" loading="lazy"></sc-if><sc-if value="{{n.noPhoto}}" hint-placeholder-val="{{ true }}"><span class="mo-av">{{n.ini}}</span></sc-if>
+                        <span class="mo-nom-t"><b>{{n.nom}}</b><sc-if value="{{n.hasClub}}" hint-placeholder-val="{{ false }}"><span>{{n.club}}</span></sc-if><sc-if value="{{n.hasPourquoi}}" hint-placeholder-val="{{ false }}"><span>{{n.pourquoi}}</span></sc-if></span>
+                        <sc-if value="{{n.canVote}}" hint-placeholder-val="{{ false }}"><button type="button" class="mo-vote" aria-pressed="{{n.pressed}}" onClick="{{n.vote}}">{{n.voteLabel}}</button></sc-if>
+                      </li>
+                    </sc-for>
+                  </ul>
+                </sc-if>
+                <sc-if value="{{p.noNommes}}" hint-placeholder-val="{{ true }}"><p class="mo-attente">Nommé(e)s annoncé(e)s au printemps</p></sc-if>
+                <sc-if value="{{p.open}}" hint-placeholder-val="{{ false }}"><p class="mo-vnote">{{p.voteNote}}</p></sc-if>
+              </div>
+            </article>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <h2 class="mo-h2">Les barèmes</h2>
+      <p class="mo-p">Chaque prix mêle la note d’un jury, le vote du public et, pour les sportifs, le vote des pairs. Les notes sont sur 100.</p>
+      <div class="mo-bars">
+        <sc-for list="{{tr.baremes}}" as="b" hint-placeholder-count="6">
+          <div class="mo-bar">
+            <h3 class="mo-bar-t">{{b.titre}}</h3>
+            <div class="mo-parts"><sc-for list="{{b.parts}}" as="pp" hint-placeholder-count="2"><span class="mo-part {{pp.cls}}" style="width: {{pp.w}}"><b>{{pp.pct}}</b> {{pp.label}}</span></sc-for></div>
+            <sc-if value="{{b.hasGrille}}" hint-placeholder-val="{{ false }}">
+              <div class="mo-grille"><span class="mo-grille-c">Grille du jury</span><sc-for list="{{b.grille}}" as="g" hint-placeholder-count="4"><div class="mo-gl"><span>{{g.critere}}</span><b>{{g.points}} pts</b></div></sc-for><div class="mo-gl mo-tot"><span>Total</span><b>{{b.total}} pts</b></div></div>
+            </sc-if>
+            <sc-if value="{{b.hasNote}}" hint-placeholder-val="{{ false }}"><p class="mo-bar-n">{{b.note}}</p></sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div class="mo-deux">
+        <div class="mo-box">
+          <h3 class="mo-h3">Les règles du vote</h3>
+          <ul class="mo-regles"><sc-for list="{{tr.regles}}" as="r" hint-placeholder-count="5"><li>{{r.t}}</li></sc-for></ul>
+        </div>
+        <div class="mo-box">
+          <h3 class="mo-h3">Le jury</h3>
+          <ul class="mo-jury"><sc-for list="{{tr.jury}}" as="j" hint-placeholder-count="7"><li class="{{j.cls}}"><span>{{j.role}}</span><b>{{j.nom}}</b></li></sc-for></ul>
+        </div>
+      </div>
+
+      <h2 class="mo-h2">Les trophées <span class="mo-h2-s">{{tr.totalTrophees}} pièces</span></h2>
+      <p class="mo-p">Une même famille, née de la mer : du laiton doré comme le soleil couchant sur la rade, du granit de la Manche, et pour chaque prix un symbole du littoral.</p>
+      <div class="mo-trophees">
+        <sc-for list="{{tr.trophees}}" as="t" hint-placeholder-count="12">
+          <figure class="mo-tro">
+            <img src="{{t.img}}" alt="Trophée {{t.nom}}" loading="lazy">
+            <figcaption><b>{{t.nom}}</b><span class="mo-tro-p">{{t.pour}}</span><span class="mo-tro-d">{{t.forme}} · {{t.socle}} · {{t.hauteur}}</span><span class="mo-tro-n">× {{t.nombre}}</span></figcaption>
+          </figure>
+        </sc-for>
+      </div>
+      <p class="mo-note">{{tr.fabrication}}</p>
+
+      <h2 class="mo-h2">Qui remet quoi à qui</h2>
+      <p class="mo-p">Les noms s’ajoutent dans l’espace administrateur dès qu’une personne a accepté de remettre un trophée.</p>
+      <div class="mo-rem" role="table" aria-label="Remise des trophées">
+        <div class="mo-rem-h" role="row"><span role="columnheader">Prix</span><span role="columnheader">Remis par</span><span role="columnheader">À</span></div>
+        <sc-for list="{{tr.remises}}" as="r" hint-placeholder-count="8">
+          <div class="mo-rem-l" role="row">
+            <span role="cell" class="mo-rem-p"><img src="{{r.img}}" alt=""><span><b>{{r.prix}}</b><span>{{r.trophee}}</span></span></span>
+            <span role="cell" class="mo-rem-q"><span>{{r.remisPar}}</span><b class="{{r.cls}}">{{r.remettant}}</b></span>
+            <span role="cell" class="mo-rem-a">{{r.a}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <h2 class="mo-h2">La soirée</h2>
+      <div class="mo-deux">
+        <div class="mo-box mo-lieu">
+          <span class="mo-k mo-k-d">Le lieu</span>
+          <h3 class="mo-h3">{{tr.lieu}}</h3>
+          <p class="mo-p">{{tr.adresse}}</p>
+          <p class="mo-note">{{tr.lieuNote}}</p>
+        </div>
+        <div class="mo-box">
+          <span class="mo-k mo-k-d">Le déroulé · 1 h 30 en tout</span>
+          <ol class="mo-der"><sc-for list="{{tr.deroule}}" as="x" hint-placeholder-count="8"><li><b>{{x.heure}}</b><span>{{x.quoi}}</span></li></sc-for></ol>
+        </div>
+      </div>
+
+      <sc-if value="{{tr.adm.on}}" hint-placeholder-val="{{ false }}">
+        <div class="mo-adm">
+          <h2 class="mo-h2">Coulisses <span class="mo-h2-s">visible par l’administrateur seulement</span></h2>
+          <p class="mo-p">Votes du public, notes du jury et des pairs (saisies dans l’admin, fiche de chaque nommé(e)) et note finale calculée avec le barème.</p>
+          <button type="button" class="btn btn-dark" onClick="{{tr.adm.charger}}">Afficher les résultats</button>
+          <sc-if value="{{tr.adm.busy}}" hint-placeholder-val="{{ false }}"><p class="mo-note">Chargement…</p></sc-if>
+          <sc-if value="{{tr.adm.hasErr}}" hint-placeholder-val="{{ false }}"><p class="mo-note">{{tr.adm.err}}</p></sc-if>
+          <sc-if value="{{tr.adm.vide}}" hint-placeholder-val="{{ false }}"><p class="mo-note">Aucun nommé pour l’instant.</p></sc-if>
+          <sc-for list="{{tr.adm.rows}}" as="a" hint-placeholder-count="0">
+            <div class="mo-res"><p class="mo-res-c">{{a.titre}} · {{a.parts}} · {{a.total}} votes</p>
+              <div class="mo-res-l mo-res-h"><span>Nommé(e)</span><span>Votes</span><span>Public</span><span>Jury</span><span>Pairs</span><span>Note</span></div>
+              <sc-for list="{{a.lignes}}" as="l" hint-placeholder-count="3"><div class="mo-res-l {{l.cls}}"><span>{{l.nom}}</span><span>{{l.votes}}</span><span>{{l.pub}}</span><span>{{l.jury}}</span><span>{{l.pairs}}</span><b>{{l.note}}</b></div></sc-for>
+            </div>
+            <sc-if value="{{a.incomplet}}" hint-placeholder-val="{{ false }}"><p class="mo-note">Notes du jury ou des pairs à compléter (—).</p></sc-if>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <div class="mo-fin">
+        <h2 class="mo-h2">Vous connaissez quelqu’un qui le mérite ?</h2>
+        <p class="mo-p">Une joueuse, un bénévole, une arbitre, un club : proposez son nom à la rédaction, avec quelques lignes sur sa saison. Nous lui demanderons son accord avant toute publication.</p>
+        <button type="button" class="btn btn-dark" onClick="{{tr.proposer}}">Proposer un nom</button>
+      </div>
     </div>
   </section>
 </sc-if>
@@ -8517,6 +8804,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/boutique.js?v=__VERSION__"></script>
 <script src="contenus/videos.js?v=__VERSION__"></script>
 <script src="contenus/podcast.js?v=__VERSION__"></script>
+<script src="contenus/trophees.js?v=__VERSION__"></script>
 <script src="contenus/culture.js?v=__VERSION__"></script>
 <script src="contenus/fonds.js?v=__VERSION__"></script>
 <script src="contenus/legal.js?v=__VERSION__"></script>
@@ -8534,6 +8822,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="js/comptes.js?v=__VERSION__"></script>
 <script src="js/paiement.js?v=__VERSION__"></script>
 <script src="js/notifications.js?v=__VERSION__"></script>
+<script src="js/trophees.js?v=__VERSION__"></script>
 <script src="js/app.js?v=__VERSION__"></script>
 <script src="js/admin.js?v=__VERSION__"></script>
 <script src="js/retouches.js?v=__VERSION__"></script>
