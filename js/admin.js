@@ -669,7 +669,7 @@
       E('h3', { style: 'margin:1.2rem 0 .3rem' }, 'Liens modifiés (' + liens.length + ')'), liens.length ? liens : E('p', { class: 'cba-sub' }, 'Aucun lien modifié.'));
   }
   // ---------- Fonds de page : une image par page, avec son cadrage ----------
-  var FOND_PAGES = [['accueil', 'Accueil'], ['actualites', 'Actualités et articles'], ['direct', 'Direct'], ['videos', 'Vidéos'], ['disciplines', 'Disciplines'], ['clubs', 'Clubs et carte'], ['joueurs', 'Joueurs'], ['boutique', 'Boutique'], ['abonnements', 'Abonnements'], ['compte', 'Mon espace'], ['quotidien', 'Le quotidien (abonnés)'], ['clubhouse', 'Club House'], ['culture', 'Culture'], ['meteo', 'Météo'], ['partenaires', 'Partenaires'], ['apropos', 'À propos'], ['contact', 'Contact'], ['mentions', 'Mentions légales'], ['application', 'Application'], ['redaction', 'Rédaction']];
+  var FOND_PAGES = [['accueil', 'Accueil'], ['actualites', 'Actualités et articles'], ['direct', 'Direct'], ['videos', 'Vidéos'], ['disciplines', 'Fiche d’une discipline'], ['clubs', 'Clubs et carte'], ['joueurs', 'Joueurs'], ['boutique', 'Boutique'], ['abonnements', 'Abonnements'], ['compte', 'Mon espace'], ['quotidien', 'Le quotidien (abonnés)'], ['clubhouse', 'Club House'], ['culture', 'Culture'], ['meteo', 'Météo'], ['partenaires', 'Partenaires'], ['apropos', 'À propos'], ['contact', 'Contact'], ['mentions', 'Mentions légales'], ['application', 'Application'], ['redaction', 'Rédaction']];
   var FOND_POS = [['center 15%', 'Montrer le haut'], ['center 30%', 'Le tiers haut'], ['center 35%', 'Un peu au-dessus du centre'], ['center 40%', 'Juste au-dessus du centre'], ['center', 'Centre'], ['center 45%', 'Presque au centre'], ['center 65%', 'Un peu en dessous du centre'], ['center 85%', 'Montrer le bas']];
   function viewFonds() {
     var v = S.work; if (!v.pages || typeof v.pages !== 'object') v.pages = {};
@@ -679,8 +679,9 @@
       [['photo', 'Photos : les images choisies ci-dessous'], ['aucun', 'Fond uni (blanc ou noir), sans image'], ['lieux', 'Illustrations des lieux de légende']].map(function (o) { return E('option', { value: o[0], selected: o[0] === mode || null }, o[1]); }));
     // Couleur : photos en noir et blanc ou en couleur, et teinte de fond (tout le site, ou page par page)
     var hexOk = function (c) { return typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c); };
-    var couleurSel = E('select', { class: 'cba-in', onchange: function (e) { v.photosEnCouleur = e.target.value === 'couleur'; mark(); } },
-      [['nb', 'En noir et blanc (signature Casa Besports)'], ['couleur', 'En couleur']].map(function (o) { return E('option', { value: o[0], selected: (o[0] === 'couleur') === (v.photosEnCouleur === true) || null }, o[1]); }));
+    var tonCur = ['maree', 'nb', 'couleur'].indexOf(v.photos) >= 0 ? v.photos : (v.photosEnCouleur === true ? 'couleur' : 'maree');
+    var couleurSel = E('select', { class: 'cba-in', onchange: function (e) { v.photos = e.target.value; v.photosEnCouleur = e.target.value === 'couleur'; mark(); } },
+      [['maree', 'Marée, le bleu de la rade (signature Casa Besports)'], ['nb', 'En noir et blanc'], ['couleur', 'En couleur']].map(function (o) { return E('option', { value: o[0], selected: o[0] === tonCur || null }, o[1]); }));
     function teinteField(get, set, labelNone) {
       var cur = get(); var on = hexOk(cur);
       var inp = E('input', { type: 'color', value: on ? cur : '#1d4e89', style: 'width:52px;height:38px;padding:2px;cursor:pointer' + (on ? '' : ';opacity:.45'), oninput: function (e) { set(e.target.value.toLowerCase()); inp.style.opacity = '1'; chk.checked = false; mark(); } });
