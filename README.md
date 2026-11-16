@@ -17,6 +17,7 @@ Site statique : aucun serveur à maintenir, aucune base de données, hébergemen
 | `js/admin.js`, `supabase/administration.sql` | **Espace administrateur** (contenus, images, messagerie, accès rédaction) : voir `docs/ESPACE-ADMIN.md` |
 | `js/paiement.js`, `supabase/paiements.sql`, `supabase/functions/paiement`, `stripe-webhook`, `portail-abonne` | **Paiements en ligne** (abonnements et boutique, Stripe) : voir `docs/PAIEMENTS.md` |
 | `js/notifications.js`, `supabase/notifications.sql`, `supabase/functions/notifications` | **Notifications** du site et de l’application (bouton « Activer », envoi depuis Admin › Notifications) : voir `docs/NOTIFICATIONS.md` |
+| `js/vestiaire.js`, `supabase/vestiaire.sql` | **Le Vestiaire** des clubs (planning, présences, fil seniors et jeunes) : voir `docs/VESTIAIRE.md` |
 | `functions/`, `outils/seo-donnees.js` | **Référencement** : adresses lisibles, aperçus de partage, plan du site : voir `docs/REFERENCEMENT.md` |
 | `manifest.webmanifest`, `icon.svg` | Installation sur téléphone (« Ajouter à l'écran d'accueil ») |
 

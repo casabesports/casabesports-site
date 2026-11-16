@@ -34,7 +34,7 @@ function cbQr(text) {
 function cbSiteUrl() { return String(window.CASA_SITE_URL || (/^https?:/.test(location.protocol) ? location.origin + location.pathname : 'https://casabesports.fr/')).replace(/index\.html$/, ''); }
 
 // ---------- adresses partageables : #/page ou #/page/identifiant ----------
-const CB_ROUTE_ID = { article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
+const CB_ROUTE_ID = { vestiaire: 'vsClub', article: 'articleId', video: 'videoId', discipline: 'discId', club: 'clubId', player: 'playerId', product: 'productId' };
 // Nom d'équipe lisible : « AS ISIGNY LE BUAT 1 » ou « as isigny le buat 1 » → « AS Isigny le Buat 1 » (sigles gardés en capitales)
 const CB_SIGLES = /^(AS|US|CS|JS|FC|SC|HB|HBC|BC|RC|CL|AL|ES|SM|ASPTT|ENT|USM|AJ|AC|OC|UL|ASC|CA|SU|AAJ|CHB|UST|VB|EC|SA|OM|PL|AG|ASL|USO|ESM|UC|SCO|CMS|SMV|GCO|CC)$/;
 function cbNomEquipe(n) {
@@ -50,7 +50,7 @@ function cbNomEquipe(n) {
     return w.charAt(0).toUpperCase() + w.slice(1);
   });
 }
-const CB_TITLES = { home: '', podcast: 'Le podcast', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Clubs et disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Autour de moi', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+const CB_TITLES = { home: '', vestiaire: 'Le Vestiaire', podcast: 'Le podcast', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Clubs et disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Autour de moi', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
 // Logos des boutiques de clubs (images hébergées chez les clubs) : si l'un ne charge pas, l'initiale du club reste affichée
 if (typeof document !== 'undefined') document.addEventListener('error', (e) => { const t = e.target; if (t && t.classList && t.classList.contains('mc-img')) t.classList.add('mc-off'); }, true);
 // Lien vers le site d'un partenaire, marqué « vient de Casa Besports » (paramètres utm_ lus par Google Analytics, Matomo, HubSpot…)
@@ -832,7 +832,7 @@ class Component extends DCLogic {
   // Accueil épuré : 5 blocs essentiels affichés d'office, les autres rubriques sont proposées
   // dans « Personnaliser mon accueil » (abonnés connectés). [id, libellé, largeur, affiché par défaut]
   modDefs() {
-    return [['essentiel', 'Mon essentiel : mes raccourcis d’abonné', 'full', false], ['une', 'Le grand bandeau : l’actu du moment', 'full', true], ['resultats', 'Résultats du week-end', 'full', true], ['portes', 'Passionné ou pro : vos accès', 'full', true], ['cherwood', 'Boutique Casa × Cherwood', 's2', true], ['gazette', 'La Gazette du mois', 's2', true],
+    return [['essentiel', 'Mon essentiel : mes raccourcis d’abonné', 'full', false], ['une', 'Le grand bandeau : l’actu du moment', 'full', true], ['vestiaire', 'Le Vestiaire : planning, présences et fil de mon club', 'full', true], ['resultats', 'Résultats du week-end', 'full', true], ['portes', 'Passionné ou pro : vos accès', 'full', true], ['cherwood', 'Boutique Casa × Cherwood', 's2', true], ['gazette', 'La Gazette du mois', 's2', true],
       ['actus', 'Dernières actus', 's2', false], ['videos', 'Vidéos', 's2', false], ['rdv', 'Le prochain rendez-vous', '', false], ['table', 'Classement Régional 2', '', false], ['meteo', 'Météo', '', false], ['private', 'Mon quotidien', '', false],
       ['clubhouse', 'Club House', '', false], ['culture', 'Culture & sorties', '', false], ['oeuvre', 'Œuvre du jour', '', false], ['lieu', 'Lieu du jour', '', false], ['shop', 'Boutique : la collection', 's2', false], ['rubriques', 'Toutes les rubriques du site', 'full', false]];
   }
@@ -1538,7 +1538,7 @@ class Component extends DCLogic {
 
     // ---------- navigation ----------
     // Barre épurée : Clubs et Club House ne font qu'une rubrique, Culture passe dans « Plus », les offres et les partenaires sont en accès direct
-    const navDefs = [['Le Terrain', 'live'], ['Actualités', 'news'], ['Clubs', 'clubs'], ['Boutique', 'shop'], ['Offres', 'offers'], ['Partenaires', 'partners']];
+    const navDefs = [['Le Terrain', 'live'], ['Actualités', 'news'], ['Clubs', 'clubs'], ['Vestiaire', 'vestiaire'], ['Boutique', 'shop'], ['Offres', 'offers'], ['Partenaires', 'partners']];
     const sectionOf = { clubhouse: 'clubs', players: 'clubs', article: 'news', video: 'videos', discipline: 'clubs', disciplines: 'clubs', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
     const activeSec = sectionOf[s.view] || s.view;
     const nav = navDefs.map(([label, v]) => ({ label, color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
@@ -1551,6 +1551,8 @@ class Component extends DCLogic {
       { titre: 'Casa Besports', items: [['Casa PRO', 'work', 'Clubs, marques, collectivités, sportifs, médias'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
+    // Le Vestiaire : en tête des services du quotidien
+    menuGroups.forEach((g) => { if (g.items.some((it) => it[1] === 'private')) g.items.unshift(['Le Vestiaire', 'vestiaire', 'Planning, présences et fil de mon club']); });
     menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
     const moreNav = [].concat(...menuGroups.map((g) => g.items));
     // Accueil : toutes les rubriques du site, en accès direct
@@ -2331,10 +2333,12 @@ class Component extends DCLogic {
 
     // ---------- accueil épuré et personnalisable ----------
     const MD = this.modDefs();
-    const modsState0 = (s.mods && s.mods.length) ? s.mods.filter((m) => m && MD.some((x) => x[0] === m.id)).concat(MD.filter((x) => !s.mods.some((m) => m && m.id === x[0])).map((d) => ({ id: d[0], on: d[3] !== false }))) : this.defaultMods();
+    // Le Vestiaire (nouveau bloc) se place juste après la une, même pour ceux qui avaient déjà composé leur accueil
+    const mods0 = (s.mods && s.mods.length && !s.mods.some((m) => m && m.id === 'vestiaire')) ? (() => { const a = s.mods.slice(); const i = a.findIndex((m) => m && m.id === 'une'); a.splice(i + 1, 0, { id: 'vestiaire', on: true }); return a; })() : s.mods;
+    const modsState0 = (mods0 && mods0.length) ? mods0.filter((m) => m && MD.some((x) => x[0] === m.id)).concat(MD.filter((x) => !mods0.some((m) => m && m.id === x[0])).map((d) => ({ id: d[0], on: d[3] !== false }))) : this.defaultMods();
     // « Mon essentiel » arrive en tête pour les abonnés qui avaient déjà composé leur accueil
     const modsState = (s.loggedIn && s.mods && s.mods.length && !s.mods.some((m) => m && m.id === 'essentiel')) ? [{ id: 'essentiel', on: true }].concat(modsState0.filter((m) => m.id !== 'essentiel')) : modsState0;
-    const homeMods = modsState.filter((m) => m.on).map((m) => { const def = MD.find((x) => x[0] === m.id); return { id: m.id, cls: def[2], isEssentiel: m.id === 'essentiel' && !!s.loggedIn, isUne: m.id === 'une', isResultats: m.id === 'resultats', isPortes: m.id === 'portes', isCherwood: m.id === 'cherwood', isRubriques: m.id === 'rubriques', isMeteo: m.id === 'meteo', isPrivate: m.id === 'private', isRdv: m.id === 'rdv' && rdv.has, isActus: m.id === 'actus', isShop: m.id === 'shop', isTable: m.id === 'table', isGazette: m.id === 'gazette', isLieu: m.id === 'lieu', isVideos: m.id === 'videos', isOeuvre: m.id === 'oeuvre', isCultureMod: m.id === 'culture', isClubMod: m.id === 'clubhouse' }; });
+    const homeMods = modsState.filter((m) => m.on).map((m) => { const def = MD.find((x) => x[0] === m.id); return { id: m.id, cls: def[2], isEssentiel: m.id === 'essentiel' && !!s.loggedIn, isUne: m.id === 'une', isResultats: m.id === 'resultats', isPortes: m.id === 'portes', isCherwood: m.id === 'cherwood', isRubriques: m.id === 'rubriques', isMeteo: m.id === 'meteo', isPrivate: m.id === 'private', isRdv: m.id === 'rdv' && rdv.has, isActus: m.id === 'actus', isShop: m.id === 'shop', isTable: m.id === 'table', isGazette: m.id === 'gazette', isLieu: m.id === 'lieu', isVideos: m.id === 'videos', isOeuvre: m.id === 'oeuvre', isCultureMod: m.id === 'culture', isClubMod: m.id === 'clubhouse', isVestiaire: m.id === 'vestiaire' }; });
     const move = (i, dlt) => { const a = modsState.slice(); const j = i + dlt; if (j < 0 || j >= a.length) return; const t = a[i]; a[i] = a[j]; a[j] = t; this.setMods(a); };
     const modRows = modsState.map((m, i) => ({ label: MD.find((x) => x[0] === m.id)[1], on: m.on, essentiel: MD.find((x) => x[0] === m.id)[3] !== false, toggle: () => this.setMods(modsState.map((x, k) => k === i ? { id: x.id, on: !x.on } : x)), up: () => move(i, -1), down: () => move(i, 1) }));
     const layouts = [['dashboard', 'Tableau de bord', 'Blocs personnalisables'], ['magazine', 'Magazine', 'Grand visuel et récits']].map(([id, label, desc]) => ({ label, desc, checked: s.homeLayout === id ? 'true' : 'false', border: s.homeLayout === id ? 'var(--acc)' : 'var(--line)', pick: () => this.setLayout(id) }));
@@ -2936,6 +2940,8 @@ class Component extends DCLogic {
     rsCtx.cvPending = typeof CasaCV !== 'undefined' && canReseau && s.studioTab === 'reseau' ? CasaCV.pending(this) : 0;
     if (s.view === 'map') this.chargeCarte();
     const RS = typeof CasaReseau !== 'undefined' ? CasaReseau.vals(this, rsCtx) : { carte: {}, com: {}, club: {}, adm: {}, fiche: { has: false, lignes: [] } };
+    // ---------- Le Vestiaire : planning, présences et fil des clubs (js/vestiaire.js, supabase/vestiaire.sql) ----------
+    const VS = typeof CasaVestiaire !== 'undefined' ? CasaVestiaire.vals(this, { V }) : { home: { on: false }, page: { off: true } };
     // ---------- le podcast : émissions et réactions d'après-match (contenus/podcast.js, modifiable dans l'admin) ----------
     const podCat = (e) => { const t = nrm(e.type + ' ' + e.qui); if (/joueu/.test(t)) return 'joueur'; if (/coach|entraineu/.test(t)) return 'coach'; if (/staff|dirige|kine|prepa|presiden|benevol/.test(t)) return 'staff'; if (/support|fan|tribune/.test(t)) return 'supporter'; return 'emission'; };
     const POD_LAB = { emission: 'Émission', joueur: 'Réaction joueur', coach: 'Réaction coach', staff: 'Réaction staff', supporter: 'Réaction supporter' };
@@ -2956,6 +2962,7 @@ class Component extends DCLogic {
     };
     return {
       podcast, essentiel, isPodcast: V === 'podcast', goPodcast: () => this.go('podcast'),
+      isVestiaire: V === 'vestiaire', vs: VS.page, vsHome: VS.home, goVestiaire: () => this.go('vestiaire'), goVestiaireClub: () => this.go('vestiaire', { vsClub: s.clubId }),
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
         ok: s.mbRes === 'ok', off: s.mbRes === 'off', none: s.mbRes === 'none', bad: s.mbRes === 'bad', format: s.mbRes === 'format',
         prenom: (s.mbInfo && s.mbInfo.prenom) || 'Membre', depuis: s.mbInfo && s.mbInfo.depuis ? 'Membre depuis ' + new Date(s.mbInfo.depuis).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '' },
