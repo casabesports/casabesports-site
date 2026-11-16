@@ -93,6 +93,26 @@ Ce fichier se lance **après** `supabase/administration.sql` (déjà fait le 202
 - Le compte administrateur ne peut pas être modifié depuis le site.
 - Utilisez ces coordonnées uniquement pour Casa Besports ; ne les exportez pas et ne les transmettez à personne.
 
+## 4 ter. Rédaction : articles enregistrés en ligne et accès cloisonnés
+
+Jusqu'ici, les articles écrits dans l'espace **Rédaction** restaient dans la page ouverte : ils disparaissaient en rechargeant. Désormais ils sont enregistrés dans Supabase, quelques secondes après chaque modification.
+
+**Qui voit quoi** (vérifié par Supabase lui-même, pas seulement caché à l'écran) :
+
+- **Vous (administrateur)** : vous voyez, modifiez, publiez et supprimez les articles de toute l'équipe.
+- **Chef d'édition, rédacteur, correspondant de club** : chacun ne voit **que ses propres articles**. Il écrit, enregistre, envoie en relecture et supprime ses brouillons. Il ne peut **ni publier**, ni modifier un article en relecture ou publié, ni toucher à l'article d'un autre, même en bricolant la page.
+- **Visiteurs** : ils lisent seulement la version en ligne des articles publiés (jamais les brouillons, notes de relecture ni l'historique).
+
+**Supprimer** : dans **Rédaction › Articles**, bouton rouge **Supprimer** sur la ligne (ou **Supprimer ce brouillon** en bas de l'éditeur). Un premier clic demande confirmation, le second supprime. Un membre de l'équipe peut supprimer ses brouillons jamais publiés ; vous pouvez tout supprimer (un article publié est alors aussi retiré du site).
+
+### Installation (une seule fois, 1 minute)
+
+1. Ouvrez [supabase.com](https://supabase.com) › votre projet › **SQL Editor** › **New query**.
+2. Sur GitHub, ouvrez le fichier `supabase/redaction.sql`, cliquez sur l'icône **Copier** (deux petits carrés, en haut à droite du fichier).
+3. Collez dans Supabase, puis **Run**. Le message « Success. No rows returned » doit s'afficher.
+
+Tant que ce n'est pas fait, l'espace Rédaction affiche un bandeau « Étape à faire ». Une fois lancé, il affiche « Articles enregistrés en ligne ».
+
 ## 5. Messagerie
 
 Dès l'installation, toutes les demandes du site arrivent ici : contact, OlistO, newsletter, commandes, demandes d'accès. Filtres : Reçus, Non lus, Demandes du site, E-mails, Envoyés, Traités.

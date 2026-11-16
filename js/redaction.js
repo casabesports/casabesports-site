@@ -755,7 +755,9 @@ var CasaRedac = (function () {
     E.hasAiOut = E.aiOut.length > 0;
     // actions de diffusion
     var g = (rx.wf.relecture || {})[c.staffRole];
-    E.canPublishNoReview = !isAdmin && !locked && g === 'alerte' && ['draft', 'corrections'].indexOf(p.status) >= 0;
+    // Avec les comptes en ligne (supabase/redaction.sql), seul l'administrateur publie : Supabase refuserait la publication d'un autre membre.
+    var srvComptes = typeof window !== 'undefined' && window.CasaAuth && window.CasaAuth.on;
+    E.canPublishNoReview = !srvComptes && !isAdmin && !locked && g === 'alerte' && ['draft', 'corrections'].indexOf(p.status) >= 0;
     E.publishNoReview = function () { R.guard(self, c, rx, 'publier', p, function (lev) { self.setPost(p.id, { status: 'published', override: true }, 'Publié sans relecture par ' + self.me().name + (lev ? ' · contraintes levées : ' + lev : '') + '.'); self.say('Article publié (sans relecture)'); }); };
     E.isOnline = !!p.online; E.onlineLabel = p.online ? 'En ligne depuis le ' + R.fmtDateTime(p.online.at) + (p.status !== 'published' ? ' · la version en ligne reste publiée pendant la modification' : '') : '';
     E.canReopen = isAdmin && p.status === 'published';

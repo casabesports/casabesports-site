@@ -1029,6 +1029,10 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .rx-tbtn[aria-pressed="true"] { background: var(--inv-bg); color: var(--on-inv); border-color: var(--ink); }
 .rx-tbtn-dark { background: var(--inv-bg); color: var(--on-inv); border-color: var(--ink); }
 .rx-tbtn-acc { background: var(--acc); color: var(--on-acc); border-color: transparent; }
+.rx-tbtn-del, .rx-btn-del { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+.rx-tbtn-del[data-sure="true"], .rx-btn-del[data-sure="true"] { background: var(--danger); color: #fff; border-color: var(--danger); }
+.rx-srv { border-color: var(--gold-text); }
+.rx-srv-ok { font-size: 12px; color: var(--muted); margin: 0 0 .8rem; }
 .rx-link { background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); font: inherit; font-weight: 700; text-align: left; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--gold-text) 60%, transparent); text-underline-offset: 3px; }
 .rx-search { display: flex; align-items: center; gap: .5rem; border: 1.5px solid var(--line-2); border-radius: 0; padding: 0 .9rem; min-height: 44px; background: var(--surface); color: var(--muted); }
 .rx-search input { border: 0; outline: none; font-family: inherit; font-size: 14px; width: 100%; background: transparent; color: var(--text); min-width: 0; }
@@ -4672,6 +4676,9 @@ img, video, canvas, svg { max-width: 100%; }
 
       <div style="flex: 999 1 640px; min-width: 0">
         <div class="rx-topbar"><span class="cond rx-crumb">Espace rédaction · {{rx.crumb}}</span><button type="button" class="rx-help" onClick="{{rx.aide.open}}" aria-label="Aide en ligne" title="Aide en ligne"><span aria-hidden="true">?</span></button></div>
+        <sc-if value="{{rxSrvSql}}" hint-placeholder-val="{{ false }}"><div class="rx-alert rx-srv" role="status"><strong>Étape à faire :</strong> lancer le fichier <code>supabase/redaction.sql</code> dans Supabase (guide : docs/ESPACE-ADMIN.md, partie « Rédaction »). D’ici là, les articles écrits ici ne sont pas enregistrés et disparaissent en fermant la page.</div></sc-if>
+        <sc-if value="{{rxSrvErr}}" hint-placeholder-val="{{ false }}"><div class="rx-alert rx-srv" role="status"><strong>Articles non chargés :</strong> {{rxSrvMsg}}. Vérifiez votre connexion puis rechargez la page.</div></sc-if>
+        <sc-if value="{{rxSrvOk}}" hint-placeholder-val="{{ false }}"><div class="rx-srv-ok" role="status">{{rxSrvLabel}}</div></sc-if>
         <!-- ESPACE CLUB : accueil (correspondant de club) -->
         <sc-if value="{{rs.club.tabHome}}" hint-placeholder-val="{{ false }}">
           <div class="glass rx-card cl-card">
@@ -4923,7 +4930,7 @@ img, video, canvas, svg { max-width: 100%; }
                   <x-td style="text-align: left; max-width: 380px"><strong>{{sr.title}}</strong><sc-if value="{{sr.online}}" hint-placeholder-val="{{ false }}"> <span class="rx-badge" style="background: #d8efe6; color: #11583f">En ligne</span></sc-if><sc-if value="{{sr.hasSnip}}" hint-placeholder-val="{{ false }}"><div class="rx-snip"><sc-for list="{{sr.snip}}" as="sg" hint-placeholder-count="3"><sc-if value="{{sg.hit}}" hint-placeholder-val="{{ false }}"><mark class="rx-hit">{{sg.t}}</mark></sc-if><sc-if value="{{sg.plain}}" hint-placeholder-val="{{ true }}">{{sg.t}}</sc-if></sc-for></div></sc-if></x-td>
                   <x-td>{{sr.type}}</x-td><x-td>{{sr.author}}</x-td>
                   <x-td><span class="rx-badge" style="background: {{sr.sBg}}; color: {{sr.sFg}}">{{sr.sLabel}}</span></x-td><x-td class="num">{{sr.versions}}</x-td><x-td style="color: var(--muted); white-space: nowrap">{{sr.updated}}</x-td>
-                  <x-td><span style="display: inline-flex; gap: .3rem"><button type="button" onClick="{{sr.edit}}" class="cond rx-tbtn">Éditer</button><sc-if value="{{sr.canReview}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.review}}" class="cond rx-tbtn rx-tbtn-acc">Relire</button></sc-if></span></x-td>
+                  <x-td><span style="display: inline-flex; gap: .3rem"><button type="button" onClick="{{sr.edit}}" class="cond rx-tbtn">Éditer</button><sc-if value="{{sr.canReview}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.review}}" class="cond rx-tbtn rx-tbtn-acc">Relire</button></sc-if><sc-if value="{{sr.canDelete}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.del}}" class="cond rx-tbtn rx-tbtn-del" data-sure="{{sr.delSure}}" aria-label="Supprimer « {{sr.title}} »">{{sr.delLabel}}</button></sc-if></span></x-td>
                 </x-tr></sc-for></x-tbody>
               </x-table>
             </div>
@@ -5049,6 +5056,7 @@ img, video, canvas, svg { max-width: 100%; }
                 <sc-if value="{{rx.ed.canPlace}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{rx.ed.placeInPage}}">Placer dans une page</button></sc-if>
                 <sc-if value="{{edLocked}}" hint-placeholder-val="{{ false }}"><span style="align-self: center; font-size: 14px; color: var(--muted)">{{edLockMsg}}</span></sc-if>
                 <span style="flex: 1"></span>
+                <sc-if value="{{edCanDelete}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost rx-btn-del" data-sure="{{edDelSure}}" onClick="{{edDelete}}">{{edDelLabel}}</button></sc-if>
                 <button type="button" class="btn btn-ghost" onClick="{{goStudioList}}">Fermer</button>
               </div>
             </div>
