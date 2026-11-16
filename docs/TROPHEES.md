@@ -10,20 +10,20 @@ il vaut mieux un nom à soi. « Les Marées d’or » reprend la signature Maré
 
 ## Le concept en bref
 
-- **31 trophées** (comme les 31 pages de la Gazette) :
-  - 20 **Vagues d’or** : la sportive et le sportif de l’année dans 10 disciplines (football, handball, basket-ball, rugby,
-    volley-ball, water-polo, tennis, roller, athlétisme, voile) ;
-  - 11 prix de la soirée : Révélation (La Bouée), Entraîneur(e) (La Boussole), Bénévole (Le Phare), Dirigeant(e) (La Digue),
-    Arbitre ou officiel (L’Amer), Club (La Rade), Exploit (L’Écume), Sport adapté et handisport (Le Cap), Prix du public
-    (Le Galet), Ancre d’honneur, et **La Marée d’or**, choisie parmi les 20 Vagues d’or.
+- **Une soirée de 1 h 30** (19 h 00 à 20 h 30, accueil compris) et **10 trophées** pour la 1re édition, toutes disciplines confondues :
+  Révélation (La Bouée), Sportive et Sportif de l’année (Vagues d’or), Équipe (La Rade), Entraîneur(e) (La Boussole),
+  Arbitre ou officiel (L’Amer), Bénévole ou dirigeant(e) (Le Phare), Sport adapté et handisport (Le Cap),
+  Exploit de l’année choisi par le public (L’Écume), et **La Marée d’or** entre les 4 premiers lauréats.
+- **5 minutes par trophée sur scène** : nommé(e)s et vidéo de 30 s, enveloppe, remise, discours d’une minute, photo.
+- Les dessins du Galet, de la Digue et de l’Ancre restent dans `assets/trophees/` pour les éditions suivantes.
 - **Votes** : un jury de 7 personnes (rôles proposés, noms à remplir), le public (un vote par prix et par compte Casa Besports),
   et pour les sportifs le vote des pairs (un bulletin par club, capitaine + entraîneur).
 - **Barèmes** (note finale sur 100) :
-  - Sportifs et Révélation : 50 % jury, 30 % public, 20 % pairs ;
-  - Entraîneur, bénévole, dirigeant, arbitre : 70 % jury, 30 % public ;
-  - Club, exploit, handisport : 60 % jury, 40 % public ;
-  - Prix du public : 100 % public ; Ancre d’honneur : 100 % jury ;
-  - Marée d’or : 60 % jury, 40 % public (vote en direct pendant l’entracte).
+  - Révélation, sportive, sportif : 50 % jury, 30 % public, 20 % pairs ;
+  - Entraîneur, arbitre, bénévole ou dirigeant : 70 % jury, 30 % public ;
+  - Équipe, handisport : 60 % jury, 40 % public ;
+  - Exploit : 100 % public ;
+  - Marée d’or : 60 % jury, 40 % public (vote en direct de 7 minutes à 20 h 08).
 - **Trophées** : laiton doré + socle en granit de la Manche, un symbole du littoral par prix. Dessins dans `assets/trophees/*.svg`.
 - **Qui remet quoi à qui** : un rôle proposé pour chaque prix, et une case « nom » laissée vide jusqu’à l’accord de la personne.
 - **Lieu** : théâtre à l’italienne de Cherbourg (géré par le Trident, scène nationale) ; date, jauge et technique à confirmer.
@@ -34,7 +34,7 @@ il vaut mieux un nom à soi. « Les Marées d’or » reprend la signature Maré
 |---|---|
 | `preparation` | Le concept, les prix, les barèmes, les trophées |
 | `propositions` | Idem + appel à proposer des noms (formulaire de contact) |
-| `vote` | Boutons « Voter » sur chaque nommé(e) (sauf Ancre d’honneur et Marée d’or) |
+| `vote` | Boutons « Voter » sur chaque nommé(e) (sauf la Marée d’or) |
 | `jury` | Vote fermé, délibération |
 | `ceremonie` | Seul le vote de la Marée d’or est ouvert (QR code à l’écran vers `/trophees`) |
 | `palmares` | Les lauréat(e)s s’affichent (champ `laureat` de chaque prix) |

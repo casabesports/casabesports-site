@@ -3792,41 +3792,8 @@ img, video, canvas, svg { max-width: 100%; }
       </ol>
 
       <h2 class="mo-h2" id="mo-prix">Les {{tr.nbPrix}} prix</h2>
-      <p class="mo-p">Deux Vagues d’or par discipline, une pour la sportive et une pour le sportif de l’année, puis les prix de la soirée qui récompensent tous ceux qui font vivre le sport : entraîneurs, bénévoles, dirigeants, arbitres, clubs.</p>
-      <div class="mo-f" role="tablist" aria-label="Filtrer les prix"><sc-for list="{{tr.filtres}}" as="f" hint-placeholder-count="3"><button type="button" role="tab" class="wk-jour {{f.cls}}" aria-selected="{{f.sel}}" onClick="{{f.pick}}">{{f.label}}</button></sc-for></div>
-
-      <sc-if value="{{tr.showVagues}}" hint-placeholder-val="{{ true }}">
-        <h3 class="mo-h3">Les Vagues d’or <span>{{tr.nbVagues}} trophées</span></h3>
-        <div class="mo-discs">
-          <sc-for list="{{tr.discs}}" as="d" hint-placeholder-count="4">
-            <div class="mo-disc">
-              <h4 class="mo-disc-t">{{d.nom}}</h4>
-              <sc-for list="{{d.list}}" as="p" hint-placeholder-count="2">
-                <article class="mo-prix mo-prix-mini">
-                  <div class="mo-prix-h"><span class="mo-prix-t">{{p.titre}}</span><span class="mo-prix-m">{{p.parts}}</span></div>
-                  <sc-if value="{{p.hasLaureat}}" hint-placeholder-val="{{ false }}"><p class="mo-laureat">Lauréat(e) : <b>{{p.laureat}}</b></p></sc-if>
-                  <sc-if value="{{p.hasNommes}}" hint-placeholder-val="{{ false }}">
-                    <ul class="mo-noms">
-                      <sc-for list="{{p.nommes}}" as="n" hint-placeholder-count="3">
-                        <li class="mo-nom {{n.cls}}">
-                          <sc-if value="{{n.hasPhoto}}" hint-placeholder-val="{{ false }}"><img class="mo-av" src="{{n.photo}}" alt="" loading="lazy"></sc-if><sc-if value="{{n.noPhoto}}" hint-placeholder-val="{{ true }}"><span class="mo-av">{{n.ini}}</span></sc-if>
-                          <span class="mo-nom-t"><b>{{n.nom}}</b><sc-if value="{{n.hasClub}}" hint-placeholder-val="{{ false }}"><span>{{n.club}}</span></sc-if></span>
-                          <sc-if value="{{n.canVote}}" hint-placeholder-val="{{ false }}"><button type="button" class="mo-vote" aria-pressed="{{n.pressed}}" onClick="{{n.vote}}">{{n.voteLabel}}</button></sc-if>
-                        </li>
-                      </sc-for>
-                    </ul>
-                  </sc-if>
-                  <sc-if value="{{p.noNommes}}" hint-placeholder-val="{{ true }}"><p class="mo-attente">Nommé(e)s annoncé(e)s au printemps</p></sc-if>
-                  <sc-if value="{{p.open}}" hint-placeholder-val="{{ false }}"><p class="mo-vnote">{{p.voteNote}}</p></sc-if>
-                </article>
-              </sc-for>
-            </div>
-          </sc-for>
-        </div>
-      </sc-if>
-
+      <p class="mo-p">Pour la 1re édition, dix trophées seulement, toutes disciplines confondues : les sportifs, les équipes, et tous ceux qui font vivre le sport. Trois nommé(e)s par prix, cinq minutes sur scène pour chacun.</p>
       <sc-if value="{{tr.showSoiree}}" hint-placeholder-val="{{ true }}">
-        <h3 class="mo-h3">Les prix de la soirée <span>{{tr.nbSoiree}} trophées</span></h3>
         <div class="mo-grid">
           <sc-for list="{{tr.soiree}}" as="p" hint-placeholder-count="6">
             <article class="mo-prix">
@@ -3915,7 +3882,7 @@ img, video, canvas, svg { max-width: 100%; }
           <p class="mo-note">{{tr.lieuNote}}</p>
         </div>
         <div class="mo-box">
-          <span class="mo-k mo-k-d">Le déroulé</span>
+          <span class="mo-k mo-k-d">Le déroulé · 1 h 30 en tout</span>
           <ol class="mo-der"><sc-for list="{{tr.deroule}}" as="x" hint-placeholder-count="8"><li><b>{{x.heure}}</b><span>{{x.quoi}}</span></li></sc-for></ol>
         </div>
       </div>

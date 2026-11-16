@@ -126,8 +126,8 @@ var CasaTrophees = (function () {
       nom: T.nom || 'Les Marées d’or', sousTitre: T.sousTitre || '', edition: T.edition || '', saison: T.saison || '', quand: quand, heure: T.heure || '', lieu: T.lieu || '', adresse: T.adresse || '', lieuNote: T.lieuNote || '', territoire: T.territoire || '',
       phaseLabel: ((T.phases || []).find(function (x) { return x.id === phase; }) || {}).titre || '',
       phases: (T.phases || []).map(function (x) { var i = ORDRE.indexOf(x.id); return { titre: x.titre, quand: x.quand, texte: x.texte, cls: i < iPh ? 'is-done' : i === iPh ? 'is-on' : '', etat: i < iPh ? 'Fait' : i === iPh ? 'En cours' : 'À venir' }; }),
-      voteOuvert: prix.some(ouvert), filtres: filtres, showVagues: fil !== 'soiree', showSoiree: fil !== 'vagues',
-      discs: discs, soiree: autres.map(carte), nbVagues: String(vagues.length), nbSoiree: String(autres.length), nbPrix: String(prix.length),
+      voteOuvert: prix.some(ouvert), showSoiree: true,
+      discs: [], soiree: prix.map(carte), nbVagues: String(vagues.length), nbSoiree: String(autres.length), nbPrix: String(prix.length),
       baremes: (T.baremes || []).map(function (b) {
         var parts = [[b.jury, 'Jury', 'j'], [b.public, 'Public', 'p'], [b.pairs, 'Pairs', 'r']].filter(function (x) { return +x[0] > 0; }).map(function (x) { return { label: x[1], pct: x[0] + ' %', w: x[0] + '%', cls: 'mo-part-' + x[2] }; });
         var g = (b.grille || []).map(function (x) { return { critere: x.critere, points: String(x.points) }; });
