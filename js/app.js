@@ -50,7 +50,7 @@ function cbNomEquipe(n) {
     return w.charAt(0).toUpperCase() + w.slice(1);
   });
 }
-const CB_TITLES = { home: '', vestiaire: 'Le Vestiaire', jeux: 'Jeux', podcast: 'Le podcast', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Clubs et disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Autour de moi', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
+const CB_TITLES = { home: '', vestiaire: 'Le Vestiaire', jeux: 'Jeux', podcast: 'Le podcast', news: 'Actualités', live: 'Le Terrain', videos: 'Vidéos', disciplines: 'Clubs et disciplines', handisport: 'Handisport et sport adapté', clubs: 'Clubs', players: 'Joueurs', map: 'Autour de moi', offers: 'Abonnements', shop: 'Boutique', culture: 'Culture', clubhouse: 'Club House', meteo: 'Météo', partners: 'Partenaires', olisto: 'OlistO', about: 'À propos', work: 'Travailler avec Casa Besports', contact: 'Contact', legal: 'Informations légales', account: 'Mon espace', private: 'Mon quotidien', verifier: 'Vérification', app: 'Application', cv: 'Mon CV' };
 // Logos des boutiques de clubs (images hébergées chez les clubs) : si l'un ne charge pas, l'initiale du club reste affichée
 if (typeof document !== 'undefined') document.addEventListener('error', (e) => { const t = e.target; if (t && t.classList && t.classList.contains('mc-img')) t.classList.add('mc-off'); }, true);
 // Lien vers le site d'un partenaire, marqué « vient de Casa Besports » (paramètres utm_ lus par Google Analytics, Matomo, HubSpot…)
@@ -69,7 +69,7 @@ function cbRouteOf(st) { const k = CB_ROUTE_ID[st.view]; return '#/' + st.view +
 // Le site reste piloté par les adresses « #/… » ; ces adresses-là ouvrent simplement la bonne page.
 const CB_PATHS = { news: 'actualites', article: 'actualites', videos: 'videos', video: 'videos', clubs: 'clubs', club: 'clubs', players: 'joueurs', player: 'joueurs', shop: 'boutique', product: 'boutique',
   disciplines: 'disciplines', discipline: 'disciplines', about: 'a-propos', contact: 'contact', partners: 'partenaires', offers: 'abonnements', live: 'le-terrain', clubhouse: 'club-house', culture: 'culture',
-  map: 'territoire', meteo: 'meteo', legal: 'mentions-legales', work: 'pro' };
+  map: 'territoire', meteo: 'meteo', legal: 'mentions-legales', work: 'pro', handisport: 'handisport' };
 const CB_PATH_DETAIL = { actualites: 'article', videos: 'video', clubs: 'club', joueurs: 'player', boutique: 'product', disciplines: 'discipline' };
 // Résumé express : les « points clés » saisis dans l'admin, sinon des phrases reprises telles quelles du texte
 // (chapô, puis la première phrase de chaque partie). Rien n'est inventé.
@@ -204,7 +204,9 @@ class Component extends DCLogic {
     const videos = ((typeof window !== 'undefined' && window.CASA_VIDEOS) || []).slice();
     const C = (id, name, sport, city, img) => ({ id, name, sport, city, img: img || null });
     // Clubs : contenus/clubs.js (modifiable dans l'espace administrateur)
-    const clubs = ((typeof window !== 'undefined' && Array.isArray(window.CASA_CLUBS)) ? window.CASA_CLUBS : []).filter((c) => c && c.id && c.name).map((c) => Object.assign(C(c.id, c.name, c.sport || 'Football', c.city || '', c.img || null), { logo: c.logo || '', niveau: c.niveau || '', fondation: c.fondation || '', stade: c.stade || '' }));
+    const clubs = ((typeof window !== 'undefined' && Array.isArray(window.CASA_CLUBS)) ? window.CASA_CLUBS : []).filter((c) => c && c.id && c.name).map((c) => Object.assign(C(c.id, c.name, c.sport || 'Football', c.city || '', c.img || null), { logo: c.logo || '', niveau: c.niveau || '', fondation: c.fondation || '', stade: c.stade || '',
+      // Section handisport ou sport adapté déclarée par le club (une pratique par ligne) : rubrique Handisport, badge et fiche
+      handi: String(c.handi || '').split(/\n|;/).map((x) => x.trim()).filter(Boolean), handiInfos: String(c.handiInfos || '').trim() }));
     const P = (id, num, name, role, club, clubLabel, img) => ({ id, num, name, role, club, clubLabel, img: img || null });
     // Joueurs : contenus/joueurs.js (modifiable dans l'espace administrateur)
     const JM = ((typeof window !== 'undefined' && Array.isArray(window.CASA_JOUEURS)) ? window.CASA_JOUEURS : []).filter((p) => p && p.id && p.name);
@@ -786,7 +788,7 @@ class Component extends DCLogic {
       }
     }
     // navigation
-    const pagesMap = [['jeu|quiz|devine', 'jeux', 'les Jeux'], ['boutique|shop|magasin', 'shop', 'Boutique'], ['tableau de bord|dashboard', 'home', 'l’accueil'], ['terrain', 'live', 'Le Terrain'], ['actu|article|news', 'news', 'Actualités'], ['video', 'videos', 'Vidéos'], ['club', 'clubs', 'Clubs'], ['joueur', 'players', 'Joueurs'], ['discipline|sport', 'clubs', 'Clubs et disciplines'], ['carte|territoire', 'map', 'Territoire'], ['abonnement|offre', 'offers', 'Abonnements'], ['partenaire|sponsor', 'partners', 'Partenaires'], ['contact|ecrire', 'contact', 'Contact'], ['propos|histoire de casa', 'about', 'À propos'], ['panier', 'cart', 'Panier'], ['espace|compte', 'account', 'Mon espace'], ['redaction|studio|relecture', 'studio', 'Espace rédaction'], ['club ?house|communaute', 'clubhouse', 'le Club House'], ['culture|musee|exposition', 'culture', 'Culture'], ['meteo|temps', 'meteo', 'Météo'], ['quotidien|agenda|liste', 'private', 'Mon quotidien'], ['curriculum|mon cv|\\bcv\\b', 'cv', 'votre CV'], ['certificat|verifier', 'verifier', 'la vérification des certificats'], ['accueil|home', 'home', 'Accueil']];
+    const pagesMap = [['jeu|quiz|devine', 'jeux', 'les Jeux'], ['boutique|shop|magasin', 'shop', 'Boutique'], ['tableau de bord|dashboard', 'home', 'l’accueil'], ['terrain', 'live', 'Le Terrain'], ['actu|article|news', 'news', 'Actualités'], ['video', 'videos', 'Vidéos'], ['handi|fauteuil|sport adapte|paralymp|cecifoot', 'handisport', 'la rubrique Handisport'], ['club', 'clubs', 'Clubs'], ['joueur', 'players', 'Joueurs'], ['discipline|sport', 'clubs', 'Clubs et disciplines'], ['carte|territoire', 'map', 'Territoire'], ['abonnement|offre', 'offers', 'Abonnements'], ['partenaire|sponsor', 'partners', 'Partenaires'], ['contact|ecrire', 'contact', 'Contact'], ['propos|histoire de casa', 'about', 'À propos'], ['panier', 'cart', 'Panier'], ['espace|compte', 'account', 'Mon espace'], ['redaction|studio|relecture', 'studio', 'Espace rédaction'], ['club ?house|communaute', 'clubhouse', 'le Club House'], ['culture|musee|exposition', 'culture', 'Culture'], ['meteo|temps', 'meteo', 'Météo'], ['quotidien|agenda|liste', 'private', 'Mon quotidien'], ['curriculum|mon cv|\\bcv\\b', 'cv', 'votre CV'], ['certificat|verifier', 'verifier', 'la vérification des certificats'], ['accueil|home', 'home', 'Accueil']];
     if (has(/\b(ouvre|ouvrir|va |aller|emmene|montre|affiche|direction|navigue)/)) {
       if (has(/gazette|mag/)) { const pm = q.match(/page\s*(\d+)/); const pg = pm ? Math.min(this.gazette().pages.length, Math.max(1, +pm[1])) - 1 : 0; this.setState({ aiOpen: false }); this.gzGo(pg); return { text: 'J’ouvre La Gazette du Cotentin' + (pm ? ' à la page ' + (pg + 1) : '') + '.', actions: [] }; }
       const m = pagesMap.find(([re]) => new RegExp(re).test(q));
@@ -1728,6 +1730,7 @@ class Component extends DCLogic {
         hasLogo: !!c.logo, noLogo: !c.logo, logo: c.logo || '',
         niveau: c.niveau || '', hasNiveau: !!c.niveau, fondation: c.fondation ? 'Fondé en ' + c.fondation : '', hasFondation: !!c.fondation, stade: c.stade || '', hasStade: !!c.stade,
         lieu: [c.sport, c.city].filter(Boolean).join(' · '),
+        hasHandi: !!(c.handi && c.handi.length), handiTxt: (c.handi || []).join(' · '),
         open: () => this.go('club', { clubId: c.id, clubTab: 'articles' }),
         toggleFollow: () => this.toggleIn('follows', c.id, 'Vous suivez ' + c.name, 'Vous ne suivez plus ' + c.name),
         fLabel: f ? 'Suivi ✓' : 'Suivre', fBg: f ? 'var(--inv-bg)' : 'var(--surface)', fFg: f ? 'var(--on-inv)' : 'var(--ink)'
@@ -1783,7 +1786,7 @@ class Component extends DCLogic {
     // ---------- navigation ----------
     // Barre épurée : Clubs et Club House ne font qu'une rubrique, Culture passe dans « Plus », les offres et les partenaires sont en accès direct
     const navDefs = [['Le Terrain', 'live'], ['Actualités', 'news'], ['Clubs', 'clubs'], ['Vestiaire', 'vestiaire'], ['Boutique', 'shop'], ['Offres', 'offers'], ['Partenaires', 'partners']];
-    const sectionOf = { clubhouse: 'clubs', players: 'clubs', jeux: 'app', article: 'news', video: 'videos', discipline: 'clubs', disciplines: 'clubs', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
+    const sectionOf = { handisport: 'clubs', clubhouse: 'clubs', players: 'clubs', jeux: 'app', article: 'news', video: 'videos', discipline: 'clubs', disciplines: 'clubs', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
     const activeSec = sectionOf[s.view] || s.view;
     const nav = navDefs.map(([label, v]) => ({ label, color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
     // Menu « Plus » regroupé en trois familles (les mêmes rubriques alimentent l'accès direct de l'accueil)
@@ -1880,11 +1883,48 @@ class Component extends DCLogic {
     const clubDisc = { has: !!clubDiscRaw, name: clubSport, stats: clubDiscRaw ? clubDiscRaw.stats : '', noClub: clubSport !== 'Tous' && clubList.length === 0,
       openBoard: () => this.go('live', { dSport: clubSport, dComp: ((X.comps[clubSport] || [])[0] || { id: null }).id, dTab: 'results' }),
       openDisc: () => this.go('discipline', { discId: clubSport }), backAll: () => this.setState({ clubSport: 'Tous' }) };
+    // ---------- handisport et sport adapté ----------
+    // Une seule rubrique, rangée par discipline (contenus/handisport.js). Un club y figure dès qu'il déclare une pratique
+    // dans sa fiche (admin › Clubs › « Handisport : pratiques proposées ») : rien n'est affiché sans l'accord du club.
+    const HS = (typeof window !== 'undefined' && window.CASA_HANDISPORT) || {};
+    const hsNorm = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').replace(/[-\s]+/g, ' ').toLowerCase().trim();
+    const hsDiscs = (Array.isArray(HS.disciplines) ? HS.disciplines : []).filter((d) => d && d.nom);
+    const hsClubs = D.clubs.filter((c) => c.handi && c.handi.length);
+    const hsMatch = (d, txt) => { const t = hsNorm(txt); return [d.nom].concat(Array.isArray(d.mots) ? d.mots : []).some((m) => { const k = hsNorm(m); return k && t.indexOf(k) >= 0; }); };
+    const hsClubsOf = (d) => hsClubs.filter((c) => c.handi.some((p) => hsMatch(d, p)));
+    const hsFam = ['Toutes', 'Handisport', 'Sport adapté', 'Avec un club'];
+    const hsF = hsFam.indexOf(s.hsFam) >= 0 ? s.hsFam : 'Toutes';
+    const hsList = hsDiscs.map((d) => ({ d, clubs: hsClubsOf(d) }))
+      .filter((x) => hsF === 'Toutes' || (hsF === 'Avec un club' ? x.clubs.length > 0 : x.d.famille === hsF))
+      .sort((a, b) => (b.clubs.length > 0) - (a.clubs.length > 0));
+    const hsSignal = (nom) => this.go('contact', { subject: 'Handisport — référencer une section' + (nom ? ' (' + nom + ')' : ''), profile: 'Club', contactSent: false,
+      message: 'Club : \nDiscipline proposée : ' + (nom || '') + '\nPublic accueilli, créneaux et lieu : \nContact du référent (si le club accepte qu’il soit affiché) : \n' });
+    const hs = {
+      titre: HS.titre || 'Handisport et sport adapté', intro: HS.intro || '', appel: HS.appel || '',
+      nDisc: String(hsDiscs.length), nClubs: String(hsClubs.length), hasClubs: hsClubs.length > 0, noClubs: hsClubs.length === 0,
+      clubsLabel: hsClubs.length > 1 ? 'clubs référencés' : 'club référencé',
+      filtres: hsFam.map((f) => ({ label: f, sel: f === hsF ? 'true' : 'false', cls: f === hsF ? 'is-on' : '', pick: () => this.setState({ hsFam: f }) })),
+      list: hsList.map(({ d, clubs }) => ({
+        id: d.id || hsNorm(d.nom).replace(/\s+/g, '-'), nom: d.nom, famille: d.famille || 'Handisport', famCls: d.famille === 'Sport adapté' ? 'is-sa' : 'is-hs', texte: d.texte || '',
+        clubs: clubs.map((c) => ({ name: c.name, city: c.city, open: () => this.go('club', { clubId: c.id, clubTab: 'infos' }) })),
+        hasClubs: clubs.length > 0, noClubs: clubs.length === 0,
+        hasSport: !!(d.sport && D.sports.indexOf(d.sport) >= 0), sportLabel: 'Tous les clubs de ' + String(d.sport || '').toLowerCase(), openSport: () => this.go('clubs', { clubSport: d.sport }),
+        signaler: () => hsSignal(d.nom)
+      })),
+      vide: hsList.length === 0,
+      clubCards: hsClubs.map((c) => Object.assign(clubV(c), { pratiques: c.handi.join(' · '), openInfos: () => this.go('club', { clubId: c.id, clubTab: 'infos' }) })),
+      liens: (Array.isArray(HS.liens) ? HS.liens : []).filter((l) => l && l.url && /^https:\/\//.test(l.url)).map((l) => ({ nom: l.nom || l.url, texte: l.texte || '', url: l.url })),
+      signaler: () => hsSignal(''), go: () => this.go('handisport')
+    };
+    hs.hasLiens = hs.liens.length > 0;
+
     const curC = clubById(s.clubId) || D.clubs[0] || { id: '', name: 'Aucun club', sport: '', city: '', img: null };
     const club = clubV(curC);
     club.hasImg = !!curC.img;
     club.openSport = () => this.go('clubs', { clubSport: curC.sport });
     club.openCity = () => this.go('map', { city: curC.city });
+    club.hasHandi = !!(curC.handi && curC.handi.length); club.handiList = (curC.handi || []).map((t) => ({ t }));
+    club.handiInfos = curC.handiInfos || ''; club.hasHandiInfos = !!curC.handiInfos; club.goHandi = () => this.go('handisport');
     club.articles = allA.filter((a) => a.clubs.indexOf(curC.id) >= 0);
     club.noArticles = club.articles.length === 0;
     club.players = D.players.filter((p) => p.club === curC.id).map(playerV);
@@ -2165,7 +2205,7 @@ class Component extends DCLogic {
 
     // ---------- Gazette liseuse ----------
     // ---------- lieux ----------
-    const placeByView = { home: 'rade', news: 'gatteville', article: 'gatteville', live: 'gare', videos: 'gare', video: 'gare', disciplines: 'sme', discipline: 'sme', clubs: 'jobourg', club: 'jobourg', map: 'jobourg', players: 'sme', player: 'sme', shop: 'rade', product: 'rade', order: 'rade', offers: 'gatteville', checkout: 'gatteville', partners: 'gare', about: 'rade', contact: 'jobourg', account: 'jobourg', studio: 'rade', legal: 'jobourg', meteo: 'gatteville', private: 'rade', culture: 'gare', clubhouse: 'jobourg', olisto: 'rade', app: 'gatteville' };
+    const placeByView = { handisport: 'jobourg', home: 'rade', news: 'gatteville', article: 'gatteville', live: 'gare', videos: 'gare', video: 'gare', disciplines: 'sme', discipline: 'sme', clubs: 'jobourg', club: 'jobourg', map: 'jobourg', players: 'sme', player: 'sme', shop: 'rade', product: 'rade', order: 'rade', offers: 'gatteville', checkout: 'gatteville', partners: 'gare', about: 'rade', contact: 'jobourg', account: 'jobourg', studio: 'rade', legal: 'jobourg', meteo: 'gatteville', private: 'rade', culture: 'gare', clubhouse: 'jobourg', olisto: 'rade', app: 'gatteville' };
     const placeId = s.placeOverride || placeByView[s.view] || 'rade';
     const placeRaw = X.places.find((p) => p.id === placeId) || X.places[0];
     const place = placeRaw;
@@ -2180,7 +2220,7 @@ class Component extends DCLogic {
     // ---------- fond photo : vraies images du sport du Cotentin ----------
     // fonds photo : réglés dans contenus/fonds.js (une image par page)
     const FD = window.CASA_FONDS || {}; const FP = FD.pages || {};
-    const pageOfView = { home: 'accueil', news: 'actualites', article: 'actualites', live: 'direct', videos: 'videos', video: 'videos', disciplines: 'disciplines', discipline: 'disciplines', clubs: 'clubs', club: 'clubs', map: 'clubs', players: 'joueurs', player: 'joueurs',
+    const pageOfView = { handisport: 'clubs', home: 'accueil', news: 'actualites', article: 'actualites', live: 'direct', videos: 'videos', video: 'videos', disciplines: 'disciplines', discipline: 'disciplines', clubs: 'clubs', club: 'clubs', map: 'clubs', players: 'joueurs', player: 'joueurs',
       shop: 'boutique', product: 'boutique', order: 'boutique', checkout: 'boutique', offers: 'abonnements', account: 'compte', cv: 'compte', private: 'quotidien', clubhouse: 'clubhouse', culture: 'culture', meteo: 'meteo', partners: 'partenaires', olisto: 'partenaires',
       about: 'apropos', contact: 'contact', legal: 'mentions', app: 'application', studio: 'redaction' };
     const fondOrig = (window.CasaAuth && CasaAuth.originalContent && (CasaAuth.originalContent('CASA_FONDS') || {}).pages) || {};
@@ -2418,6 +2458,7 @@ class Component extends DCLogic {
         .concat(D.clubs.filter((c) => m(c.name + ' ' + c.city + ' ' + c.sport)).map((c) => ({ label: c.name, sub: c.sport + ' · ' + c.city, kind: 'Club', go: () => this.go('club', { clubId: c.id, clubTab: 'articles' }) })))
         .concat(D.players.filter((p) => m(p.name + ' ' + p.role + ' ' + p.clubLabel)).map((p) => ({ label: p.name, sub: p.role + ' · ' + p.clubLabel, kind: 'Joueur', go: () => this.go('player', { playerId: p.id }) })))
         .concat(D.sports.filter((x) => m(x)).map((x) => ({ label: x, sub: 'Discipline', kind: 'Discipline', go: () => this.go('discipline', { discId: x }) })))
+        .concat((((window.CASA_HANDISPORT || {}).disciplines) || []).filter((d) => d && d.nom && m(d.nom + ' ' + (d.famille || '') + ' handisport ' + (d.mots || []).join(' '))).map((d) => ({ label: d.nom, sub: (d.famille || 'Handisport') + ' · pratiques et clubs', kind: 'Handisport', go: () => this.go('handisport') })))
         .concat(m('gazette') ? [{ label: 'La Gazette du Cotentin', sub: 'Abonnement numérique, papier ou les deux', kind: 'Mag', go: () => this.go('offers', { offerTab: 'La Gazette' }) }] : [])
         .concat(X.places.filter((p) => m(p.name + ' ' + p.desc + ' ' + p.moment)).map((p) => ({ label: p.name, sub: 'Lieu de légende · ' + p.year, kind: 'Histoire', go: () => this.setState({ searchOpen: false, placeOpen: true, placeIdx: X.places.indexOf(p) }) })))
         .concat(X.partners.filter((p) => m(p.name + ' ' + p.sector + ' ' + p.city)).map((p) => ({ label: p.name, sub: p.sector + (p.real ? ' · partenaire' : ' · partenaire fictif'), kind: 'Partenaire', go: () => this.setState({ searchOpen: false, partnerId: p.id }) })))
@@ -2432,7 +2473,7 @@ class Component extends DCLogic {
     const quick = [['Scores en direct', 'Le Terrain', () => this.go('live', { dTab: 'live' })], ['Classement Régional 2', 'Le Terrain', () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' })], ['Maillot personnalisé', 'Boutique', () => this.go('product', { productId: 'maillot-retro', color: 0, size: null, qty: 1 })], ['La Gazette du Cotentin', 'Abonnement', () => this.go('offers', { offerTab: 'La Gazette' })], ['Pointe-Hague défie Goliath', 'Article', () => this.go('article', { articleId: 'pointe-hague' })], ['Carte des clubs', 'Territoire', () => this.go('map')]].map(([label, kind, go]) => ({ label, kind, go }));
 
     // ---------- fil d'Ariane ----------
-    const labelOf = { podcast: 'Le podcast', jeux: 'Jeux', news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', work: 'Casa PRO', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
+    const labelOf = { handisport: 'Handisport', podcast: 'Le podcast', jeux: 'Jeux', news: 'Actualités', videos: 'Vidéos', disciplines: 'Disciplines', clubs: 'Clubs', players: 'Joueurs', map: 'Territoire', offers: 'Abonnements', partners: 'Partenaires', about: 'À propos', work: 'Casa PRO', contact: 'Contact', account: 'Mon espace', live: 'Le Terrain', shop: 'Boutique', studio: 'Espace rédaction', legal: 'Informations juridiques', meteo: 'Météo', private: 'Mon quotidien', culture: 'Culture', clubhouse: 'Club House', olisto: 'Partenaires', app: 'L’application', verifier: 'Vérification' };
     const crumbsRaw = [['Accueil', () => this.go('home')]];
     if (labelOf[activeSec] && activeSec !== 'home') crumbsRaw.push([labelOf[activeSec], () => this.go(activeSec)]);
     const leaf = { article: curA.tag, video: curV.title, discipline: dName, club: curC.name, player: curP.name, checkout: sp.name, product: curPr.name, order: 'Commande', live: s.dSport, cv: 'Mon CV' }[s.view];
@@ -2497,7 +2538,7 @@ class Component extends DCLogic {
     // Pied de page : seulement les liens qu'on ne retrouve pas dans « Toutes les rubriques »
     const footLinks = [['Casa PRO', 'work'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']].map(([label, v]) => ({ label, go: () => this.go(v) }));
 
-    const progress = { home: 8, news: 20, article: 45, video: 45, videos: 20, disciplines: 20, discipline: 40, clubs: 20, club: 45, players: 20, player: 60, map: 30, offers: 30, checkout: 30 + s.step * 17, partners: 40, about: 40, contact: 50, account: 50, live: 35, shop: 25, product: 55, order: 85, studio: 50, legal: 40, meteo: 30, private: 45, culture: 35, clubhouse: 40, olisto: 45, app: 30, cv: 60, verifier: 40 }[s.view] || 10;
+    const progress = { handisport: 30, home: 8, news: 20, article: 45, video: 45, videos: 20, disciplines: 20, discipline: 40, clubs: 20, club: 45, players: 20, player: 60, map: 30, offers: 30, checkout: 30 + s.step * 17, partners: 40, about: 40, contact: 50, account: 50, live: 35, shop: 25, product: 55, order: 85, studio: 50, legal: 40, meteo: 30, private: 45, culture: 35, clubhouse: 40, olisto: 45, app: 30, cv: 60, verifier: 40 }[s.view] || 10;
 
     // ---------- thèmes ----------
     const THEME_DEFS = [
@@ -3257,6 +3298,7 @@ class Component extends DCLogic {
       },
       vid: curV, otherVideos: videos.filter((v) => v.id !== curV.id), playing: s.playing, notPlaying: !s.playing, togglePlay: () => this.setState({ playing: !s.playing }),
       playLabel: s.playing ? 'Pause' : 'Lire la vidéo', playState: s.playing ? 'Lecture en cours' : 'Prêt à lire', vidDim: s.playing ? 0.9 : 0.75,
+      isHandisport: V === 'handisport', hs, goHandisport: () => this.go('handisport'),
       disciplines, disc, clubChips, clubList, clubDisc, goClubsAll: () => this.go('clubs', { clubSport: 'Tous' }), club, clubTabs, tabArticles: s.clubTab === 'articles', tabPlayers: s.clubTab === 'players', tabInfos: s.clubTab === 'infos', tabMatches: s.clubTab === 'matchs', tabAlbum: s.clubTab === 'album',
       roleChips, sportChips: plSportChips, hasSportChips: plSportChips.length > 0, zoneChips, playerList, playerCount: playerList.length + (playerList.length > 1 ? ' profils' : ' profil'), noPlayerList: playerList.length === 0, hasLibres, pl, cityName: s.city, cityClubs,
       // terrain
@@ -3515,7 +3557,7 @@ class Component extends DCLogic {
       isPrivate: V === 'private', pv, pf: pfm, pvTabs, tabBar,
       isApp: V === 'app', appUrl, arModes, notif, installSteps, installApp, installLabel, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: pwaIn ? 'Vous êtes dans l’application.' : 'Gratuite, sans passer par un store. Fonctionne sur téléphone, tablette et ordinateur.',
       isOlisto: V === 'olisto', ol, goOlisto: () => this.go('olisto'),
-      clubsSwitch: [['clubs', 'Clubs et disciplines', 'Tous les sports, les clubs et leurs résultats'], ['players', 'Joueurs', 'Les profils du Cotentin'], ['clubhouse', 'Club House', 'La communauté des supporters']].map(([v, label, sub]) => ({ label, sub, sel: V === v ? 'true' : 'false', cls: V === v ? 'is-on' : '', go: () => this.go(v) })),
+      clubsSwitch: [['clubs', 'Clubs et disciplines', 'Tous les sports, les clubs et leurs résultats'], ['players', 'Joueurs', 'Les profils du Cotentin'], ['clubhouse', 'Club House', 'La communauté des supporters'], ['handisport', 'Handisport', 'Le sport adapté, par discipline']].map(([v, label, sub]) => ({ label, sub, sel: V === v ? 'true' : 'false', cls: V === v ? 'is-on' : '', go: () => this.go(v) })),
       isClubhouse: V === 'clubhouse', card, cardColors, chTabs, ch, chf, chMe, chLevelColor: LV[lvIdx][2], chHome, goClubhouse: () => this.go('clubhouse'),
       pvGroups, pvTitle, tm, isCulture: V === 'culture', cuTabs, cu, cuf, workOpen: !!woRaw, wo, closeWork: () => this.setState({ workIdx: null }), oeuvre, cultureHome, goCulture: () => this.go('culture'),
       hdrY: s.hdrY, showToTop: s.scrolled, toTop: () => { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} },
