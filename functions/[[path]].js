@@ -32,6 +32,7 @@ const SECTIONS = {
   'partenaires': { t: 'Partenaires', d: 'Les partenaires de Casa Besports et les offres réservées aux abonnés.' },
   'abonnements': { t: 'Abonnements', d: 'Suivre Casa Besports : abonnement BE+ et La Gazette du Cotentin.' },
   'le-terrain': { t: 'Le Terrain', d: 'Scores, agenda et classements du sport dans la Manche.' },
+  'handisport': { t: 'Handisport et sport adapté', d: 'Basket fauteuil, cécifoot, volley assis, football adapté… les pratiques handisport et sport adapté du Cotentin, discipline par discipline, avec les clubs qui les proposent.' },
   'club-house': { t: 'Club House', d: 'La tribune des supporters du Cotentin : discussions, sondages et rendez-vous.' },
   'culture': { t: 'Culture', d: 'Le sport, l’art et la mémoire du Cotentin.' },
   'territoire': { t: 'Territoire', d: 'La carte des clubs et des communes de Normandie.' },
