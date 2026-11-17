@@ -735,8 +735,8 @@ class Component extends DCLogic {
     if (has(/club ?house|clubhouse|communaute|forum|annonce|benevol.*cherche|sondage|carte membre|mes points|fidelite|classement des membres|evenement|covoit/)) {
       if (has(/covoit/)) return { text: 'Le covoiturage pour les matchs se trouve au Club House, rubrique Annonces & entraide.', actions: [act('Voir les trajets', () => this.go('clubhouse', { chTab: 'annonces', chAdCat: 'Covoiturage' }))] };
       if (has(/annonce|benevol/)) return { text: 'Petites annonces du Club House : matériel, bénévolat, joueurs, stages et covoiturage.', actions: [act('Voir les annonces', () => this.go('clubhouse', { chTab: 'annonces' }))] };
-      if (has(/evenement/)) { const ev = this.chData().events; return { text: 'Prochains rendez-vous du Club House :\n' + ev.map((e) => '• ' + e.title + ' — ' + e.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + e.time).join('\n'), actions: [act('Voir les événements', () => this.go('clubhouse', { chTab: 'events' }))] }; }
-      if (has(/point|carte|fidelite|classement/)) return { text: 'Vos points se gagnent en pronostiquant, en votant, en participant aux événements et en publiant. Ils déterminent votre niveau : Supporter, Fidèle, Ultra, Légende.', actions: [act('Ma carte membre', () => this.go('clubhouse', { chTab: 'carte' })), act('Classement', () => this.go('clubhouse', { chTab: 'ligue' }))] };
+      if (has(/evenement/)) { const ev = this.chData().events; return { text: 'Prochains rendez-vous du Club House :\n' + ev.map((e) => '• ' + e.title + ' — ' + e.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + e.time).join('\n'), actions: [act('Voir le Club House', () => this.go('clubhouse', { chTab: 'fil' }))] }; }
+      if (has(/point|carte|fidelite|classement/)) return { text: 'Vos points se gagnent en pronostiquant, en votant, en participant aux événements et en publiant. Ils déterminent votre niveau : Supporter, Fidèle, Ultra, Légende.', actions: [act('Ma carte membre', () => this.go('clubhouse', { chTab: 'carte' }))] };
       return { text: 'Le Club House réunit le fil de la communauté, les annonces et l’entraide, les événements, le classement des membres et votre carte de membre.', actions: [act('Entrer au Club House', () => this.go('clubhouse'))] };
     }
     // culture
@@ -2267,7 +2267,7 @@ class Component extends DCLogic {
         .concat(this.culture().routes.filter((r) => m(r.name + ' ' + r.area + ' ' + r.sport)).map((r) => ({ label: r.name, sub: r.sport + ' · ' + r.area, kind: 'Parcours', go: () => this.go('culture', { cuTab: 'parcours' }) })))
         .concat(this.chData().posts.filter((p) => m(p.text + ' ' + p.author)).map((p) => ({ label: p.text.slice(0, 60), sub: 'Club House · ' + p.author, kind: 'Club House', go: () => this.go('clubhouse', { chTab: 'fil' }) })))
         .concat(this.chData().ads.filter((a) => m(a.title + ' ' + a.text + ' ' + a.where)).map((a) => ({ label: a.title, sub: 'Annonce · ' + a.where, kind: 'Annonce', go: () => this.go('clubhouse', { chTab: 'annonces' }) })))
-        .concat(this.chData().events.filter((e) => m(e.title + ' ' + e.place)).map((e) => ({ label: e.title, sub: 'Événement · ' + e.place, kind: 'Événement', go: () => this.go('clubhouse', { chTab: 'events' }) })))
+        .concat(this.chData().events.filter((e) => m(e.title + ' ' + e.place)).map((e) => ({ label: e.title, sub: 'Événement · ' + e.place, kind: 'Événement', go: () => this.go('clubhouse', { chTab: 'fil' }) })))
         .slice(0, 22);
     }
     const quick = [['Scores en direct', 'Le Terrain', () => this.go('live', { dTab: 'live' })], ['Classement Régional 2', 'Le Terrain', () => this.go('live', { dSport: 'Football', dComp: 'r2', dTab: 'table' })], ['Maillot personnalisé', 'Boutique', () => this.go('product', { productId: 'maillot-retro', color: 0, size: null, qty: 1 })], ['La Gazette du Cotentin', 'Abonnement', () => this.go('offers', { offerTab: 'La Gazette' })], ['Pointe-Hague défie Goliath', 'Article', () => this.go('article', { articleId: 'pointe-hague' })], ['Carte des clubs', 'Territoire', () => this.go('map')]].map(([label, kind, go]) => ({ label, kind, go }));
@@ -2526,16 +2526,9 @@ class Component extends DCLogic {
     const emptyMod = { actus: !dashNews.length, shop: !dashProducts.length, table: !dashTable.length, videos: !dashVideos.length };
     const homeModsShown = homeMods.filter((m) => !emptyMod[m.id] && (m.id !== 'rdv' || m.isRdv) && (m.id !== 'essentiel' || m.isEssentiel));
     // « Mon essentiel » : ce dont l'abonné connecté a besoin, en un coup d'œil
-    const podDernier = (Array.isArray(window.CASA_PODCAST) ? window.CASA_PODCAST : []).filter((e) => e && e.title && e.actif !== false).sort((a, b) => String(b.date || '') > String(a.date || '') ? 1 : -1)[0];
-    const favNoms = favS.concat(favClubObjs.map((c) => c.name));
+    // Mes clubs, le podcast, la Gazette, Mon quotidien et l'abonnement sont déjà dans la barre du bas et le menu : on ne garde ici que ce qui n'y est pas
     const essentiel = [
-      { k: 'Mes clubs', t: favNoms.length ? favNoms.slice(0, 2).join(' · ') + (favNoms.length > 2 ? ' +' + (favNoms.length - 2) : '') : 'Choisir mes sports et clubs', go: () => favNoms.length ? this.go('live') : this.setState({ customizeOpen: true }), ico: 'M3 21V10l9-6 9 6v11 M9 21v-6h6v6' },
-      { k: 'Le podcast', t: podDernier ? podDernier.title : 'Émissions et réactions d’après-match', go: () => this.go('podcast'), ico: 'M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z M5 11a7 7 0 0 0 14 0 M12 18v3' },
-      { k: 'La Gazette', t: 'Le numéro du mois', go: () => this.setState({ readerOpen: true, page: 0 }), ico: 'M5 4h12v16H5z M17 8h2v10a2 2 0 0 1-2 2 M8 8h6 M8 12h6 M8 16h4' },
-      { k: 'Ma compo AR', t: 'Mon équipe sur le vrai terrain', go: () => this.openAR('lineup'), ico: 'M4 7l8-4 8 4v10l-8 4-8-4z M4 7l8 4 8-4 M12 11v10' },
-      { k: 'Mon quotidien', t: 'Agenda, listes, matchs à venir', go: () => this.go('private'), ico: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4' },
-      s.subs.casab ? { k: 'Mon abonnement', t: 'BE+ actif · gérer', go: () => this.go('account'), ico: 'M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6L3.3 9.2l6.1-.6z' }
-        : { k: 'Passer à BE+', t: 'Tout le sport du Cotentin, sans limite', go: () => this.go('offers'), ico: 'M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6L3.3 9.2l6.1-.6z' }
+      { k: 'Ma compo AR', t: 'Composez votre équipe et posez-la sur le vrai terrain, en réalité augmentée', go: () => this.openAR('lineup'), ico: 'M4 7l8-4 8 4v10l-8 4-8-4z M4 7l8 4 8-4 M12 11v10' }
     ];
     // Les deux portes d'entrée : passionné (abonnement) et pro (Casa PRO)
     const portes = s.loggedIn
@@ -2816,7 +2809,8 @@ class Component extends DCLogic {
       badges: BADGES.map(([name, how, ok]) => ({ name, how, status: ok ? 'Obtenu' : 'À débloquer', stColor: ok ? 'var(--success)' : 'var(--muted)', border: ok ? 'var(--acc)' : 'var(--line)', op: ok ? '1' : '.7' })),
       album: albumV,
       perks: X.partners.map((p) => { const claimed = s.claimed.indexOf(p.id) >= 0; return { name: p.name, mono: p.mono, color: p.color, perk: p.perk, status: claimed ? 'Activé' : s.subs.casab ? 'Disponible' : 'Avec BE+', stColor: claimed ? 'var(--success)' : 'var(--gold-text)', open: () => this.setState({ partnerId: p.id }) }; }) };
-    const chTabsDef = [['fil', 'Le fil'], ['annonces', 'Annonces & entraide'], ['events', 'Événements'], ['ligue', 'Classement'], ['carte', 'Ma carte et mon album']];
+    // Club House épuré : trois onglets. Les événements se résument au « prochain rendez-vous » du fil, et les points à la carte membre (le classement n'est plus affiché)
+    const chTabsDef = [['fil', 'Le fil'], ['annonces', 'Entraide'], ['carte', 'Ma carte']];
     const chTab = chTabsDef.some((t) => t[0] === s.chTab) ? s.chTab : 'fil';
     const chTabs = chTabsDef.map(([id, label]) => Object.assign(pill(id === chTab), { label, sel: id === chTab ? 'true' : 'false', pick: () => this.setState({ chTab: id }) }));
     const ROOMS = ['Général', 'Football', 'Basket', 'Water-polo', 'Trail & course'];
@@ -2862,7 +2856,7 @@ class Component extends DCLogic {
     const ch = { tFil: chTab === 'fil', tAnnonces: chTab === 'annonces', tEvents: chTab === 'events', tLigue: chTab === 'ligue', tCarte: chTab === 'carte',
       posts: chPosts, rooms: ['Tous'].concat(ROOMS).map((r) => Object.assign(pill(r === room), { label: r, pick: () => this.setState({ chRoom: r }) })), roomOpts: ROOMS.map((v) => ({ v })),
       publish: () => { if (needLogin()) return; if (chf.text.trim().length < 3) { this.say('Écrivez quelques mots'); return; } saveCh({ posts: [{ id: 'm' + Date.now(), author: meName, room: chf.room, time: 'à l’instant', text: chf.text.trim().slice(0, 500), likes: 0, liked: false, comments: [], mine: true, staff: !!s.role }].concat(chState.posts) }); this.setState({ chf: Object.assign({}, chf, { text: '' }), chRoom: 'Tous' }); this.say('Publié au Club House · +5 pts'); },
-      poll: pollV, nextEvent: chEvents[0] ? { title: nextEv.title, when: fmtDay(nextEv.date) + ' · ' + nextEv.time, place: nextEv.place } : { title: 'Aucun rendez-vous pour l’instant', when: 'Proposez le vôtre', place: 'onglet Événements' }, goEvents: () => this.setState({ chTab: 'events' }), goCard: () => this.setState({ chTab: 'carte' }), goPronos: () => this.go('live', { dTab: 'pronos' }),
+      poll: pollV, nextEvent: chEvents[0] ? { title: nextEv.title, when: fmtDay(nextEv.date) + ' · ' + nextEv.time, place: nextEv.place } : { title: 'Aucun rendez-vous pour l’instant', when: 'Bientôt annoncé', place: 'Club House' }, nextGo: chEvents[0] ? chEvents[0].rsvp : null, nextLabel: chEvents[0] ? chEvents[0].btnLabel : '', hasNext: !!chEvents[0], goEvents: () => this.setState({ chTab: 'events' }), goCard: () => this.setState({ chTab: 'carte' }), goPronos: () => this.go('live', { dTab: 'pronos' }),
       adCats: AD_CATS.map((c) => Object.assign(pill(c === adCat), { label: c, pick: () => this.setState({ chAdCat: c }) })), showAds: adCat !== 'Covoiturage', showRides: adCat === 'Covoiturage', ads: chAds,
       publishAd: () => { if (needLogin()) return; if (!chf.adTitle.trim()) { this.say('Titre requis'); return; } saveCh({ ads: [{ id: 'a' + Date.now(), type: chf.adType, cat: chf.adCat, title: chf.adTitle.trim(), text: chf.adText.trim(), author: meName, where: chf.adWhere.trim() || 'Cotentin', time: 'à l’instant', mine: true }].concat(chState.ads) }); this.setState({ chf: Object.assign({}, chf, { adTitle: '', adText: '', adWhere: '' }) }); this.say('Annonce publiée · +5 pts'); },
       addRide: () => { if (needLogin()) return; pv.addRide(); },
@@ -3015,8 +3009,8 @@ class Component extends DCLogic {
       ['Sur iPhone', 'Ouvrez l’application dans Safari, touchez le bouton Partager puis « Sur l’écran d’accueil ».'],
       ['Sur ordinateur', 'Dans Chrome ou Edge, cliquez sur l’icône d’installation dans la barre d’adresse.']].map(([title, text]) => ({ title, text }));
     // ---------- barre d'onglets mobile ----------
-    const TAB_ICONS = { podcast: 'M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z M5 11a7 7 0 0 0 14 0 M12 18v3 M8 21h8', clubs: 'M3 21V10l9-6 9 6v11 M9 21v-6h6v6 M7 11h.01 M17 11h.01', home: 'M4 11l8-7 8 7v9h-5v-6H9v6H4z', live: 'M4 20V10M10 20V4M16 20v-7M22 20H2', news: 'M5 4h12v16H5z M17 8h2v10a2 2 0 0 1-2 2 M8 8h6 M8 12h6 M8 16h4', meteo: 'M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z', private: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4 M8 13h3 M8 16h6' };
-    const tabBar = [['home', 'Accueil'], ['live', 'Terrain'], ['news', 'Actus'], ['podcast', 'Podcast'], ['clubs', 'Clubs']].map(([id, label]) => { const on = activeSec === id || (id === 'home' && s.view === 'home'); return { label, ico: TAB_ICONS[id], sym: id === 'home', pic: id !== 'home', color: on ? 'var(--ink)' : 'var(--muted)', bar: on ? 'var(--acc)' : 'transparent', cur: on ? 'page' : 'false', go: () => this.go(id) }; });
+    const TAB_ICONS = { vestiaire: 'M8 3l-5 3 2 5 3-1v11h8V10l3 1 2-5-5-3a4 4 0 0 1-8 0z', podcast: 'M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z M5 11a7 7 0 0 0 14 0 M12 18v3 M8 21h8', clubs: 'M3 21V10l9-6 9 6v11 M9 21v-6h6v6 M7 11h.01 M17 11h.01', home: 'M4 11l8-7 8 7v9h-5v-6H9v6H4z', live: 'M4 20V10M10 20V4M16 20v-7M22 20H2', news: 'M5 4h12v16H5z M17 8h2v10a2 2 0 0 1-2 2 M8 8h6 M8 12h6 M8 16h4', meteo: 'M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z', private: 'M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4 M8 13h3 M8 16h6' };
+    const tabBar = [['home', 'Accueil'], ['live', 'Terrain'], ['vestiaire', 'Vestiaire'], ['podcast', 'Podcast'], ['clubs', 'Clubs']].map(([id, label]) => { const on = activeSec === id || (id === 'home' && s.view === 'home'); return { label, ico: TAB_ICONS[id], sym: id === 'home', pic: id !== 'home', color: on ? 'var(--ink)' : 'var(--muted)', bar: on ? 'var(--acc)' : 'transparent', cur: on ? 'page' : 'false', go: () => this.go(id) }; });
     const V = s.view === 'disciplines' ? 'clubs' : s.view; // ancienne page Disciplines → Clubs
     const n = newsArticles.length;
     // ---------- réseau local (carte, commerces, espace club, administration) et profil membre (photo, CV, certification) ----------

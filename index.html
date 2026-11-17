@@ -2691,6 +2691,13 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 .ess-t { font-size: 12.5px; line-height: 1.35; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 @media (max-width: 1060px) { .ess-g { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .ess-g { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; } .ess-c { min-height: 92px; padding: .7rem; } }
+/* Mon essentiel allégé : un seul raccourci (Ma compo AR), affiché en bandeau sur toute la largeur */
+.ess-g { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important; }
+.ess-c:only-child { flex-direction: row; align-items: center; gap: .9rem; min-height: 0; padding: .9rem 1.1rem; }
+.ess-c:only-child .ess-i { margin: 0; flex: none; }
+.ess-c:only-child .ess-k { flex: none; }
+.ess-c:only-child .ess-t { -webkit-line-clamp: 1; }
+@media (max-width: 520px) { .ess-c:only-child { flex-wrap: wrap; row-gap: .25rem; } .ess-c:only-child .ess-t { flex-basis: 100%; -webkit-line-clamp: 2; } }
 /* Clubs et disciplines : encart de la discipline choisie */
 .cl-disc { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--sun, #f2b33d); padding: 1rem 1.2rem; margin-bottom: 1.5rem; }
 .cl-disc-t { display: flex; flex-direction: column; gap: .2rem; min-width: 0; }
@@ -7269,7 +7276,7 @@ img, video, canvas, svg { max-width: 100%; }
     <div class="wrap" style="position: relative; padding-top: 2rem; padding-bottom: 2rem">
       <div class="cl-switch" role="tablist" aria-label="Rubrique Clubs"><sc-for list="{{clubsSwitch}}" as="cs" hint-placeholder-count="2"><button type="button" role="tab" class="cl-sw {{cs.cls}}" aria-selected="{{cs.sel}}" onClick="{{cs.go}}"><span class="cl-sw-t">{{cs.label}}</span><span class="cl-sw-s">{{cs.sub}}</span></button></sc-for></div>
       <h1 class="h1" style="font-size: clamp(2.6rem, 6vw, 4.8rem); max-width: 760px; margin-bottom: .8rem">La tribune des supporters du <em class="bn-em">Cotentin</em></h1>
-      <p style="max-width: 36rem; font-size: 1.08rem; line-height: 1.6; color: var(--text-2); margin: 0 0 1.25rem">Discuter, s’entraider, se retrouver au bord des terrains et gagner des points de fidélité.</p>
+      <p style="max-width: 36rem; font-size: 1.08rem; line-height: 1.6; color: var(--text-2); margin: 0 0 1.25rem">Discuter, s’entraider et faire vivre sa carte membre.</p>
       <div style="display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.25rem">
         <span class="chip" style="display: inline-flex; align-items: center; gap: .45rem; background: var(--surface); color: var(--text); border: 1.5px solid var(--line-2); text-transform: none; letter-spacing: 0; font-family: inherit; font-weight: 700; font-size: 14px"><span style="width: 9px; height: 9px; border-radius: 50%; background: {{chLevelColor}}"></span>{{chMe.level}} · {{chMe.points}} pts</span>
         <sc-if value="{{loggedOut}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-dark" onClick="{{openLogin}}" style="min-height: 44px; font-size: 15px">Rejoindre le Club House</button></sc-if>
@@ -7281,7 +7288,6 @@ img, video, canvas, svg { max-width: 100%; }
   </section>
 
   <section class="wrap" style="padding-top: 2rem; padding-bottom: 4.5rem">
-    <div style="font-size: 13px; color: var(--muted); margin-bottom: 1.25rem">Partagez avec les supporters du Cotentin : respect, bienveillance et passion.</div>
 
     <!-- LE FIL -->
     <sc-if value="{{ch.tFil}}" hint-placeholder-val="{{ true }}">
@@ -7337,9 +7343,8 @@ img, video, canvas, svg { max-width: 100%; }
             <div class="eb" style="font-size: 13px; margin-bottom: .6rem">Prochain rendez-vous</div>
             <div class="ttl" style="font-size: 20px">{{ch.nextEvent.title}}</div>
             <div style="font-size: 13px; color: var(--muted); margin: .2rem 0 .7rem">{{ch.nextEvent.when}} · {{ch.nextEvent.place}}</div>
-            <button type="button" class="btn btn-ghost" onClick="{{ch.goEvents}}" style="width: 100%; min-height: 42px; font-size: 14px">Tous les événements</button>
+            <sc-if value="{{ch.hasNext}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost" onClick="{{ch.nextGo}}" style="width: 100%; min-height: 42px; font-size: 14px">{{ch.nextLabel}}</button></sc-if>
           </div>
-          <button type="button" onClick="{{openLineupAR}}" style="text-align: left; border: 1px solid var(--line); cursor: pointer; background: var(--surface); color: var(--text); border-radius: 0; padding: 1.1rem 1.2rem"><span class="eb" style="display: block; font-size: 13px; margin-bottom: .3rem">Réalité augmentée</span><span class="ttl" style="display: block; font-size: 20px">Proposer ma compo en AR</span><span style="font-size: 13px; color: var(--muted)">Posez le terrain sur votre table, placez vos onze, publiez ici.</span></button>
           <button type="button" onClick="{{ch.goCard}}" class="cb-deep" style="text-align: left; border: 0; cursor: pointer; background: var(--inv-bg); color: var(--on-inv); border-radius: 0; padding: 1.1rem 1.2rem">
             <span class="eb" style="display: block; font-size: 13px; color: var(--gold-on-inv); margin-bottom: .3rem">Ma carte membre</span>
             <span class="num" style="display: block; font-size: 34px">{{chMe.points}} pts</span>
@@ -7397,56 +7402,6 @@ img, video, canvas, svg { max-width: 100%; }
           </div>
         </div>
       </sc-if>
-    </sc-if>
-
-    <!-- ÉVÉNEMENTS -->
-    <sc-if value="{{ch.tEvents}}" hint-placeholder-val="{{ false }}">
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 1rem">
-        <sc-for list="{{ch.events}}" as="ev2" hint-placeholder-count="4">
-          <article style="background: var(--surface); border: 1px solid var(--line); border-radius: 0; overflow: hidden; display: flex">
-            <div class="cb-deep" style="background: var(--inv-bg); color: var(--on-inv); padding: 1rem .9rem; text-align: center; min-width: 86px; display: flex; flex-direction: column; justify-content: center"><span class="cond" style="font-size: 12px; color: var(--gold-on-inv)">{{ev2.dow}}</span><span class="num" style="font-size: 34px; line-height: 1">{{ev2.day}}</span><span class="cond" style="font-size: 12px; color: var(--on-inv-2)">{{ev2.mon}}</span></div>
-            <div style="padding: .9rem 1rem; display: flex; flex-direction: column; gap: .35rem; flex: 1">
-              <span class="cond" style="font-size: 11px; color: var(--gold-text)">{{ev2.kind}} · {{ev2.time}}</span>
-              <h3 class="ttl" style="font-size: 21px; margin: 0">{{ev2.title}}</h3>
-              <p style="margin: 0; font-size: 14px; color: var(--text-2); line-height: 1.5">{{ev2.desc}}</p>
-              <div style="font-size: 12.5px; color: var(--muted)">⌖ {{ev2.place}} · {{ev2.going}} participant(s)</div>
-              <button type="button" onClick="{{ev2.rsvp}}" class="btn" style="margin-top: .3rem; min-height: 40px; font-size: 14px; background: {{ev2.btnBg}}; color: {{ev2.btnFg}}; border: 1.5px solid var(--ink)">{{ev2.btnLabel}}</button>
-            </div>
-          </article>
-        </sc-for>
-      </div>
-      
-    </sc-if>
-
-    <!-- LIGUE & CLASSEMENT -->
-    <sc-if value="{{ch.tLigue}}" hint-placeholder-val="{{ false }}">
-      <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start">
-        <div style="flex: 2 1 420px">
-          <h2 class="h2" style="font-size: 2rem; margin-bottom: .4rem">Classement des membres</h2>
-          <p style="margin: 0 0 1rem; color: var(--text-2)">Les points se gagnent en pronostiquant les matchs du Terrain, en votant au sondage et au concours photo, en participant aux événements et en publiant au Club House.</p>
-          <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 0; overflow: hidden">
-            <sc-for list="{{ch.board}}" as="br" hint-placeholder-count="8">
-              <div style="display: flex; gap: .8rem; align-items: center; padding: .65rem 1rem; border-bottom: 1px solid var(--line); background: {{br.bg}}">
-                <span class="num" style="width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: {{br.rankBg}}; color: {{br.rankFg}}; flex: none">{{br.rank}}</span>
-                <span style="flex: 1; font-weight: {{br.weight}}; color: var(--text)">{{br.name}}</span>
-                <span class="cond" style="font-size: 11px; color: var(--muted)">{{br.level}}</span>
-                <span class="num" style="font-size: 18px; color: var(--ink); min-width: 64px; text-align: right">{{br.points}}</span>
-              </div>
-            </sc-for>
-          </div>
-        </div>
-        <div style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 1rem">
-          <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: 1.1rem 1.2rem">
-            <div class="eb" style="font-size: 13px; margin-bottom: .6rem">Barème</div>
-            <sc-for list="{{ch.scale}}" as="sc" hint-placeholder-count="6"><div style="display: flex; justify-content: space-between; gap: .5rem; padding: .35rem 0; border-bottom: 1px solid var(--line); font-size: 14px"><span style="color: var(--text)">{{sc.what}}</span><strong class="num" style="color: var(--ink)">{{sc.pts}}</strong></div></sc-for>
-          </div>
-          <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: 1.1rem 1.2rem">
-            <div class="eb" style="font-size: 13px; margin-bottom: .6rem">Récompenses du mois</div>
-            <p style="margin: 0 0 .8rem; font-size: 14px; color: var(--text-2); line-height: 1.5">Les trois premiers gagnent un article de la boutique Cherwood × Casa.</p>
-            <button type="button" class="btn btn-dark" onClick="{{ch.goPronos}}" style="width: 100%; min-height: 42px; font-size: 14px">Faire mes pronos</button>
-          </div>
-        </div>
-      </div>
     </sc-if>
 
     <!-- MA CARTE MEMBRE -->
