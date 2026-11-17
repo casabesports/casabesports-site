@@ -1083,16 +1083,15 @@ class Component extends DCLogic {
     ((typeof window !== 'undefined' && window.CASA_CULTURE) || []).forEach((w) => { const r = rooms.find((x) => x.n === String(w.salle || '2')); if (r && w.img) r.works.push(Object.assign({ author: 'Casa Besports', year: '', technique: '', alt: w.title || '', ratio: '4 / 3', fit: 'cover', bg: '#111', text: '' }, w)); });
     const flat = [];
     rooms.forEach((r) => r.works.forEach((w, i) => flat.push(Object.assign({}, w, { room: r.n, pos: String(i + 1) }))));
-    const routes = [
-      { id: 'rade', name: 'La boucle de la rade', sport: 'Course à pied', area: 'Cherbourg-en-Cotentin', level: 'Accessible', city: 'Cherbourg', img: B('37f0accd200070c08850e6289a7929b2'),
-        desc: 'Une boucle urbaine entre mer et colline : la gare maritime, les quais et la montée vers le fort du Roule.', steps: [['Gare maritime', 'la Cité de la Mer, escale du Titanic en 1912'], ['Les quais', 'face à la plus grande rade artificielle du monde'], ['Montagne du Roule', 'montée vers le musée de la Libération']] },
-      { id: 'hague', name: 'Sentier des douaniers', sport: 'Trail', area: 'La Hague', level: 'Exigeant', city: 'Beaumont-Hague', img: B('68220997b900b01cc4ef65a2529b0ff1'),
-        desc: 'Le littoral sauvage de la Hague par le sentier côtier (GR223), entre falaises, criques et villages de pêcheurs.', steps: [['Nez de Jobourg', 'falaises parmi les plus hautes d’Europe'], ['Sentier du littoral (GR223)', 'l’ancien chemin des douaniers'], ['Omonville-la-Petite', 'le village où vécut Jacques Prévert']] },
-      { id: 'saire', name: 'Du port au phare', sport: 'Vélo · marche', area: 'Val de Saire', level: 'Accessible', city: 'Barfleur', img: B('f46b43bf0cb05c3fde4cba8ae7d9c8d5'),
-        desc: 'De Barfleur à la pointe de Gatteville, sur les traces du naufrage de la Blanche-Nef.', steps: [['Barfleur', 'port normand au large duquel sombra la Blanche-Nef en 1120'], ['Pointe de Barfleur', 'le littoral et ses récifs'], ['Phare de Gatteville', '75 m, allumé en 1835']] },
-      { id: 'juin', name: 'Mémoire du 6 juin', sport: 'Vélo', area: 'Centre Cotentin', level: 'Modéré', city: 'Carentan', img: B('66637b2212fc497ace187dc8cf592255'),
-        desc: 'Un itinéraire du souvenir entre le bourg des parachutistes et la plage du Débarquement.', steps: [['Sainte-Mère-Église', 'les parachutistes de la 82e division aéroportée'], ['Les marais du Cotentin', 'routes de campagne et chemins'], ['Utah Beach', 'plage du Débarquement du 6 juin 1944']] }
-    ];
+    // Parcours sport & patrimoine : contenus/parcours.js (« Les Escales du Cotentin »)
+    const PC_MODES = { marche: 'Marche', course: 'Course à pied', trail: 'Trail', velo: 'Vélo', autre: 'Autrement' };
+    const routes = ((typeof window !== 'undefined' && window.CASA_PARCOURS) || []).filter((p) => p && p.id && (p.escales || []).length).map((p) => Object.assign({}, p, {
+      img: /^[0-9a-f]{32}$/.test(p.img || '') ? B(p.img) : (p.img || B('37f0accd200070c08850e6289a7929b2')),
+      modes: (p.modes && p.modes.length ? p.modes : ['marche']).filter((m) => PC_MODES[m]),
+      sport: (p.modes && p.modes.length ? p.modes : ['marche']).map((m) => PC_MODES[m]).filter(Boolean).join(' · '),
+      city: p.city || p.area || 'Cherbourg', level: p.level || 'Accessible',
+      steps: p.escales.map((e) => [e.nom, e.d || ''])
+    }));
     const venues = [
       ['Cité de la Mer', 'Musée', 'Cherbourg-en-Cotentin', 'Installée dans l’ancienne gare maritime transatlantique, elle est consacrée à l’exploration des océans ; on y visite notamment le sous-marin Le Redoutable.', 'gare'],
       ['Musée de la Libération', 'Musée', 'Cherbourg-en-Cotentin', 'Au sommet de la Montagne du Roule, dans le fort, il retrace la libération de Cherbourg et de la Normandie en 1944.', 'rade'],
@@ -1286,6 +1285,155 @@ class Component extends DCLogic {
     A.runs += 1; A.actions += n; A.last = t;
     C.log = C.log.slice(0, 60);
     this.saveCrm(C);
+  }
+
+  // ---------- Parcours sport & patrimoine : « Les Escales du Cotentin » (js/parcours.js, chargé à la demande) ----------
+  chargeParcours() {
+    if (typeof window === 'undefined' || window.CasaParcours || this._pcLoad || !window.CasaCharge || !window.CASA_LIBS.parcours) return;
+    this._pcLoad = true;
+    window.CasaCharge(window.CASA_LIBS.parcours).then(() => this.setState({ tick: (this.state.tick || 0) + 1 })).catch(() => { this._pcLoad = false; this.say('La carte des parcours n’a pas pu se charger. Vérifiez votre connexion.'); });
+  }
+  pcTrace(p) {
+    this._pcTr = this._pcTr || {};
+    const T = this._pcTr[p.id];
+    if (T) return T.r;
+    if (typeof window === 'undefined' || !window.CasaParcours) return null;
+    this._pcTr[p.id] = { r: null };
+    window.CasaParcours.trace(p).then((r) => { this._pcTr[p.id] = { r }; this.setState({ tick: (this.state.tick || 0) + 1 }); });
+    return null;
+  }
+  pcPlus() { const s = this.state; return !!(s.loggedIn && ((s.subs && s.subs.casab) || s.role === 'admin')); }
+  pcCarnet() { const C = this.priv().carnet || {}; return { tampons: C.tampons || {}, sorties: C.sorties || [] }; }
+  // Ajoute des tampons (et une sortie) au carnet de bord BE+ ; renvoie false si la personne n'est pas abonnée
+  pcTamponner(p, idxs, sortie) {
+    if (!this.pcPlus()) return false;
+    const C = this.pcCarnet(); const t = Object.assign({}, C.tampons[p.id] || {}); const d = this.addDays(0);
+    (idxs || []).forEach((i) => { if (!t[i]) t[i] = d; });
+    const sorties = sortie ? C.sorties.concat([Object.assign({ id: Math.random().toString(36).slice(2, 9), pid: p.id, date: d }, sortie)]).slice(-200) : C.sorties;
+    this.setPriv({ carnet: { tampons: Object.assign({}, C.tampons, { [p.id]: t }), sorties } });
+    return true;
+  }
+  parcoursVue(CU) {
+    const s = this.state; const CP = typeof window !== 'undefined' ? window.CasaParcours : null;
+    this.chargeParcours();
+    const ALL = { marche: ['Marche', 4.5, 10], course: ['Course', 10, 5], trail: ['Trail', 8, 8], velo: ['Vélo', 15, 6], autre: ['Autrement', 0, 0] };
+    const pill = (on) => ({ bg: on ? 'var(--inv-bg)' : 'var(--surface)', fg: on ? 'var(--on-inv)' : 'var(--text)', border: on ? 'var(--ink)' : 'var(--line-2)', pressed: on ? 'true' : 'false' });
+    const km = (m) => (m / 1000).toFixed(m < 10000 ? 1 : 0).replace('.', ',') + ' km';
+    const duree = (min) => { min = Math.max(5, Math.round(min / 5) * 5); const h = Math.floor(min / 60); return h ? h + ' h ' + String(min % 60).padStart(2, '0') : min + ' min'; };
+    const chrono = (sec) => { const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), x = sec % 60; return (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(x).padStart(2, '0'); };
+    const estime = (mode, r) => { const a = ALL[mode]; if (!r || !a || !a[1]) return 'À votre rythme'; return duree((r.m / 1000) / a[1] * 60 + ((r.up || 0) / 100) * a[2]); };
+    const plus = this.pcPlus(); const C = this.pcCarnet();
+    const fait = (p) => Object.keys(C.tampons[p.id] || {}).map(Number);
+    const boucle = (p) => fait(p).length >= p.escales.length;
+    const lieux = (typeof window !== 'undefined' && window.CASA_LIEUX) || [];
+    const filtre = ['tous', 'marche', 'course', 'trail', 'velo'].indexOf(s.pcFiltre) >= 0 ? s.pcFiltre : 'tous';
+    const routes = CU.routes.filter((p) => filtre === 'tous' || p.modes.indexOf(filtre) >= 0);
+    const open = CU.routes.find((p) => p.id === s.pcOpen) || null;
+    const ouvrir = (id) => { this.setState({ pcOpen: id, pcFin: null, pcImp: null, pcEscale: null }); setTimeout(() => { try { const el = document.querySelector('.pc'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }, 60); };
+    const statsDe = (p) => { const r = this.pcTrace(p); return { r, dist: r ? (r.source === 'droit' ? '≈ ' : '') + km(r.m) : (CP ? 'calcul…' : '—'), dplus: r && r.up != null ? '+' + r.up + ' m' : '—' }; };
+    const C0 = { tampons: Object.keys(C.tampons).reduce((n, k) => n + Object.keys(C.tampons[k]).length, 0), badges: CU.routes.filter(boucle), m: C.sorties.reduce((n, x) => n + (x.m || 0), 0) };
+    const carnet = { plus, libre: !plus,
+      resume: C0.tampons + (C0.tampons > 1 ? ' tampons' : ' tampon') + ' · ' + C0.badges.length + (C0.badges.length > 1 ? ' parcours bouclés' : ' parcours bouclé') + ' · ' + km(C0.m) + ' parcourus',
+      badges: C0.badges.map((p) => ({ name: p.name })), hasBadges: C0.badges.length > 0,
+      decouvrir: () => this.go('offers', { offerTab: 'BE+' }), connexion: () => this.setState({ loginOpen: true }), notLoggedIn: !s.loggedIn };
+    const vue = {
+      list: !open, detail: !!open, carnet,
+      filtres: [['tous', 'Tous'], ['marche', 'Marche'], ['course', 'Course'], ['trail', 'Trail'], ['velo', 'Vélo']].map(([id, label]) => Object.assign(pill(id === filtre), { label, pick: () => this.setState({ pcFiltre: id }) })),
+      vide: routes.length === 0,
+      cards: routes.map((p) => { const st = statsDe(p); const f = fait(p); return { name: p.name, area: p.area, level: p.level, sport: p.sport, img: p.img, desc: p.desc, dist: st.dist, dplus: st.dplus, nb: String(p.escales.length),
+        steps: p.escales.map((e, i) => ({ n: String(i + 1), t: e.nom, d: e.d, ok: f.indexOf(i) >= 0 })), boucle: boucle(p), tampons: plus && f.length ? f.length + ' / ' + p.escales.length + ' tampons' : '', hasTampons: plus && f.length > 0,
+        open: () => ouvrir(p.id), meteo: () => { this.setState({ wxCity: p.city }); this.go('meteo'); } }; })
+    };
+    if (!open) return vue;
+
+    // ---------- fiche d'un parcours ----------
+    const p = open; const st = statsDe(p); const r = st.r; const f = fait(p);
+    const allure = p.modes.concat(['autre']).indexOf(s.pcAllure) >= 0 ? s.pcAllure : p.modes[0];
+    const live = s.pcLive && CP && CP.enDirect() ? s.pcLive : null;
+    const fin = s.pcFin && s.pcFin.pid === p.id ? s.pcFin : null;
+    const faitesLive = live ? live.faites : [];
+    const prochaine = live ? live.prochaine : -1;
+    const lieuDe = (e) => (e.lieu ? lieux.find((l) => l.id === e.lieu) : null);
+    const sport = (a) => ({ marche: 'Marche', course: 'Course à pied', trail: 'Trail', velo: 'Vélo', autre: 'Autre' })[a] || 'Marche';
+    const d = {
+      name: p.name, area: p.area, level: p.level, desc: p.desc, img: p.img, sport: p.sport, nb: String(p.escales.length),
+      back: () => this.setState({ pcOpen: null, pcFin: null, pcImp: null }),
+      allures: p.modes.concat(['autre']).map((m) => Object.assign(pill(m === allure), { label: ALL[m][0], pick: () => this.setState({ pcAllure: m }) })),
+      dist: st.dist, dplus: st.dplus, temps: estime(allure, r), tempsLbl: allure === 'autre' ? 'Durée' : 'Temps estimé · ' + ALL[allure][0].toLowerCase(),
+      source: !r ? (CP ? 'Calcul du tracé par l’IGN…' : 'Chargement de la carte…')
+        : r.source === 'gpx' ? 'Tracé vérifié sur le terrain (fichier GPX de la rédaction).'
+        : r.source === 'ign' ? 'Tracé calculé par l’IGN sur les chemins et les routes (BD TOPO), dénivelé IGN. Il peut s’écarter du sentier balisé : suivez toujours le balisage sur place.'
+        : 'Tracé provisoire en ligne droite entre les escales (service de l’IGN injoignable pour le moment) : la distance réelle est plus longue.',
+      estimNote: allure === 'autre' ? 'Poussette, fauteuil, roller, trottinette… L’accessibilité des chemins n’a pas encore été vérifiée : renseignez-vous avant de partir.' : 'Estimation selon la distance et le dénivelé, à adapter à votre forme.',
+      escales: p.escales.map((e, i) => { const l = lieuDe(e); const ok = f.indexOf(i) >= 0 || faitesLive.indexOf(i) >= 0; return { n: String(i + 1), nom: e.nom, d: e.d, ok, next: prochaine === i, cls: 'pc-esc' + (ok ? ' pc-esc-ok' : '') + (prochaine === i ? ' pc-esc-next' : ''),
+        hasStory: !!(l && l.moment), story: () => this.setState({ pcEscale: { pid: p.id, i, lire: true } }),
+        carte: 'https://www.google.com/maps/search/?api=1&query=' + e.lat + ',' + e.lon }; }),
+      // suivi en direct
+      isLive: !!live, notLive: !live,
+      start: () => {
+        if (!CP) { this.say('La carte se charge encore…'); return; }
+        const ok = CP.demarrer(p, {
+          maj: (x) => { if (x) this.setState({ pcLive: x }); },
+          escale: (i) => { const saved = this.pcTamponner(p, [i]); this.setState({ pcEscale: { pid: p.id, i, saved } }); try { if (navigator.vibrate) navigator.vibrate([120, 60, 120]); } catch (e) {} },
+          erreur: (m) => this.say(m)
+        });
+        if (ok) { this.setState({ pcLive: CP.etat(), pcFin: null }); this.say('Suivi lancé : gardez cette page ouverte'); }
+      },
+      stop: () => {
+        if (!CP) return; const x = CP.arreter(); if (!x) { this.setState({ pcLive: null }); return; }
+        const saved = x.m > 50 ? this.pcTamponner(p, x.faites, { m: x.m, s: x.s, source: 'direct' }) : false;
+        this.setState({ pcLive: null, pcFin: { pid: p.id, m: x.m, s: x.s, n: x.faites.length, pts: x.pts, debut: x.debut, saved, logged: false } });
+      },
+      liveDist: live ? km(live.m) : '', liveTime: live ? chrono(live.s) : '', liveEsc: live ? live.faites.length + ' / ' + p.escales.length : '',
+      liveNext: live ? (live.prochaine >= 0 ? 'Prochaine escale : ' + p.escales[live.prochaine].nom + (live.distProchaine != null ? ' · ' + (live.distProchaine < 1000 ? live.distProchaine + ' m' : km(live.distProchaine)) + ' à vol d’oiseau' : '') : 'Toutes les escales sont atteintes. Bravo !') : '',
+      liveNote: live && live.note ? live.note : (live && !live.moi ? 'Recherche du signal GPS…' : ''), hasLiveNote: !!(live && (live.note || !live.moi)),
+      // fin de sortie
+      hasFin: !!fin,
+      finTxt: fin ? km(fin.m) + ' en ' + chrono(fin.s) + ' · ' + fin.n + ' / ' + p.escales.length + ' escales' : '',
+      finCarnet: fin ? (fin.saved ? 'Sortie et tampons ajoutés à votre carnet de bord BE+.' : (plus ? '' : 'Avec BE+, cette sortie et ses tampons rejoindraient votre carnet de bord.')) : '',
+      finHasTrace: !!(fin && fin.pts && fin.pts.length > 1),
+      finGpx: () => { if (CP && fin) CP.telecharger('casabesports-' + p.id + '-ma-sortie.gpx', CP.gpx(p.name + ' · ma sortie', fin.pts, p.escales, true)); },
+      finLog: () => {
+        if (!s.loggedIn) { this.setState({ loginOpen: true }); return; } if (!fin || fin.logged) return;
+        const P0 = this.priv(); this.setPriv({ sessions: P0.sessions.concat([{ id: Math.random().toString(36).slice(2, 9), date: this.addDays(0), sport: sport(allure), min: Math.max(1, Math.round(fin.s / 60)), feel: 'Moyen' }]) });
+        this.setState({ pcFin: Object.assign({}, fin, { logged: true }) }); this.say('Sortie enregistrée dans votre activité');
+      },
+      finLogged: !!(fin && fin.logged), finNotLogged: !(fin && fin.logged),
+      finClose: () => this.setState({ pcFin: null }),
+      // fichiers GPX : export du parcours, import de la trace d'une sortie
+      gpx: () => { if (!CP) return; const pts = (r && r.pts) || p.escales.map((e) => [e.lat, e.lon]); CP.telecharger('casabesports-' + p.id + '.gpx', CP.gpx('Casa Besports · ' + p.name, pts, p.escales, false)); this.say('Fichier GPX téléchargé'); },
+      plan: () => this.planEvent(p.name + ' · ' + ALL[allure][0], this.nextSaturday(), '09:30', 'Sport', p.area),
+      meteo: () => { this.setState({ wxCity: p.city }); this.go('meteo'); },
+      imp: s.pcImp && s.pcImp.pid === p.id ? s.pcImp.txt : '', hasImp: !!(s.pcImp && s.pcImp.pid === p.id),
+      onTrace: (ev) => {
+        const file = ev && ev.target && ev.target.files && ev.target.files[0]; if (!file || !CP) return;
+        if (ev.target) try { ev.target.value = ''; } catch (e) {}
+        if (!/\.gpx$/i.test(file.name || '')) { this.setState({ pcImp: { pid: p.id, txt: 'Choisissez un fichier .gpx (les fichiers .fit ne sont pas lus : exportez la sortie au format GPX).' } }); return; }
+        file.text().then((txt) => {
+          const pts = CP.lireGpx(txt); const hits = CP.escalesAtteintes(pts, p.escales); const m = Math.round(CP.longueur(pts));
+          const t0 = pts[0][3], t1 = pts[pts.length - 1][3]; const sec = t0 && t1 && t1 > t0 ? Math.round((t1 - t0) / 1000) : 0;
+          const saved = hits.length ? this.pcTamponner(p, hits, { m, s: sec, source: 'gpx' }) : false;
+          const base = 'Trace lue : ' + km(m) + (sec ? ' en ' + chrono(sec) : '') + '. ' + (hits.length ? hits.length + ' escale' + (hits.length > 1 ? 's' : '') + ' sur ' + p.escales.length + ' traversée' + (hits.length > 1 ? 's' : '') + ' (' + hits.map((i) => p.escales[i].nom).join(', ') + ').' : 'Aucune escale de ce parcours sur cette trace.');
+          this.setState({ pcImp: { pid: p.id, txt: base + (hits.length ? (saved ? ' Tampons ajoutés à votre carnet de bord BE+.' : ' Avec BE+, ces tampons rejoindraient votre carnet de bord.') : '') } });
+        }).catch((e) => this.setState({ pcImp: { pid: p.id, txt: (e && e.message) || 'Lecture du fichier impossible.' } }));
+      }
+    };
+    // fenêtre « escale atteinte » ou « le moment d'histoire »
+    const pe = s.pcEscale && s.pcEscale.pid === p.id ? s.pcEscale : null;
+    if (pe && p.escales[pe.i]) {
+      const e = p.escales[pe.i]; const l = lieuDe(e);
+      d.pop = { titre: (pe.lire ? 'Escale ' : 'Escale atteinte · ') + (pe.i + 1) + ' / ' + p.escales.length, nom: e.nom, d: e.d, moment: l && l.moment ? l.moment : '', hasMoment: !!(l && l.moment), sportTxt: l && l.sport ? l.sport : '', hasSport: !!(l && l.sport),
+        tampon: pe.lire ? '' : (pe.saved ? 'Tampon ajouté à votre carnet de bord BE+.' : 'Avec BE+, ce tampon rejoindrait votre carnet de bord.'), hasTampon: !pe.lire, close: () => this.setState({ pcEscale: null }) };
+    }
+    d.hasPop = !!d.pop; if (!d.pop) d.pop = {};
+    // carte Leaflet après le rendu
+    if (CP && typeof window !== 'undefined' && window.L) {
+      const opts = { parcours: p, pts: r ? r.pts : null, source: r ? r.source : 'droit', faites: f.concat(faitesLive), prochaine, moi: live ? live.moi : null, sillage: live ? live.sillage : null, suivre: !!(live && live.moi),
+        surEscale: (i) => this.setState({ pcEscale: { pid: p.id, i, lire: true } }) };
+      (window.queueMicrotask || setTimeout)(() => { const slot = document.getElementById('pc-carte-slot'); if (slot) CP.sync(slot, opts); });
+    }
+    vue.d = d;
+    return vue;
   }
 
   // Carte de Normandie : téléchargée seulement à l'ouverture de la page Territoire
@@ -2264,7 +2412,7 @@ class Component extends DCLogic {
         .concat(X.partners.filter((p) => m(p.name + ' ' + p.sector + ' ' + p.city)).map((p) => ({ label: p.name, sub: p.sector + (p.real ? ' · partenaire' : ' · partenaire fictif'), kind: 'Partenaire', go: () => this.setState({ searchOpen: false, partnerId: p.id }) })))
         .concat(this.culture().flat.filter((w) => m(w.title + ' ' + w.author + ' ' + w.technique)).map((w, i) => ({ label: w.title, sub: 'Exposition · salle ' + w.room, kind: 'Œuvre', go: () => this.setState({ searchOpen: false, workIdx: this.culture().flat.indexOf(w) }) })))
         .concat(this.culture().venues.filter((v) => m(v.name + ' ' + v.city + ' ' + v.desc)).map((v) => ({ label: v.name, sub: v.kind + ' · ' + v.city, kind: 'Culture', go: () => this.go('culture', { cuTab: 'lieux' }) })))
-        .concat(this.culture().routes.filter((r) => m(r.name + ' ' + r.area + ' ' + r.sport)).map((r) => ({ label: r.name, sub: r.sport + ' · ' + r.area, kind: 'Parcours', go: () => this.go('culture', { cuTab: 'parcours' }) })))
+        .concat(this.culture().routes.filter((r) => m(r.name + ' ' + r.area + ' ' + r.sport)).map((r) => ({ label: r.name, sub: r.sport + ' · ' + r.area, kind: 'Parcours', go: () => this.go('culture', { cuTab: 'parcours', pcOpen: r.id }) })))
         .concat(this.chData().posts.filter((p) => m(p.text + ' ' + p.author)).map((p) => ({ label: p.text.slice(0, 60), sub: 'Club House · ' + p.author, kind: 'Club House', go: () => this.go('clubhouse', { chTab: 'fil' }) })))
         .concat(this.chData().ads.filter((a) => m(a.title + ' ' + a.text + ' ' + a.where)).map((a) => ({ label: a.title, sub: 'Annonce · ' + a.where, kind: 'Annonce', go: () => this.go('clubhouse', { chTab: 'annonces' }) })))
         .concat(this.chData().events.filter((e) => m(e.title + ' ' + e.place)).map((e) => ({ label: e.title, sub: 'Événement · ' + e.place, kind: 'Événement', go: () => this.go('clubhouse', { chTab: 'events' }) })))
@@ -2649,10 +2797,7 @@ class Component extends DCLogic {
     const cuf = Object.assign({ title: '', author: '', rights: false }, s.cuf || {});
     const cu = {
       tExpo: cuTab === 'expo', tParcours: cuTab === 'parcours', tLieux: cuTab === 'lieux', tConcours: cuTab === 'concours', rooms,
-      routes: CU.routes.map((r) => Object.assign({}, r, { dist: 'distance à mesurer', steps: r.steps.map(([t, d], i) => ({ n: String(i + 1), t, d })),
-        plan: () => this.planEvent(r.name + ' · ' + r.sport, this.nextSaturday(), '09:30', 'Sport', r.area),
-        log: () => { if (!s.loggedIn) { this.setState({ loginOpen: true }); return; } const P0 = this.priv(); this.setPriv({ sessions: P0.sessions.concat([{ id: Math.random().toString(36).slice(2, 9), date: this.addDays(0), sport: r.sport.split(' ')[0] === 'Course' ? 'Course à pied' : r.sport.split(' ')[0], min: 60, feel: 'Moyen' }]) }); this.say('Sortie enregistrée dans votre activité (60 min, modifiable)'); },
-        meteo: () => { this.setState({ wxCity: r.city }); this.go('meteo'); } })),
+      pc: cuTab === 'parcours' ? this.parcoursVue(CU) : null,
       kinds: kinds.map((k) => Object.assign(pill(k === cuKind), { label: k, pick: () => this.setState({ cuKind: k }) })),
       venues: CU.venues.filter((v) => cuKind === 'Tous' || v.kind === cuKind).map((v) => Object.assign({}, v, { hasLink: !!v.placeId, storyLabel: 'Le moment d’histoire',
         story: () => this.setState({ placeOpen: true, placeIdx: X.places.findIndex((p) => p.id === v.placeId) }),
@@ -2680,7 +2825,7 @@ class Component extends DCLogic {
         else if (woRaw.kind === 'product') this.go('product', { productId: woRaw.productId, color: 0, size: null, qty: 1 }); }
     });
     const oeuvre = Object.assign({}, CU.flat[now0.getDate() % woN], { open: () => this.setState({ workIdx: now0.getDate() % woN }) });
-    const routeDuJour = CU.routes[now0.getDay() % CU.routes.length];
+    const routeDuJour = CU.routes[now0.getDay() % Math.max(1, CU.routes.length)] || { name: 'Les Escales du Cotentin', sport: 'Marche' };
     const cultureHome = { route: routeDuJour.name, routeSport: routeDuJour.sport, venue: CU.venues[now0.getDate() % CU.venues.length].name, open: () => this.go('culture', { cuTab: 'parcours' }), openVenues: () => this.go('culture', { cuTab: 'lieux' }) };
 
     // ---------- Mon quotidien : extensions ----------
