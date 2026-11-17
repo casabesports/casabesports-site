@@ -69,6 +69,7 @@ var CasaVestiaire = (function () {
       var jobs = [];
       if (ids.length) jobs.push(db(function (c) { return c.rpc('vs_comptes', { ids: ids }); }).then(function (rows) { (rows || []).forEach(function (x) { cd.comptes[x.evenement_id] = x; }); }, function () {}));
       if (uid() && ids.length) jobs.push(db(function (c) { return c.from('vestiaire_presences').select('evenement_id, membre_id, reponse, vestiaire_membres(nom, section)').in('evenement_id', ids); }).then(function (rows) { cd.presences = rows || []; }, function () {}));
+      if (uid() && ids.length) jobs.push(resume(ids).then(function (m) { cd.covoit = m; }));
       if (uid() && cd.staff) jobs.push(db(function (c) { return c.from('vestiaire_membres').select('*').eq('club', club).order('cree_le'); }).then(function (rows) { cd.membres = rows || []; }, function () {}));
       return Promise.all(jobs);
     }).then(function () { if (D.user === u) { D.clubs[club] = cd; D.sqlMissing = false; } }, function (e) { if (D.user === u) { D.clubs[club] = cd; fail(app, e); } })
@@ -84,6 +85,7 @@ var CasaVestiaire = (function () {
       var h = { at: Date.now(), key: clubs.join(','), events: r[0] || [], posts: r[1] || [], comptes: {}, presences: [] };
       var ids = h.events.map(function (e) { return e.id; }); var jobs = [];
       if (ids.length) jobs.push(db(function (c) { return c.rpc('vs_comptes', { ids: ids }); }).then(function (rows) { (rows || []).forEach(function (x) { h.comptes[x.evenement_id] = x; }); }, function () {}));
+      if (ids.length && clubs.length) jobs.push(resume(ids).then(function (m) { h.covoit = m; }));
       if (ids.length && clubs.length) jobs.push(db(function (c) { return c.from('vestiaire_presences').select('evenement_id, membre_id, reponse').in('evenement_id', ids); }).then(function (rows) { h.presences = rows || []; }, function () {}));
       return Promise.all(jobs).then(function () { if (D.user === u) { D.home = h; D.sqlMissing = false; } });
     }).catch(function (e) { D.home = { at: Date.now(), key: clubs.join(','), events: [], posts: [], comptes: {}, presences: [] }; fail(app, e); })
@@ -157,6 +159,11 @@ var CasaVestiaire = (function () {
       club: club ? club.name : '', hasClub: mode === 'home' && !!club, openClub: function () { app.go('vestiaire', { vsClub: ev.club }); },
       comptes: bits.join(' · '), hasComptes: bits.length > 0 && !ev.annule,
       reps: ev.annule ? [] : reps, canAnswer: !ev.annule && reps.length > 0,
+      // Covoiturage : visible des familles concernées et du club, si supabase/vestiaire-covoiturage.sql est lancé
+      hasCovoit: !ev.annule && !!uid() && !!(cd.covoit || {})[ev.id] && (mode !== 'home' || ev.type === 'match' || (cd.covoit[ev.id].voitures + cd.covoit[ev.id].besoins) > 0), covoitLabel: covoitLabel((cd.covoit || {})[ev.id]),
+      covoitOpen: mode !== 'home' && U.cvOpen === ev.id, covoitPressed: U.cvOpen === ev.id ? 'true' : 'false',
+      toggleCovoit: function () { if (mode === 'home') { app.go('vestiaire', { vsClub: ev.club, vs: Object.assign({}, ui(app), { cvOpen: ev.id }) }); return; } set(app, { cvOpen: U.cvOpen === ev.id ? null : ev.id }); },
+      cv: mode !== 'home' && U.cvOpen === ev.id ? covoitVals(app, ev, cd) : { ready: false, loading: false },
       canList: mode !== 'home' && canSee && !!uid(), listOpen: open, liste: liste, listLabel: open ? 'Masquer les réponses' : 'Qui vient ?',
       toggleList: function () { set(app, { evOpen: open ? null : ev.id }); },
       isStaff: mode !== 'home' && !!cd.staff,
@@ -164,6 +171,110 @@ var CasaVestiaire = (function () {
       annuler: function () { db(function (c) { return c.from('vestiaire_evenements').update({ annule: !ev.annule }).eq('id', ev.id); }).then(function () { app.say(ev.annule ? 'Événement rétabli.' : 'Événement annulé : il reste affiché, barré.'); refresh(app, ev.club); }, function (e) { app.say(e.message); }); },
       annulerLabel: ev.annule ? 'Rétablir' : 'Annuler',
       suppr: function () { if (!window.confirm('Supprimer définitivement « ' + titre + ' » du planning ?')) return; db(function (c) { return c.from('vestiaire_evenements').delete().eq('id', ev.id); }).then(function () { app.say('Supprimé du planning.'); refresh(app, ev.club); }, function (e) { app.say(e.message); }); }
+    };
+  }
+
+  // ---------- Covoiturage et messages du déplacement (supabase/vestiaire-covoiturage.sql) ----------
+  // Privé : réservé au club et aux familles de la section concernée. Les enfants ne sont nommés que pour leur parent,
+  // le conducteur qui les emmène et le club.
+  var SENS = { aller_retour: 'Aller et retour', aller: 'Aller seulement', retour: 'Retour seulement' };
+  D.cv = {}; D.cvMissing = false;
+  function resume(ids) {
+    return db(function (c) { return c.rpc('vs_covoit_resume', { ids: ids }); }).then(function (rows) {
+      var m = {}; (rows || []).forEach(function (x) { m[x.evenement_id] = x; }); D.cvMissing = false; return m;
+    }, function (e) { if (missing(e)) D.cvMissing = true; return {}; });
+  }
+  function loadCovoit(app, eid) {
+    if (busy['cv' + eid]) return; busy['cv' + eid] = 1;
+    Promise.all([
+      db(function (c) { return c.from('vestiaire_trajets').select('*').eq('evenement_id', eid).order('cree_le'); }),
+      db(function (c) { return c.rpc('vs_places_prises', { eid: eid }); }),
+      db(function (c) { return c.from('vestiaire_passagers').select('trajet_id, membre_id, user_id, nom'); }),
+      db(function (c) { return c.from('vestiaire_besoins').select('*').eq('evenement_id', eid); }),
+      db(function (c) { return c.from('vestiaire_messages').select('*').eq('evenement_id', eid).order('cree_le').limit(200); })
+    ]).then(function (r) {
+      var prises = {}; (r[1] || []).forEach(function (x) { prises[x.trajet_id] = x.prises; });
+      var tids = (r[0] || []).map(function (t) { return t.id; });
+      D.cv[eid] = { at: Date.now(), trajets: r[0] || [], prises: prises, passagers: (r[2] || []).filter(function (p) { return tids.indexOf(p.trajet_id) >= 0; }), besoins: r[3] || [], messages: r[4] || [] };
+    }, function (e) { D.cv[eid] = { at: Date.now(), trajets: [], prises: {}, passagers: [], besoins: [], messages: [], err: e.message }; })
+      .then(function () { busy['cv' + eid] = 0; tick(app); });
+  }
+  function cvAct(app, ev, p, msg) {
+    return p.then(function () { if (msg) app.say(msg); delete D.cv[ev.id]; loadCovoit(app, ev.id); if (D.clubs[ev.club]) loadClub(app, ev.club, true); D.home = null; },
+      function (e) { app.say(e.message); });
+  }
+  function covoitLabel(r) {
+    if (!r) return 'Covoiturage';
+    var libres = Math.max(0, r.places - r.prises), bits = [];
+    if (r.voitures) bits.push(libres ? libres + (libres > 1 ? ' places libres' : ' place libre') : 'voitures complètes');
+    if (r.besoins) bits.push(r.besoins + ' cherche' + (r.besoins > 1 ? 'nt' : '') + ' une place');
+    if (!r.voitures && !r.besoins) bits.push('proposer ou chercher une place');
+    if (r.messages) bits.push(r.messages + ' message' + (r.messages > 1 ? 's' : ''));
+    return 'Covoiturage · ' + bits.join(' · ');
+  }
+  function covoitVals(app, ev, cd) {
+    var U = ui(app), x = D.cv[ev.id], me = uid();
+    if (!x) { loadCovoit(app, ev.id); return { loading: true, ready: false }; }
+    var miens = repondants(ev);
+    var placeDe = function (mid) { var p = x.passagers.find(function (q) { return q.membre_id === mid; }); return p ? p.trajet_id : null; };
+    var cherche = function (mid) { return x.besoins.some(function (b) { return b.membre_id === mid; }); };
+    var pourQui = function (m) { return m.qualite === 'parent' ? m.nom : 'moi'; };
+    var voitures = x.trajets.map(function (t) {
+      var pris = x.prises[t.id] || 0, libres = Math.max(0, t.places - pris), mine = t.user_id === me;
+      var noms = x.passagers.filter(function (p) { return p.trajet_id === t.id; }).map(function (p) { return p.nom || 'Passager'; });
+      var actions = [];
+      miens.forEach(function (m) {
+        var ici = placeDe(m.id);
+        if (ici === t.id) actions.push({ label: 'Annuler la place (' + pourQui(m) + ')', cls: 'btn-ghost', go: function () { cvAct(app, ev, db(function (c) { return c.from('vestiaire_passagers').delete().eq('trajet_id', t.id).eq('membre_id', m.id); }), 'Place annulée.'); } });
+        else if (!ici && libres > 0 && !mine) actions.push({ label: 'Réserver une place (' + pourQui(m) + ')', cls: 'btn-gold', go: function () { cvAct(app, ev, db(function (c) { return c.from('vestiaire_passagers').insert({ trajet_id: t.id, membre_id: m.id }); }), 'Place réservée avec ' + String(t.conducteur || '').split(' · ')[0] + '.'); } });
+      });
+      return {
+        conducteur: t.conducteur || 'Un parent', sens: SENS[t.sens] || '', rdv: [t.rdv_lieu, t.rdv_heure ? t.rdv_heure.replace(/^0/, '').replace(':', ' h ') : ''].filter(Boolean).join(' · '), hasRdv: !!(t.rdv_lieu || t.rdv_heure),
+        places: libres ? libres + ' sur ' + t.places + (libres > 1 ? ' places libres' : ' place libre') : 'Complet (' + t.places + ' places)', complet: !libres, cls: libres ? '' : 'is-full',
+        tel: t.telephone || '', hasTel: !!t.telephone, telHref: 'tel:' + String(t.telephone || '').replace(/[^+0-9]/g, ''), note: t.note || '', hasNote: !!t.note,
+        noms: noms.join(', '), hasNoms: noms.length > 0, mine: mine, actions: actions, hasActions: actions.length > 0,
+        canDel: mine || !!cd.staff, del: function () { if (!window.confirm('Retirer cette voiture ? Les familles inscrites devront trouver une autre place.')) return; cvAct(app, ev, db(function (c) { return c.from('vestiaire_trajets').delete().eq('id', t.id); }), 'Voiture retirée.'); }
+      };
+    });
+    var besoinsMiens = miens.filter(function (m) { return !placeDe(m.id); }).map(function (m) {
+      var deja = cherche(m.id);
+      return { label: deja ? 'Je ne cherche plus de place (' + pourQui(m) + ')' : 'Je cherche une place (' + pourQui(m) + ')', cls: deja ? 'btn-ghost' : 'btn-dark',
+        go: function () { cvAct(app, ev, deja ? db(function (c) { return c.from('vestiaire_besoins').delete().eq('evenement_id', ev.id).eq('membre_id', m.id); }) : db(function (c) { return c.from('vestiaire_besoins').insert({ evenement_id: ev.id, membre_id: m.id }); }), deja ? 'Demande retirée.' : 'C’est noté : les familles du déplacement voient qu’une place est cherchée.'); } };
+    });
+    var r = (cd.covoit || {})[ev.id] || {};
+    var nB = r.besoins || x.besoins.length;
+    var f = U.cvForm && U.cvForm.eid === ev.id ? U.cvForm : { eid: ev.id };
+    var on = function (k) { return function (e) { var o = Object.assign({}, f); o[k] = val(e); set(app, { cvForm: o }); }; };
+    var m = U.cvMsg && U.cvMsg.eid === ev.id ? U.cvMsg : { eid: ev.id };
+    return {
+      ready: true, loading: false, err: x.err || '', hasErr: !!x.err,
+      voitures: voitures, hasVoitures: voitures.length > 0, noVoitures: !voitures.length,
+      besoins: nB ? nB + (nB > 1 ? ' personnes cherchent une place' : ' personne cherche une place') : '', hasBesoins: nB > 0,
+      besoinsNoms: cd.staff ? x.besoins.map(function (b) { var mm = (cd.membres || []).find(function (k) { return k.id === b.membre_id; }); return mm ? mm.nom : ''; }).filter(Boolean).join(', ') : '',
+      besoinsMiens: besoinsMiens, hasBesoinsMiens: besoinsMiens.length > 0,
+      offre: {
+        open: !!f.open, closed: !f.open, toggle: function () { set(app, { cvForm: f.open ? { eid: ev.id } : { eid: ev.id, open: true, places: '3', sens: 'aller_retour' } }); },
+        places: f.places || '3', onPlaces: on('places'), placesOpts: [1, 2, 3, 4, 5, 6, 7].map(function (k) { return { v: String(k), l: k + (k > 1 ? ' places' : ' place') }; }),
+        sens: f.sens || 'aller_retour', onSens: on('sens'), sensOpts: opts(SENS),
+        lieu: f.lieu || '', onLieu: on('lieu'), heure: f.heure || '', onHeure: on('heure'), note: f.note || '', onNote: on('note'),
+        partageTel: !!f.partageTel, onPartageTel: on('partageTel'), tel: f.tel || '', onTel: on('tel'),
+        err: f.err || '', hasErr: !!f.err, busy: !!f.busy, label: f.busy ? 'Envoi…' : 'Proposer ma voiture',
+        send: function () {
+          var tel = f.partageTel ? String(f.tel || '').trim() : '';
+          if (f.partageTel && !/^\+?[0-9 .]{8,20}$/.test(tel)) return set(app, { cvForm: Object.assign({}, f, { err: 'Numéro de téléphone invalide.' }) });
+          set(app, { cvForm: Object.assign({}, f, { busy: true, err: '' }) });
+          db(function (c) { return c.from('vestiaire_trajets').insert({ evenement_id: ev.id, places: parseInt(f.places, 10) || 3, sens: f.sens || 'aller_retour', rdv_lieu: String(f.lieu || '').trim().slice(0, 120) || null, rdv_heure: /^\d\d:\d\d$/.test(f.heure || '') ? f.heure : null, telephone: tel || null, note: String(f.note || '').trim().slice(0, 200) || null }); })
+            .then(function () { set(app, { cvForm: { eid: ev.id } }); app.say('Merci ! Votre voiture est proposée aux familles du déplacement.'); delete D.cv[ev.id]; loadCovoit(app, ev.id); if (D.clubs[ev.club]) loadClub(app, ev.club, true); },
+              function (e) { set(app, { cvForm: Object.assign({}, f, { busy: false, err: e.message }) }); });
+        }
+      },
+      messages: x.messages.map(function (k) { var a = String(k.auteur || 'Membre').split(' · '); return { auteur: a[0], role: a[1] || '', quand: ilya(k.cree_le), texte: k.texte, ini: initiales(a[0]), mine: k.user_id === me,
+        canDel: k.user_id === me || !!cd.staff, del: function () { cvAct(app, ev, db(function (c) { return c.from('vestiaire_messages').delete().eq('id', k.id); }), 'Message supprimé.'); } }; }),
+      hasMessages: x.messages.length > 0,
+      msg: { texte: m.texte || '', onTexte: function (e) { set(app, { cvMsg: { eid: ev.id, texte: val(e) } }); }, busy: !!m.busy,
+        send: function () { var t = String(m.texte || '').trim(); if (!t) return; set(app, { cvMsg: { eid: ev.id, texte: t, busy: true } });
+          db(function (c) { return c.from('vestiaire_messages').insert({ evenement_id: ev.id, texte: t.slice(0, 500) }); }).then(function () { set(app, { cvMsg: { eid: ev.id } }); delete D.cv[ev.id]; loadCovoit(app, ev.id); }, function (e) { set(app, { cvMsg: { eid: ev.id, texte: t } }); app.say(e.message); }); } },
+      refresh: function () { delete D.cv[ev.id]; loadCovoit(app, ev.id); }
     };
   }
   function postVals(app, p, cd, mode) {
@@ -286,7 +397,7 @@ var CasaVestiaire = (function () {
     var home = { on: on, sqlMissing: D.sqlMissing };
     if (on && ctx.V === 'home' && (!logged || D.mine !== null)) loadHome(app, homeClubs);
     var H = D.home || { events: [], posts: [], comptes: {}, presences: [] };
-    var hcd = { comptes: H.comptes, presences: H.presences, staff: false };
+    var hcd = { comptes: H.comptes, presences: H.presences, covoit: H.covoit || {}, staff: false };
     home.mine = homeClubs.length > 0;
     // Un joueur senior ne voit pas le planning des jeunes (et inversement) ; le club voit tout
     var monPlanning = function (e) { return e.club === corresp || e.section === 'club' || mine.some(function (m) { return m.statut === 'valide' && m.club === e.club && (m.staff || m.section === e.section); }); };
@@ -336,6 +447,7 @@ var CasaVestiaire = (function () {
       join: join, evForm: evFormVals(app, club), composer: composerVals(app, club, cd, sec === 'tout' ? 'club' : sec), gestion: staffVals(app, club, cd),
       quitter: membre ? function () { if (!window.confirm('Quitter le vestiaire de ' + (co ? co.name : 'ce club') + ' ? Vos réponses aux convocations seront effacées.')) return; Promise.all(mesClub.map(function (m) { return db(function (c) { return c.from('vestiaire_membres').delete().eq('id', m.id); }); })).then(function () { app.say('Vous avez quitté ce vestiaire.'); D.mine = null; loadMine(app); refresh(app, club); }, function (e) { app.say(e.message); }); } : null,
       canQuit: membre && !cd.staff,
+      cvMissing: D.cvMissing && s.role === 'admin',
       secNote: sec === 'jeunes' ? 'Section jeunes : les prénoms et les présences des jeunes ne sont visibles que du club et de leurs parents.' : '', hasSecNote: sec === 'jeunes'
     };
     return { home: home, page: page };

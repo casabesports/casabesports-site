@@ -2929,7 +2929,7 @@ img, video, canvas, svg { max-width: 100%; }
 .vs-r.vs-r-incertain.is-on { background: var(--sun, #f2b33d); border-color: var(--sun, #f2b33d); color: #10283a; }
 .vs-r.vs-r-absent.is-on { background: var(--danger); border-color: var(--danger); color: #fff; }
 .vs-act { display: flex; flex-wrap: wrap; gap: .25rem .9rem; margin-top: .35rem; }
-.vs-lnk { background: none; border: 0; padding: .2rem 0; min-height: 32px; color: var(--ink); font: 700 13px/1 inherit; font-family: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.vs-lnk { background: none; border: 0; padding: .2rem 0; min-height: 32px; color: var(--ink); font-weight: 700; font-size: 13px; line-height: 1.2; font-family: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .vs-lnk.is-danger { color: var(--danger); }
 .vs-liste { margin: .45rem 0 0; padding: .6rem .75rem; background: var(--surface-2); display: grid; gap: .35rem; font-size: 13.5px; }
 .vs-liste-l { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: .5rem; }
@@ -2960,7 +2960,7 @@ img, video, canvas, svg { max-width: 100%; }
 .vs-head .vs-lnk { color: #fff; }
 .vs-pick { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: 0 0 1rem; }
 .vs-pick .field { max-width: 420px; }
-.vs-chip { min-height: 40px; padding: .4rem .8rem; border: 1.5px solid var(--rade, #10283a); background: var(--surface); color: var(--ink); font: 700 13px/1.1 inherit; font-family: inherit; cursor: pointer; border-radius: 0; }
+.vs-chip { min-height: 40px; padding: .4rem .8rem; border: 1.5px solid var(--rade, #10283a); background: var(--surface); color: var(--ink); font-weight: 700; font-size: 13px; line-height: 1.2; font-family: inherit; cursor: pointer; border-radius: 0; }
 .vs-chip.is-on { background: var(--rade, #10283a); color: #fff; }
 .vs-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 560px; border: 1.5px solid var(--rade, #10283a); background: var(--surface); margin: 0 0 1rem; }
 .vs-tab { min-height: 46px; border: 0; background: transparent; color: var(--text); font: 800 14px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .03em; cursor: pointer; border-radius: 0; }
@@ -2995,6 +2995,32 @@ img, video, canvas, svg { max-width: 100%; }
 .vs-compose-b { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; }
 .vs-compose-b .field { max-width: 240px; min-height: 42px; }
 .vs-reste { font-size: 12px; color: var(--muted); }
+/* Covoiturage et messages du déplacement */
+.vs-cv-btn { display: inline-flex; align-items: center; gap: .45rem; align-self: flex-start; margin-top: .4rem; min-height: 38px; padding: .4rem .75rem .35rem; border: 1.5px solid var(--rade, #10283a); background: var(--surface); color: var(--ink); font-weight: 700; font-size: 13px; line-height: 1.2; font-family: inherit; text-align: left; cursor: pointer; border-radius: 0; }
+.vs-cv-btn[aria-expanded="true"] { background: var(--rade, #10283a); color: #fff; }
+.vsh .vs-cv-btn { background: transparent; color: var(--sun, #f2b33d); border-color: rgba(242, 179, 61, .55); }
+.vs-cv { margin: .5rem 0 0; padding: .8rem .85rem .9rem; background: var(--surface-2); border-left: 3px solid var(--rade, #10283a); display: flex; flex-direction: column; gap: .55rem; }
+.vs-cv-priv { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.vs-cv-h { font: 800 12.5px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .08em; color: var(--ink); margin-top: .3rem; }
+.vs-car { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--herbe, #2f6b4f); padding: .65rem .75rem; display: flex; flex-direction: column; gap: .25rem; }
+.vs-car.is-full { border-left-color: var(--line-2); }
+.vs-car-t { display: flex; flex-wrap: wrap; gap: .3rem .7rem; align-items: baseline; justify-content: space-between; }
+.vs-car-t b { font: 800 15px/1.2 var(--bn-font, sans-serif); color: var(--ink); }
+.vs-car-p { font-size: 12.5px; font-weight: 800; color: var(--success); }
+.vs-car.is-full .vs-car-p { color: var(--muted); }
+.vs-car-n { font-size: 13px; color: var(--text-2); }
+.vs-car-a { display: flex; flex-wrap: wrap; gap: .4rem .7rem; align-items: center; }
+.vs-car-a .btn { min-height: 38px; padding: .4rem .8rem; font-size: 13px; }
+.vs-cv-b { margin: 0; font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.vs-msg { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: .55rem; }
+.vs-msg .vs-av { width: 32px; height: 32px; font-size: 12px; }
+.vs-msg .vs-p-x { margin-top: .1rem; font-size: 14px; }
+.vs-msg .vs-lnk { min-height: 24px; padding: 0; font-size: 12px; }
+.vs-msg-in { display: flex; gap: .4rem; }
+.vs-msg-in .field { min-height: 44px; flex: 1 1 auto; min-width: 0; }
+.vs-car a.vs-lnk { font-size: 13.5px; align-self: flex-start; }
+@media (max-width: 560px) { .vs-cv { margin-left: -70px; } .vs-msg-in .btn { padding-left: .8rem; padding-right: .8rem; } }
+.vs-msg-in .btn { min-height: 44px; flex: none; }
 @media (max-width: 560px) { .vs-rep-n { width: 100%; } .vs-r { flex: 1 1 0; padding-left: .3rem; padding-right: .3rem; } .vs-head { padding: 1rem; } .vs-logo { width: 56px; height: 56px; font-size: 19px; } .vs-box { padding: .9rem .85rem 1rem; } .vs-liste-l { grid-template-columns: 1fr; gap: 0; } .vsh-in { padding: 1.1rem 1rem; } .vsh-col { padding: .8rem 1rem 1rem; } }
 </style>
 </head>
@@ -3214,6 +3240,7 @@ img, video, canvas, svg { max-width: 100%; }
                           <span class="vs-ev-t">{{e.titre}}</span>
                           <span class="vs-meta">{{e.quand}}<sc-if value="{{e.hasLieu}}" hint-placeholder-val="{{ true }}"> · {{e.lieu}}</sc-if><sc-if value="{{e.hasClub}}" hint-placeholder-val="{{ true }}"> · <button type="button" class="vs-club-l" onClick="{{e.openClub}}">{{e.club}}</button></sc-if></span>
                           <sc-if value="{{e.hasComptes}}" hint-placeholder-val="{{ false }}"><span class="vs-cpt">{{e.comptes}}</span></sc-if>
+                          <sc-if value="{{e.hasCovoit}}" hint-placeholder-val="{{ false }}"><button type="button" class="vs-cv-btn" onClick="{{e.toggleCovoit}}"><span>{{e.covoitLabel}}</span> <span aria-hidden="true">→</span></button></sc-if>
                           <sc-for list="{{e.reps}}" as="r" hint-placeholder-count="0">
                             <div class="vs-rep"><span class="vs-rep-n">{{r.nom}}</span><sc-for list="{{r.boutons}}" as="b" hint-placeholder-count="3"><button type="button" class="vs-r {{b.cls}}" aria-pressed="{{b.pressed}}" onClick="{{b.pick}}">{{b.label}}</button></sc-for></div>
                           </sc-for>
@@ -3891,6 +3918,7 @@ img, video, canvas, svg { max-width: 100%; }
       <sc-if value="{{vs.on}}" hint-placeholder-val="{{ true }}"><p class="vs-info">Le Vestiaire ouvre très bientôt : les clubs pourront y publier leur planning et leurs nouvelles.</p></sc-if>
     </sc-if>
     <sc-if value="{{vs.hasErr}}" hint-placeholder-val="{{ false }}"><p class="vs-info is-warn">{{vs.err}}</p></sc-if>
+    <sc-if value="{{vs.cvMissing}}" hint-placeholder-val="{{ false }}"><p class="vs-info is-warn"><b>Covoiturage :</b> lancer une fois supabase/vestiaire-covoiturage.sql dans Supabase (SQL Editor › New query › coller › Run) pour l’activer.</p></sc-if>
 
     <div class="vs-pick">
       <sc-for list="{{vs.mesClubs}}" as="c" hint-placeholder-count="0"><button type="button" class="vs-chip {{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.label}}</button></sc-for>
@@ -3957,6 +3985,51 @@ img, video, canvas, svg { max-width: 100%; }
                   </div>
                   <sc-if value="{{e.listOpen}}" hint-placeholder-val="{{ false }}">
                     <div class="vs-liste"><sc-for list="{{e.liste}}" as="l" hint-placeholder-count="3"><div class="vs-liste-l {{l.cls}}"><b>{{l.label}} · {{l.n}}</b><span>{{l.noms}}</span></div></sc-for></div>
+                  </sc-if>
+                  <sc-if value="{{e.hasCovoit}}" hint-placeholder-val="{{ false }}"><button type="button" class="vs-cv-btn" aria-expanded="{{e.covoitPressed}}" onClick="{{e.toggleCovoit}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17h14M6 17l1.5-5h9L18 17M4 17v2M20 17v2M7.5 12l1.3-3.5h6.4L16.5 12"></path><circle cx="8" cy="17" r="1.6"></circle><circle cx="16" cy="17" r="1.6"></circle></svg><span>{{e.covoitLabel}}</span></button></sc-if>
+                  <sc-if value="{{e.covoitOpen}}" hint-placeholder-val="{{ false }}">
+                    <div class="vs-cv">
+                      <p class="vs-cv-priv">Privé : visible des familles de ce déplacement et du club. Le prénom d’un enfant n’est vu que par son parent, son conducteur et le club.</p>
+                      <sc-if value="{{e.cv.loading}}" hint-placeholder-val="{{ false }}"><p class="vs-vide">Chargement…</p></sc-if>
+                      <sc-if value="{{e.cv.ready}}" hint-placeholder-val="{{ true }}">
+                        <sc-if value="{{e.cv.hasErr}}" hint-placeholder-val="{{ false }}"><p class="vs-err">{{e.cv.err}}</p></sc-if>
+                        <span class="vs-cv-h">Les voitures</span>
+                        <sc-for list="{{e.cv.voitures}}" as="v" hint-placeholder-count="2">
+                          <div class="vs-car {{v.cls}}">
+                            <div class="vs-car-t"><b>{{v.conducteur}}</b><span class="vs-car-p">{{v.places}}</span></div>
+                            <span class="vs-meta">{{v.sens}}<sc-if value="{{v.hasRdv}}" hint-placeholder-val="{{ true }}"> · départ {{v.rdv}}</sc-if></span>
+                            <sc-if value="{{v.hasNote}}" hint-placeholder-val="{{ false }}"><span class="vs-note">{{v.note}}</span></sc-if>
+                            <sc-if value="{{v.hasTel}}" hint-placeholder-val="{{ false }}"><a class="vs-lnk" href="{{v.telHref}}">Appeler {{v.tel}}</a></sc-if>
+                            <sc-if value="{{v.hasNoms}}" hint-placeholder-val="{{ false }}"><span class="vs-car-n">Passagers : {{v.noms}}</span></sc-if>
+                            <div class="vs-car-a"><sc-for list="{{v.actions}}" as="a" hint-placeholder-count="1"><button type="button" class="btn {{a.cls}}" onClick="{{a.go}}">{{a.label}}</button></sc-for><sc-if value="{{v.canDel}}" hint-placeholder-val="{{ false }}"><button type="button" class="vs-lnk is-danger" onClick="{{v.del}}">Retirer la voiture</button></sc-if></div>
+                          </div>
+                        </sc-for>
+                        <sc-if value="{{e.cv.noVoitures}}" hint-placeholder-val="{{ true }}"><p class="vs-vide">Pas encore de voiture proposée pour ce déplacement.</p></sc-if>
+                        <sc-if value="{{e.cv.hasBesoins}}" hint-placeholder-val="{{ false }}"><p class="vs-cv-b">{{e.cv.besoins}}<sc-if value="{{e.cv.besoinsNoms}}" hint-placeholder-val="{{ false }}"> : {{e.cv.besoinsNoms}}</sc-if></p></sc-if>
+                        <div class="vs-car-a">
+                          <sc-for list="{{e.cv.besoinsMiens}}" as="a" hint-placeholder-count="1"><button type="button" class="btn {{a.cls}}" onClick="{{a.go}}">{{a.label}}</button></sc-for>
+                          <sc-if value="{{e.cv.offre.closed}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-gold" onClick="{{e.cv.offre.toggle}}">Je propose ma voiture</button></sc-if>
+                        </div>
+                        <sc-if value="{{e.cv.offre.open}}" hint-placeholder-val="{{ false }}">
+                          <div class="vs-form">
+                            <label class="lbl">Places libres<x-select class="field" value="{{e.cv.offre.places}}" onChange="{{e.cv.offre.onPlaces}}"><sc-for list="{{e.cv.offre.placesOpts}}" as="o" hint-placeholder-count="3"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+                            <label class="lbl">Trajet<x-select class="field" value="{{e.cv.offre.sens}}" onChange="{{e.cv.offre.onSens}}"><sc-for list="{{e.cv.offre.sensOpts}}" as="o" hint-placeholder-count="3"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+                            <label class="lbl">Point de départ<input class="field" value="{{e.cv.offre.lieu}}" onChange="{{e.cv.offre.onLieu}}" maxlength="120" placeholder="Parking du stade"></label>
+                            <label class="lbl">Heure de départ<input class="field" type="time" value="{{e.cv.offre.heure}}" onChange="{{e.cv.offre.onHeure}}"></label>
+                            <label class="lbl is-wide">Précision (facultatif)<input class="field" value="{{e.cv.offre.note}}" onChange="{{e.cv.offre.onNote}}" maxlength="200" placeholder="Siège rehausseur disponible, retour après le goûter…"></label>
+                            <label class="vs-check is-wide"><input type="checkbox" checked="{{e.cv.offre.partageTel}}" onChange="{{e.cv.offre.onPartageTel}}"><span>Afficher mon téléphone aux familles de ce déplacement (facultatif)</span></label>
+                            <sc-if value="{{e.cv.offre.partageTel}}" hint-placeholder-val="{{ false }}"><label class="lbl">Téléphone<input class="field" type="tel" value="{{e.cv.offre.tel}}" onChange="{{e.cv.offre.onTel}}" maxlength="20"></label></sc-if>
+                            <sc-if value="{{e.cv.offre.hasErr}}" hint-placeholder-val="{{ false }}"><p class="vs-err is-wide">{{e.cv.offre.err}}</p></sc-if>
+                            <div class="is-wide" style="display: flex; gap: .5rem; flex-wrap: wrap"><button type="button" class="btn btn-gold" onClick="{{e.cv.offre.send}}" disabled="{{e.cv.offre.busy}}">{{e.cv.offre.label}}</button><button type="button" class="btn btn-ghost" onClick="{{e.cv.offre.toggle}}">Fermer</button></div>
+                          </div>
+                        </sc-if>
+                        <span class="vs-cv-h">Messages du déplacement</span>
+                        <sc-for list="{{e.cv.messages}}" as="k" hint-placeholder-count="2">
+                          <div class="vs-msg"><span class="vs-av" aria-hidden="true">{{k.ini}}</span><div><div class="vs-p-h"><span class="vs-p-a">{{k.auteur}}</span><span class="vs-p-r">{{k.role}} · {{k.quand}}</span><sc-if value="{{k.canDel}}" hint-placeholder-val="{{ false }}"><button type="button" class="vs-lnk is-danger" onClick="{{k.del}}">Supprimer</button></sc-if></div><p class="vs-p-x">{{k.texte}}</p></div></div>
+                        </sc-for>
+                        <div class="vs-msg-in"><input class="field" value="{{e.cv.msg.texte}}" onChange="{{e.cv.msg.onTexte}}" maxlength="500" placeholder="On part à 9 h 15, quelqu’un a un maillot en plus ?" aria-label="Message aux familles du déplacement"><button type="button" class="btn btn-dark" onClick="{{e.cv.msg.send}}" disabled="{{e.cv.msg.busy}}">Envoyer</button></div>
+                      </sc-if>
+                    </div>
                   </sc-if>
                 </div>
               </div>
