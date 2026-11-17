@@ -29,7 +29,7 @@
     { key: 'CASA_BOUTIQUE', label: 'Boutique : présentation', desc: 'Bandeau de la boutique, affiches des collections et « Vos maillots de cœur » (les boutiques officielles des clubs du Cotentin : nom, club lié, logo, adresse de la boutique).' },
     { key: 'CASA_PRODUITS', label: 'Boutique : produits', desc: 'Fiches produits : nom, prix, photos, tailles, couleurs.', item: 'name' },
     { key: 'CASA_VIDEOS', label: 'Vidéos', desc: 'Vidéos et vignettes.', item: 'title' },
-    { key: 'CASA_PODCAST', label: 'Podcast', desc: 'Les épisodes du podcast BE+ (page « Le podcast »). Type : « Émission » ou « Réaction » (après-match). Qui : Joueur, Coach, Staff ou Supporter. Date au format 2026-11-16. Envoyez le fichier audio (.mp3 ou .m4a, 50 Mo maximum). Publiez une réaction seulement avec l’accord de la personne enregistrée.', item: 'title' },
+    { key: 'CASA_PODCAST', label: 'Podcast · Casa Studio', desc: 'Les épisodes du podcast BE+ (page « Le podcast », lecteur Casa Studio). Fichier audio ou vidéo, ambiance (4 fonds Casa Besports ou votre image), invité, chapitres, extraits, transcription, partenaire (affiché « Contenu sponsorisé ») et date de publication programmée. Type : « Émission » ou « Réaction » (après-match). Qui : Joueur, Coach, Staff ou Supporter. Date au format 2026-11-16. Envoyez le fichier audio (.mp3 ou .m4a, 50 Mo maximum). Publiez une réaction seulement avec l’accord de la personne enregistrée.', item: 'title' },
     { key: 'CASA_QUIZ', label: 'Jeux : questions du quiz', desc: 'Vos questions pour le « Quiz du bus » (rubrique Jeux). Une bonne réponse et trois mauvaises ; l’explication s’affiche après la réponse. Elles forment le thème « Questions de la rédaction » et passent aussi dans « Tous les sports ». N’ajoutez que des faits vérifiés.', item: 'question' },
     { key: 'CASA_CULTURE', label: 'Culture', desc: 'Œuvres et photographies des salles Culture.', item: 'title' },
     { key: 'CASA_FONDS', label: 'Fonds de page', desc: 'L’image derrière chaque page du site.' },
@@ -46,7 +46,10 @@
     CASA_GAZETTE: { id: '', sec: 'À la une', kind: 'article', rubric: '', title: '', script: '', kicker: '', img: '', imgCap: '', imgFormat: 'auto', mise: 'auto', paras: [{ t: '' }], colonnes: 'auto', quote: '', quoteBy: '' },
     CASA_LIEUX: { id: '', name: '', short: '', where: '', year: '', img: '', photo: '', hook: '', desc: '', moment: '', sport: '' },
     CASA_PRODUITS: { id: '', line: 'casa', name: '', short: '', price: 0, type: 'tee', img: '', gallery: [], colors: ['marine'], sizes: ['S', 'M', 'L', 'XL'], flag: '', isNew: false, desc: '' },
-    CASA_PODCAST: { id: '', type: 'Réaction', qui: 'Joueur', nom: '', club: '', date: '', title: '', dek: '', audio: '', duree: '', img: '', actif: true },
+    CASA_PODCAST: { id: '', type: 'Réaction', qui: 'Joueur', nom: '', club: '', date: '', title: '', dek: '', audio: '', duree: '', img: '', actif: true,
+      // Casa Studio
+      emission: '', invite: '', inviteRole: '', description: '', video: '', sousTitres: '', fond: 'auto', fondPerso: '', fondVideo: '',
+      chapitres: [], extraits: [], transcription: '', sponsor: '', sponsorLien: '', publierLe: '' },
     CASA_QUIZ: { id: '', question: '', bonne: '', faux1: '', faux2: '', faux3: '', explication: '', actif: true },
     CASA_VIDEOS: { id: '', tag: '', date: '', img: '', alt: '', title: '', dek: '', url: '', dur: '' },
     CASA_CLUBS: { id: '', name: '', sport: 'Football', city: '', niveau: '', fondation: '', stade: '', logo: '', img: '', handi: '', handiInfos: '' },
@@ -57,7 +60,7 @@
     CASA_CULTURE: { salle: '3', title: '', author: '', year: '', technique: '', img: '', alt: '', text: '' }
   };
   // Modèle d'un élément ajouté dans une sous-liste vide
-  var NESTED = { cols3: { h: '', t: '' }, stats: { k: '', l: '' }, enbref: { h: '', t: '' }, card: { k: '', v: '' }, qs: { n: '', q: '', a: '' }, pts: { t: '' }, entries: { w: '', s: '', d: '' }, baro: { dir: 'up', h: '', t: '' }, classement: { t: '' }, blocks: { img: '', sport: '', title: '', text: '' }, retenir: { n: '', h: '', t: '' }, textes: { avant: '', apres: '', apresEn: '', page: '' }, images: { avant: '', apres: '', page: '' }, dates: { annee: '', titre: '', texte: '', titreEn: '', texteEn: '' }, etapes: { annee: '', titre: '', photo: '', alt: '', paragraphes: [] }, etapesEn: { annee: '', titre: '', alt: '', paragraphes: [] }, piliers: { titre: '', texte: '' }, piliersEn: { titre: '', texte: '' }, paras: { t: '' }, sections: ['', ''], collections: { ligne: '', nom: '', accroche: '', titre: '', texte: '', image: '' }, maillots: { nom: '', club: '', sport: 'Football', city: '', logo: '', boutiqueUrl: '', plateforme: '', partenaire: false, codePromo: '', avantage: '', verification: '', actif: true } };
+  var NESTED = { chapitres: { debut: '0:00', titre: '' }, extraits: { debut: '0:00', fin: '0:30', titre: '' }, cols3: { h: '', t: '' }, stats: { k: '', l: '' }, enbref: { h: '', t: '' }, card: { k: '', v: '' }, qs: { n: '', q: '', a: '' }, pts: { t: '' }, entries: { w: '', s: '', d: '' }, baro: { dir: 'up', h: '', t: '' }, classement: { t: '' }, blocks: { img: '', sport: '', title: '', text: '' }, retenir: { n: '', h: '', t: '' }, textes: { avant: '', apres: '', apresEn: '', page: '' }, images: { avant: '', apres: '', page: '' }, dates: { annee: '', titre: '', texte: '', titreEn: '', texteEn: '' }, etapes: { annee: '', titre: '', photo: '', alt: '', paragraphes: [] }, etapesEn: { annee: '', titre: '', alt: '', paragraphes: [] }, piliers: { titre: '', texte: '' }, piliersEn: { titre: '', texte: '' }, paras: { t: '' }, sections: ['', ''], collections: { ligne: '', nom: '', accroche: '', titre: '', texte: '', image: '' }, maillots: { nom: '', club: '', sport: 'Football', city: '', logo: '', boutiqueUrl: '', plateforme: '', partenaire: false, codePromo: '', avantage: '', verification: '', actif: true } };
   // ---------- La Gazette : 31 pages (la Une, le sommaire, puis 29 pages intérieures) et ses cartons ----------
   var GZ_PAGES = 31, GZ_INNER = 29;
   var GZ_MODELS = [
@@ -97,10 +100,14 @@
     city: 'Ville', num: 'Numéro de maillot', role: 'Poste ou fonction', club: 'Club (identifiant, voir la section Clubs)', clubLabel: 'Nom du club affiché (facultatif)', masquer: 'Masquer ce joueur sur le site', sector: 'Secteur d’activité', tier: 'Niveau de partenariat (Platinum, Or ou Club)', site: 'Site internet du partenaire (lien, marqué « vient de Casa Besports »)', app: 'Application du partenaire (lien, facultatif)',
     color: 'Couleur du logo (#xxxxxx)', since: 'Partenaire depuis (année)', perk: 'Avantage offert', real: 'Vrai partenaire (affiché)', mois: 'Prix par mois (€)', an: 'Prix par an (€)', perks: 'Avantages', casab: 'Donne accès à BE+',
     gazette: 'Gazette incluse (num, pap, duo ou vide)', paper: 'Envoi papier', bienvenue: 'Message de bienvenue (épinglé)', sondage: 'Sondage de la semaine', question: 'Question (vide = pas de sondage)', options: 'Réponses possibles',
-    actif: 'Affiché sur le site', intro: 'Introduction', cles: 'Chiffres clés', source: 'Source', lien: 'Texte du lien', lieux: 'Communes', equipes: 'Équipes', exacts: 'Stades précis', lat: 'Latitude', lon: 'Longitude', cherche: 'Mot du nom du stade',
+    actif: 'Affiché sur le site',
+    emission: 'Nom de l’émission (ex. « Le Banc », « Masterclass »)', invite: 'Invité (prénom et nom, avec son accord)', inviteRole: 'Fonction de l’invité', description: 'Description longue (affichée dans le lecteur)',
+    video: 'Fichier vidéo (.mp4, 50 Mo maximum) : remplace l’illustration', sousTitres: 'Sous-titres de la vidéo (adresse d’un fichier .vtt, facultatif)', fond: 'Ambiance du lecteur (fond par défaut)', fondPerso: 'Votre image de fond (remplace l’ambiance)', fondVideo: 'Votre vidéo de fond en boucle, muette (facultatif)',
+    chapitres: 'Chapitres (début au format 12:30)', extraits: 'Extraits courts à partager (début et fin)', debut: 'Début (minutes:secondes)', fin: 'Fin (minutes:secondes)', transcription: 'Transcription (texte de l’épisode, facultatif)',
+    sponsor: 'Partenaire de l’émission (vide = pas de partenaire). Affiché « Contenu sponsorisé »', sponsorLien: 'Site du partenaire (facultatif)', publierLe: 'Publication programmée (ex. 2026-11-20T18:00 ; vide = tout de suite). Attention : programmé = masqué de la page, pas secret', intro: 'Introduction', cles: 'Chiffres clés', source: 'Source', lien: 'Texte du lien', lieux: 'Communes', equipes: 'Équipes', exacts: 'Stades précis', lat: 'Latitude', lon: 'Longitude', cherche: 'Mot du nom du stade',
     citation: 'Citation', citationEn: 'Citation (anglais)', dates: 'Frise des dates', imgFormat: 'Format de l’image', mise: 'Position de l’image et du texte', colonnes: 'Colonnes du texte', tagline: 'Phrase forte', lead: 'Chapeau', label: 'Ce que mesure le chiffre', cols3: 'Trois repères', h: 'Titre', bigA: 'Grand titre (début)', bigB: 'Grand titre (fin, sur bandeau)', who: 'Qui', whoSub: 'Sa fonction', stats: 'Chiffres', k: 'Chiffre ou clé', why: 'Pourquoi on vous le raconte', aside: 'Encadré', enbref: 'En bref', card: 'Carte d’identité', v: 'Valeur', qs: 'Questions', q: 'Question', a: 'Réponse', pour: 'Pour', contre: 'Contre', pts: 'Arguments', note: 'Note', entries: 'Mots', w: 'Mot', s: 'Prononciation ou catégorie', d: 'Définition', baro: 'Baromètre', dir: 'Tendance', clT: 'Titre du classement', clSub: 'Sous-titre du classement', classement: 'Classement', blocks: 'Résultats', retenir: 'À retenir', solutions: 'Solutions du quiz', ours: 'L’ours (qui fait la Gazette)', n: 'Numéro', textes: 'Textes retouchés', images: 'Images remplacées', avant: 'D’origine (texte ou image)', apres: 'Remplacé par', apresEn: 'Remplacé par (anglais)', page: 'Page (vide = toutes les pages)', annee: 'Année', etapes: 'Étapes de l’histoire', etapesEn: 'Étapes (anglais)', piliers: 'Piliers', piliersEn: 'Piliers (anglais)', manifeste: 'Manifeste (paragraphes)', manifesteEn: 'Manifeste (anglais)', manifesteFin: 'Phrase après la citation', soustitre: 'Sous-titre', intro: 'Phrase d’introduction', photoAlt: 'Description de la photo', alt: 'Description de la photo', raisonSurtitre: 'Surtitre des piliers', raisonTitre: 'Titre des piliers', signature: 'Phrase de conviction', signatureSurtitre: 'Surtitre de la conviction', signatureSuite: 'Suite de la conviction', appel: 'Appel final (paragraphes)', appelTitre: 'Titre de l’appel final', appelFin: 'Dernière phrase', sections: 'Sections', src: 'Source', why: 'Pourquoi ça compte', big: 'Chiffre', l: 'Unité'
   };
-  var LONG = /^(handi|handiInfos|horaires|telephone|body|bodyEn|desc|texte|text|dek|dekEn|hook|moment|t|kicker|accroche|motif|message|why|citation|citationEn|note|lead|a|d|ours|solutions)$/;
+  var LONG = /^(description|transcription|handi|handiInfos|horaires|telephone|body|bodyEn|desc|texte|text|dek|dekEn|hook|moment|t|kicker|accroche|motif|message|why|citation|citationEn|note|lead|a|d|ours|solutions)$/;
 
   // ---------- état ----------
   var S = { open: false, tab: 'msg', setup: null, msgs: [], mf: 'tous', q: '', sel: null, compose: null, contacts: [], team: [], reqs: [], subs: [], key: null, work: null, dirty: false, openCards: {}, images: [], busy: false, loaded: {} };
@@ -740,6 +747,9 @@
       return [lab, sel];
     }
     if (k === 'audio') return [lab, audioField(parent, k)];
+    if (S.key === 'CASA_PODCAST' && (k === 'video' || k === 'fondVideo')) return [lab, audioField(parent, k, 'video')];
+    if (S.key === 'CASA_PODCAST' && k === 'fond') return [lab, fondStudioField(parent, k)];
+    if (S.key === 'CASA_PODCAST' && k === 'fondPerso') return [lab, imgField(parent, k)];
     if (isImg(k, str)) return [lab, imgField(parent, k)];
     var long = LONG.test(String(k)) || str.length > 70 || str.indexOf('\n') >= 0;
     var inp = long ? E('textarea', { class: 'cba-in', value: str, rows: String(Math.min(18, Math.max(3, Math.ceil(str.length / 90) + (str.match(/\n/g) || []).length))) }) : E('input', { class: 'cba-in', value: str });
@@ -769,8 +779,18 @@
         E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { pickImage(set); } }, 'Bibliothèque'),
         parent[k] ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { set(''); } }, 'Retirer') : null)));
   }
-  // Fichier audio du podcast : envoi dans le stockage du site (dossier podcast/) ou adresse collée
-  function audioField(parent, k) {
+  // Casa Studio : les 4 ambiances dessinées pour Casa Besports (assets/studio/), avec aperçu
+  var STUDIO_FONDS = [['auto', 'Automatique (Studio Session pour une émission, Warm Studio pour une réaction)'], ['gold-edition', 'Gold Edition · noir et or, émissions premium et masterclass'], ['classic-microphone', 'Classic Microphone · noir et blanc, sobre et documentaire'], ['studio-session', 'Studio Session · studio d’enregistrement'], ['warm-studio', 'Warm Studio · chaleureux, interviews et récits']];
+  function fondStudioField(parent, k) {
+    var prev = E('img', { alt: '', style: 'width:160px;height:90px;object-fit:cover;display:block;margin-top:.35rem;background:#111' });
+    var maj = function () { var v = parent[k] && parent[k] !== 'auto' ? parent[k] : (/mission/i.test(parent.type || '') ? 'studio-session' : 'warm-studio'); prev.src = 'assets/studio/' + v + '-paysage.jpg'; };
+    var sel = E('select', { class: 'cba-in', onchange: function (e) { parent[k] = e.target.value; maj(); mark(); } }, STUDIO_FONDS.map(function (o) { return E('option', { value: o[0], selected: (parent[k] || 'auto') === o[0] || null }, o[1]); }));
+    maj();
+    return E('div', {}, sel, prev, E('p', { class: 'cba-sub', style: 'margin:.3rem 0 0' }, 'Illustrations créées pour Casa Besports (droits maîtrisés). Une image ou une vidéo de fond ajoutée plus bas les remplace.'));
+  }
+  // Fichier audio du podcast (ou vidéo de Casa Studio) : envoi dans le stockage du site (dossier podcast/) ou adresse collée
+  function audioField(parent, k, kind) {
+    if (kind === 'video') return videoField(parent, k);
     var player = E('audio', { controls: true, preload: 'none', src: parent[k] || null, style: 'width:100%;margin-top:.35rem' + (parent[k] ? '' : ';display:none') });
     var inp = E('input', { class: 'cba-in', value: parent[k] || '', placeholder: 'Adresse du fichier .mp3 ou bouton « Envoyer un fichier audio »', oninput: function (e) { parent[k] = e.target.value; player.src = e.target.value; player.style.display = e.target.value ? '' : 'none'; mark(); } });
     var btn = E('button', { type: 'button', class: 'cba-btn sm' }, 'Envoyer un fichier audio');
@@ -779,6 +799,21 @@
       btn.disabled = true; btn.textContent = 'Envoi…';
       uploadAudio(f).then(function (u) { parent[k] = u; inp.value = u; player.src = u; player.style.display = ''; mark(); btn.disabled = null; btn.textContent = 'Envoyer un fichier audio'; toast('Fichier audio enregistré : pensez à « Enregistrer et publier »'); },
         function (er) { btn.disabled = null; btn.textContent = 'Envoyer un fichier audio'; err(er); });
+    } });
+    btn.addEventListener('click', function () { file.click(); });
+    return E('div', {}, inp, E('div', { class: 'cba-row', style: 'margin-top:.35rem' }, btn, file), player);
+  }
+  function videoField(parent, k) {
+    var player = E('video', { controls: true, preload: 'none', playsinline: true, src: parent[k] || null, style: 'width:100%;max-width:360px;margin-top:.35rem' + (parent[k] ? '' : ';display:none') });
+    var inp = E('input', { class: 'cba-in', value: parent[k] || '', placeholder: 'Adresse du fichier .mp4 ou bouton « Envoyer une vidéo »', oninput: function (e) { parent[k] = e.target.value; player.src = e.target.value; player.style.display = e.target.value ? '' : 'none'; mark(); } });
+    var btn = E('button', { type: 'button', class: 'cba-btn sm' }, 'Envoyer une vidéo');
+    var file = E('input', { type: 'file', accept: 'video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov', style: 'display:none', onchange: function (e) {
+      var f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+      if (f.size > 50 * 1024 * 1024) { err(new Error('Vidéo trop lourde (50 Mo maximum) : exportez-la en .mp4 720p, ou déposez-la sur YouTube et utilisez la section Vidéos')); return; }
+      var ext = (/\.(mp4|webm|mov)$/i.exec(f.name || '') || [0, 'mp4'])[1].toLowerCase(), d = new Date(), stamp = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+      btn.disabled = true; btn.textContent = 'Envoi…';
+      A.uploadImage(f, 'podcast/' + stamp + '-' + slug(f.name.replace(/\.[^.]+$/, '')) + '-' + Math.random().toString(36).slice(2, 6) + '.' + ext).then(function (u) { parent[k] = u; inp.value = u; player.src = u; player.style.display = ''; mark(); btn.disabled = null; btn.textContent = 'Envoyer une vidéo'; toast('Vidéo enregistrée : pensez à « Enregistrer et publier »'); },
+        function (er) { btn.disabled = null; btn.textContent = 'Envoyer une vidéo'; var m = String((er && er.message) || er); err(/mime|type|size|large|exceed/i.test(m) ? new Error('Le stockage refuse cette vidéo : lancez une fois supabase/podcast.sql (format .mp4, 50 Mo maximum)') : er); });
     } });
     btn.addEventListener('click', function () { file.click(); });
     return E('div', {}, inp, E('div', { class: 'cba-row', style: 'margin-top:.35rem' }, btn, file), player);

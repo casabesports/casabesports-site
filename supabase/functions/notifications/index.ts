@@ -11,6 +11,8 @@
 //   retirer   public  → supprime un appareil (la personne a désactivé les notifications)
 //   etat      admin   → nombre d'appareils inscrits + 20 derniers envois
 //   envoyer   admin   → { titre, texte, lien, essai? } : envoie à tous les appareils (ou au seul appareil « essai »)
+//   lineup    connecté → { envoi } : prévient les destinataires d'une composition envoyée (Casa Lineup),
+//                       ou l'expéditeur quand on lui a répondu. Tables : supabase/lineups.sql
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as webpush from 'jsr:@negrel/webpush@0.5.0';
 
@@ -72,6 +74,29 @@ async function estAdmin(req: Request) {
   return data === true;
 }
 
+// Envoie un message à une liste d'appareils, retire ceux qui n'existent plus
+async function pousser(lignes: { endpoint: string; p256dh: string; auth: string }[], titre: string, texte: string, lien: string) {
+  const contact = Deno.env.get('NOTIF_CONTACT') || Deno.env.get('EXPEDITEUR_EMAIL') || 'contact@casabesports.fr';
+  const serveur = await webpush.ApplicationServer.new({ contactInformation: 'mailto:' + contact, vapidKeys: (await cles()).keys });
+  const message = JSON.stringify({ title: titre, body: texte, url: lien, tag: 'casa-' + Date.now().toString(36) });
+  let envoyees = 0, echecs = 0; const perimes: string[] = []; const erreurs: string[] = [];
+  for (let i = 0; i < lignes.length; i += 25) { // 25 appareils à la fois
+    await Promise.all(lignes.slice(i, i + 25).map(async (s) => {
+      try {
+        await serveur.subscribe({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } })
+          .pushTextMessage(message, { ttl: 86400, urgency: webpush.Urgency.High });
+        envoyees++;
+      } catch (e) {
+        const st = (e as webpush.PushMessageError)?.response?.status;
+        if (st === 404 || st === 410) perimes.push(s.endpoint); // appareil désinscrit : on le retire
+        else { echecs++; if (erreurs.length < 3) erreurs.push(st ? 'code ' + st + ' ' + (await (e as webpush.PushMessageError).response.text().catch(() => '')).slice(0, 120) : String((e as Error)?.message || e)); }
+      }
+    }));
+  }
+  if (perimes.length) await service.from('push_abonnements').delete().in('endpoint', perimes);
+  return { envoyees, echecs, perimes, erreurs };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   if (req.method !== 'POST') return json({ error: 'Méthode non autorisée' }, 405);
@@ -101,6 +126,33 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    // ----- Casa Lineup : une composition a été envoyée, ou on a répondu à un envoi -----
+    if (action === 'lineup') {
+      const moi = await utilisateur(req);
+      if (!moi) return json({ error: 'Connexion requise' }, 401);
+      const id = String(body.envoi ?? '');
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ error: 'Envoi invalide' }, 400);
+      const { data: e } = await service.from('lineup_envois').select('id, lineup_id, expediteur, expediteur_nom, dest_libelle, statut, repondu_par, repondu_nom, notifie').eq('id', id).maybeSingle();
+      if (!e) return json({ ok: true, envoyees: 0 });
+      let cibles: string[] = []; let titre = ''; let texte = '';
+      if (e.statut === 'envoye' && e.expediteur === moi && e.notifie !== 'envoye') {
+        const { data } = await service.rpc('lineup_destinataires', { e: id });
+        cibles = ((data ?? []) as string[]).filter((u) => u && u !== moi);
+        titre = 'Nouvelle composition reçue';
+        texte = (e.expediteur_nom || 'Quelqu’un') + ' vous a envoyé une composition. Ouvrez-la pour l’accepter, la refuser ou proposer une modification.';
+      } else if (e.statut !== 'envoye' && e.repondu_par === moi && e.notifie !== e.statut) {
+        cibles = e.expediteur && e.expediteur !== moi ? [e.expediteur] : [];
+        const mot = e.statut === 'accepte' ? 'a accepté' : e.statut === 'refuse' ? 'a refusé' : 'propose une modification de';
+        titre = 'Réponse à votre composition';
+        texte = (e.repondu_nom || e.dest_libelle || 'Le destinataire') + ' ' + mot + ' votre composition.';
+      } else return json({ ok: true, envoyees: 0 });
+      await service.from('lineup_envois').update({ notifie: e.statut }).eq('id', id); // une seule notification par étape
+      if (!cibles.length) return json({ ok: true, envoyees: 0 });
+      const { data: appareils } = await service.from('push_abonnements').select('endpoint, p256dh, auth').in('user_id', cibles.slice(0, 500)).limit(5000);
+      const r = await pousser(appareils ?? [], titre, texte, '/?compo=' + e.lineup_id + '&envoi=' + e.id);
+      return json({ ok: true, envoyees: r.envoyees });
+    }
+
     // ----- réservé à l'administrateur -----
     if (!(await estAdmin(req))) return json({ error: 'Réservé à l’administrateur' }, 403);
 
@@ -128,26 +180,7 @@ Deno.serve(async (req) => {
       if (error) return json({ error: error.message }, 500);
       if (essai && !(liste ?? []).length) return json({ error: 'Cet appareil n’est pas inscrit : touchez d’abord « Activer les notifications » sur le site.' }, 400);
 
-      const contact = Deno.env.get('NOTIF_CONTACT') || Deno.env.get('EXPEDITEUR_EMAIL') || 'contact@casabesports.fr';
-      const serveur = await webpush.ApplicationServer.new({ contactInformation: 'mailto:' + contact, vapidKeys: (await cles()).keys });
-      const message = JSON.stringify({ title: titre, body: texte, url: lien, tag: 'casa-' + Date.now().toString(36) });
-
-      let envoyees = 0, echecs = 0; const perimes: string[] = []; const erreurs: string[] = [];
-      const lignes = liste ?? [];
-      for (let i = 0; i < lignes.length; i += 25) { // 25 appareils à la fois
-        await Promise.all(lignes.slice(i, i + 25).map(async (s) => {
-          try {
-            await serveur.subscribe({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } })
-              .pushTextMessage(message, { ttl: 86400, urgency: webpush.Urgency.High });
-            envoyees++;
-          } catch (e) {
-            const st = (e as webpush.PushMessageError)?.response?.status;
-            if (st === 404 || st === 410) perimes.push(s.endpoint); // appareil désinscrit : on le retire
-            else { echecs++; if (erreurs.length < 3) erreurs.push(st ? 'code ' + st + ' ' + (await (e as webpush.PushMessageError).response.text().catch(() => '')).slice(0, 120) : String((e as Error)?.message || e)); }
-          }
-        }));
-      }
-      if (perimes.length) await service.from('push_abonnements').delete().in('endpoint', perimes);
+      const { envoyees, echecs, perimes, erreurs } = await pousser(liste ?? [], titre, texte, lien);
       await service.from('notifications_envoyees').insert({ titre, texte: texte || null, lien, essai: !!essai, envoyees, echecs, retirees: perimes.length, par: await utilisateur(req) });
       return json({ ok: true, envoyees, echecs, retirees: perimes.length, erreurs });
     }
