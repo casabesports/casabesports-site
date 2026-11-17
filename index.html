@@ -7919,14 +7919,29 @@ img, video, canvas, svg { max-width: 100%; }
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem"><div class="ttl" style="font-size: 28px">{{pwTitle}}</div><button type="button" onClick="{{closePw}}" aria-label="Fermer" style="width: 44px; height: 44px; flex: none; border: 0; background: var(--surface-2); border-radius: 50%; cursor: pointer; font-size: 20px; color: var(--text)">×</button></div>
       <sc-if value="{{pwNotDone}}" hint-placeholder-val="{{ true }}">
         <p style="color: var(--text-2); margin: 0 0 1rem">Vous vous connecterez ensuite avec votre e-mail (ou votre mobile) et ce mot de passe. 8 caractères minimum.</p>
+        <sc-if value="{{pwHasIdent}}" hint-placeholder-val="{{ true }}"><p style="margin: 0 0 1rem; padding: .7rem .9rem; background: var(--surface-2); font-size: 14px">Votre identifiant de connexion : <strong>{{pwIdent}}</strong><br><span style="color: var(--text-2)">Utilisez toujours celui-ci pour retrouver ce compte.</span></p></sc-if>
+        <sc-if value="{{dupFound}}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="margin: 0 0 1rem; padding: .9rem; border: 2px solid var(--danger); font-size: 14px">
+            <strong>Vous avez déjà un compte avec {{dupFound}}.</strong> Pour ne pas avoir deux comptes (et deux fiches abonné), supprimez celui-ci, qui vient d’être créé avec votre mobile, puis connectez-vous avec votre e-mail.
+            <button type="button" class="btn btn-dark" onClick="{{dupDelete}}" disabled="{{authBusy}}" style="width: 100%; margin-top: .75rem">{{dupDeleteLabel}}</button>
+            <button type="button" class="crumb" onClick="{{dupKeep}}" style="margin-top: .5rem">Ce n’est pas mon adresse : en saisir une autre</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{noDup}}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{pwNeedEmail}}" hint-placeholder-val="{{ false }}">
+          <label class="lbl" style="margin-bottom: 1rem">Votre e-mail <span style="font-weight: 500; color: var(--muted)">(conseillé : un seul compte, et mot de passe récupérable)</span><input class="field" type="email" autocomplete="email" value="{{pwEmail}}" onChange="{{onPwEmail}}" placeholder="vous@exemple.fr"></label>
+        </sc-if>
         <label class="lbl" style="margin-bottom: 1rem">Nouveau mot de passe<span style="position: relative; display: block"><input class="field" style="width: 100%; padding-right: 6rem" type="{{pwType}}" autocomplete="new-password" value="{{pw}}" onChange="{{onPw}}"><button type="button" onClick="{{togglePwShow}}" aria-label="{{pwEyeAria}}" aria-pressed="{{pwShown}}" style="position: absolute; right: .35rem; top: 50%; transform: translateY(-50%); min-height: 36px; padding: 0 .7rem; border: 0; background: transparent; color: var(--text-2); font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: .35rem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>{{pwEye}}</button></span></label>
         <label class="lbl" style="margin-bottom: 1rem">Confirmez le mot de passe<span style="position: relative; display: block"><input class="field" style="width: 100%; padding-right: 6rem" type="{{pwType}}" autocomplete="new-password" value="{{pw2}}" onChange="{{onPw2}}"><button type="button" onClick="{{togglePwShow}}" aria-label="{{pwEyeAria}}" aria-pressed="{{pwShown}}" style="position: absolute; right: .35rem; top: 50%; transform: translateY(-50%); min-height: 36px; padding: 0 .7rem; border: 0; background: transparent; color: var(--text-2); font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: .35rem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>{{pwEye}}</button></span></label>
         <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div role="alert" style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
         <button type="button" class="btn btn-dark" onClick="{{savePw}}" disabled="{{authBusy}}" style="width: 100%">{{pwSaveLabel}}</button>
+        </sc-if>
         <button type="button" class="crumb" onClick="{{closePw}}" style="margin-top: .75rem">Plus tard (depuis Mon compte)</button>
       </sc-if>
       <sc-if value="{{pwDone}}" hint-placeholder-val="{{ false }}">
-        <p style="color: var(--text-2); margin: 0 0 1.25rem">Mot de passe enregistré. La prochaine fois : « Connexion › J’ai un compte ».</p>
+        <sc-if value="{{pwChecked}}" hint-placeholder-val="{{ true }}"><p style="color: var(--text-2); margin: 0 0 1rem">✓ Mot de passe enregistré et <strong>connexion vérifiée</strong>. La prochaine fois : « Connexion › J’ai un compte » avec <strong>{{pwCheckIdent}}</strong> et ce mot de passe.</p></sc-if>
+        <sc-if value="{{pwCheckFailed}}" hint-placeholder-val="{{ false }}"><p role="alert" style="color: var(--danger); font-weight: 700; margin: 0 0 1rem">Mot de passe enregistré, mais la connexion de contrôle a échoué : {{pwCheckWhy}} Déconnectez-vous puis essayez « J’ai un compte » ; si cela ne marche pas, utilisez « Mot de passe oublié ».</p></sc-if>
+        <sc-if value="{{hasPwEmailSent}}" hint-placeholder-val="{{ false }}"><p style="color: var(--text-2); margin: 0 0 1rem">Un e-mail de confirmation a été envoyé à <strong>{{pwEmailSent}}</strong> : ouvrez-le pour rattacher cette adresse à votre compte.</p></sc-if>
         <button type="button" class="btn btn-dark" onClick="{{closePw}}" style="width: 100%">Continuer</button>
       </sc-if>
     </div>
@@ -7966,7 +7981,7 @@ img, video, canvas, svg { max-width: 100%; }
           <button type="button" class="crumb" onClick="{{setLoginPw}}" style="margin-top: .75rem">Retour à la connexion</button>
         </sc-if>
         <sc-if value="{{loginBySignup}}" hint-placeholder-val="{{ false }}">
-        <p style="color: var(--text-2); margin: 0 0 1rem">Recevez un lien par e-mail ou un code par SMS : votre compte est créé, puis vous choisissez votre mot de passe pour les prochaines fois.</p>
+        <p style="color: var(--text-2); margin: 0 0 1rem">Recevez un lien par e-mail ou un code par SMS : votre compte est créé, puis vous choisissez votre mot de passe pour les prochaines fois. <strong>Déjà inscrit ?</strong> Utilisez le même e-mail ou le même mobile que la première fois : vous retrouvez votre compte, rien n’est créé en double.</p>
         <div role="tablist" aria-label="Mode de connexion" style="display: flex; gap: .4rem; margin-bottom: 1rem">
           <button type="button" role="tab" aria-selected="{{loginByEmailAria}}" class="{{loginEmailCls}}" onClick="{{setLoginEmail}}" style="flex: 1; min-height: 44px; font-size: 15px">E-mail</button>
           <button type="button" role="tab" aria-selected="{{loginByPhoneAria}}" class="{{loginPhoneCls}}" onClick="{{setLoginPhone}}" style="flex: 1; min-height: 44px; font-size: 15px">Téléphone mobile</button>

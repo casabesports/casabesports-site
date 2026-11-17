@@ -156,7 +156,8 @@ class Component extends DCLogic {
           if (firstFor && window.CasaAuth.registerMember) window.CasaAuth.registerMember(cbMemberNo(u.id), String(u.name || this.state.name || '').trim().split(/\s+/)[0] || null).catch(() => {});
           this.applyProfileTheme((u.email || u.phone || u.id).toLowerCase());
           const needPw = !u.hasPassword || window.CasaAuth.recovery;
-          this.setState({ hasPassword: !!u.hasPassword, pwOpen: needPw && !this.readLS('cb-pw-later-' + u.id, false) || window.CasaAuth.recovery, pw: '', pw2: '', pwDone: false });
+          // Pendant la vérification du nouveau mot de passe (reconnexion automatique), on ne referme pas la fenêtre
+          if (!window.CasaAuth.verifPw && !this._pwFlow) this.setState({ hasPassword: !!u.hasPassword, pwOpen: needPw && !this.readLS('cb-pw-later-' + u.id, false) || window.CasaAuth.recovery, pw: '', pw2: '', pwDone: false, pwEmail: '', dupFound: '', pwCheck: null });
           if (!wasIn) this.say('Connecté. Bienvenue !');
         } else if (this.state.loggedIn) { this._authFor = null; this.rxReset(); this.setState({ loggedIn: false, role: null, accReq: null, subs: { casab: false, gazette: null }, paidSubs: false, orders: this.state.orders.filter((o) => !o.srv) }); if (this.state.view === 'studio') this.go('home'); }
       });
@@ -910,6 +911,16 @@ class Component extends DCLogic {
   isoOf(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   addDays(n) { const d = this.today0(); d.setDate(d.getDate() + n); return this.isoOf(d); }
   addMyMr(m) { if (typeof CasaCV === 'undefined') return; const P = CasaCV.prof(this); CasaCV.setProf(this, { mr: [m].concat((P.mr || []).filter((x) => x.ref !== m.ref)).slice(0, 30) }, true); }
+  // Avant d'envoyer un lien ou un code d'inscription : si cet appareil connaît déjà un compte avec un AUTRE
+  // identifiant (ex. compte créé par e-mail, inscription tentée par SMS), on prévient une fois pour éviter un doublon.
+  dupWarn(ident) {
+    const A = window.CasaAuth, last = A && A.lastAccount ? A.lastAccount() : null;
+    if (!last || ident === last.email || ident === last.phone || this.state.dupWarned === ident) return false;
+    const mask = (v) => /@/.test(v) ? v.replace(/^(.)[^@]*(@.*)$/, '$1•••$2') : v.replace(/^(\+\d{2})\d+(\d{2})$/, '$1 •• •• •• $2');
+    const connu = last.email || last.phone;
+    this.setState({ dupWarned: ident, formError: 'Attention : un compte existe déjà sur cet appareil (' + mask(connu) + '). Pour ne pas avoir deux comptes, connectez-vous plutôt avec ' + (last.email ? 'cet e-mail' : 'ce mobile') + '. Si c’est bien une autre personne, cliquez à nouveau pour continuer.' });
+    return true;
+  }
   readLS(k, fallback) { try { const v = window.localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } }
   writeLS(k, v) { try { window.localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 
@@ -3222,6 +3233,7 @@ class Component extends DCLogic {
       sendLink: () => {
         if (!validEmail) { this.setState({ formError: 'Saisissez un e-mail valide.' }); return; }
         if (!authLive) { this.setState({ linkSent: true, formError: '' }); return; }
+        if (this.dupWarn(s.email.trim().toLowerCase())) return;
         this.setState({ authBusy: true, formError: '' });
         window.CasaAuth.sendEmail(s.email.trim().toLowerCase(), s.name.trim()).then(() => this.setState({ authBusy: false, linkSent: true }), (e) => this.setState({ authBusy: false, formError: e.message }));
       },
@@ -3252,7 +3264,24 @@ class Component extends DCLogic {
         this.setState({ authBusy: true, formError: '' });
         window.CasaAuth.resetPassword(s.email).then(() => this.setState({ authBusy: false, resetSent: true }), (e) => this.setState({ authBusy: false, formError: e.message }));
       },
-      pwOpen: s.pwOpen && s.loggedIn, hasPassword: s.hasPassword, pwTitle: s.hasPassword && !(window.CasaAuth && window.CasaAuth.recovery) ? 'Changer mon mot de passe' : 'Choisissez votre mot de passe',
+      pwOpen: s.pwOpen && s.loggedIn, hasPassword: s.hasPassword,
+      // Anti-doublon : identifiant du compte, e-mail à ajouter si le compte a été créé par SMS, vérification de la connexion
+      pwIdent: (() => { const A = window.CasaAuth; const i = A && A.identifiant ? A.identifiant() : null; return i ? i.label : (s.email || s.phone || ''); })(),
+      pwHasIdent: !!(window.CasaAuth && window.CasaAuth.identifiant && window.CasaAuth.identifiant()),
+      pwNeedEmail: !!(authLive && window.CasaAuth.user && !window.CasaAuth.user.email && !window.CasaAuth.user.emailPending && window.CasaAuth.user.phone),
+      pwEmail: s.pwEmail || '', onPwEmail: (e) => this.setState({ pwEmail: e.target.value, dupFound: '' }),
+      dupFound: s.dupFound || '', noDup: !s.dupFound,
+      dupDeleteLabel: s.authBusy ? 'Suppression…' : 'Supprimer ce nouveau compte et me connecter avec mon e-mail',
+      dupDelete: () => {
+        const mail = s.dupFound;
+        if (!confirm('Ce compte créé avec votre mobile va être supprimé. Vous vous connecterez ensuite avec ' + mail + '. Continuer ?')) return;
+        this.setState({ authBusy: true, formError: '' });
+        window.CasaAuth.deleteDuplicate().then(() => { this.setState({ authBusy: false, pwOpen: false, dupFound: '', loggedIn: false, loginOpen: true, loginMode: 'email', email: mail, loginId: mail, linkSent: false }); this.say('Compte en double supprimé : connectez-vous avec ' + mail); }, (e) => this.setState({ authBusy: false, formError: e.message }));
+      },
+      dupKeep: () => this.setState({ dupFound: '', pwEmail: '', formError: '' }),
+      pwChecked: !!(s.pwCheck && s.pwCheck.verifie), pwCheckFailed: !!(s.pwCheck && !s.pwCheck.verifie),
+      pwCheckIdent: (s.pwCheck && s.pwCheck.identifiant) || '', pwCheckWhy: (s.pwCheck && s.pwCheck.raison) || '',
+      pwEmailSent: s.pwEmailSent || '', hasPwEmailSent: !!s.pwEmailSent, pwTitle: s.hasPassword && !(window.CasaAuth && window.CasaAuth.recovery) ? 'Changer mon mot de passe' : 'Choisissez votre mot de passe',
       pwBtnLabel: s.hasPassword ? 'Changer mon mot de passe' : 'Créer mon mot de passe', pwDone: s.pwDone, pwNotDone: !s.pwDone, pwSaveLabel: s.authBusy ? 'Enregistrement…' : 'Enregistrer le mot de passe',
       openPw: () => this.setState({ pwOpen: true, pw: '', pw2: '', pwDone: false, formError: '' }),
       closePw: () => { const u = window.CasaAuth && window.CasaAuth.user; if (u && !s.hasPassword) this.writeLS('cb-pw-later-' + u.id, true); if (window.CasaAuth) window.CasaAuth.recovery = false; this.setState({ pwOpen: false, formError: '' }); },
@@ -3260,8 +3289,18 @@ class Component extends DCLogic {
         if (String(s.pw).length < 8) { this.setState({ formError: 'Le mot de passe doit contenir au moins 8 caractères.' }); return; }
         if (s.pw !== s.pw2) { this.setState({ formError: 'Les deux mots de passe ne sont pas identiques.' }); return; }
         if (!authLive) { this.setState({ pwDone: true, hasPassword: true }); return; }
-        this.setState({ authBusy: true, formError: '' });
-        window.CasaAuth.setPassword(s.pw).then(() => { window.CasaAuth.recovery = false; this.setState({ authBusy: false, pwDone: true, hasPassword: true, pw: '', pw2: '' }); }, (e) => this.setState({ authBusy: false, formError: e.message }));
+        const A = window.CasaAuth, mail = String(s.pwEmail || '').trim().toLowerCase();
+        const needMail = !!(A.user && !A.user.email && !A.user.emailPending && A.user.phone);
+        if (needMail && mail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) { this.setState({ formError: 'Adresse e-mail invalide (ou laissez la case vide).' }); return; }
+        this.setState({ authBusy: true, formError: '', dupFound: '' }); this._pwFlow = true;
+        // 1. Compte créé par SMS : on rattache l'e-mail AVANT le mot de passe. Supabase refuse une adresse déjà prise
+        //    par un autre compte : on le dit tout de suite au lieu de laisser deux comptes pour la même personne.
+        const etape1 = needMail && mail ? A.linkEmail(mail).then(() => mail) : Promise.resolve('');
+        etape1.then((envoye) =>
+          // 2. Mot de passe, puis reconnexion de contrôle avec l'identifiant du compte
+          A.setPassword(s.pw).then((res) => { A.recovery = false; this.setState({ authBusy: false, pwDone: true, hasPassword: true, pw: '', pw2: '', pwCheck: res, pwEmailSent: envoye }); }),
+        (e) => { if (e && e.code === 'existe') this.setState({ authBusy: false, dupFound: mail }); else throw e; })
+          .catch((e) => this.setState({ authBusy: false, formError: e.message })).then(() => { this._pwFlow = false; });
       },
       phone: s.phone, onPhone: (e) => this.setState({ phone: e.target.value }), smsCode: s.smsCode, onSmsCode: (e) => this.setState({ smsCode: e.target.value }),
       codeSent: s.codeSent, codeNotSent: !s.codeSent,
@@ -3270,6 +3309,7 @@ class Component extends DCLogic {
         const ph = window.CasaAuth ? window.CasaAuth.phone(s.phone) : '';
         if (!ph) { this.setState({ formError: 'Saisissez un numéro de mobile valide (ex. 06 12 34 56 78).' }); return; }
         if (!authLive) { this.setState({ phone: ph, codeSent: true, formError: '' }); return; }
+        if (this.dupWarn(ph)) return;
         this.setState({ authBusy: true, formError: '', phone: ph });
         window.CasaAuth.sendSms(ph, s.name.trim()).then(() => this.setState({ authBusy: false, codeSent: true }), (e) => this.setState({ authBusy: false, formError: e.message }));
       },

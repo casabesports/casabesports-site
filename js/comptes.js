@@ -51,13 +51,46 @@
         return d;
       }, function (e) { A.viaPassword = false; throw e; });
     },
-    // Créer ou changer son mot de passe (une fois connecté)
+    // Créer ou changer son mot de passe (une fois connecté), puis VÉRIFIER la connexion :
+    // on se reconnecte aussitôt avec l'identifiant du compte + ce mot de passe, et on contrôle que c'est bien
+    // le même compte (même id). Renvoie { verifie: true|false, identifiant, raison }.
     setPassword: function (password) {
-      return use(function (c) { return c.auth.updateUser({ password: password, data: { has_password: true } }); }).then(function (d) {
-        if (A.user) { A.user.hasPassword = true; emit(A.user); }
-        return d;
+      var avant = A.user;
+      return use(function (c) { return c.auth.updateUser({ password: password, data: { has_password: true } }); }).then(function () {
+        if (A.user) A.user.hasPassword = true;
+        var ident = A.identifiant(avant);
+        if (!ident) return { verifie: false, identifiant: '', raison: 'Aucun identifiant confirmé sur ce compte.' };
+        var cred = ident.email ? { email: ident.email, password: password } : { phone: ident.phone, password: password };
+        A.verifPw = true; A.viaPassword = true;
+        return use(function (c) { return c.auth.signInWithPassword(cred); }).then(function (d) {
+          A.verifPw = false;
+          var memeCompte = !!(d && d.user && avant && d.user.id === avant.id);
+          return { verifie: memeCompte, identifiant: ident.label, raison: memeCompte ? '' : 'La connexion a ouvert un autre compte.' };
+        }, function (e) { A.verifPw = false; return { verifie: false, identifiant: ident.label, raison: e.message }; });
       });
     },
+    // Identifiant de connexion du compte : e-mail confirmé en priorité, sinon numéro de mobile
+    identifiant: function (u) {
+      u = u || A.user; if (!u) return null;
+      if (u.email && u.emailOk) return { email: u.email.toLowerCase(), label: u.email.toLowerCase() };
+      if (u.phone) return { phone: u.phone, label: u.phone };
+      if (u.email) return { email: u.email.toLowerCase(), label: u.email.toLowerCase() };
+      return null;
+    },
+    // Ajouter son e-mail à un compte créé par SMS. Supabase refuse une adresse déjà utilisée par un autre compte :
+    // l'erreur porte alors code = 'existe' (le site propose de supprimer ce compte en double).
+    linkEmail: function (email) {
+      email = String(email || '').trim().toLowerCase();
+      return use(function (c) { return c.auth.updateUser({ email: email }, { emailRedirectTo: location.origin + location.pathname }); });
+    },
+    // Supprimer le compte tout juste créé quand la personne en avait déjà un (voir supabase/comptes.sql) puis se déconnecter
+    deleteDuplicate: function () {
+      return use(function (c) { return c.rpc('supprimer_compte_doublon'); }).then(function () {
+        return use(function (c) { return c.auth.signOut(); }).catch(function () {});
+      });
+    },
+    // Dernier compte utilisé sur cet appareil (e-mail / mobile) : sert à prévenir avant d'en créer un deuxième
+    lastAccount: function () { try { var v = JSON.parse(localStorage.getItem('cb-compte-appareil') || 'null'); return v && (v.email || v.phone) ? v : null; } catch (e) { return null; } },
     // Mot de passe oublié : lien de réinitialisation par e-mail
     resetPassword: function (email) {
       return use(function (c) { return c.auth.resetPasswordForEmail(String(email).trim().toLowerCase(), { redirectTo: location.origin + location.pathname }); });
@@ -189,22 +222,28 @@
   // Client Supabase brut (canaux temps réel du quiz en réseau, js/jeux.js)
   A.client = function () { return ready; };
 
-  function emit(u) { A.user = u; listeners.forEach(function (cb) { try { cb(u); } catch (e) {} }); }
+  function emit(u) {
+    A.user = u;
+    if (u && (u.email || u.phone)) { try { localStorage.setItem('cb-compte-appareil', JSON.stringify({ email: u.email ? u.email.toLowerCase() : '', phone: u.phone || '' })); } catch (e) {} }
+    listeners.forEach(function (cb) { try { cb(u); } catch (e) {} }); }
   function toUser(session) {
     var u = session && session.user; if (!u) return null;
     var m = u.user_metadata || {};
-    return { id: u.id, email: u.email || '', phone: u.phone ? '+' + String(u.phone).replace(/^\+/, '') : '', name: m.name || '', hasPassword: !!m.has_password || !!A.viaPassword, created: u.created_at || '', prefs: m.accueil && typeof m.accueil === 'object' ? m.accueil : null };
+    return { id: u.id, email: u.email || '', phone: u.phone ? '+' + String(u.phone).replace(/^\+/, '') : '', emailOk: !!u.email_confirmed_at, emailPending: u.new_email || '', name: m.name || '', hasPassword: !!m.has_password || !!A.viaPassword, created: u.created_at || '', prefs: m.accueil && typeof m.accueil === 'object' ? m.accueil : null };
   }
   function use(fn) {
     return ready.then(function (c) {
       return fn(c).then(function (r) {
         if (r && r.error) {
-          var msg = r.error.message || 'Erreur';
+          var msg = r.error.message || 'Erreur', code = r.error.code || '';
+          if (code === 'email_exists' || /already (been )?registered|email.*already.*(exists|use)/i.test(msg)) { var ex = new Error('Cette adresse e-mail a déjà un compte Casa Besports.'); ex.code = 'existe'; throw ex; }
+          if (code === 'phone_exists' || /phone.*already.*(registered|exists|use)/i.test(msg)) { var ex2 = new Error('Ce numéro de mobile a déjà un compte Casa Besports.'); ex2.code = 'existe'; throw ex2; }
           if (/rate limit|seconds/i.test(msg)) msg = 'Trop de demandes : patientez une minute puis réessayez.';
           else if (/invalid|expired/i.test(msg) && /token|otp/i.test(msg)) msg = 'Code incorrect ou expiré.';
           else if (/phone.*(provider|disabled)|unsupported phone/i.test(msg)) msg = 'La connexion par SMS n’est pas encore activée.';
+          else if (/supprimer_compte_doublon/i.test(msg)) msg = 'Suppression impossible pour l’instant (réglage Supabase à faire : supabase/comptes.sql).';
           else if (/signups not allowed/i.test(msg)) msg = 'Les inscriptions sont fermées pour le moment.';
-          else if (/invalid login credentials/i.test(msg)) msg = 'Identifiant ou mot de passe incorrect. Première visite ? Créez votre compte avec l’onglet « Créer un compte ».';
+          else if (/invalid login credentials/i.test(msg)) msg = 'Identifiant ou mot de passe incorrect. Pas encore de mot de passe ? Choisissez « Connexion par lien ou SMS » avec l’e-mail ou le mobile utilisé la première fois : vous retrouverez votre compte, sans en créer un deuxième.';
           else if (/email not confirmed/i.test(msg)) msg = 'Adresse e-mail pas encore confirmée : ouvrez le lien reçu par e-mail.';
           else if (/password.*(at least|characters|short)/i.test(msg)) msg = 'Le mot de passe doit contenir au moins 8 caractères.';
           else if (/password.*(weak|pwned|known)/i.test(msg)) msg = 'Mot de passe trop simple : ajoutez des chiffres et des majuscules.';

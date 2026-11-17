@@ -55,6 +55,31 @@ Supabase › **Authentication › Sign In / Providers › Email** : laissez « E
 Supabase › **Authentication › Policies** (ou *Password security*) : longueur minimale **8**, et cochez « Prevent use of leaked passwords » si proposé.
 Le lien « Mot de passe oublié » utilise le modèle d'e-mail **Reset Password** (Authentication › Emails), à traduire en français comme les autres.
 
+## 7. Un seul compte par personne (doublons)
+
+Supabase refuse déjà tout seul deux comptes avec **le même e-mail** ou **le même mobile**.
+Le seul doublon possible : une personne s'inscrit une fois avec son e-mail, puis une autre fois avec son mobile.
+Le site l'évite de trois façons :
+
+- **À la création du mot de passe**, il affiche l'identifiant du compte, puis **se reconnecte aussitôt avec ce mot de passe**
+  pour vérifier que la connexion marche et ouvre bien le même compte (« ✓ connexion vérifiée »).
+- **Compte créé par SMS** : il demande l'e-mail en même temps que le mot de passe. Si cette adresse a déjà un compte,
+  il propose de supprimer le compte qu'on vient de créer par erreur, puis de se connecter avec l'e-mail.
+- **Même appareil** : si quelqu'un s'est déjà connecté sur ce téléphone ou cet ordinateur avec un autre identifiant,
+  le site prévient avant d'envoyer un nouveau lien ou un nouveau code.
+
+À faire une seule fois dans Supabase :
+
+1. **SQL Editor › New query** : collez le contenu de `supabase/comptes.sql`, cliquez **Run** (message « Success »).
+   Il ajoute la suppression du compte en double (seulement un compte de moins de 24 h, sans e-mail confirmé, sans abonnement).
+2. **Authentication › Sign In / Providers › Email** : vérifiez que **« Secure email change »** est activé (c'est le réglage par défaut) :
+   l'e-mail ajouté à un compte SMS n'est rattaché qu'après un clic dans l'e-mail reçu.
+3. **Authentication › Emails › Templates › Change Email Address** : traduisez le message en français si ce n'est pas fait.
+
+Doublons déjà présents : dans l'admin, onglet **Abonnés**, le filtre **« Doublons possibles »** montre les comptes au même nom.
+Gardez celui qui a l'abonnement ou l'e-mail confirmé ; supprimez l'autre dans Supabase › **Authentication › Users**
+(cochez la ligne › bouton **Delete user**). Sa carte membre part avec lui ; son historique d'articles et de paiements reste.
+
 ## Voir et gérer les abonnés
 
 Supabase › **Authentication › Users** : liste des comptes, recherche, suppression, export.
