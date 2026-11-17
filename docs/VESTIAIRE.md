@@ -44,3 +44,21 @@ Le script peut être relancé sans risque. Il a besoin des scripts déjà lancé
 1. Le responsable du club crée son compte sur le site (bouton de connexion).
 2. Dans **Admin › Abonnés**, donnez-lui l'étiquette **Correspondant de club** et choisissez son club.
 3. Il ouvre le Vestiaire de son club : il peut ajouter le planning, valider les joueurs, nommer des encadrants et publier dans le fil.
+
+## Covoiturage et messages du déplacement
+
+Sous chaque match, plateau ou entraînement, le bouton **Covoiturage** ouvre l'espace du déplacement :
+
+- **Je propose ma voiture** : nombre de places, aller et/ou retour, point et heure de départ, précision
+  (« siège rehausseur »), et le téléphone seulement si le conducteur le choisit.
+- **Réserver une place** pour son enfant (ou pour soi), en un geste ; on ne peut pas réserver dans une voiture pleine.
+- **Je cherche une place** : les familles voient combien de personnes cherchent ; le club voit qui.
+- **Messages du déplacement** : un fil privé pour les familles et le club (« on part à 9 h 15 », « goûter offert »…).
+- Sur l'accueil, chaque match montre « Covoiturage · 2 places libres · 1 cherche une place ».
+
+C'est **privé** : seuls le club et les membres validés de la section concernée y ont accès. Les noms affichés
+sont ceux des **adultes** (prénom + initiale du compte) ; le prénom d'un enfant n'est vu que par son parent,
+le conducteur qui l'emmène et le club. Le club peut retirer une voiture ou un message.
+
+Mise en route : lancer **une fois** `supabase/vestiaire-covoiturage.sql`, après `supabase/vestiaire.sql`,
+de la même façon (SQL Editor › New query › coller › Run).
