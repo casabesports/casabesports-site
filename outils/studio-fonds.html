@@ -1,0 +1,218 @@
+<!doctype html>
+<!--
+  Casa Studio — générateur des 4 fonds par défaut du podcast (Gold Edition, Classic Microphone, Studio Session, Warm Studio).
+  Ces images sont DESSINÉES par ce fichier (aucune photo, aucune image d'une autre source) : Casa Besports en détient tous les droits.
+  Elles s'inspirent de l'ambiance des références fournies, sans les reproduire.
+  Régénérer : node outils/studio-fonds.js (ouvre ce fichier dans Chromium et enregistre assets/studio/*.jpg)
+-->
+<html lang="fr"><head><meta charset="utf-8"><title>Fonds Casa Studio</title>
+<style>body{margin:0;background:#111;color:#eee;font:14px sans-serif}canvas{display:block;margin:10px;max-width:45vw;height:auto;float:left}</style></head>
+<body>
+<script>
+'use strict';
+// ---------- outils ----------
+function rnd(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 1000000) / 1000000; }; }
+function grain(ctx, W, H, amt, seed) {
+  var r = rnd(seed || 7), img = ctx.getImageData(0, 0, W, H), d = img.data;
+  for (var i = 0; i < d.length; i += 4) { var n = (r() - .5) * amt; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  ctx.putImageData(img, 0, 0);
+}
+function vignette(ctx, W, H, a) {
+  var g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .25, W / 2, H / 2, Math.hypot(W, H) * .62);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,' + a + ')');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+function bokeh(ctx, W, H, n, colors, rMin, rMax, blur, seed, zone) {
+  var r = rnd(seed); ctx.save(); ctx.filter = 'blur(' + blur + 'px)'; ctx.globalCompositeOperation = 'lighter';
+  for (var i = 0; i < n; i++) {
+    var x = zone ? zone[0] + r() * zone[2] : r() * W, y = zone ? zone[1] + r() * zone[3] : r() * H, rad = rMin + r() * (rMax - rMin), c = colors[Math.floor(r() * colors.length)];
+    var g = ctx.createRadialGradient(x, y, 0, x, y, rad);
+    g.addColorStop(0, c.replace('A', (.35 + r() * .4).toFixed(2))); g.addColorStop(.7, c.replace('A', (.18 + r() * .2).toFixed(2))); g.addColorStop(1, c.replace('A', '0'));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+function metal(ctx, x0, x1, y, stops) { var g = ctx.createLinearGradient(x0, y, x1, y); stops.forEach(function (s) { g.addColorStop(s[0], s[1]); }); return g; }
+function rrect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+// Micro de studio (corps, grille, araignée). s = échelle, palette = couleurs du métal
+function micro(ctx, cx, top, s, pal, opts) {
+  opts = opts || {};
+  var w = 150 * s, hCap = 230 * s, hBody = 330 * s;
+  // tige de fixation
+  ctx.fillStyle = metal(ctx, cx - 14 * s, cx + 14 * s, 0, [[0, pal.dark], [.5, pal.light], [1, pal.dark]]);
+  if (opts.stand) { ctx.fillRect(cx - 12 * s, top + hCap + hBody, 24 * s, opts.stand * s); }
+  // capsule (grille)
+  ctx.save(); rrect(ctx, cx - w / 2, top, w, hCap, w / 2 * .9); ctx.clip();
+  ctx.fillStyle = metal(ctx, cx - w / 2, cx + w / 2, 0, [[0, pal.grillDark], [.35, pal.grillLight], [.6, pal.grillMid], [1, pal.grillDark]]); ctx.fillRect(cx - w / 2, top, w, hCap);
+  ctx.fillStyle = 'rgba(0,0,0,.55)';
+  for (var yy = top + 6 * s; yy < top + hCap; yy += 7 * s) for (var xx = cx - w / 2 + ((yy / (7 * s)) % 2 ? 3.5 * s : 0); xx < cx + w / 2; xx += 7 * s) { ctx.beginPath(); ctx.arc(xx, yy, 2.1 * s, 0, 6.3); ctx.fill(); }
+  var hl = ctx.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0); hl.addColorStop(0, 'rgba(0,0,0,.5)'); hl.addColorStop(.3, 'rgba(255,255,255,.18)'); hl.addColorStop(.42, 'rgba(255,255,255,0)'); hl.addColorStop(1, 'rgba(0,0,0,.55)');
+  ctx.fillStyle = hl; ctx.fillRect(cx - w / 2, top, w, hCap); ctx.restore();
+  // bague
+  ctx.fillStyle = metal(ctx, cx - w / 2, cx + w / 2, 0, [[0, pal.dark], [.3, pal.light], [.55, pal.mid], [1, pal.dark]]);
+  ctx.fillRect(cx - w / 2 - 3 * s, top + hCap - 6 * s, w + 6 * s, 26 * s);
+  // corps
+  ctx.fillStyle = metal(ctx, cx - w / 2, cx + w / 2, 0, [[0, pal.dark], [.22, pal.mid], [.36, pal.light], [.5, pal.mid], [1, pal.dark]]);
+  rrect(ctx, cx - w / 2 + 4 * s, top + hCap + 20 * s, w - 8 * s, hBody - 20 * s, 10 * s); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(cx - w / 2 + 4 * s, top + hCap + hBody - 60 * s, w - 8 * s, 6 * s);
+  // araignée (suspension élastique)
+  ctx.strokeStyle = pal.spider; ctx.lineWidth = 5 * s; ctx.lineCap = 'round';
+  var ry = top + hCap + 150 * s, R = w * .95;
+  ctx.beginPath(); ctx.ellipse(cx, ry, R, R * .22, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx, ry + 120 * s, R * .8, R * .18, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 3.4 * s;
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (d) {
+    ctx.beginPath(); ctx.moveTo(cx + d[0] * R, ry - (d[1] < 0 ? 120 : -10) * s); ctx.lineTo(cx + d[0] * w * .46, ry + (d[1] < 0 ? 10 : 110) * s); ctx.lineTo(cx + d[0] * R * .8, ry + (d[1] < 0 ? 120 : -100) * s); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(cx - R, ry - 120 * s); ctx.lineTo(cx - R, ry + 10 * s); ctx.moveTo(cx + R, ry - 120 * s); ctx.lineTo(cx + R, ry + 10 * s); ctx.stroke();
+}
+function popFilter(ctx, cx, cy, r, ring, mesh) {
+  ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.3); ctx.fillStyle = mesh; ctx.fill(); ctx.clip();
+  ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 1;
+  for (var i = -r; i < r; i += 5) { ctx.beginPath(); ctx.moveTo(cx + i, cy - r); ctx.lineTo(cx + i, cy + r); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx - r, cy + i); ctx.lineTo(cx + r, cy + i); ctx.stroke(); }
+  ctx.restore(); ctx.lineWidth = r * .09; ctx.strokeStyle = ring; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.3); ctx.stroke();
+}
+
+// ---------- 1. GOLD EDITION : platine et disque doré vus du dessus ----------
+function gold(ctx, W, H) {
+  var g = ctx.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#191714'); g.addColorStop(1, '#0b0a09'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  var m = Math.min(W, H), land = W > H;
+  var cx = land ? W * .60 : W * .56, cy = land ? H * .56 : H * .53, R = land ? H * .62 : W * .78;
+  // ombre du disque
+  ctx.save(); ctx.filter = 'blur(' + (m * .03) + 'px)'; ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.beginPath(); ctx.arc(cx + m * .015, cy + m * .02, R * 1.02, 0, 6.3); ctx.fill(); ctx.restore();
+  // plateau
+  ctx.fillStyle = metal(ctx, cx - R, cx + R, 0, [[0, '#5a4419'], [.5, '#a9852e'], [1, '#4a3712']]); ctx.beginPath(); ctx.arc(cx, cy, R * 1.03, 0, 6.3); ctx.fill();
+  // disque : base dorée + reflets coniques (lumière en étoile, comme un vinyle éclairé)
+  var base = ctx.createRadialGradient(cx, cy, R * .1, cx, cy, R); base.addColorStop(0, '#6e5317'); base.addColorStop(.5, '#9a7728'); base.addColorStop(1, '#5e4613');
+  ctx.fillStyle = base; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.3); ctx.fill();
+  if (ctx.createConicGradient) {
+    var cg = ctx.createConicGradient(-.4, cx, cy);
+    [[0, 'rgba(255,226,150,.0)'], [.06, 'rgba(255,233,170,.55)'], [.12, 'rgba(255,226,150,0)'], [.3, 'rgba(255,220,140,0)'], [.38, 'rgba(255,236,180,.35)'], [.46, 'rgba(255,226,150,0)'],
+     [.56, 'rgba(255,226,150,0)'], [.62, 'rgba(255,240,190,.6)'], [.69, 'rgba(255,226,150,0)'], [.84, 'rgba(255,226,150,0)'], [.9, 'rgba(255,230,160,.3)'], [1, 'rgba(255,226,150,0)']].forEach(function (s) { cg.addColorStop(s[0], s[1]); });
+    ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.3); ctx.fill();
+  }
+  // sillons
+  var r0 = rnd(11);
+  for (var rr = R * .34; rr < R * .985; rr += m * .0019) {
+    ctx.strokeStyle = r0() > .5 ? 'rgba(40,26,4,' + (.12 + r0() * .2).toFixed(2) + ')' : 'rgba(255,228,160,' + (.04 + r0() * .08).toFixed(2) + ')';
+    ctx.lineWidth = m * .0011; ctx.beginPath(); ctx.arc(cx, cy, rr, 0, 6.3); ctx.stroke();
+  }
+  // plages entre morceaux
+  [.52, .66, .8].forEach(function (k) { ctx.strokeStyle = 'rgba(30,20,4,.55)'; ctx.lineWidth = m * .006; ctx.beginPath(); ctx.arc(cx, cy, R * k, 0, 6.3); ctx.stroke(); });
+  // étiquette
+  var lab = R * .3; ctx.fillStyle = '#0d0c0a'; ctx.beginPath(); ctx.arc(cx, cy, lab, 0, 6.3); ctx.fill();
+  ctx.strokeStyle = 'rgba(220,180,90,.6)'; ctx.lineWidth = m * .003; ctx.beginPath(); ctx.arc(cx, cy, lab * .92, 0, 6.3); ctx.stroke();
+  ctx.save(); ctx.translate(cx, cy); ctx.fillStyle = 'rgba(232,196,110,.9)'; ctx.font = '700 ' + Math.round(lab * .13) + 'px "League Spartan", sans-serif'; ctx.textAlign = 'center';
+  var txt = 'CASA STUDIO · GOLD EDITION · CASA STUDIO · GOLD EDITION · ';
+  for (var i = 0; i < txt.length; i++) { ctx.save(); ctx.rotate(i / txt.length * Math.PI * 2); ctx.fillText(txt[i], 0, -lab * .74); ctx.restore(); }
+  ctx.font = '800 ' + Math.round(lab * .34) + 'px "League Spartan", sans-serif'; ctx.textAlign = 'left'; var wBE = ctx.measureText('BE').width, wP = ctx.measureText('+').width, x0 = -(wBE + wP + lab * .03) / 2;
+  ctx.fillStyle = '#f2f2f2'; ctx.fillText('BE', x0, -lab * .16); ctx.fillStyle = '#f2b33d'; ctx.fillText('+', x0 + wBE + lab * .03, -lab * .16);
+  ctx.restore();
+  // axe
+  ctx.fillStyle = metal(ctx, cx - lab * .08, cx + lab * .08, 0, [[0, '#6b5320'], [.5, '#f4dc9a'], [1, '#6b5320']]); ctx.beginPath(); ctx.arc(cx, cy, lab * .07, 0, 6.3); ctx.fill();
+  // bras de lecture
+  var px = land ? cx + R * 1.12 : W * .86, py = land ? cy - R * .78 : H * .1, hx = land ? cx + R * .62 : W * .8, hy = land ? cy + R * .38 : cy + R * .28;
+  ctx.save(); ctx.filter = 'blur(' + (m * .012) + 'px)'; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = m * .028; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(px + m * .02, py + m * .03); ctx.quadraticCurveTo(px + m * .05, hy - R * .2, hx + m * .02, hy + m * .03); ctx.stroke(); ctx.restore();
+  ctx.lineCap = 'round'; ctx.lineWidth = m * .022;
+  ctx.strokeStyle = metal(ctx, px - m * .05, px + m * .05, 0, [[0, '#7d5f22'], [.45, '#ffe7a8'], [.6, '#c79a3e'], [1, '#6d521b']]);
+  ctx.beginPath(); ctx.moveTo(px, py); ctx.quadraticCurveTo(px + m * .03, hy - R * .25, hx, hy); ctx.stroke();
+  ctx.lineWidth = m * .006; ctx.strokeStyle = 'rgba(255,245,210,.7)'; ctx.beginPath(); ctx.moveTo(px - m * .004, py); ctx.quadraticCurveTo(px + m * .026, hy - R * .25, hx - m * .004, hy); ctx.stroke();
+  // cellule
+  ctx.save(); ctx.translate(hx, hy); ctx.rotate(.5);
+  ctx.fillStyle = metal(ctx, -m * .04, m * .04, 0, [[0, '#8a6a28'], [.5, '#f6e2a6'], [1, '#7a5c1f']]); rrect(ctx, -m * .035, -m * .02, m * .07, m * .09, m * .008); ctx.fill();
+  ctx.fillStyle = '#1a1a1a'; ctx.fillRect(-m * .02, m * .06, m * .04, m * .02); ctx.restore();
+  // pivot
+  ctx.fillStyle = metal(ctx, px - m * .09, px + m * .09, 0, [[0, '#4d3a14'], [.5, '#d9b866'], [1, '#4d3a14']]); ctx.beginPath(); ctx.arc(px, py, m * .085, 0, 6.3); ctx.fill();
+  ctx.fillStyle = metal(ctx, px - m * .05, px + m * .05, 0, [[0, '#6b5320'], [.5, '#fff0bf'], [1, '#6b5320']]); ctx.beginPath(); ctx.arc(px, py, m * .05, 0, 6.3); ctx.fill();
+  ctx.fillStyle = '#2a2316'; ctx.beginPath(); ctx.arc(px, py, m * .018, 0, 6.3); ctx.fill();
+  // boutons
+  [[W * .07, H * .95], [W * .9, H * .94]].forEach(function (b) { ctx.fillStyle = metal(ctx, b[0] - m * .04, b[0] + m * .04, 0, [[0, '#5a4419'], [.5, '#e9cd85'], [1, '#5a4419']]); ctx.beginPath(); ctx.arc(b[0], b[1], m * .035, 0, 6.3); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = m * .004; ctx.beginPath(); ctx.arc(b[0], b[1], m * .022, 0, 6.3); ctx.stroke(); });
+  vignette(ctx, W, H, .75); grain(ctx, W, H, 6, 3);
+}
+
+// ---------- 2. CLASSIC MICROPHONE : noir et blanc, sobre, documentaire ----------
+function classic(ctx, W, H) {
+  ctx.fillStyle = '#0c0c0c'; ctx.fillRect(0, 0, W, H);
+  var m = Math.min(W, H), land = W > H;
+  bokeh(ctx, W, H, 26, ['rgba(255,255,255,A)', 'rgba(200,200,200,A)'], m * .02, m * .1, m * .02, 5);
+  var lg = ctx.createRadialGradient(W * .65, H * .3, 0, W * .65, H * .3, m * .9); lg.addColorStop(0, 'rgba(120,120,120,.35)'); lg.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
+  var s = (land ? H / 1080 : W / 1080) * (land ? 1.15 : 1.25), cx = land ? W * .6 : W * .58, top = land ? H * .12 : H * .3;
+  // pied (col de cygne)
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 22 * s; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(cx - 330 * s, H + 20); ctx.bezierCurveTo(cx - 330 * s, top + 700 * s, cx - 300 * s, top + 330 * s, cx - 300 * s, top + 330 * s); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 4 * s; ctx.stroke();
+  popFilter(ctx, cx - 300 * s, top + 170 * s, 190 * s, '#151515', 'rgba(20,20,20,.88)');
+  micro(ctx, cx, top, s, { dark: '#3a3a3a', mid: '#9a9a9a', light: '#e8e8e8', grillDark: '#2b2b2b', grillMid: '#7c7c7c', grillLight: '#cfcfcf', spider: '#bdbdbd' }, { stand: 400 });
+  vignette(ctx, W, H, .8); grain(ctx, W, H, 9, 9);
+}
+
+// ---------- 3. STUDIO SESSION : studio d'enregistrement, lumières froides et roses ----------
+function session(ctx, W, H) {
+  var g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#2a2235'); g.addColorStop(.55, '#3a2a35'); g.addColorStop(1, '#141019'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  var m = Math.min(W, H), land = W > H;
+  // poutres et cloisons floues
+  ctx.save(); ctx.filter = 'blur(' + (m * .025) + 'px)';
+  ctx.fillStyle = 'rgba(15,10,18,.75)'; ctx.fillRect(W * .52, -10, m * .07, H * .3); ctx.fillRect(-10, H * .1, W + 20, m * .05);
+  ctx.fillStyle = 'rgba(150,80,60,.35)'; ctx.fillRect(W * .5, H * .36, W * .6, H * .45);
+  ctx.fillStyle = 'rgba(10,30,40,.7)'; ctx.fillRect(-10, H * .52, W * .45, H * .4);
+  ctx.restore();
+  bokeh(ctx, W, H, 18, ['rgba(80,200,230,A)', 'rgba(230,120,170,A)', 'rgba(255,190,140,A)'], m * .03, m * .12, m * .03, 21);
+  var s = (land ? H / 1080 : W / 1080) * (land ? 1.12 : 1.25), cx = land ? W * .52 : W * .47, top = land ? H * .1 : H * .22;
+  // perche
+  ctx.strokeStyle = '#121212'; ctx.lineWidth = 26 * s; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-40, top + 560 * s); ctx.lineTo(cx - 120 * s, top + 120 * s); ctx.stroke();
+  ctx.strokeStyle = 'rgba(120,220,255,.35)'; ctx.lineWidth = 3 * s; ctx.stroke();
+  // câble
+  ctx.strokeStyle = '#0d0d0d'; ctx.lineWidth = 9 * s; ctx.beginPath(); ctx.moveTo(cx + 10 * s, top - 30 * s); ctx.bezierCurveTo(cx + 120 * s, top - 140 * s, cx + 420 * s, top + 40 * s, cx + 330 * s, top + 420 * s); ctx.stroke();
+  micro(ctx, cx, top, s, { dark: '#4a4550', mid: '#a9a3ad', light: '#f1e9ee', grillDark: '#3a3540', grillMid: '#8a8590', grillLight: '#d9d3dc', spider: '#cfc9d3' }, { stand: 60 });
+  // filtre anti-pop à droite
+  popFilter(ctx, cx + 360 * s, top + 560 * s, 190 * s, '#0e0e0e', 'rgba(30,25,35,.82)');
+  vignette(ctx, W, H, .7); grain(ctx, W, H, 7, 13);
+}
+
+// ---------- 4. WARM STUDIO : ambiance chaleureuse, casque, console ----------
+function warm(ctx, W, H) {
+  var g = ctx.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#3a1f0e'); g.addColorStop(.6, '#1d0f07'); g.addColorStop(1, '#0a0604'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  var m = Math.min(W, H), land = W > H;
+  // lames de bois verticales (floues)
+  ctx.save(); ctx.filter = 'blur(' + (m * .012) + 'px)';
+  for (var x = 0; x < W; x += m * .07) { var a = .25 + .2 * Math.sin(x * .02); ctx.fillStyle = 'rgba(150,75,30,' + a.toFixed(2) + ')'; ctx.fillRect(x, 0, m * .045, H * .6); }
+  ctx.restore();
+  var lg = ctx.createRadialGradient(W * .85, H * .1, 0, W * .85, H * .1, m * .9); lg.addColorStop(0, 'rgba(255,170,90,.45)'); lg.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
+  bokeh(ctx, W, H, 30, ['rgba(255,170,90,A)', 'rgba(255,200,120,A)'], m * .015, m * .05, m * .008, 31, [0, H * .45, W, H * .3]);
+  // console de mixage floue (bas)
+  ctx.save(); ctx.filter = 'blur(' + (m * .01) + 'px)';
+  ctx.fillStyle = '#120b07'; ctx.beginPath(); ctx.moveTo(0, H * .72); ctx.lineTo(W, H * .66); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();
+  var r0 = rnd(41);
+  for (var i = 0; i < 9; i++) for (var j = 0; j < 4; j++) {
+    var bx = W * (.04 + i * .1), by = H * (.76 + j * .05) - i * H * .006;
+    ctx.fillStyle = r0() > .75 ? 'rgba(150,255,170,.85)' : 'rgba(255,190,120,' + (.3 + r0() * .4).toFixed(2) + ')'; ctx.beginPath(); ctx.ellipse(bx, by, m * .02, m * .012, -.1, 0, 6.3); ctx.fill();
+  }
+  ctx.restore();
+  // casque (en haut à gauche)
+  var hx = land ? W * .2 : W * .25, hy = land ? H * .3 : H * .2, hr = m * .22;
+  ctx.save(); ctx.filter = 'blur(' + (m * .004) + 'px)';
+  ctx.strokeStyle = '#0c0907'; ctx.lineWidth = m * .035; ctx.beginPath(); ctx.arc(hx, hy + hr * .2, hr, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+  [-1, 1].forEach(function (d) { var ex = hx + d * hr * .95, ey = hy + hr * .45; ctx.fillStyle = '#0e0a08'; ctx.beginPath(); ctx.ellipse(ex, ey, hr * .28, hr * .38, 0, 0, 6.3); ctx.fill(); ctx.strokeStyle = 'rgba(255,170,90,.35)'; ctx.lineWidth = m * .004; ctx.stroke(); });
+  ctx.restore();
+  // micro sur pied de table
+  var s = (land ? H / 1080 : W / 1080) * (land ? 1.0 : 1.15), cx = land ? W * .6 : W * .58, top = land ? H * .12 : H * .3;
+  micro(ctx, cx, top, s, { dark: '#120d0a', mid: '#3d322c', light: '#8a7466', grillDark: '#1a1410', grillMid: '#5c4a3e', grillLight: '#b48f74', spider: '#2a2420' }, { stand: 260 });
+  ctx.fillStyle = '#0c0907'; ctx.beginPath(); ctx.ellipse(cx, top + (230 + 330 + 260) * s, 170 * s, 40 * s, 0, 0, 6.3); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,170,90,.4)'; ctx.lineWidth = 3 * s; ctx.stroke();
+  vignette(ctx, W, H, .7); grain(ctx, W, H, 7, 17);
+}
+
+window.SCENES = { 'gold-edition': gold, 'classic-microphone': classic, 'studio-session': session, 'warm-studio': warm };
+window.dessiner = function (id, W, H) {
+  var c = document.createElement('canvas'); c.width = W; c.height = H; document.body.appendChild(c);
+  window.SCENES[id](c.getContext('2d'), W, H); return c.toDataURL('image/jpeg', .8);
+};
+document.fonts.load('800 40px "League Spartan"').catch(function () {}).then(function () {
+  if (location.search.indexOf('apercu') >= 0) Object.keys(window.SCENES).forEach(function (k) { window.dessiner(k, 540, 960); window.dessiner(k, 960, 540); });
+  window.pret = true;
+});
+</script>
+<link rel="stylesheet" href="../assets/polices/polices.css">
+</body></html>

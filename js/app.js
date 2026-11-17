@@ -135,6 +135,9 @@ class Component extends DCLogic {
     try { this._onPwa = () => this.setState({ pwaTick: Date.now() }); window.addEventListener('casa-pwa', this._onPwa); } catch (e) {} // application installable (js/pwa.js)
     try { this._onNotif = () => this.setState({ notifEtat: window.CasaNotif ? window.CasaNotif.dernier() : null }); window.addEventListener('casa-notif', this._onNotif); } catch (e) {} // notifications (js/notifications.js)
     this.rxLoadPublic(); // articles publiés depuis l'espace rédaction (supabase/redaction.sql)
+    // Lien partagé d'une composition Casa Lineup : ?compo=identifiant (la connexion a le temps de se rétablir avant l'ouverture)
+    try { const q = new URLSearchParams(location.search), ec = q.get('ecoute'); if (ec) { const t = String(q.get('t') || '').split('-').map(Number); setTimeout(() => { this.go('podcast'); this.openStudio(ec, isFinite(t[0]) && q.get('t') ? { t: t[0], fin: isFinite(t[1]) ? t[1] : null } : {}); }, 600); } } catch (e) {}
+    try { const q = new URLSearchParams(location.search), cid = q.get('compo'); if (cid && /^[0-9a-f-]{36}$/i.test(cid)) setTimeout(() => this.openLineup({ id: cid, envoi: q.get('envoi') || null }), 1200); } catch (e) {}
     // Comptes abonnés (js/comptes.js) : la session Supabase pilote l'état connecté
     if (window.CasaAuth && window.CasaAuth.on) {
       window.CasaAuth.onChange((u) => {
@@ -150,6 +153,8 @@ class Component extends DCLogic {
             if (role !== this.state.role || Object.keys(extra).length) this.setState(Object.assign({ role }, extra));
             this.rxLoad(); }, () => this.setState({ srvRole: 'erreur' }));
           if (firstFor) this.loadPaid(this._waitPaid ? 5 : 0);
+          // Casa Lineup : compositions reçues qui attendent une réponse (supabase/lineups.sql ; ignoré tant que le fichier n'est pas lancé)
+          if (firstFor && window.CasaAuth.db) window.CasaAuth.db((c) => c.rpc('lineup_a_traiter')).then((n) => { n = Number(n) || 0; this.setState({ lineupN: n }); if (n > 0) this.say(n > 1 ? n + ' compositions reçues vous attendent dans Casa Lineup (Clubs)' : 'Une composition reçue vous attend dans Casa Lineup (Clubs)'); }, () => {});
           if (firstFor) { if (u.prefs) this.applyPrefs(u.prefs); else if (this.state.mods || (this.state.favSports || []).length || (this.state.favClubs || []).length) this.syncPrefs(); }
           if (firstFor && window.CasaAuth.myAccessRequest) window.CasaAuth.myAccessRequest().then((d) => this.setState({ accReq: d || null }), () => {});
           if (!u.name && this.state.name.trim()) window.CasaAuth.updateName(this.state.name.trim()).catch(() => {});
@@ -1455,6 +1460,21 @@ class Component extends DCLogic {
     this._carteLoad = true;
     window.CasaCharge(window.CASA_LIBS.carte).then(() => this.setState({ tick: (this.state.tick || 0) + 1 })).catch(() => { this._carteLoad = false; this.say('La carte n’a pas pu se charger. Vérifiez votre connexion.'); });
   }
+  // Casa Lineup (js/lineup.js) : compositions d'équipe, téléchargé seulement quand on l'ouvre
+  openLineup(o) {
+    o = o || {};
+    if (typeof window === 'undefined') return;
+    if (!window.CasaLineup && window.CasaCharge && !this._luLoad) {
+      this._luLoad = true; this.say('Ouverture de Casa Lineup…');
+      window.CasaCharge(window.CASA_LIBS.lineup).then(() => { this._luLoad = false; this.openLineup(o); }).catch(() => { this._luLoad = false; this.say('Casa Lineup n’a pas pu se charger. Vérifiez votre connexion.'); });
+      return;
+    }
+    if (!window.CasaLineup) return;
+    const D = this.data(), s = this.state;
+    window.CasaLineup.open({ clubs: D.clubs, players: D.players, matches: this.more().matches || [], role: s.role, clubRole: s.clubRoleId || null, pro: !!s.arPro,
+      siteUrl: cbSiteUrl(), connect: () => this.setState({ loginOpen: true }) }, o);
+    if (s.lineupN) this.setState({ lineupN: 0 });
+  }
   openAR(mode) {
     const s = this.state;
     // 3D et réalité augmentée : téléchargées seulement quand on les ouvre
@@ -1519,8 +1539,12 @@ class Component extends DCLogic {
   podPlay(ep) {
     if (!ep || !ep.audio) { this.say('Cet épisode n’a pas encore de fichier audio.'); return; }
     if (this.state.listening) this.stopVoix();
-    const A = this._pod || (this._pod = new Audio());
+    let A = this._pod || (this._pod = new Audio());
     if (this.state.podId === ep.id && A.getAttribute('src')) { if (A.paused) A.play().catch(() => {}); else A.pause(); return; }
+    // Fichier du site ou du stockage Supabase : lu avec autorisation (forme d'onde de Casa Studio possible). Autre site : lecture simple.
+    let cors = false; try { const u = new URL(ep.audio, location.href); cors = u.origin === location.origin || /\.supabase\.co$/.test(u.hostname); } catch (e) {}
+    if (A.__cbAn && !cors) { A.pause(); A = this._pod = new Audio(); } // un lecteur relié à l'analyse ne peut pas lire un fichier sans autorisation
+    if (cors) A.crossOrigin = 'anonymous'; else A.removeAttribute('crossorigin');
     A.src = ep.audio; A.preload = 'auto'; this._podP = 0;
     A.ontimeupdate = () => { const p = A.duration ? Math.round(A.currentTime / A.duration * 100) : 0; if (p !== this._podP) { this._podP = p; this.setState({ podPct: p + '%' }); } };
     A.onplay = () => this.setState({ podPlaying: true });
@@ -1529,6 +1553,28 @@ class Component extends DCLogic {
     A.onerror = () => { this.setState({ podPlaying: false }); this.say('Impossible de lire cet épisode pour le moment.'); };
     this.setState({ podId: ep.id, podT: ep.title, podPct: '0%', podPlaying: true });
     A.play().catch(() => this.setState({ podPlaying: false }));
+  }
+  // Casa Studio (js/studio.js) : le lecteur plein écran, téléchargé à la première ouverture
+  openStudio(id, o) {
+    if (typeof window === 'undefined') return;
+    if (!window.CasaStudio && window.CasaCharge && !this._stLoad) {
+      this._stLoad = true;
+      window.CasaCharge(window.CASA_LIBS.studio).then(() => { this._stLoad = false; this.openStudio(id, o); }).catch(() => { this._stLoad = false; this.say('Le lecteur n’a pas pu se charger. Vérifiez votre connexion.'); });
+      return;
+    }
+    if (!window.CasaStudio) return;
+    const eps = this.podEpisodes(), ep = eps.find((e) => e.id === id);
+    if (!ep) { this.say('Cet épisode n’est pas (ou plus) disponible.'); return; }
+    window.CasaStudio.open(ep, { episodes: eps, audio: () => this._pod || (this._pod = new Audio()), play: (e) => this.podPlay(e), currentId: () => this.state.podId, stopAudio: () => { if (this._pod && !this._pod.paused) this._pod.pause(); }, siteUrl: cbSiteUrl() }, o || {});
+  }
+  // Épisodes affichés : actifs, et dont l'heure de publication (programmation) est passée
+  podEpisodes() {
+    const nrm = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const cat = (e) => { const t = nrm(e.type + ' ' + e.qui); if (/joueu/.test(t)) return 'joueur'; if (/coach|entraineu/.test(t)) return 'coach'; if (/staff|dirige|kine|prepa|presiden|benevol/.test(t)) return 'staff'; if (/support|fan|tribune/.test(t)) return 'supporter'; return 'emission'; };
+    const LAB = { emission: 'Émission', joueur: 'Réaction joueur', coach: 'Réaction coach', staff: 'Réaction staff', supporter: 'Réaction supporter' };
+    const now = Date.now();
+    return (Array.isArray(window.CASA_PODCAST) ? window.CASA_PODCAST : []).filter((e) => e && e.title && e.actif !== false && (!e.publierLe || !(new Date(e.publierLe).getTime() > now)))
+      .map((e, i) => { const c = cat(e); return Object.assign({}, e, { id: e.id || 'ep' + i, cat: c, kind: LAB[c] }); }).sort((a, b) => String(b.date || '') > String(a.date || '') ? 1 : -1);
   }
   podToggle() { const A = this._pod; if (!A || !A.getAttribute('src')) return; if (A.paused) A.play().catch(() => {}); else A.pause(); }
   podStop() { const A = this._pod; if (A) { A.pause(); A.removeAttribute('src'); try { A.load(); } catch (e) {} } this.setState({ podId: null, podPlaying: false, podT: '', podPct: '0%' }); }
@@ -3222,12 +3268,15 @@ class Component extends DCLogic {
     // ---------- le podcast : émissions et réactions d'après-match (contenus/podcast.js, modifiable dans l'admin) ----------
     const podCat = (e) => { const t = nrm(e.type + ' ' + e.qui); if (/joueu/.test(t)) return 'joueur'; if (/coach|entraineu/.test(t)) return 'coach'; if (/staff|dirige|kine|prepa|presiden|benevol/.test(t)) return 'staff'; if (/support|fan|tribune/.test(t)) return 'supporter'; return 'emission'; };
     const POD_LAB = { emission: 'Émission', joueur: 'Réaction joueur', coach: 'Réaction coach', staff: 'Réaction staff', supporter: 'Réaction supporter' };
-    const podAll = (Array.isArray(window.CASA_PODCAST) ? window.CASA_PODCAST : []).filter((e) => e && e.title && e.actif !== false)
-      .map((e, i) => Object.assign({}, e, { id: e.id || 'ep' + i, cat: podCat(e) })).sort((a, b) => String(b.date || '') > String(a.date || '') ? 1 : -1);
+    const podAll = this.podEpisodes();
     const podF = s.podF || 'tout';
     const podEp = (e) => { const on = s.podId === e.id; return { title: e.title, dek: e.dek || '', hasDek: !!e.dek, kind: POD_LAB[e.cat], who: [e.nom, e.club].filter(Boolean).join(' · '), hasWho: !!(e.nom || e.club),
       meta: [e.date ? pd(e.date) && pd(e.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '', e.duree || ''].filter(Boolean).join(' · '), img: e.img || '', hasImg: !!e.img, hasAudio: !!e.audio,
-      on, playLabel: on && s.podPlaying ? 'Pause' : 'Écouter', pressed: on && s.podPlaying ? 'true' : 'false', cls: on ? 'is-on' : '', play: () => this.podPlay(e) }; };
+      on, playLabel: on && s.podPlaying ? 'Pause' : 'Écouter', pressed: on && s.podPlaying ? 'true' : 'false', cls: on ? 'is-on' : '', play: () => this.podPlay(e),
+      // Casa Studio : lecteur plein écran, ambiance de l'épisode (fond maison par défaut ou image choisie), contenu sponsorisé signalé
+      studio: () => { if (e.audio && !e.video && s.podId !== e.id) this.podPlay(e); this.openStudio(e.id); }, hasVideo: !!e.video, noVideo: !e.video, emission: e.emission || '', hasEmission: !!e.emission,
+      fond: e.fondPerso || ('assets/studio/' + (['gold-edition', 'classic-microphone', 'studio-session', 'warm-studio'].indexOf(e.fond) >= 0 ? e.fond : (e.cat === 'emission' ? 'studio-session' : 'warm-studio')) + '-paysage.jpg'),
+      sponsor: e.sponsor ? 'Contenu sponsorisé · avec ' + e.sponsor : '', hasSponsor: !!e.sponsor, invite: e.invite ? 'Invité : ' + [e.invite, e.inviteRole].filter(Boolean).join(', ') : '', hasInvite: !!e.invite }; };
     const podList = podAll.filter((e) => podF === 'tout' || (podF === 'reactions' ? e.cat !== 'emission' : e.cat === podF));
     const podcast = {
       has: podAll.length > 0, none: !podAll.length, une: podAll[0] ? podEp(podAll[0]) : {}, hasUne: !!podAll[0],
@@ -3278,6 +3327,7 @@ class Component extends DCLogic {
       proposeTopic: () => this.go('contact', { subject: 'Proposition de sujet', profile: 'Autre', contactSent: false }),
       proposePlayer: () => this.go('contact', { subject: 'Ma fiche joueur', profile: 'Joueur', contactSent: false, formError: '' }),
       submitResult: () => this.go('contact', { subject: 'Transmettre un résultat — ' + s.dSport, profile: 'Club', contactSent: false }),
+      lu: { open: () => this.openLineup({ sport: s.dSport || null }), club: () => this.openLineup({ club: s.view === 'club' ? s.clubId : null }), has: !!s.lineupN, n: String(s.lineupN || 0) },
       orderRecap: () => this.go('contact', { subject: 'Devis résumé de match (290 €)' + (s.view === 'club' ? ' — ' + curC.name : ''), profile: 'Club', contactSent: false }),
       art: artObj, gzSide, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
       fontUp: () => this.setState({ fontStep: Math.min(3, s.fontStep + 1) }), fontDown: () => this.setState({ fontStep: Math.max(0, s.fontStep - 1) }),
