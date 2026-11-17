@@ -1293,8 +1293,15 @@
       loadSubs(); S.loaded.team = false;
     }, err);
   }
+  // Doublons possibles : deux comptes au même nom (souvent : un créé par e-mail, l'autre par SMS)
+  function nomCle(u) { return String(u.nom || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]+/g, ' ').trim(); }
+  function doublon(u) {
+    var k = nomCle(u); if (!k || k.indexOf(' ') < 0) return false;
+    return S.subs.some(function (v) { return v.id !== u.id && nomCle(v) === k; });
+  }
   function subMatches(u) {
     var f = S.subF || 'tous';
+    if (f === 'doublons' && !doublon(u)) return false;
     if (f === 'payants' && !aboActif(u)) return false;
     if (f === 'redaction' && !u.etiquette) return false;
     if (f === 'demandes' && u.demande !== 'en_attente') return false;
@@ -1314,9 +1321,11 @@
         E('strong', { style: 'font-size:1.05rem' }, u.nom || u.email || (u.telephone ? '+' + String(u.telephone).replace(/^\+/, '') : 'Sans nom'),
           u.etiquette ? E('span', { class: 'cba-tag', style: 'background:#1d5e3a' }, etiquetteLabel(u.etiquette) + (u.club ? ' · ' + clubName(u.club) : '')) : null,
           aboActif(u) ? E('span', { class: 'cba-tag dr' }, 'abonné') : null,
-          u.demande === 'en_attente' ? E('span', { class: 'cba-tag' }, 'demande en attente') : null),
+          u.demande === 'en_attente' ? E('span', { class: 'cba-tag' }, 'demande en attente') : null,
+          doublon(u) ? E('span', { class: 'cba-tag', style: 'background:#a3471b' }, 'doublon possible') : null),
         u.email ? E('button', { type: 'button', class: 'cba-btn sm', onclick: function () { S.tab = 'msg'; S.compose = { to: u.email, subject: 'Casa Besports', text: '', replyTo: null }; loadTab('msg'); } }, 'Lui écrire') : null),
       E('dl', { class: 'cba-kv', style: 'margin:.6rem 0' }, kv.map(function (r) { return [E('dt', {}, r[0]), E('dd', {}, r[1], r[2] || null)]; })),
+      doublon(u) ? E('p', { class: 'cba-note', style: 'margin:0 0 .6rem' }, 'Un autre compte porte le même nom. Si c’est la même personne, gardez celui qui a l’abonnement ou l’e-mail confirmé, et supprimez l’autre dans Supabase › Authentication › Users (guide : docs/COMPTES-ABONNES.md, partie « Doublons »).') : null,
       u.etiquette === 'admin' ? E('p', { style: 'color:var(--muted);margin:0' }, 'Compte administrateur : il ne se modifie pas ici.')
       : !mailOk ? E('p', { style: 'color:var(--muted);margin:0' }, 'Accès à la rédaction impossible pour l’instant : il faut une adresse e-mail confirmée (la personne se connecte une fois avec son e-mail, depuis « Mon espace »).')
       : [E('div', { class: 'cba-lbl' }, 'Accès à la rédaction'),
@@ -1343,6 +1352,7 @@
     if (S.subsErr) return head.concat(E('div', { class: 'cba-note' }, 'La liste n’a pas pu être chargée : ' + S.subsErr), E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.loaded.subs = false; render(); loadSubs(); } }, 'Réessayer'));
     var n = function (f) { return S.subs.filter(f).length; };
     var chips = [['tous', 'Tous (' + S.subs.length + ')'], ['payants', 'Abonnés payants (' + n(aboActif) + ')'], ['redaction', 'Rédaction (' + n(function (u) { return u.etiquette; }) + ')'], ['demandes', 'Demandes en attente (' + n(function (u) { return u.demande === 'en_attente'; }) + ')']];
+    var nd = n(doublon); if (nd) chips.push(['doublons', 'Doublons possibles (' + nd + ')']);
     var holder = E('div', {}, subList());
     return head.concat(
       E('div', { class: 'cba-row', style: 'margin-bottom:.6rem' }, chips.map(function (c) { return E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String((S.subF || 'tous') === c[0]), onclick: function () { S.subF = c[0]; render(); } }, c[1]); }),
