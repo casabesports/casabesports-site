@@ -149,6 +149,11 @@
 
       panel = el('div', { class: 'av-sec' }); wrap.appendChild(panel);
 
+      video.addEventListener('error', function () {
+        lock.innerHTML = '<b style="font-family:Cormorant Garamond,Georgia,serif;font-size:24px">Cette vidéo ne se lit pas ici</b><p class="av-small">Son format n’est pas reconnu par ce navigateur. Les vidéos d’iPhone (HEVC) se lisent dans Safari ; sur ordinateur Windows, exportez-la d’abord en MP4 (H.264), par exemple avec l’application Photos ou Clipchamp.</p>';
+        lock.appendChild(btn('Choisir une autre vidéo', function () { input.value = ''; input.click(); }, true));
+        lock.style.display = 'flex';
+      });
       video.addEventListener('loadedmetadata', function () { fit(); renderMarks(); renderPanel(); });
       video.addEventListener('timeupdate', onTime);
       video.addEventListener('seeked', function () { redraw(); onTime(); });
@@ -283,10 +288,20 @@
       panel.appendChild(r2);
       panel.appendChild(el('p', { class: 'av-small' }, 'Choisissez un outil puis dessinez sur l’image : la vidéo se met en pause. Le dessin reste affiché 4 secondes à cet endroit de la vidéo, à chaque lecture. Idéal pour montrer un placement, une course ou un espace libre.'));
     }
+    // Téléphone : feuille de partage (enregistrer dans Photos, WhatsApp…) ; sinon (ou si refusé) : téléchargement
+    function download(b, nom) { var u = URL.createObjectURL(b); var a = el('a', { href: u, download: nom }); document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 60000); }
+    function give(b, nom) {
+      var f = null; try { f = new File([b], nom, { type: b.type }); } catch (e) {}
+      var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      if (touch && f && navigator.canShare && navigator.canShare({ files: [f] })) {
+        navigator.share({ files: [f], title: nom }).catch(function (e) { if (!e || e.name !== 'AbortError') download(b, nom); });
+      } else download(b, nom);
+    }
     function capture() {
       var c = document.createElement('canvas'); c.width = video.videoWidth; c.height = video.videoHeight;
       var x = c.getContext('2d'); x.drawImage(video, 0, 0, c.width, c.height); paint(x, c.width, c.height, visibleDrawings());
-      c.toBlob(function (b) { if (!b) return; var a = el('a', { href: URL.createObjectURL(b), download: 'analyse-' + fmt(video.currentTime).replace(/:/g, 'h') + '.png' }); document.body.appendChild(a); a.click(); a.remove(); }, 'image/png');
+      var nom = 'analyse-' + fmt(video.currentTime).replace(/^(\d+):(\d+)$/, '$1min$2').replace(/^(\d+):(\d+):(\d+)$/, '$1h$2min$3') + '.png';
+      c.toBlob(function (b) { if (b) give(b, nom); }, 'image/png');
     }
 
     // ---------- 4. Rapport ----------
@@ -312,8 +327,7 @@
     function csv() {
       var lines = [['Temps', 'Secondes', 'Action', 'Équipe', 'Note']].concat(S.events.map(function (e) { return [fmt(e.t), Math.round(e.t), e.type === 'mi' ? 'Mi-temps' : NAME[e.type], e.team === 'nous' ? 'Nous' : e.team === 'adv' ? 'Adversaire' : '', e.note || '']; }));
       var txt = '﻿' + lines.map(function (l) { return l.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(';'); }).join('\r\n');
-      var a = el('a', { href: URL.createObjectURL(new Blob([txt], { type: 'text/csv;charset=utf-8' })), download: 'rapport-' + S.file.name.replace(/\.[^.]+$/, '') + '.csv' });
-      document.body.appendChild(a); a.click(); a.remove();
+      download(new Blob([txt], { type: 'text/csv;charset=utf-8' }), 'rapport-' + S.file.name.replace(/\.[^.]+$/, '') + '.csv');
     }
 
     // ---------- 5. Questions (réponses calculées à partir des actions marquées) ----------
