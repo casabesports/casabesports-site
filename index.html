@@ -3127,7 +3127,7 @@ img, video, canvas, svg { max-width: 100%; }
 @media (max-width: 560px) { .vs-rep-n { width: 100%; } .vs-r { flex: 1 1 0; padding-left: .3rem; padding-right: .3rem; } .vs-head { padding: 1rem; } .vs-logo { width: 56px; height: 56px; font-size: 19px; } .vs-box { padding: .9rem .85rem 1rem; } .vs-liste-l { grid-template-columns: 1fr; gap: 0; } .vsh-in { padding: 1.1rem 1rem; } .vsh-col { padding: .8rem 1rem 1rem; } }
 </style>
 <style>
-/* Casa Lineup : bouton d'accès (Clubs, Le Terrain) */
+/* Casa Line Up : bouton d'accès (Clubs, Le Terrain) */
 .lu-btn { display: inline-flex; align-items: center; gap: .4rem; min-height: 36px; padding: 0 .8rem; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); font: 700 13px/1 Mulish, sans-serif; cursor: pointer; border-radius: 0; }
 .lu-btn:hover { background: var(--ink); color: var(--bg); }
 .lu-n { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--sun, #f2b33d); color: #10283a; font-size: 11px; line-height: 18px; text-align: center; }
@@ -4502,7 +4502,7 @@ img, video, canvas, svg { max-width: 100%; }
       <sc-for list="{{clubChips}}" as="c" hint-placeholder-count="5">
         <button type="button" class="chip" onClick="{{c.pick}}" aria-pressed="{{c.pressed}}" style="background: {{c.bg}}; color: {{c.fg}}; border: 1.5px solid {{c.border}}">{{c.label}}</button>
       </sc-for>
-      <button type="button" class="lu-btn" onClick="{{lu.open}}" style="margin-left: auto"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18"></rect><path d="M3 12h18M12 3v18"></path><circle cx="12" cy="12" r="3"></circle></svg>Casa Lineup<sc-if value="{{lu.has}}" hint-placeholder-val="{{ false }}"><span class="lu-n" aria-label="compositions reçues">{{lu.n}}</span></sc-if></button>
+      <button type="button" class="lu-btn" onClick="{{lu.open}}" style="margin-left: auto"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18"></rect><path d="M3 12h18M12 3v18"></path><circle cx="12" cy="12" r="3"></circle></svg>Casa Line Up<sc-if value="{{lu.has}}" hint-placeholder-val="{{ false }}"><span class="lu-n" aria-label="compositions reçues">{{lu.n}}</span></sc-if></button>
       <button type="button" class="hs-lien" onClick="{{goHandisport}}">Handisport et sport adapté</button>
       <button type="button" class="lnk" onClick="{{goMap}}">Vue carte</button>
     </div>
@@ -4568,7 +4568,7 @@ img, video, canvas, svg { max-width: 100%; }
             <div class="hs-ou">Où la pratiquer</div>
             <div class="hs-cl"><sc-for list="{{d.clubs}}" as="c" hint-placeholder-count="1"><button type="button" class="hs-cl-b" onClick="{{c.open}}">{{c.name}} <span>{{c.city}}</span></button></sc-for></div>
           </sc-if>
-          <sc-if value="{{d.noClubs}}" hint-placeholder-val="{{ true }}"><p class="hs-none">Pas encore de club référencé dans le Cotentin. <button type="button" class="lnk" onClick="{{d.signaler}}">Signaler un club</button></p></sc-if>
+          <sc-if value="{{d.noClubs}}" hint-placeholder-val="{{ true }}"><p class="hs-none">Pas encore de club référencé dans le Cotentin. <button type="button" class="lnk" onClick="{{d.signaler}}">Proposer un club</button></p></sc-if>
           <sc-if value="{{d.hasSport}}" hint-placeholder-val="{{ false }}"><button type="button" class="lnk hs-sport" onClick="{{d.openSport}}">{{d.sportLabel}}</button></sc-if>
         </article>
       </sc-for>
@@ -5592,7 +5592,7 @@ img, video, canvas, svg { max-width: 100%; }
           </sc-for>
         </div>
         <button type="button" class="btn btn-gold" onClick="{{newPost}}" style="width: 100%; margin-top: 1rem">{{newPostLabel}}</button>
-        <button type="button" class="btn btn-ghost" onClick="{{lu.open}}" style="width: 100%; margin-top: .5rem">Casa Lineup · compositions</button>
+        <button type="button" class="btn btn-ghost" onClick="{{lu.open}}" style="width: 100%; margin-top: .5rem">Casa Line Up · compositions</button>
         <sc-if value="{{showRoleSwitch}}" hint-placeholder-val="{{ true }}"><div style="border-top: 1px solid var(--line); margin-top: 1rem; padding-top: .9rem">
           <div class="cond" style="font-size: 11px; color: var(--muted); margin-bottom: .4rem">Démo : changer de rôle</div>
           <div style="display: flex; flex-wrap: wrap; gap: .3rem"><sc-for list="{{roleSwitch}}" as="rs" hint-placeholder-count="2"><button type="button" onClick="{{rs.pick}}" style="flex: 1 1 auto; white-space: nowrap; padding: 0 .55rem; min-height: 36px; border-radius: 0; cursor: pointer; font-size: 12.5px; font-weight: 700; background: {{rs.bg}}; color: {{rs.fg}}; border: 1px solid {{rs.border}}">{{rs.label}}</button></sc-for></div>

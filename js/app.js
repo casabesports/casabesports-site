@@ -135,7 +135,7 @@ class Component extends DCLogic {
     try { this._onPwa = () => this.setState({ pwaTick: Date.now() }); window.addEventListener('casa-pwa', this._onPwa); } catch (e) {} // application installable (js/pwa.js)
     try { this._onNotif = () => this.setState({ notifEtat: window.CasaNotif ? window.CasaNotif.dernier() : null }); window.addEventListener('casa-notif', this._onNotif); } catch (e) {} // notifications (js/notifications.js)
     this.rxLoadPublic(); // articles publiés depuis l'espace rédaction (supabase/redaction.sql)
-    // Lien partagé d'une composition Casa Lineup : ?compo=identifiant (la connexion a le temps de se rétablir avant l'ouverture)
+    // Lien partagé d'une composition Casa Line Up : ?compo=identifiant (la connexion a le temps de se rétablir avant l'ouverture)
     try { const q = new URLSearchParams(location.search), ec = q.get('ecoute'); if (ec) { const t = String(q.get('t') || '').split('-').map(Number); setTimeout(() => { this.go('podcast'); this.openStudio(ec, isFinite(t[0]) && q.get('t') ? { t: t[0], fin: isFinite(t[1]) ? t[1] : null } : {}); }, 600); } } catch (e) {}
     try { const q = new URLSearchParams(location.search), cid = q.get('compo'); if (cid && /^[0-9a-f-]{36}$/i.test(cid)) setTimeout(() => this.openLineup({ id: cid, envoi: q.get('envoi') || null }), 1200); } catch (e) {}
     // Comptes abonnés (js/comptes.js) : la session Supabase pilote l'état connecté
@@ -153,8 +153,8 @@ class Component extends DCLogic {
             if (role !== this.state.role || Object.keys(extra).length) this.setState(Object.assign({ role }, extra));
             this.rxLoad(); }, () => this.setState({ srvRole: 'erreur' }));
           if (firstFor) this.loadPaid(this._waitPaid ? 5 : 0);
-          // Casa Lineup : compositions reçues qui attendent une réponse (supabase/lineups.sql ; ignoré tant que le fichier n'est pas lancé)
-          if (firstFor && window.CasaAuth.db) window.CasaAuth.db((c) => c.rpc('lineup_a_traiter')).then((n) => { n = Number(n) || 0; this.setState({ lineupN: n }); if (n > 0) this.say(n > 1 ? n + ' compositions reçues vous attendent dans Casa Lineup (Clubs)' : 'Une composition reçue vous attend dans Casa Lineup (Clubs)'); }, () => {});
+          // Casa Line Up : compositions reçues qui attendent une réponse (supabase/lineups.sql ; ignoré tant que le fichier n'est pas lancé)
+          if (firstFor && window.CasaAuth.db) window.CasaAuth.db((c) => c.rpc('lineup_a_traiter')).then((n) => { n = Number(n) || 0; this.setState({ lineupN: n }); if (n > 0) this.say(n > 1 ? n + ' compositions reçues vous attendent dans Casa Line Up (Clubs)' : 'Une composition reçue vous attend dans Casa Line Up (Clubs)'); }, () => {});
           if (firstFor) { if (u.prefs) this.applyPrefs(u.prefs); else if (this.state.mods || (this.state.favSports || []).length || (this.state.favClubs || []).length) this.syncPrefs(); }
           if (firstFor && window.CasaAuth.myAccessRequest) window.CasaAuth.myAccessRequest().then((d) => this.setState({ accReq: d || null }), () => {});
           if (!u.name && this.state.name.trim()) window.CasaAuth.updateName(this.state.name.trim()).catch(() => {});
@@ -1460,13 +1460,13 @@ class Component extends DCLogic {
     this._carteLoad = true;
     window.CasaCharge(window.CASA_LIBS.carte).then(() => this.setState({ tick: (this.state.tick || 0) + 1 })).catch(() => { this._carteLoad = false; this.say('La carte n’a pas pu se charger. Vérifiez votre connexion.'); });
   }
-  // Casa Lineup (js/lineup.js) : compositions d'équipe, téléchargé seulement quand on l'ouvre
+  // Casa Line Up (js/lineup.js) : compositions d'équipe, téléchargé seulement quand on l'ouvre
   openLineup(o) {
     o = o || {};
     if (typeof window === 'undefined') return;
     if (!window.CasaLineup && window.CasaCharge && !this._luLoad) {
-      this._luLoad = true; this.say('Ouverture de Casa Lineup…');
-      window.CasaCharge(window.CASA_LIBS.lineup).then(() => { this._luLoad = false; this.openLineup(o); }).catch(() => { this._luLoad = false; this.say('Casa Lineup n’a pas pu se charger. Vérifiez votre connexion.'); });
+      this._luLoad = true; this.say('Ouverture de Casa Line Up…');
+      window.CasaCharge(window.CASA_LIBS.lineup).then(() => { this._luLoad = false; this.openLineup(o); }).catch(() => { this._luLoad = false; this.say('Casa Line Up n’a pas pu se charger. Vérifiez votre connexion.'); });
       return;
     }
     if (!window.CasaLineup) return;

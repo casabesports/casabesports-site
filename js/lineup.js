@@ -55,7 +55,8 @@
     DEF: 'Défenseur', AIL: 'Ailier', PIV: 'Pivot', ATT: 'Attaquant', 'AIL G': 'Ailier gauche', 'AIL D': 'Ailier droit', 'ARR G': 'Arrière gauche', 'ARR D': 'Arrière droit', MEN: 'Meneur', ARR: 'Arrière', AF: 'Ailier fort', PAS: 'Passeur', R4: 'Réceptionneur-attaquant', CEN: 'Central', POI: 'Pointu',
     1: 'Pilier gauche', 2: 'Talonneur', 3: 'Pilier droit', 4: 'Deuxième ligne', 5: 'Deuxième ligne', 6: 'Troisième ligne aile', 7: 'Troisième ligne aile', 8: 'Troisième ligne centre', 9: 'Demi de mêlée', 10: 'Demi d’ouverture', 11: 'Ailier', 12: 'Centre', 13: 'Centre', 14: 'Ailier', 15: 'Arrière' };
   var FORMATS = { '9:16': [1080, 1920, 'Story 9:16'], '4:5': [1080, 1350, 'Portrait 4:5'], '1:1': [1080, 1080, 'Carré 1:1'], '16:9': [1920, 1080, 'Paysage 16:9'] };
-  var MODELES = { A: ['Éditorial', 'Grands portraits verticaux, titre fort : annoncer une équipe, une ligne, une sélection.'], B: ['Composition officielle', 'Les titulaires en grille, numéros, noms et remplaçants : l’avant-match.'], C: ['Terrain tactique', 'Le terrain en perspective, chacun à son poste : analyses, plateaux, réseaux.'] };
+  // Seul le modèle C (terrain tactique) est proposé ; les fonctions modeleA/modeleB restent pour relire d'anciennes compositions.
+  var MODELES = { C: ['Terrain tactique', 'Le terrain en perspective, chacun à son poste : analyses, plateaux, réseaux.'] };
   var FONTS = { auto: ['Selon le modèle', ''], spartan: ['League Spartan', '800'], barlow: ['Barlow Condensed', '700'], cormorant: ['Cormorant Garamond', '700'], archivo: ['Archivo Black', '400'], cinzel: ['Cinzel', '900'] };
   var FONT_MODELE = { A: 'cormorant', B: 'barlow', C: 'spartan' };
   var FONDS = { auto: 'Selon le modèle', papier: 'Papier clair', clair: 'Teinte claire', degrade: 'Dégradé', uni: 'Couleur unie', texture: 'Texture', maree: 'Marée (Casa Besports)', pelouse: 'Pelouse', photo: 'Ma photo' };
@@ -108,7 +109,7 @@
       formation: form, titulaires: slotsFor(sport, form).map(function (s) { return { x: s.x, y: s.y, poste: s.poste, prenom: '', nom: '', num: '', photo: '', credit: '', cap: false }; }),
       remplacants: [], staff: [{ role: 'Entraîneur', nom: '' }], arbitres: [], vedettes: null,
       titre: '', surtitre: '', texte: '', variante: '',
-      style: { modele: o.modele || 'B', format: '4:5', c1: NAVY, c2: SUN, fond: 'auto', fondImg: '', font: 'auto', nom: 1, portrait: 'rect', signature: true, casa: true, gkHaut: true, logo: true } };
+      style: { modele: 'C', format: '4:5', c1: NAVY, c2: SUN, fond: 'auto', fondImg: '', font: 'auto', nom: 1, portrait: 'rect', signature: true, casa: true, gkHaut: true, logo: true } };
   }
   function vedettes(L) {
     if (Array.isArray(L.vedettes) && L.vedettes.length) return L.vedettes.filter(function (i) { return L.titulaires[i]; });
@@ -516,7 +517,7 @@
       obj(4, ['<< /Type /XObject /Subtype /Image /Width ' + px[0] + ' /Height ' + px[1] + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpg.length + ' >>\nstream\n', jpg, '\nendstream']);
       var cs = 'q ' + pw + ' 0 0 ' + ph + ' 0 0 cm /Im1 Do Q';
       obj(5, ['<< /Length ' + cs.length + ' >>\nstream\n' + cs + '\nendstream']);
-      obj(6, ['<< /Title (' + String(titreDe(L) + ' ' + (L.clubNom || '')).replace(/[()\\]/g, '').replace(/[^\x20-\x7e]/g, '?') + ') /Producer (Casa Lineup - Casa Besports) >>']);
+      obj(6, ['<< /Title (' + String(titreDe(L) + ' ' + (L.clubNom || '')).replace(/[()\\]/g, '').replace(/[^\x20-\x7e]/g, '?') + ') /Producer (Casa Line Up - Casa Besports) >>']);
       var xo = off; put('xref\n0 7\n0000000000 65535 f \n'); for (var i = 1; i <= 6; i++) put(('0000000000' + xref[i]).slice(-10) + ' 00000 n \n');
       put('trailer\n<< /Size 7 /Root 1 0 R /Info 6 0 R >>\nstartxref\n' + xo + '\n%%EOF');
       return new Blob(parts, { type: 'application/pdf' });
@@ -548,7 +549,7 @@
     out.push('</svg>');
     return Promise.resolve(new Blob([out.join('\n')], { type: 'image/svg+xml' }));
   }
-  function exporterJSON(L) { var d = clone(L); d.app = 'Casa Lineup · Casa Besports'; d.exporte_le = new Date().toISOString(); return Promise.resolve(new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' })); }
+  function exporterJSON(L) { var d = clone(L); d.app = 'Casa Line Up · Casa Besports'; d.exporte_le = new Date().toISOString(); return Promise.resolve(new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' })); }
   function videoType() {
     if (typeof MediaRecorder === 'undefined' || !HTMLCanvasElement.prototype.captureStream) return null;
     var c = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
@@ -626,7 +627,7 @@
       '#cbl{position:fixed;inset:0;z-index:9998;background:#0b1b28;color:#e9efee;font:500 14px/1.45 Mulish,system-ui,sans-serif;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}',
       '#cbl *{box-sizing:border-box}#cbl button,#cbl input,#cbl select,#cbl textarea{font:inherit;color:inherit}',
       '#cbl .cbl-top{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;border-bottom:1px solid rgba(233,239,238,.12);background:#10283a;flex-wrap:wrap}',
-      '#cbl .cbl-brand{display:flex;align-items:center;gap:.5rem;font:700 18px/1 "Barlow Condensed",sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-right:.4rem}',
+      '#cbl .cbl-brand{display:flex;align-items:center;gap:.5rem;font:700 18px/1 "Barlow Condensed",sans-serif;margin-right:.4rem;white-space:nowrap}',
       '#cbl .cbl-brand img{height:22px;width:auto}',
       '#cbl .cbl-tabs{display:flex;gap:.25rem;flex:1;overflow-x:auto}',
       '#cbl .cbl-tab{border:0;background:transparent;padding:.45rem .7rem;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;color:#9fb3bf;white-space:nowrap}',
@@ -674,13 +675,13 @@
       '#cbl .cbl-modal>div{background:#10283a;border-radius:10px;padding:1rem;max-width:420px;width:100%;text-align:center}',
       '#cbl .cbl-modal svg{width:240px;height:240px;background:#fff;padding:10px;border-radius:6px}',
       '#cbl .cbl-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}',
-      '@media (max-width:899px){#cbl .cbl-main{flex-direction:column;overflow-y:auto}#cbl .cbl-ed{width:auto;border-right:0;overflow:visible;padding-bottom:5rem}#cbl .cbl-pv{order:-1;flex:none;position:sticky;top:0;z-index:2;background:#0b1b28;padding:.5rem;border-bottom:1px solid rgba(233,239,238,.1)}#cbl .cbl-pv canvas{max-height:38vh}#cbl .cbl-brand span{display:none}}'
+      '@media (max-width:899px){#cbl .cbl-main{flex-direction:column;overflow-y:auto}#cbl .cbl-ed{width:auto;border-right:0;overflow:visible;padding-bottom:5rem}#cbl .cbl-pv{order:-1;flex:none;position:sticky;top:0;z-index:2;background:#0b1b28;padding:.5rem;border-bottom:1px solid rgba(233,239,238,.1)}#cbl .cbl-pv canvas{max-height:38vh}#cbl .cbl-brand{font-size:16px}}'
     ].join('\n');
     document.head.appendChild(s);
   }
   function toast(t) { if (!st) return; var x = el('div', { class: 'cbl-toast', role: 'status' }, t); st.root.appendChild(x); setTimeout(function () { x.remove(); }, 3200); }
   function fermer() {
-    if (!st) return; if (st.dirty && !confirm('Fermer Casa Lineup ? Les changements non enregistrés seront perdus.')) return;
+    if (!st) return; if (st.dirty && !confirm('Fermer Casa Line Up ? Les changements non enregistrés seront perdus.')) return;
     document.removeEventListener('keydown', st.onKey); st.root.remove(); document.body.style.overflow = st.ovf || ''; redrawLater = null;
     try { if (st.back && st.back.focus) st.back.focus(); } catch (e) {} st = null;
   }
@@ -689,7 +690,7 @@
   function open(ctx, opts) {
     opts = opts || {}; css();
     if (st) fermer(); if (st) return;
-    var root = el('div', { id: 'cbl', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Casa Lineup : compositions d’équipe' });
+    var root = el('div', { id: 'cbl', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Casa Line Up : compositions d’équipe' });
     st = { root: root, ctx: ctx || {}, tab: 'creer', L: null, meta: {}, dirty: false, back: document.activeElement, ovf: document.body.style.overflow, recuesN: 0 };
     st.onKey = function (e) { if (e.key === 'Escape' && !root.querySelector('.cbl-modal')) fermer(); };
     document.addEventListener('keydown', st.onKey); document.body.style.overflow = 'hidden';
@@ -714,9 +715,9 @@
     var tabs = [['creer', 'Composer'], ['mes', 'Mes compositions'], ['recues', 'Reçues']];
     if (st.tab === 'voir') tabs.push(['voir', 'Composition partagée']);
     r.appendChild(el('div', { class: 'cbl-top' },
-      el('div', { class: 'cbl-brand' }, el('img', { src: 'assets/logo-be.svg', alt: 'BE+' }), el('span', {}, 'Casa Lineup')),
+      el('div', { class: 'cbl-brand' }, 'Casa Line Up'),
       el('div', { class: 'cbl-tabs', role: 'tablist' }, tabs.map(function (t) { return el('button', { type: 'button', class: 'cbl-tab', role: 'tab', 'data-tab': t[0], 'aria-selected': st.tab === t[0] ? 'true' : 'false', onclick: function () { onglet(t[0]); } }, t[1], t[0] === 'recues' ? el('span', { class: 'cbl-badge', style: st.recuesN ? '' : 'display:none' }, String(st.recuesN)) : null); })),
-      el('button', { type: 'button', class: 'cbl-x', onclick: fermer, 'aria-label': 'Fermer Casa Lineup' }, 'Fermer')));
+      el('button', { type: 'button', class: 'cbl-x', onclick: fermer, 'aria-label': 'Fermer Casa Line Up' }, 'Fermer')));
     var main = el('div', { class: 'cbl-main' }); r.appendChild(main);
     if (st.tab === 'creer') editeur(main); else if (st.tab === 'mes') mesCompos(main); else if (st.tab === 'recues') recues(main); else voir(main);
     var f = r.querySelector('[aria-selected=true]'); if (f && !st.focused) { st.focused = true; f.focus(); }
@@ -728,7 +729,7 @@
     var bar1 = el('div', { class: 'cbl-bar', role: 'group', 'aria-label': 'Modèle' }), bar2 = el('div', { class: 'cbl-bar', role: 'group', 'aria-label': 'Format' });
     function chips() {
       bar1.innerHTML = ''; bar2.innerHTML = '';
-      Object.keys(MODELES).forEach(function (k) { bar1.appendChild(el('button', { type: 'button', class: 'cbl-chip', 'aria-pressed': L.style.modele === k ? 'true' : 'false', title: MODELES[k][1], onclick: function () { L.style.modele = k; touche(); chips(); } }, k + ' · ' + MODELES[k][0])); });
+      Object.keys(MODELES).forEach(function (k) { bar1.appendChild(el('button', { type: 'button', class: 'cbl-chip', 'aria-pressed': L.style.modele === k ? 'true' : 'false', title: MODELES[k][1], onclick: function () { L.style.modele = k; touche(); chips(); } }, MODELES[k][0])); });
       Object.keys(FORMATS).forEach(function (k) { bar2.appendChild(el('button', { type: 'button', class: 'cbl-chip', 'aria-pressed': L.style.format === k ? 'true' : 'false', onclick: function () { L.style.format = k; touche(); chips(); } }, FORMATS[k][2])); });
     }
     chips();
@@ -830,8 +831,6 @@
       acts.appendChild(el('span', { title: POSTE_NOM[p.poste] || '' }, p.poste || ''));
       var cap = el('label', { style: 'display:inline-flex;gap:.25rem;align-items:center;cursor:pointer' }, el('input', { type: 'radio', name: 'cbl-cap', checked: p.cap ? true : null, onchange: function () { L.titulaires.forEach(function (q) { q.cap = false; }); p.cap = true; touche(); } }), 'Capitaine');
       acts.appendChild(cap);
-      var vd = vedettes(L), on = vd.indexOf(i) >= 0;
-      acts.appendChild(el('label', { style: 'display:inline-flex;gap:.25rem;align-items:center;cursor:pointer', title: 'Joueurs mis en avant dans le modèle A' }, el('input', { type: 'checkbox', checked: on ? true : null, onchange: function (e) { var v = vedettes(L).slice(); if (e.target.checked) { if (v.length >= 6) { e.target.checked = false; toast('6 joueurs au maximum dans le modèle A'); return; } v.push(i); } else v = v.filter(function (k) { return k !== i; }); L.vedettes = v.sort(function (a, b) { return L.titulaires[a].x - L.titulaires[b].x; }); touche(); } }), 'En avant (A)'));
     } else {
       acts.appendChild(inp(L, p, 'poste', null, { ph: 'Poste', max: 20 }));
       acts.lastChild.style.cssText = 'width:90px;min-height:28px;padding:.2rem .4rem';
@@ -929,10 +928,8 @@
     function lireLogo(input, cb) { input.addEventListener('change', function () { var f = input.files && input.files[0]; input.value = ''; if (!f) return; var r = new FileReader(); r.onload = function () { var im = new Image(); im.onload = function () { var k = Math.min(1, 400 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL('image/png')); touche(); draw(); }; im.src = r.result; }; r.readAsDataURL(f); }); }
     lireLogo(logoF, function (u) { L.clubLogo = u; }); lireLogo(advF, function (u) { L.advLogo = u; L.advLogoPerso = true; });
     return section('4 · Le style', false, [
-      el('label', { class: 'cbl-l' }, 'Modèle'), el('div', {}, Object.keys(MODELES).map(function (k) { return el('label', { style: 'display:flex;gap:.5rem;align-items:flex-start;margin:.3rem 0;cursor:pointer' }, el('input', { type: 'radio', name: 'cbl-mod', checked: s.modele === k ? true : null, onchange: function () { s.modele = k; touche(); if (st.chips) st.chips(); } }), el('span', {}, el('strong', {}, k + ' · ' + MODELES[k][0]), el('br'), el('span', { class: 'cbl-note' }, MODELES[k][1]))); })),
+      el('label', { class: 'cbl-l' }, 'Modèle'), el('div', {}, Object.keys(MODELES).map(function (k) { return el('label', { style: 'display:flex;gap:.5rem;align-items:flex-start;margin:.3rem 0;cursor:pointer' }, el('input', { type: 'radio', name: 'cbl-mod', checked: s.modele === k ? true : null, onchange: function () { s.modele = k; touche(); if (st.chips) st.chips(); } }), el('span', {}, el('strong', {}, MODELES[k][0]), el('br'), el('span', { class: 'cbl-note' }, MODELES[k][1]))); })),
       inp(L, L, 'titre', 'Titre', { ph: titreDe(Object.assign({}, L, { titre: '' })), max: 40 }),
-      inp(L, L, 'surtitre', 'Surtitre (modèle A)', { ph: 'Saison 2026/27', max: 40 }),
-      inp(L, L, 'texte', 'Texte d’accompagnement (modèle A)', { long: true, max: 400 }),
       el('label', { class: 'cbl-l' }, 'Couleurs'), pal,
       el('div', { class: 'cbl-2' }, el('div', {}, inp(L, s, 'c1', 'Principale', { type: 'color' })), el('div', {}, inp(L, s, 'c2', 'Secondaire', { type: 'color' }))),
       el('div', { class: 'cbl-2' }, el('div', {}, inp(L, s, 'fond', 'Arrière-plan', { options: Object.keys(FONDS).map(function (k) { return [k, FONDS[k]]; }), after: function (v) { if (v === 'photo' && !s.fondImg) fondImg.click(); } })),
@@ -1026,7 +1023,7 @@
       vid && peut('lineup.video') ? b('Vidéo animée', function () { toast('Enregistrement de la vidéo (6 secondes)…'); return exporterVideo(L).then(function (r) { telecharger(r.blob, nomFichier(L, r.ext)); if (r.ext !== 'mp4') toast('Vidéo WebM : lisible partout sauf certains iPhone. Sur iPhone, l’export se fait en MP4.'); }); }) : null),
       el('label', { style: 'display:flex;gap:.4rem;align-items:center;cursor:pointer;margin-top:.35rem;font-size:13px' }, hd, 'Double définition (' + taille(L, true).join(' × ') + ' px)'),
       vid ? null : el('p', { class: 'cbl-note' }, 'Vidéo animée : ce navigateur ne sait pas l’enregistrer (essayez Chrome, Edge ou Safari récents).'),
-      el('p', { class: 'cbl-note' }, 'SVG : le plan tactique en vectoriel, net à toutes les tailles (les modèles A, B et C s’exportent en PNG, JPG ou PDF).'));
+      el('p', { class: 'cbl-note' }, 'SVG : le plan tactique en vectoriel, net à toutes les tailles (le terrain tactique s’exporte aussi en PNG, JPG ou PDF).'));
   }
   function boutonsPartage(L, idFn) {
     function lienOuAvis() { var id = idFn(); if (!id) { toast(moi() ? 'Enregistrez d’abord la composition en ligne' : 'Connectez-vous et enregistrez pour obtenir un lien'); return null; } return lien(id); }
@@ -1042,7 +1039,7 @@
       b('Partager…', function () { partagerImage().catch(function (e) { toast(msg(e)); }); }, 'Partage du téléphone (image + lien)'),
       b('Copier le lien', function () { var u = lienOuAvis(); if (!u) return; (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function () { toast('Lien copié'); }, function () { prompt('Lien de la composition :', u); }); }),
       b('WhatsApp', function () { var u = idFn() ? lien(idFn()) : ''; var t = [titreDe(L), L.clubNom, matchLigne(L)].filter(Boolean).join(' · ') + (u ? ' ' + u : ''); if (!u) toast('Sans lien en ligne : seul le texte part. Utilisez « Partager… » pour envoyer l’image.'); window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener'); }),
-      b('E-mail', function () { var u = idFn() ? lien(idFn()) : ''; location.href = 'mailto:?subject=' + encodeURIComponent(titreDe(L) + (L.clubNom ? ' · ' + L.clubNom : '')) + '&body=' + encodeURIComponent((matchLigne(L) ? matchLigne(L) + '\n\n' : '') + (u ? 'Voir la composition : ' + u : 'La composition est en pièce jointe.') + '\n\nCasa Lineup · Casa Besports'); }),
+      b('E-mail', function () { var u = idFn() ? lien(idFn()) : ''; location.href = 'mailto:?subject=' + encodeURIComponent(titreDe(L) + (L.clubNom ? ' · ' + L.clubNom : '')) + '&body=' + encodeURIComponent((matchLigne(L) ? matchLigne(L) + '\n\n' : '') + (u ? 'Voir la composition : ' + u : 'La composition est en pièce jointe.') + '\n\nCasa Line Up · Casa Besports'); }),
       b('QR code', function () { var u = lienOuAvis(); if (u) qr(u); })),
       el('p', { class: 'cbl-note' }, 'Le lien n’ouvre la composition qu’aux personnes autorisées par sa confidentialité (ou à tous si elle est publiée).'));
   }
@@ -1058,14 +1055,14 @@
   }
   function importJSON(L) {
     var f = el('input', { type: 'file', accept: 'application/json,.json', style: 'display:none' });
-    f.addEventListener('change', function () { var file = f.files && f.files[0]; f.value = ''; if (!file) return; file.text().then(function (t) { var d = JSON.parse(t); if (!d || !Array.isArray(d.titulaires) || !d.style) throw new Error('Ce fichier n’est pas une composition Casa Lineup'); st.L = valider(d); st.meta = {}; st.dirty = true; draw(); toast('Composition importée'); }).catch(function (e) { toast(msg(e)); }); });
+    f.addEventListener('change', function () { var file = f.files && f.files[0]; f.value = ''; if (!file) return; file.text().then(function (t) { var d = JSON.parse(t); if (!d || !Array.isArray(d.titulaires) || !d.style) throw new Error('Ce fichier n’est pas une composition Casa Line Up'); st.L = valider(d); st.meta = {}; st.dirty = true; draw(); toast('Composition importée'); }).catch(function (e) { toast(msg(e)); }); });
     return el('div', { class: 'cbl-row' }, el('button', { type: 'button', class: 'cbl-btn sm', onclick: function () { f.click(); } }, 'Ouvrir un fichier .json'), f,
       el('button', { type: 'button', class: 'cbl-btn sm', onclick: function () { if (st.dirty && !confirm('Commencer une nouvelle composition ? Les changements non enregistrés seront perdus.')) return; st.L = nouvelle({ sport: L.sport, club: L.club, clubNom: L.clubNom, clubLogo: L.clubLogo }); st.meta = {}; st.dirty = false; draw(); } }, 'Nouvelle composition'));
   }
   // une composition venue d'ailleurs (fichier, base) est complétée et nettoyée avant usage
   function valider(d) {
     var base = nouvelle({ sport: SPORTS[d.sport] ? d.sport : 'football' }), L = Object.assign(base, d);
-    L.style = Object.assign(nouvelle().style, d.style || {}); if (!MODELES[L.style.modele]) L.style.modele = 'B'; if (!FORMATS[L.style.format]) L.style.format = '4:5';
+    L.style = Object.assign(nouvelle().style, d.style || {}); if (!MODELES[L.style.modele]) L.style.modele = 'C'; if (!FORMATS[L.style.format]) L.style.format = '4:5';
     var S = SPORTS[L.sport];
     L.titulaires = (d.titulaires || []).slice(0, S.n).map(function (p) { return { x: clamp(Number(p.x) || 50, 0, 100), y: clamp(Number(p.y) || 50, 0, 100), poste: String(p.poste || ''), prenom: String(p.prenom || ''), nom: String(p.nom || ''), num: String(p.num || ''), photo: /^(data:image\/|https:\/\/|assets\/)/.test(p.photo || '') ? p.photo : '', credit: String(p.credit || ''), cap: !!p.cap }; });
     while (L.titulaires.length < S.n) { var s = slotsFor(L.sport, L.formation)[L.titulaires.length] || { x: 50, y: 50, poste: '' }; L.titulaires.push({ x: s.x, y: s.y, poste: s.poste, prenom: '', nom: '', num: '', photo: '', credit: '', cap: false }); }
@@ -1153,7 +1150,7 @@
       if (r.variante) ed.appendChild(el('p', { class: 'cbl-note' }, r.variante));
       if (matchLigne(L)) ed.appendChild(el('p', {}, matchLigne(L)));
       if (st.voirEnvoi && st.voirEnvoi.commentaire) ed.appendChild(el('div', { class: 'cbl-warn' }, (st.voirEnvoi.expediteur_nom || 'L’expéditeur') + ' : « ' + st.voirEnvoi.commentaire + ' »'));
-      ed.appendChild(el('p', { class: 'cbl-note' }, 'Changez le modèle ou le format au-dessus de l’aperçu avant d’exporter : la composition d’origine n’est pas modifiée.'));
+      ed.appendChild(el('p', { class: 'cbl-note' }, 'Changez le format au-dessus de l’aperçu avant d’exporter : la composition d’origine n’est pas modifiée.'));
       ed.appendChild(el('label', { class: 'cbl-l' }, 'Exporter')); ed.appendChild(boutonsExport(L));
       ed.appendChild(el('label', { class: 'cbl-l' }, 'Partager')); ed.appendChild(boutonsPartage(L, function () { return r.id; }));
       ed.appendChild(el('div', { class: 'cbl-row', style: 'margin-top:.8rem' },
