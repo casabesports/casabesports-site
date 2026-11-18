@@ -1831,8 +1831,8 @@ class Component extends DCLogic {
 
     // ---------- navigation ----------
     // Barre épurée : Clubs et Club House ne font qu'une rubrique, Culture passe dans « Plus », les offres et les partenaires sont en accès direct
-    // Ordre en trois familles : Attirer (Terrain, actualités, vidéos) · Fidéliser (Clubs, Vestiaire) · Monétiser (Casa PRO, boutique, partenaires)
-    const navDefs = [['Le Terrain', 'live', 'Attirer'], ['Actualités', 'news', 'Attirer'], ['Vidéos', 'videos', 'Attirer'], ['Clubs', 'clubs', 'Fidéliser'], ['Vestiaire', 'vestiaire', 'Fidéliser'], ['Casa PRO', 'work', 'Monétiser'], ['Boutique', 'shop', 'Monétiser'], ['Partenaires', 'partners', 'Monétiser']];
+    // Ordre en trois familles : Attirer (Terrain, actualités, vidéos) · Fidéliser (Clubs, Vestiaire) · Monétiser (partenaires ; Casa PRO = bouton PRO, boutique = icône panier)
+    const navDefs = [['Le Terrain', 'live', 'Attirer'], ['Actualités', 'news', 'Attirer'], ['Vidéos', 'videos', 'Attirer'], ['Clubs', 'clubs', 'Fidéliser'], ['Vestiaire', 'vestiaire', 'Fidéliser'], ['Partenaires', 'partners', 'Monétiser']];
     const sectionOf = { handisport: 'clubs', clubhouse: 'clubs', players: 'clubs', jeux: 'app', article: 'news', video: 'videos', discipline: 'clubs', disciplines: 'clubs', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
     const activeSec = sectionOf[s.view] || s.view;
     const nav = navDefs.map(([label, v, groupe], i) => ({ label, groupe, cls: i > 0 && navDefs[i - 1][2] !== groupe ? 'nav-sep' : '', color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
@@ -3374,7 +3374,9 @@ class Component extends DCLogic {
         const perso = curPr.perso && s.persoName.trim() ? (s.persoName.toUpperCase() + (s.persoNum ? ' ' + s.persoNum : '')) : '';
         this.addLine(curPr, ci, s.size, s.qty, perso, unit + persoFee);
       },
-      cartOpen: s.cartOpen, openCart: () => this.setState({ cartOpen: true, menuOpen: false }), closeCart: () => this.setState({ cartOpen: false }),
+      cartOpen: s.cartOpen, openCart: () => this.setState({ cartOpen: true, menuOpen: false }),
+      // Icône panier du haut : ouvre la boutique ; le panier s'ouvre s'il contient des articles ou si l'on est déjà dans la boutique
+      openShopCart: () => (cartCount > 0 || s.view === 'shop' || s.view === 'product' ? this.setState({ cartOpen: true, menuOpen: false }) : this.go('shop')), closeCart: () => this.setState({ cartOpen: false }),
       cartLines, cartCount: String(cartCount), hasCart: cartCount > 0, cartEmpty: cartCount === 0, cartAria: 'Panier, ' + cartCount + ' article(s)',
       cartSub: eur(sub), hasDiscount: disc10 > 0, discount: eur(disc10), cartNet: eur(net),
       shipMsg: net >= FREE ? 'Livraison offerte ✓' : 'Plus que ' + eur(FREE - net) + ' pour la livraison offerte', shipPct: Math.min(100, Math.round(net / FREE * 100)) + '%',
