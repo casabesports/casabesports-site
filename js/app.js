@@ -137,6 +137,8 @@ class Component extends DCLogic {
     this.rxLoadPublic(); // articles publiés depuis l'espace rédaction (supabase/redaction.sql)
     // Lien partagé d'une composition Casa Line Up : ?compo=identifiant (la connexion a le temps de se rétablir avant l'ouverture)
     try { const q = new URLSearchParams(location.search), ec = q.get('ecoute'); if (ec) { const t = String(q.get('t') || '').split('-').map(Number); setTimeout(() => { this.go('podcast'); this.openStudio(ec, isFinite(t[0]) && q.get('t') ? { t: t[0], fin: isFinite(t[1]) ? t[1] : null } : {}); }, 600); } } catch (e) {}
+    // Lien d'une causerie (notification) : ?causerie=identifiant&club=club
+    try { const q = new URLSearchParams(location.search), zid = q.get('causerie'), zc = q.get('club'); if (zid && zc && /^[0-9a-f-]{36}$/i.test(zid)) setTimeout(() => this.openCauseries({ id: zid, club: zc }), 1500); } catch (e) {}
     try { const q = new URLSearchParams(location.search), cid = q.get('compo'); if (cid && /^[0-9a-f-]{36}$/i.test(cid)) setTimeout(() => this.openLineup({ id: cid, envoi: q.get('envoi') || null }), 1200); } catch (e) {}
     // Comptes abonnés (js/comptes.js) : la session Supabase pilote l'état connecté
     if (window.CasaAuth && window.CasaAuth.on) {
@@ -1468,6 +1470,19 @@ class Component extends DCLogic {
     if (typeof window === 'undefined' || window.CasaCarte || this._carteLoad || !window.CasaCharge) return;
     this._carteLoad = true;
     window.CasaCharge(window.CASA_LIBS.carte).then(() => this.setState({ tick: (this.state.tick || 0) + 1 })).catch(() => { this._carteLoad = false; this.say('La carte n’a pas pu se charger. Vérifiez votre connexion.'); });
+  }
+  // Causeries d'avant-match du Vestiaire (js/causeries.js), téléchargées seulement quand on les ouvre
+  openCauseries(o) {
+    o = o || {};
+    if (typeof window === 'undefined') return;
+    if (!window.CasaCauseries && window.CasaCharge && !this._czLoad) {
+      this._czLoad = true; this.say('Ouverture des causeries…');
+      window.CasaCharge(window.CASA_LIBS.causeries).then(() => { this._czLoad = false; this.openCauseries(o); }).catch(() => { this._czLoad = false; this.say('Les causeries n’ont pas pu se charger. Vérifiez votre connexion.'); });
+      return;
+    }
+    if (!window.CasaCauseries || !o.club) return;
+    const D = this.data(), s = this.state;
+    window.CasaCauseries.open({ club: o.club, clubs: D.clubs, isAdmin: s.role === 'admin', say: (m) => this.say(m), connect: () => this.setState({ loginOpen: true, linkSent: false }) }, { id: o.id || null, nouvelle: !!o.nouvelle });
   }
   // Casa Line Up (js/lineup.js) : compositions d'équipe, téléchargé seulement quand on l'ouvre
   openLineup(o) {
