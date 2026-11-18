@@ -197,7 +197,7 @@ class Component extends DCLogic {
     try { const mq = new URLSearchParams(location.search).get('membre'); if (mq) setTimeout(() => { this.go('verifier', { mbQ: mq.slice(0, 20) }); this.checkMember(mq); }, 0); } catch (e) {}
     try { const vq = new URLSearchParams(location.search).get('verifier'); if (vq) setTimeout(() => this.go('verifier', { verifId: vq.slice(0, 20) }), 0); } catch (e) {}
     this.creaInit();
-    this.fetchWeather(this.state.wxCity); this._wxIv = setInterval(() => { const c = this.state.wxCity; const w = (this.state.wxLive || {})[c]; if (w) { this.setState({ wxLive: Object.assign({}, this.state.wxLive, { [c]: Object.assign({}, w, { at: 0 }) }) }); } this.fetchWeather(c); }, 10 * 60 * 1000);
+    this.fetchWeather(this.state.wxCity); this._wxIv = setInterval(() => { const c = this.state.wxCity; const w = (this.state.wxLive || {})[c]; if (w) { this.setState({ wxLive: Object.assign({}, this.state.wxLive, { [c]: Object.assign({}, w, { at: 0 }) }) }); } this.fetchWeather(c); if (this.state.view === 'live' && this._wxTerrain) this.meteoTerrain(this._wxTerrain, true); }, 10 * 60 * 1000);
   }
   componentWillUnmount() { try { window.removeEventListener('casa-pwa', this._onPwa); window.removeEventListener('casa-notif', this._onNotif); } catch (e) {} clearInterval(this._crmIv); clearInterval(this._iv); clearInterval(this._wxIv); clearInterval(this._tmI); clearTimeout(this._t); clearTimeout(this._ai); try { window.removeEventListener('scroll', this._onScroll); } catch (e) {} try { if (this._mq) (this._mq.removeEventListener ? this._mq.removeEventListener('change', this._onMq) : this._mq.removeListener(this._onMq)); } catch (e) {} clearTimeout(this._th); }
 
@@ -935,7 +935,8 @@ class Component extends DCLogic {
   // Accueil épuré : 5 blocs essentiels affichés d'office, les autres rubriques sont proposées
   // dans « Personnaliser mon accueil » (abonnés connectés). [id, libellé, largeur, affiché par défaut]
   modDefs() {
-    return [['essentiel', 'Mon essentiel : mes raccourcis d’abonné', 'full', false], ['une', 'Le grand bandeau : l’actu du moment', 'full', true], ['vestiaire', 'Le Vestiaire : planning, présences et fil de mon club', 'full', true], ['resultats', 'Résultats du week-end', 'full', true], ['portes', 'Passionné ou pro : vos accès', 'full', true], ['cherwood', 'Boutique Casa × Cherwood', 's2', true], ['gazette', 'La Gazette du mois', 's2', true],
+    // « Mon essentiel » (Ma compo AR) a quitté l'accueil : Ma compo AR est dans le menu « Plus »
+    return [['une', 'Le grand bandeau : l’actu du moment', 'full', true], ['vestiaire', 'Le Vestiaire : planning, présences et fil de mon club', 'full', true], ['resultats', 'Résultats du week-end', 'full', true], ['portes', 'Passionné ou pro : vos accès', 'full', true], ['cherwood', 'Boutique Casa × Cherwood', 's2', true], ['gazette', 'La Gazette du mois', 's2', true],
       ['actus', 'Dernières actus', 's2', false], ['videos', 'Vidéos', 's2', false], ['rdv', 'Le prochain rendez-vous', '', false], ['table', 'Classement Régional 2', '', false], ['meteo', 'Météo', '', false], ['private', 'Mon quotidien', '', false],
       ['clubhouse', 'Club House', '', false], ['culture', 'Culture & sorties', '', false], ['oeuvre', 'Œuvre du jour', '', false], ['lieu', 'Lieu du jour', '', false], ['shop', 'Boutique : la collection', 's2', false], ['rubriques', 'Toutes les rubriques du site', 'full', false]];
   }
@@ -1027,12 +1028,18 @@ class Component extends DCLogic {
     this.writeLS('cb-wx-extra', list);
     this.setState({ wxExtra: list, wxCity: this.state.wxCity === name ? 'Cherbourg' : this.state.wxCity });
   }
-  fetchWeather(city, cc) {
+  // Météo des terrains (Le Terrain) : les villes affichées sont chargées ensemble puis rafraîchies toutes les 10 minutes
+  meteoTerrain(list, force) {
+    this._wxTerrain = list;
+    setTimeout(() => (list || []).forEach((c) => this.fetchWeather(c, null, force)), 0);
+  }
+  fetchWeather(city, cc, force) {
     if (typeof window === 'undefined' || !window.CASA_WEATHER || typeof fetch !== 'function') return;
     const D = this.data(); const ex = (this.state.wxExtra || []).find((x) => x.name === city); const c = cc || (ex ? [ex.lat, ex.lon] : D.cities[city]); if (!c) return;
     const [lat, lon] = c;
     const cached = (this.state.wxLive || {})[city];
-    if (cached && Date.now() - cached.at < 10 * 60 * 1000) return;
+    if (!force && cached && Date.now() - cached.at < 10 * 60 * 1000) return;
+    this._wxBusy = this._wxBusy || {}; if (this._wxBusy[city]) return; this._wxBusy[city] = true;
     this.setState({ wxLoading: true });
     const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
       '&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m' +
@@ -1048,8 +1055,10 @@ class Component extends DCLogic {
       const data = { live: true, at: Date.now(), cur: { t: Math.round(cc.temperature_2m), feels: Math.round(cc.apparent_temperature), code: cc.weather_code, wind: Math.round(cc.wind_speed_10m), gust: Math.round(cc.wind_gusts_10m), hum: Math.round(cc.relative_humidity_2m), rain: cc.precipitation, dir: dirs[Math.round(cc.wind_direction_10m / 45) % 8] },
         hours, days, sunrise: (w.daily.sunrise[0] || '').slice(11, 16), sunset: (w.daily.sunset[0] || '').slice(11, 16),
         waves: m && m.current && m.current.wave_height != null ? String(m.current.wave_height).replace('.', ',') + ' m' : '—' };
-      this.setState({ wxLive: Object.assign({}, this.state.wxLive, { [city]: data }), wxLoading: false });
-    }).catch(() => this.setState({ wxLoading: false }));
+      this._wxBusy[city] = false;
+      this._wxAll = Object.assign({}, this.state.wxLive, this._wxAll, { [city]: data });
+      this.setState({ wxLive: this._wxAll, wxLoading: false });
+    }).catch(() => { this._wxBusy[city] = false; this.setState({ wxLoading: false }); });
   }
 
   // ---------- espace privé ----------
@@ -1831,23 +1840,23 @@ class Component extends DCLogic {
 
     // ---------- navigation ----------
     // Barre épurée : Clubs et Club House ne font qu'une rubrique, Culture passe dans « Plus », les offres et les partenaires sont en accès direct
-    // Ordre en trois familles : Attirer (Terrain, actualités, vidéos) · Fidéliser (Clubs, Vestiaire) · Monétiser (partenaires ; Casa PRO = bouton PRO, boutique = icône panier)
-    const navDefs = [['Le Terrain', 'live', 'Attirer'], ['Actualités', 'news', 'Attirer'], ['Vidéos', 'videos', 'Attirer'], ['Clubs', 'clubs', 'Fidéliser'], ['Vestiaire', 'vestiaire', 'Fidéliser'], ['Partenaires', 'partners', 'Monétiser']];
-    const sectionOf = { handisport: 'clubs', clubhouse: 'clubs', players: 'clubs', jeux: 'app', article: 'news', video: 'videos', discipline: 'clubs', disciplines: 'clubs', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
+    // Ordre en trois familles : Attirer (Terrain, actualités, vidéos) · Fidéliser (Clubs, Vestiaire) (Partenaires et Offres dans « Plus », Casa PRO = bouton PRO, boutique = icône panier)
+    const navDefs = [['Le Terrain', 'live', 'Attirer'], ['Actualités', 'news', 'Attirer'], ['Vidéos', 'videos', 'Attirer'], ['Clubs', 'clubs', 'Fidéliser'], ['Vestiaire', 'vestiaire', 'Fidéliser']];
+    const sectionOf = { map: 'live', handisport: 'clubs', clubhouse: 'clubs', players: 'clubs', jeux: 'app', article: 'news', video: 'videos', discipline: 'clubs', disciplines: 'clubs', club: 'clubs', player: 'players', checkout: 'offers', product: 'shop', order: 'shop', cv: 'account' };
     const activeSec = sectionOf[s.view] || s.view;
     const nav = navDefs.map(([label, v, groupe], i) => ({ label, groupe, cls: i > 0 && navDefs[i - 1][2] !== groupe ? 'nav-sep' : '', color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
     // Menu « Plus » regroupé en trois familles (les mêmes rubriques alimentent l'accès direct de l'accueil)
     const goV = (v, extra) => () => this.go(v, extra || {});
     const menuGroups = [
       // Menu « Plus » allégé : 10 rubriques en trois familles courtes (les joueurs sont dans la rubrique Clubs)
-      { titre: 'À voir, à écouter', items: [['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine']] },
-      { titre: 'Au quotidien', items: [['Mon quotidien', 'private', 'Agenda, listes, activité, budget sport'], ['Autour de moi', 'map', 'La carte vivante du week-end'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['L’application', 'app', 'Installer BE+ sur le téléphone'], ['Jeux', 'jeux', 'Le quiz du bus, devine le joueur']] },
-      { titre: 'Casa Besports', items: [['Offres', 'offers', 'Les abonnements BE+'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
+      { titre: 'À voir, à écouter', items: [['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Ma compo AR', 'ar:lineup', 'Votre équipe posée sur le vrai terrain, en réalité augmentée'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine']] },
+      { titre: 'Au quotidien', items: [['Mon quotidien', 'private', 'Agenda, listes, activité, budget sport'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['Jeux', 'jeux', 'Le quiz du bus, devine le joueur']] },
+      { titre: 'Casa Besports', items: [['Offres', 'offers', 'Les abonnements BE+'], ['Partenaires', 'partners', 'Commerces et marques partenaires'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']] }
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
     // Le Vestiaire : en tête des services du quotidien
     menuGroups.forEach((g) => { if (g.items.some((it) => it[1] === 'private')) g.items.unshift(['Le Vestiaire', 'vestiaire', 'Planning, présences et fil de mon club']); });
-    menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
+    menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: v === 'ar:lineup' ? () => { this.setState({ moreOpen: false, menuOpen: false }); this.openAR('lineup'); } : goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
     const moreNav = [].concat(...menuGroups.map((g) => g.items));
     // Accueil : toutes les rubriques du site, en accès direct
     const rubriques = [{ titre: 'L’essentiel', items: [['Le Terrain', 'live', 'Scores, agenda et classements'], ['Actualités', 'news', 'Récits et résultats'], ['Clubs', 'clubs', 'Les clubs et le Club House'], ['Boutique', 'shop', 'Maillots et collections'], ['Offres', 'offers', 'BE+, La Gazette et Casa PRO'], ['Partenaires', 'partners', 'Les entreprises qui nous soutiennent']].map(([label, v, sub]) => ({ label, sub, go: goV(v) })) }].concat(menuGroups.filter((g) => g.titre !== 'Équipe'));
@@ -2662,6 +2671,10 @@ class Component extends DCLogic {
       go: () => this.wxSearch(s.wxQ), busy: !!s.wxSearching, none: !!s.wxNone && !!(s.wxQ || '').trim(), hasRes: (s.wxRes || []).length > 0,
       res: (s.wxRes || []).map((r) => ({ name: r.name, region: r.region, add: () => this.wxAdd(r) })), hasMine: wxMine.length > 0, mine: wxMine };
     const weather = wxCityNames.slice(0, 4).map((c) => { const Wc = (s.wxLive || {})[c] || this.wxDemo(c); const [label, ico] = this.wxIcon(Wc.cur.code); return { city: c, label: Wc.live ? label : 'Indisponible', ico, temp: Wc.live ? Wc.cur.t + '°' : '—', wind: Wc.live ? Wc.cur.wind + ' km/h' : '—', sun: Wc.cur.code <= 2, cloud: Wc.cur.code === 3 || Wc.cur.code === 45, rain: Wc.cur.code > 45 }; });
+    const wxT = wxCityNames.slice(0, 4);
+    if (s.view === 'live' && (s.dSport === 'Football' || s.dSport === 'Rugby' || s.dSport === 'Trail')) this.meteoTerrain(wxT);
+    const wxAt = Math.max(0, ...wxT.map((c) => ((s.wxLive || {})[c] || {}).at || 0));
+    const wxMaj = wxAt ? 'Temps réel · mis à jour à ' + new Date(wxAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'Temps réel · chargement…';
 
     // ---------- accueil épuré et personnalisable ----------
     const MD = this.modDefs();
@@ -2669,7 +2682,7 @@ class Component extends DCLogic {
     const mods0 = (s.mods && s.mods.length && !s.mods.some((m) => m && m.id === 'vestiaire')) ? (() => { const a = s.mods.slice(); const i = a.findIndex((m) => m && m.id === 'une'); a.splice(i + 1, 0, { id: 'vestiaire', on: true }); return a; })() : s.mods;
     const modsState0 = (mods0 && mods0.length) ? mods0.filter((m) => m && MD.some((x) => x[0] === m.id)).concat(MD.filter((x) => !mods0.some((m) => m && m.id === x[0])).map((d) => ({ id: d[0], on: d[3] !== false }))) : this.defaultMods();
     // « Mon essentiel » arrive en tête pour les abonnés qui avaient déjà composé leur accueil
-    const modsState = (s.loggedIn && s.mods && s.mods.length && !s.mods.some((m) => m && m.id === 'essentiel')) ? [{ id: 'essentiel', on: true }].concat(modsState0.filter((m) => m.id !== 'essentiel')) : modsState0;
+    const modsState = modsState0.filter((m) => m.id !== 'essentiel');
     const homeMods = modsState.filter((m) => m.on).map((m) => { const def = MD.find((x) => x[0] === m.id); return { id: m.id, cls: def[2], isEssentiel: m.id === 'essentiel' && !!s.loggedIn, isUne: m.id === 'une', isResultats: m.id === 'resultats', isPortes: m.id === 'portes', isCherwood: m.id === 'cherwood', isRubriques: m.id === 'rubriques', isMeteo: m.id === 'meteo', isPrivate: m.id === 'private', isRdv: m.id === 'rdv' && rdv.has, isActus: m.id === 'actus', isShop: m.id === 'shop', isTable: m.id === 'table', isGazette: m.id === 'gazette', isLieu: m.id === 'lieu', isVideos: m.id === 'videos', isOeuvre: m.id === 'oeuvre', isCultureMod: m.id === 'culture', isClubMod: m.id === 'clubhouse', isVestiaire: m.id === 'vestiaire' }; });
     const move = (i, dlt) => { const a = modsState.slice(); const j = i + dlt; if (j < 0 || j >= a.length) return; const t = a[i]; a[i] = a[j]; a[j] = t; this.setMods(a); };
     const modRows = modsState.map((m, i) => ({ label: MD.find((x) => x[0] === m.id)[1], on: m.on, essentiel: MD.find((x) => x[0] === m.id)[3] !== false, toggle: () => this.setMods(modsState.map((x, k) => k === i ? { id: x.id, on: !x.on } : x)), up: () => move(i, -1), down: () => move(i, 1) }));
@@ -3567,7 +3580,7 @@ class Component extends DCLogic {
       themeStatus: curTheme === 'auto' ? 'Automatique (actuellement ' + (s.sysDark ? 'sombre' : 'clair') + ')' : themeName,
       themeIconSun: curTheme === 'light', themeIconMoon: curTheme === 'dark' || curTheme === 'noir', themeIconPaper: curTheme === 'paper', themeIconAuto: curTheme === 'auto',
       themeSavedNote: s.loggedIn ? 'Enregistré sur cet appareil et dans votre profil.' : 'Enregistré sur cet appareil. Connectez-vous pour le retrouver partout.',
-      weather, showWeather: s.dSport === 'Football' || s.dSport === 'Rugby' || s.dSport === 'Trail',
+      weather, wxMaj, showWeather: s.dSport === 'Football' || s.dSport === 'Rugby' || s.dSport === 'Trail',
       about: (() => {
         let A = window.CASA_APROPOS || {}; const en = window.CasaLang && window.CasaLang.lang === 'en';
         // Une ancienne version enregistrée en ligne (sans chronologie « etapes ») ne doit pas masquer l'histoire du fichier
