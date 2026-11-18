@@ -3073,6 +3073,7 @@ img, video, canvas, svg { max-width: 100%; }
 .vs-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.2rem; align-items: start; }
 @media (min-width: 960px) { .vs-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); } }
 .vs-box { background: var(--surface); border: 1px solid var(--line); padding: 1rem 1.1rem 1.1rem; min-width: 0; }
+.vs-cz { margin: 0 0 1.2rem; border-left: 4px solid var(--sun, #f2b33d); }
 .vs-box-h { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; margin: 0 0 .5rem; }
 .vs-box-t { font: 800 22px/1.05 var(--bn-font, sans-serif); text-transform: uppercase; margin: 0; color: var(--ink); }
 .vs-box .vs-k { color: var(--gold-text); }
@@ -4063,6 +4064,15 @@ img, video, canvas, svg { max-width: 100%; }
       </div>
       <div class="vs-tabs" role="tablist" aria-label="Section"><sc-for list="{{vs.secTabs}}" as="t" hint-placeholder-count="3"><button type="button" role="tab" class="vs-tab {{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}</button></sc-for></div>
       <sc-if value="{{vs.hasSecNote}}" hint-placeholder-val="{{ false }}"><p class="vs-info">{{vs.secNote}}</p></sc-if>
+
+      <!-- Causeries d'avant-match (js/causeries.js, supabase/causeries.sql) : réservées aux convoqués, au staff et aux personnes choisies -->
+      <sc-if value="{{vs.czOn}}" hint-placeholder-val="{{ false }}">
+        <section class="vs-box vs-cz" aria-labelledby="vs-cz">
+          <div class="vs-box-h"><div><span class="vs-k">Avant-match · réservé à l’équipe</span><h3 id="vs-cz" class="vs-box-t">Les causeries</h3></div>
+            <div style="display: flex; gap: .5rem; flex-wrap: wrap"><button type="button" class="btn btn-ghost" onClick="{{vs.openCauseries}}">Ouvrir</button><sc-if value="{{vs.czStaff}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-gold" onClick="{{vs.nouvelleCauserie}}">+ Nouvelle causerie</button></sc-if></div></div>
+          <p class="vs-vide" style="margin: 0">Le mot du coach, la compo, les tactiques et les coups de pied arrêtés : seuls les joueurs convoqués, le staff et les personnes choisies par le coach peuvent les lire.</p>
+        </section>
+      </sc-if>
 
       <div class="vs-grid">
         <!-- Planning -->
@@ -8957,7 +8967,7 @@ img, video, canvas, svg { max-width: 100%; }
 <script>
   /* Chargement à la demande : la 3D (réalité augmentée) et la carte de Normandie ne sont téléchargées
      que lorsqu'on ouvre ces fonctions, pour que le site s'affiche plus vite. */
-  window.CASA_LIBS = { ar: ['js/three.min.js', 'js/analyse-video.js?v=__VERSION__', 'js/realite-augmentee.js?v=__VERSION__'], carte: ['js/leaflet.js?v=__VERSION__', 'js/carte-normandie.js?v=__VERSION__'], parcours: ['js/leaflet.js?v=__VERSION__', 'js/parcours.js?v=__VERSION__'], lineup: ['contenus/droits.js?v=__VERSION__', 'js/lineup.js?v=__VERSION__'], studio: ['js/studio.js?v=__VERSION__'] };
+  window.CASA_LIBS = { ar: ['js/three.min.js', 'js/analyse-video.js?v=__VERSION__', 'js/realite-augmentee.js?v=__VERSION__'], carte: ['js/leaflet.js?v=__VERSION__', 'js/carte-normandie.js?v=__VERSION__'], parcours: ['js/leaflet.js?v=__VERSION__', 'js/parcours.js?v=__VERSION__'], lineup: ['contenus/droits.js?v=__VERSION__', 'js/lineup.js?v=__VERSION__'], studio: ['js/studio.js?v=__VERSION__'], causeries: ['js/causeries-tableau.js?v=__VERSION__', 'js/causeries.js?v=__VERSION__'] };
   window.CasaCharge = (function () {
     var done = {};
     function one(src) {

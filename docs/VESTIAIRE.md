@@ -62,3 +62,6 @@ le conducteur qui l'emmène et le club. Le club peut retirer une voiture ou un m
 
 Mise en route : lancer **une fois** `supabase/vestiaire-covoiturage.sql`, après `supabase/vestiaire.sql`,
 de la même façon (SQL Editor › New query › coller › Run).
+
+## Les causeries d'avant-match
+Dans chaque vestiaire, le cadre « Les causeries » permet au coach de partager sa causerie (PDF, photo de son travail ou modèle Casa avec compo, remplaçants, capitaine et tableau tactique) uniquement avec les convoqués, le staff et les personnes qu'il choisit. Pour la mise en route et le détail, voir [CAUSERIES.md](CAUSERIES.md).

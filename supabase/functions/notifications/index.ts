@@ -13,6 +13,7 @@
 //   envoyer   admin   → { titre, texte, lien, essai? } : envoie à tous les appareils (ou au seul appareil « essai »)
 //   lineup    connecté → { envoi } : prévient les destinataires d'une composition envoyée (Casa Lineup),
 //                       ou l'expéditeur quand on lui a répondu. Tables : supabase/lineups.sql
+//   causerie  staff   → { causerie } : prévient les joueurs autorisés d'une causerie publiée (supabase/causeries.sql)
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as webpush from 'jsr:@negrel/webpush@0.5.0';
 
@@ -150,6 +151,27 @@ Deno.serve(async (req) => {
       if (!cibles.length) return json({ ok: true, envoyees: 0 });
       const { data: appareils } = await service.from('push_abonnements').select('endpoint, p256dh, auth').in('user_id', cibles.slice(0, 500)).limit(5000);
       const r = await pousser(appareils ?? [], titre, texte, '/?compo=' + e.lineup_id + '&envoi=' + e.id);
+      return json({ ok: true, envoyees: r.envoyees });
+    }
+
+    // ----- Causeries du Vestiaire : le coach publie, les joueurs autorisés sont prévenus (une seule fois) -----
+    if (action === 'causerie') {
+      const moi = await utilisateur(req);
+      if (!moi) return json({ error: 'Connexion requise' }, 401);
+      const id = String(body.causerie ?? '');
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ error: 'Causerie invalide' }, 400);
+      const { data: z } = await service.from('causeries').select('id, club, titre, statut, notifier, notifie, ouvre_le, auteur_nom').eq('id', id).maybeSingle();
+      if (!z || z.statut !== 'publie' || !z.notifier || z.notifie) return json({ ok: true, envoyees: 0 });
+      const { data: staff } = await clientDe(req).rpc('vs_staff', { c: z.club });
+      if (staff !== true) return json({ error: 'Réservé au staff du club' }, 403);
+      await service.from('causeries').update({ notifie: true }).eq('id', id);
+      const { data } = await service.rpc('cz_destinataires', { cid: id });
+      const cibles = ((data ?? []) as string[]).filter((u) => u && u !== moi);
+      if (!cibles.length) return json({ ok: true, envoyees: 0 });
+      const ouvre = z.ouvre_le && new Date(z.ouvre_le).getTime() > Date.now()
+        ? ' Lisible à partir du ' + new Date(z.ouvre_le).toLocaleString('fr-FR', { timeZone: 'Europe/Paris', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + '.' : '';
+      const { data: appareils } = await service.from('push_abonnements').select('endpoint, p256dh, auth').in('user_id', cibles.slice(0, 500)).limit(5000);
+      const r = await pousser(appareils ?? [], 'La causerie est arrivée', (z.auteur_nom ? 'Coach ' + z.auteur_nom + ' : ' : '') + String(z.titre).slice(0, 80) + '.' + ouvre, '/?causerie=' + z.id + '&club=' + encodeURIComponent(z.club));
       return json({ ok: true, envoyees: r.envoyees });
     }
 
