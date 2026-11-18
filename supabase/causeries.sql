@@ -188,7 +188,8 @@ alter table public.causerie_lectures enable row level security;
 alter table public.causerie_notes enable row level security;
 
 drop policy if exists "cz lecture" on public.causeries;
-create policy "cz lecture" on public.causeries for select to authenticated using (public.cz_peut_voir(id));
+-- vs_staff(club) d'abord : la ligne qu'on vient de créer est relue tout de suite (insert … returning)
+create policy "cz lecture" on public.causeries for select to authenticated using (public.vs_staff(club) or public.cz_peut_voir(id));
 drop policy if exists "cz ajout" on public.causeries;
 create policy "cz ajout" on public.causeries for insert to authenticated with check (public.vs_staff(club));
 drop policy if exists "cz modif" on public.causeries;
