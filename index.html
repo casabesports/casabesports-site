@@ -784,7 +784,7 @@ button.b-card:hover { transform: none; box-shadow: none; border-color: var(--ink
 
 /* ---------- En-tête : le bandeau noir du logo ---------- */
 .bn-hdr-wrap { position: sticky; top: 0; z-index: 30; transition: transform .35s ease; }
-.bn-hdr { border-bottom: 1px solid var(--bn-bord-noir); }
+.bn-hdr { border-bottom: 1px solid var(--bn-bord-noir); padding-top: env(safe-area-inset-top, 0px); }
 .bn-hdr .hdr-in { max-width: 1320px; margin: 0 auto; height: 64px; padding: 0 1rem 0 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .bn-logo-btn { background: none; border: 0; cursor: pointer; display: flex; align-items: center; padding: 6px 0; flex: none; }
 .bn-logo { display: block; height: 40px; width: auto; } /* l’image du logo, cadre noir compris : le texte fait la moitié de la hauteur */
@@ -4988,7 +4988,7 @@ img, video, canvas, svg { max-width: 100%; }
   <section class="wrap" style="padding-top: 1.5rem; padding-bottom: 5rem">
     <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1.5rem">
       <div><div class="eb" style="margin-bottom: .4rem; display: flex; align-items: center; gap: .5rem"><span class="pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #e03040"></span>Le Terrain · temps réel</div><h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem)">Tableau de bord</h1></div>
-      <button type="button" class="chip lu-btn" onClick="{{lu.open}}">Composer une équipe<sc-if value="{{lu.has}}" hint-placeholder-val="{{ false }}"><span class="lu-n" aria-label="compositions reçues">{{lu.n}}</span></sc-if></button>
+      <div style="display: flex; flex-wrap: wrap; gap: .5rem"><button type="button" class="chip lu-btn" onClick="{{lu.open}}">Composer une équipe<sc-if value="{{lu.has}}" hint-placeholder-val="{{ false }}"><span class="lu-n" aria-label="compositions reçues">{{lu.n}}</span></sc-if></button><button type="button" class="chip lu-btn" onClick="{{goMap}}">Autour de moi</button></div>
       <div style="font-size: 13px; color: var(--muted); text-align: right">Mise à jour : {{updatedAgo}}<br><span class="cond" style="font-size: 12px; color: {{srcColor}}">{{srcLabel}}</span></div>
     </div>
 
@@ -5027,7 +5027,7 @@ img, video, canvas, svg { max-width: 100%; }
 
     <sc-if value="{{showWeather}}" hint-placeholder-val="{{ true }}">
       <section aria-labelledby="meteo-title" style="margin-bottom: 1.75rem">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .5rem; margin-bottom: .6rem"><h2 id="meteo-title" class="cond" style="font-size: 15px; color: var(--gold-text); margin: 0">Météo des terrains</h2><span style="font-size: 12.5px; color: var(--muted)">Prévisions Open-Meteo</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .5rem; margin-bottom: .6rem"><h2 id="meteo-title" class="cond" style="font-size: 15px; color: var(--gold-text); margin: 0">Météo des terrains</h2><span style="font-size: 12.5px; color: var(--muted)">{{wxMaj}} · Open-Meteo</span></div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: .6rem">
           <sc-for list="{{weather}}" as="w" hint-placeholder-count="4">
             <div style="display: flex; align-items: center; gap: .75rem; background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: .75rem .9rem">
@@ -8134,6 +8134,7 @@ img, video, canvas, svg { max-width: 100%; }
     <div style="flex: 1 1 300px; max-width: 380px">
       <div class="bn-pied-marque"><svg class="bn-sym" viewBox="0 0 1000 1000" width="64" height="64" role="img" aria-label="BE+"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></div>
       <p style="line-height: 1.65; margin: .75rem 0 1.25rem">Le média du sport local dans le Nord Cotentin. Résumés, interviews, inside vestiaire.</p>
+      <button type="button" class="btn btn-gold" onClick="{{goApp}}" style="margin-bottom: 1.25rem">Télécharger l’application</button>
       <div style="display: flex; flex-wrap: wrap; gap: .5rem">
         <sc-for list="{{reseaux}}" as="rs" hint-placeholder-count="5"><a href="{{rs.href}}" target="_blank" rel="noopener me" style="color: var(--on-inv-2); border: 1px solid var(--inv-line); border-radius: 0; padding: 0 .8rem; font-size: 14px; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center">{{rs.label}}</a></sc-for>
       </div>
