@@ -80,8 +80,10 @@ Deno.serve(async (req) => {
       const plan = plans.find((p) => p && p.id === b.formule);
       const periode = b.periode === 'an' ? 'an' : 'mois';
       const prix = plan ? Number(plan[periode]) : 0;
-      if (!plan || !(prix > 0)) return json({ error: 'Formule inconnue.' }, 400);
-      const cadeau = !!b.cadeau && !plan.arPro;
+      if (!plan || !(prix > 0) || plan.masque) return json({ error: 'Formule inconnue.' }, 400);
+      // BE+ Jeunes : la personne certifie avoir moins de 26 ans (ou être étudiante, apprentie)
+      if (plan.jeunes && b.jeunes !== true) return json({ error: 'BE+ Jeunes : cochez la case qui certifie l’âge ou le statut.' }, 400);
+      const cadeau = !!b.cadeau && !plan.arPro && !plan.clubPro;
       const email = cadeau ? txt(b.email, 200).toLowerCase() : (user?.email || txt(b.email, 200).toLowerCase());
       if (!validEmail(email)) return json({ error: 'Adresse e-mail invalide.' }, 400);
       if (plan.paper && !txt(b.adresse, 300)) return json({ error: 'Adresse postale requise pour le magazine papier.' }, 400);
@@ -92,6 +94,7 @@ Deno.serve(async (req) => {
       const md: Record<string, string> = {
         type: 'abonnement', formule: plan.id, periode, cadeau: cadeau ? '1' : '0', email, nom: txt(b.nom, 100),
         adresse: txt(b.adresse, 450), user_id: cadeau ? '' : (user?.id || ''), payeur_user_id: user?.id || '',
+        ...(plan.jeunes ? { jeunes: 'certifie' } : {}),
       };
       const nom = (cadeau ? 'Abonnement offert · ' : '') + txt(plan.name, 120).replace(/Casa B\+/g, 'BE+') + (periode === 'an' ? (cadeau ? ' · 1 an' : ' · annuel') : (cadeau ? ' · 1 mois' : ' · mensuel'));
       const customer = cadeau ? undefined : await clientConnu(email);

@@ -19,7 +19,9 @@
     { key: 'CASA_HANDISPORT', label: 'Handisport', desc: 'La rubrique « Handisport et sport adapté » (Clubs › Handisport) : titre, introduction, disciplines (famille Handisport ou Sport adapté, texte, mots qui rangent les clubs) et liens utiles. Les clubs, eux, se déclarent dans la section Clubs, champ « Handisport : pratiques proposées », seulement avec leur accord.' },
     { key: 'CASA_JOUEURS', label: 'Joueurs', desc: 'Joueurs, entraîneurs et arbitres : nom, numéro, poste, club, photo. Les joueurs des clubs pros normands viennent aussi de contenus/joueurs-libres.js : pour en masquer un, ajoutez-le ici avec le même identifiant (wd-q…) et cochez « masquer ».', item: 'name' },
     { key: 'CASA_PARTENAIRES', label: 'Partenaires', desc: 'Les partenaires affichés sur la page Partenaires : nom, secteur, avantage offert.', item: 'name' },
-    { key: 'CASA_ABONNEMENTS', label: 'Abonnements', desc: 'Les formules BE+ et La Gazette : nom, prix au mois et à l’année, avantages.', item: 'name' },
+    { key: 'CASA_ABONNEMENTS', label: 'Abonnements', desc: 'Les formules BE+ et La Gazette : nom, prix TTC au mois et à l’année, avantages. « famille » = nombre de comptes, « jeunes » = case à cocher sur l’âge, « masque » = formule retirée de la vente (les abonnés gardent leur accès). Ne changez pas les identifiants.', item: 'name' },
+    { key: 'CASA_OFFRES_PRO', label: 'Offres pro (payables en ligne)', desc: 'Club PRO, Club PRO + Analyse vidéo et Analyse vidéo Pro : nom, prix TTC au mois et à l’année, avantages. Ne changez pas les identifiants (club-pro, club-pro-video, ar-pro).', item: 'name' },
+    { key: 'CASA_TARIFS', label: 'Tarifs pros (sur devis)', desc: 'Les prix affichés pour les partenaires (Club, Or, Platinum, à la carte), la couverture des clubs, les collectivités, les Marées d’or et les sportifs. Réglés par devis et facture : le prix est écrit tel quel (« 120 € ») avec HT ou TTC.' },
     { key: 'CASA_CLUBHOUSE', label: 'Club House', desc: 'Le message de bienvenue et le sondage de la semaine (question vide = pas de sondage).' },
     { key: 'CASA_REGLEMENTS', label: 'Règlements des sports', desc: 'Les règles expliquées de chaque discipline (réalité augmentée et pages sport).' },
     { key: 'CASA_STADES', label: 'Stades (réalité augmentée)', desc: 'Les communes et stades utilisés par « Ma compo en AR ».' },
@@ -56,7 +58,8 @@
     CASA_JOUEURS: { id: '', num: '', name: '', role: 'Attaquant', club: '', clubLabel: '', sport: '', img: '', masquer: false },
     CASA_ENCARTS: { id: '', nom: '', img: '', site: '', texte: '', actif: true },
     CASA_PARTENAIRES: { id: '', name: '', mono: '', logo: '', logoFond: '#ffffff', sector: '', city: '', tier: 'Club', color: '#163a5f', since: 2026, perk: '', adresse: '', telephone: '', horaires: '', desc: '', site: '', app: '', real: true },
-    CASA_ABONNEMENTS: { id: '', name: '', mois: 0, an: 0, perks: [''], casab: false, gazette: '', paper: false },
+    CASA_ABONNEMENTS: { id: '', name: '', mois: 0, an: 0, perks: [''], casab: false, gazette: '', paper: false, famille: 0, jeunes: false, masque: false },
+    CASA_OFFRES_PRO: { id: '', name: '', mois: 0, an: 0, perks: [''], clubPro: false, arPro: false, casab: false, gazette: null, paper: false },
     CASA_CULTURE: { salle: '3', title: '', author: '', year: '', technique: '', img: '', alt: '', text: '' }
   };
   // Modèle d'un élément ajouté dans une sous-liste vide
@@ -561,7 +564,7 @@
 
   // ---------- Aperçu sur le site, avant publication ----------
   var PV = null, pvBar = null;
-  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_HANDISPORT: 'handisport', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_PODCAST: 'podcast', CASA_QUIZ: 'jeux', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home', CASA_RESEAUX: 'home', CASA_ENCARTS: 'news' };
+  var VIEW_OF = { CASA_ARTICLES: 'news', CASA_CLUBS: 'clubs', CASA_HANDISPORT: 'handisport', CASA_JOUEURS: 'players', CASA_PARTENAIRES: 'partners', CASA_ABONNEMENTS: 'offers', CASA_OFFRES_PRO: 'work', CASA_TARIFS: 'partners', CASA_CLUBHOUSE: 'clubhouse', CASA_REGLEMENTS: 'disciplines', CASA_STADES: 'app', CASA_GAZETTE_NUMERO: 'gazette', CASA_GAZETTE: 'gazette', CASA_LIEUX: 'home', CASA_BOUTIQUE: 'shop', CASA_PRODUITS: 'shop', CASA_VIDEOS: 'videos', CASA_PODCAST: 'podcast', CASA_QUIZ: 'jeux', CASA_CULTURE: 'culture', CASA_FONDS: 'home', CASA_APROPOS: 'about', CASA_LEGAL: 'legal', CASA_LEGAL_MAJ: 'legal', CASA_SPORT: 'live', CASA_RETOUCHES: 'home', CASA_RESEAUX: 'home', CASA_ENCARTS: 'news' };
   function openCardIdx(k) { if (k === 'CASA_GAZETTE' && S.gzSel != null) return S.gzSel; var m = null; Object.keys(S.openCards || {}).forEach(function (p) { var r = p.match(new RegExp('^' + k + '\\[(\\d+)\\]$')); if (r && S.openCards[p]) m = Number(r[1]); }); return m; }
   function startPreview(k, value) {
     var site = window.CasaSite; if (!site || PV) return;

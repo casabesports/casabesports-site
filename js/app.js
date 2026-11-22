@@ -171,7 +171,7 @@ class Component extends DCLogic {
     }
     this._crmIv = setInterval(() => { if (this.state.role === 'admin') { const A = this.crmData().agents; ['qualif', 'hygiene', 'relance', 'fidel', 'rapport'].forEach((k) => { if (A[k] && A[k].on) this.runAgent(k); }); } }, 20000);
     this._iv = setInterval(() => this.setState({ tick: this.state.tick + 1 }), 15000);
-    try { const rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; if (window.CASA_APP && !rm && !window.sessionStorage.getItem('cb-intro')) { window.sessionStorage.setItem('cb-intro', '1'); this.setState({ introOn: true }); this._introT = setTimeout(() => this.setState({ introOn: false }), 3500); } } catch (e) {}
+    try { const rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; if (window.CASA_APP && !rm && !window.sessionStorage.getItem('cb-intro')) { window.sessionStorage.setItem('cb-intro', '1'); this.setState({ introOn: true }); this._introT = setTimeout(() => this.setState({ introOn: false }), 4000); } } catch (e) {}
     this._lastY = 0;
     this._onScroll = () => {
       const y = window.scrollY || 0; const dy = y - this._lastY; this._lastY = y;
@@ -810,7 +810,7 @@ class Component extends DCLogic {
     if (has(/gazette|magazine|\bmag\b/)) {
       const pm = q.match(/page\s*(\d+)/);
       if (pm) { const pg = Math.min(this.gazette().pages.length, Math.max(1, +pm[1])) - 1; this.gzGo(pg); return { text: 'Page ' + (pg + 1) + ' : « ' + this.gazette().pages[pg].title + ' ».', actions: [] }; }
-      return { text: 'La Gazette du Cotentin existe en 3 formules :\n• Numérique : 3,99 € / mois\n• Papier : 6,90 € / mois\n• Papier + numérique : 8,90 € / mois\nUn numéro d’essai complet de ' + this.gazette().pages.length + ' pages est lisible gratuitement, avec son « détail choc ».', actions: [act('Lire le numéro d’essai', () => this.setState({ readerOpen: true, page: 0 })), act('S’abonner', () => this.go('offers', { offerTab: 'La Gazette' }))] };
+      return { text: 'La Gazette du Cotentin, 31 pages chaque mois :\n• En liseuse : incluse dans BE+ (4,99 € / mois)\n• Papier livré dans la Manche : 9,90 € / mois\n• BE+ Papier (BE+ et la Gazette papier) : 12,90 € / mois\nUn numéro d’essai complet de ' + this.gazette().pages.length + ' pages est lisible gratuitement, avec son « détail choc ».', actions: [act('Lire le numéro d’essai', () => this.setState({ readerOpen: true, page: 0 })), act('S’abonner', () => this.go('offers', { offerTab: 'La Gazette' }))] };
     }
     // scores en direct
     if (has(/direct|live|en cours|score/) && !has(/classement/)) {
@@ -860,7 +860,7 @@ class Component extends DCLogic {
       if (!pool.length) return { text: 'Rien ne correspond à ce budget. Les goodies commencent à 6 € et la carte cadeau à 20 €.', actions: [act('Voir les goodies', () => this.go('shop', { shopLine: 'Goodies' }))] };
       return { text: 'Ma sélection' + (budget ? ' à moins de ' + budget + ' €' : '') + ' :\n' + pool.map((p) => '• ' + p.name + ' — ' + eur(p.price)).join('\n') + (this.state.subs.casab ? '\nRemise abonné −10 % appliquée au panier.' : ''), actions: pool.map((p) => act('Voir ' + p.name.split(' «')[0], () => this.go('product', { productId: p.id, color: 0, size: null, qty: 1, persoName: '', persoNum: '' }))) };
     }
-    if (has(/abonn|casa b|premium|tarif|prix|pack/)) return { text: 'Les formules :\n• BE+ : 4,99 € / mois (articles Premium, alertes, −10 % boutique)\n• La Gazette : dès 3,99 € / mois\n• Pack Supporter : 11,90 € / mois (tout compris)\nEn annuel, deux mois sont offerts.', actions: [act('Comparer les offres', () => this.go('offers'))] };
+    if (has(/abonn|casa b|premium|tarif|prix|pack/)) return { text: 'Les formules :\n• BE+ : 4,99 € / mois (Premium, Gazette en liseuse, alertes, −10 % boutique)\n• BE+ Famille : 7,99 € / mois pour 4 comptes\n• BE+ Jeunes : 2,49 € / mois (moins de 26 ans, étudiants, apprentis)\n• BE+ Papier : 12,90 € / mois (avec la Gazette livrée)\nEn annuel, deux mois sont offerts. Pour les clubs : Club PRO à 12,90 € / mois.', actions: [act('Comparer les offres', () => this.go('offers'))] };
     if (has(/partenaire|sponsor|avantage/)) return { text: 'Nos partenaires :\n' + X.partners.map((p) => '• ' + p.name + ' — ' + p.perk).join('\n'), actions: [act('Voir les partenaires', () => this.go('partners'))] };
     if (has(/redaction|relecture|relire|valider|publier|admin|brouillon/)) {
       if (!this.state.role) return { text: 'L’espace rédaction est réservé à l’équipe.', actions: [act('Se connecter', () => this.setState({ loginOpen: true }))] };
@@ -1634,11 +1634,11 @@ class Component extends DCLogic {
       const plans = this.more().subPlans; const eur = (n) => (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace('.', ',') + ' €';
       const date = (d) => { try { return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
       const actifs = abos.filter((a) => P.estActif(a) && plans[a.formule]);
-      let casab = false, num = false, pap = false, arPro = false;
-      actifs.forEach((a) => { const p = plans[a.formule]; if (p.arPro) arPro = true; if (p.casab) casab = true; if (p.gazette === 'num' || p.gazette === 'duo') num = true; if (p.gazette === 'pap' || p.gazette === 'duo') pap = true; });
-      const srv = abos.filter((a) => plans[a.formule]).map((a) => ({ srv: true, label: plans[a.formule].name + (a.cadeau ? ' (offert)' : ''), detail: eur(a.montant) + (a.cadeau ? '' : a.periode === 'an' ? ' / an' : ' / mois') + (a.fin ? (P.estActif(a) ? (a.resiliation_prevue || a.cadeau ? ' · jusqu’au ' : ' · renouvelé le ') : ' · terminé le ') + date(a.fin) : ''), status: P.estActif(a) ? (a.resiliation_prevue ? 'Résilié' : 'Actif') : 'Terminé' }))
+      let casab = false, num = false, pap = false, arPro = false, clubPro = false;
+      actifs.forEach((a) => { const p = plans[a.formule]; if (p.arPro) arPro = true; if (p.clubPro && !a.partage) clubPro = true; if (p.casab) casab = true; if (p.gazette === 'num' || p.gazette === 'duo') num = true; if (p.gazette === 'pap' || p.gazette === 'duo') pap = true; });
+      const srv = abos.filter((a) => plans[a.formule]).map((a) => ({ srv: true, label: plans[a.formule].name + (a.partage ? ' (offert par ' + (a.titulaire || 'un proche') + ')' : a.cadeau ? ' (offert)' : ''), detail: a.partage ? 'Compte famille' + (a.fin && P.estActif(a) ? ' · jusqu’au ' + date(a.fin) : '') : eur(a.montant) + (a.cadeau ? '' : a.periode === 'an' ? ' / an' : ' / mois') + (a.fin ? (P.estActif(a) ? (a.resiliation_prevue || a.cadeau ? ' · jusqu’au ' : ' · renouvelé le ') : ' · terminé le ') + date(a.fin) : ''), status: P.estActif(a) ? (a.resiliation_prevue ? 'Résilié' : 'Actif') : 'Terminé' }))
         .concat(cmds.map((c) => ({ srv: true, label: 'Commande ' + c.numero, detail: (c.lignes || []).reduce((n, l) => n + (l.quantite || 0), 0) + ' article(s) · ' + eur(c.montant) + ' · ' + date(c.cree_le), status: { payee: 'Payée', preparee: 'En préparation', expediee: 'Expédiée', retiree: 'Retirée', remboursee: 'Remboursée', annulee: 'Annulée' }[c.statut] || c.statut })));
-      const st = { orders: srv.concat(this.state.orders.filter((o) => !o.srv)), paidSubs: actifs.length > 0, arPro };
+      const st = { orders: srv.concat(this.state.orders.filter((o) => !o.srv)), paidSubs: actifs.some((a) => !a.partage), arPro, clubPro };
       if (abos.length) st.subs = { casab, gazette: num && pap ? 'duo' : pap ? 'pap' : num ? 'num' : null };
       this.setState(st);
       // Retour de Stripe : l'avis de paiement peut arriver quelques secondes après la personne
@@ -1994,6 +1994,9 @@ class Component extends DCLogic {
     club.hasImg = !!curC.img;
     club.openSport = () => this.go('clubs', { clubSport: curC.sport });
     club.openCity = () => this.go('map', { city: curC.city });
+    // Club PRO (js/offres.js) : badge et vitrine des sponsors du club
+    const cpro = window.CasaOffres && s.view === 'club' ? window.CasaOffres.ficheClub(this, curC.id) : { pro: false, sponsors: [], hasSponsors: false };
+    club.pro = cpro.pro; club.sponsors = cpro.sponsors; club.hasSponsors = cpro.hasSponsors;
     club.hasHandi = !!(curC.handi && curC.handi.length); club.handiList = (curC.handi || []).map((t) => ({ t }));
     club.handiInfos = curC.handiInfos || ''; club.hasHandiInfos = !!curC.handiInfos; club.goHandi = () => this.go('handisport');
     club.articles = allA.filter((a) => a.clubs.indexOf(curC.id) >= 0);
@@ -2254,16 +2257,17 @@ class Component extends DCLogic {
     const priceOf = (id) => X.subPlans[id][period === 'an' ? 'an' : 'mois'];
     const perLabel = period === 'an' ? '/ an' : '/ mois';
     const periods = [['mois', 'Mensuel'], ['an', 'Annuel · 2 mois offerts']].map(([id, label]) => Object.assign(pill(s.period === id), { label, pick: () => this.setState({ period: id }) }));
-    const offerTabsDefs = ['Tout', 'BE+', 'La Gazette', 'Packs'];
+    const offerTabsDefs = ['Tout', 'BE+', 'La Gazette'];
     const offerTabs = offerTabsDefs.map((t) => ({ label: t, sel: s.offerTab === t ? 'true' : 'false', color: s.offerTab === t ? 'var(--ink)' : 'var(--muted)', line: s.offerTab === t ? accent : 'transparent', pick: () => this.setState({ offerTab: t }) }));
-    const tabPlans = { 'Tout': ['casab', 'gaz-duo', 'pack'], 'BE+': ['casab', 'pack'], 'La Gazette': ['gaz-num', 'gaz-pap', 'gaz-duo'], 'Packs': ['pack', 'gaz-duo'] }[s.offerTab];
+    // Grille du 2026-11-22 (docs/OFFRES.md) : une formule masquée (masque: true) n'est plus proposée
+    const tabPlans = ({ 'Tout': ['casab', 'famille', 'pack'], 'BE+': ['casab', 'famille', 'jeunes'], 'La Gazette': ['gaz-pap', 'pack'] }[s.offerTab] || ['casab', 'famille', 'pack']).filter((id) => X.subPlans[id] && !X.subPlans[id].masque);
     const owned = (id) => { const p = X.subPlans[id]; return (p.casab ? s.subs.casab : true) && (p.gazette ? s.subs.gazette === p.gazette || (s.subs.gazette === 'duo' && p.gazette !== 'duo') : true) && (p.casab || p.gazette); };
     const offerCards = tabPlans.map((id) => {
       const p = X.subPlans[id];
-      const hero = id === 'pack' || (s.offerTab === 'La Gazette' && id === 'gaz-duo');
+      const hero = s.offerTab === 'BE+' ? id === 'casab' : id === 'pack';
       const has = owned(id);
       return { name: p.name, price: eur(priceOf(id)), per: perLabel, note: period === 'an' ? 'soit ' + eur(priceOf(id) / 12) + ' / mois' : 'Sans engagement',
-        perks: p.perks.map((t) => ({ t })), badge: id === 'pack' ? 'Le plus complet' : id === 'gaz-duo' ? 'Recommandé' : id === 'casab' ? 'Le digital' : id === 'gaz-pap' ? 'Le papier' : 'Le numérique',
+        perks: p.perks.map((t) => ({ t })), badge: { pack: 'Le plus complet', casab: 'Le digital', famille: 'Pour toute la famille', jeunes: 'Moins de 26 ans', 'gaz-pap': 'Le papier', 'gaz-duo': 'Papier et numérique' }[id] || 'Le numérique',
         deep: hero ? 'cb-deep' : '', bg: hero ? 'var(--inv-bg)' : 'var(--surface)', fg: hero ? 'var(--on-inv-2)' : 'var(--text)', border: hero ? 'var(--inv-bg)' : 'var(--line)', titleColor: hero ? 'var(--on-inv)' : 'var(--ink)',
         badgeBg: hero ? accent : 'var(--surface-2)', badgeFg: hero ? 'var(--on-acc)' : 'var(--gold-text)', ctaBg: hero ? accent : 'var(--inv-bg)', ctaFg: hero ? 'var(--on-acc)' : 'var(--on-inv)',
         cta: has ? 'Déjà abonné ✓' : 'Choisir', go: () => (has ? this.go('account') : this.go('checkout', { subPlan: id, step: 1, isGift: false })) };
@@ -2329,6 +2333,18 @@ class Component extends DCLogic {
     const tiersDef = [['Platinum', 'Partenaire Platinum', '#e8a830', '360px', '130px'], ['Or', 'Partenaires Or', '#9a6410', '300px', '110px'], ['Club', 'Partenaires Club', '#8f9aa8', '260px', '100px']];
     // un niveau inconnu (ou vide) range le partenaire avec les partenaires Club, pour qu'il ne disparaisse jamais de la page
     const tierOf = (p) => (tiersDef.some((t) => t[0] === p.tier) ? p.tier : 'Club');
+    // Tarifs des pros (contenus/tarifs.js, modifiables dans l'admin) : devis et facture, pas de paiement en ligne
+    const TF = window.CASA_TARIFS || {};
+    const tfLigne = (l) => ({ t: String(l.t || ''), d: String(l.d || ''), hasD: !!l.d, prix: String(l.prix || '') + (l.unite ? ' ' + l.unite : '') });
+    const tfPart = TF.partenaires || {};
+    const partTarifs = {
+      has: Array.isArray(tfPart.niveaux) && tfPart.niveaux.length > 0, titre: tfPart.titre || 'Devenir partenaire', intro: tfPart.intro || '',
+      fondateur: tfPart.fondateur || '', hasFondateur: !!tfPart.fondateur,
+      niveaux: (tfPart.niveaux || []).map((n) => ({ nom: n.nom || n.id, mois: n.mois || '', an: n.an || '', unite: n.unite || '', star: !!n.recommande, cls: n.recommande ? 'tf-niv is-star' : 'tf-niv',
+        perks: (n.perks || []).filter(Boolean).map((t) => ({ t })), go: () => this.go('contact', { subject: 'Partenariat — ' + (n.nom || n.id), profile: 'Entreprise', contactSent: false, formError: '' }) })),
+      carte: (tfPart.carte || []).map(tfLigne), hasCarte: (tfPart.carte || []).length > 0,
+      carteGo: () => this.go('contact', { subject: 'Partenariat — à la carte', profile: 'Entreprise', contactSent: false, formError: '' })
+    };
     const partnerTiers = tiersDef.map(([id, label, line, min, h]) => ({ label, line, min, h, items: partners.filter((p) => tierOf(p) === id) })).filter((t) => t.items.length);
     const ptRaw = X.partners.find((p) => p.id === s.partnerId);
     const claimed = ptRaw && s.claimed.indexOf(ptRaw.id) >= 0;
@@ -2588,6 +2604,23 @@ class Component extends DCLogic {
       ].map((c) => Object.assign(c, { items: c.items.map((t) => ({ t })) })),
       devis: toContact('Demande de devis', ''), partenaire: toContact('Devenir partenaire', 'Entreprise'), histoire: toContact('Proposer une histoire', ''), redaction: toContact('Message à la rédaction', ''),
       stats: proStats, hasStats: proStats.length > 0, offres: proOffres, cur: proCur, rdv: toContact('Casa PRO · rendez-vous', ''),
+      // Tarifs de l'onglet choisi (contenus/tarifs.js) et Club PRO (contenus/offres-pro.js, payable en ligne)
+      tarifs: (() => {
+        const tf = (k, sujet, profil) => { const b = TF[k]; return b && Array.isArray(b.lignes) && b.lignes.length ? { titre: b.titre || '', intro: b.intro || '', hasIntro: !!b.intro, lignes: b.lignes.map(tfLigne), astuce: b.astuce || '', hasAstuce: !!b.astuce, go: toContact(sujet, profil) } : null; };
+        const niv = tfPart.niveaux && tfPart.niveaux.length ? { titre: tfPart.titre || 'Devenir partenaire', intro: tfPart.intro || '', hasIntro: !!tfPart.intro, lignes: tfPart.niveaux.map((n) => ({ t: n.nom || n.id, d: (n.perks || []).slice(0, 3).join(' · '), hasD: true, prix: (n.mois || '') + (n.unite ? ' ' + n.unite : '') + ' / mois' })).concat((tfPart.carte || []).map(tfLigne)), astuce: tfPart.fondateur || '', hasAstuce: !!tfPart.fondateur, go: toContact('Casa PRO · partenariat', 'Entreprise') } : null;
+        const parTab = { clubs: [tf('clubs', 'Casa PRO · couverture du club', 'Club')], marques: [niv], collectivites: [tf('collectivites', 'Casa PRO · événement', 'Autre'), tf('marees', 'Les Marées d’or · parrainage', 'Entreprise')], sportifs: [tf('sportifs', 'Casa PRO · sportif', 'Joueur')], medias: [] };
+        return (parTab[proCur.id] || []).filter(Boolean);
+      })(),
+      clubPro: (() => {
+        if (proCur.id !== 'clubs') return [];
+        const e2 = (n) => (Math.round(Number(n || 0) * 100) / 100).toFixed(2).replace('.', ',').replace(',00', '') + ' €';
+        return ['club-pro', 'club-pro-video'].map((id) => X.subPlans[id]).filter((P) => P && !P.masque && P.mois > 0).map((P) => ({
+          name: P.name, mois: e2(P.mois), an: e2(P.an), star: P.id === 'club-pro', cls: P.id === 'club-pro' ? 'tf-niv is-star' : 'tf-niv', tag: P.id === 'club-pro' ? 'Le plus utile' : 'Le pack',
+          perks: (P.perks || []).map((t) => ({ t })), actif: !!s.clubPro, inactif: !s.clubPro,
+          mensuel: () => this.go('checkout', { subPlan: P.id, step: 1, isGift: false, period: 'mois' }),
+          annuel: () => this.go('checkout', { subPlan: P.id, step: 1, isGift: false, period: 'an' }),
+          vestiaire: () => this.go('vestiaire') }));
+      })(),
       voir: () => { try { const el = document.getElementById('pro-offres'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} },
       public: () => this.go('home'),
       ar: (() => {
@@ -2602,6 +2635,7 @@ class Component extends DCLogic {
           devis: toContact('Analyse vidéo Pro · plusieurs équipes', 'Club') };
       })()
     };
+    workVals.hasTarifs = workVals.tarifs.length > 0; workVals.hasClubPro = workVals.clubPro.length > 0; workVals.clubProActif = !!s.clubPro;
     // Réseaux sociaux du pied de page (contenus/reseaux.js, modifiables dans l'admin) : un réseau sans adresse est masqué
     const RSX = window.CASA_RESEAUX || {};
     const reseaux = [['instagram', 'Instagram'], ['youtube', 'YouTube'], ['tiktok', 'TikTok'], ['facebook', 'Facebook'], ['x', 'X'], ['linkedin', 'LinkedIn']]
@@ -3336,11 +3370,11 @@ class Component extends DCLogic {
       isHome: V === 'home', isNews: V === 'news', isArticle: V === 'article', isVideos: V === 'videos', isVideo: V === 'video',
       isDisciplines: V === 'disciplines', isDiscipline: V === 'discipline', isClubs: V === 'clubs', isClub: V === 'club',
       isPlayers: V === 'players', isPlayer: V === 'player', isMap: V === 'map', isOffers: V === 'offers', isCheckout: V === 'checkout',
-      isPartners: V === 'partners', isAbout: V === 'about', isWork: V === 'work', work: workVals, cherwood, isContact: V === 'contact', isAccount: V === 'account',
+      isPartners: V === 'partners', partTarifs, isAbout: V === 'about', isWork: V === 'work', work: workVals, cherwood, isContact: V === 'contact', isAccount: V === 'account',
       isLive: V === 'live', isShop: V === 'shop', isProduct: V === 'product', isOrder: V === 'order',
       showCrumbs: V !== 'home', crumbs, back: () => this.back(),
       goHome: () => this.go('home'), goNews: () => this.go('news'), goVideos: () => this.go('videos'), goClubs: () => this.go('clubs'),
-      goPlayers: () => this.go('players'), goMap: () => this.go('map'), goOffers: () => this.go('offers'), goPartners: () => this.go('partners'),
+      goPlayers: () => this.go('players'), goMap: () => this.go('map'), goOffers: () => this.go('offers'), goPartners: () => this.go('partners'), goPro: () => this.go('work', { proTab: 'clubs' }),
       goLive: () => this.go('live'), goShop: () => this.go('shop'), goGazette: () => this.go('offers', { offerTab: 'La Gazette' }),
       goContact: () => this.go('contact', { contactSent: false }), goWork: () => this.go('work'), goAccount: () => (s.loggedIn ? this.go('account') : this.setState({ loginOpen: true, linkSent: false })),
       goCheckout: () => this.go('checkout', { subPlan: 'casab', step: 1 }),
@@ -3359,7 +3393,7 @@ class Component extends DCLogic {
       proposePlayer: () => this.go('contact', { subject: 'Ma fiche joueur', profile: 'Joueur', contactSent: false, formError: '' }),
       submitResult: () => this.go('contact', { subject: 'Transmettre un résultat — ' + s.dSport, profile: 'Club', contactSent: false }),
       lu: { open: () => this.openLineup({ sport: s.dSport || null }), club: () => this.openLineup({ club: s.view === 'club' ? s.clubId : null }), has: !!s.lineupN, n: String(s.lineupN || 0) },
-      orderRecap: () => this.go('contact', { subject: 'Devis résumé de match (290 €)' + (s.view === 'club' ? ' — ' + curC.name : ''), profile: 'Club', contactSent: false }),
+      orderRecap: () => this.go('contact', { subject: 'Résumé vidéo d’un match (220 € TTC)' + (s.view === 'club' ? ' — ' + curC.name : ''), profile: 'Club', contactSent: false }),
       art: artObj, gzSide, related, locked, unlocked: !locked, fontSize: fontSizes[s.fontStep],
       fontUp: () => this.setState({ fontStep: Math.min(3, s.fontStep + 1) }), fontDown: () => this.setState({ fontStep: Math.max(0, s.fontStep - 1) }),
       toggleSummary: () => this.setState({ summary: !s.summary }), summaryOpen: s.summary, summaryPressed: s.summary ? 'true' : 'false', sumBg: s.summary ? 'var(--inv-bg)' : 'var(--surface)', sumFg: s.summary ? 'var(--on-inv)' : 'var(--ink)',
@@ -3428,14 +3462,17 @@ class Component extends DCLogic {
       // abonnements
       offerTabs, periods, offerCards, offerTabGazette: s.offerTab === 'La Gazette' || s.offerTab === 'Tout',
       subName: sp.name, subPrice: eur(priceOf(s.subPlan)) + ' ' + perLabel, subNote: period === 'an' ? '2 mois offerts · paiement annuel' : 'Sans engagement · résiliable à tout moment',
-      subNeedsAddress, isGift: s.isGift && !sp.arPro, giftOk: !sp.arPro, toggleIsGift: () => this.setState({ isGift: !s.isGift }),
+      subNeedsAddress, isGift: s.isGift && !sp.arPro && !sp.clubPro, giftOk: !sp.arPro && !sp.clubPro, toggleIsGift: () => this.setState({ isGift: !s.isGift }),
+      subJeunes: !!sp.jeunes, jeuneOk: !!s.jeuneOk, toggleJeune: () => this.setState({ jeuneOk: !s.jeuneOk }),
+      jeuneLabel: s.isGift ? 'Je certifie que le bénéficiaire a moins de 26 ans, ou qu’il est étudiant ou apprenti.' : 'Je certifie avoir moins de 26 ans, ou être étudiant ou apprenti. L’équipe peut demander un justificatif.',
+      subFamille: !!sp.famille && !s.isGift, subClubPro: !!sp.clubPro,
       nameLabel: s.isGift ? 'Prénom du bénéficiaire' : 'Prénom', emailLabel: s.isGift ? 'E-mail du bénéficiaire' : 'E-mail',
       steps, step1: s.step === 1, step2: s.step === 2, step3: s.step === 3, step4: s.step === 4,
-      nextStep: () => { if (s.subPending) this.setState({ subPending: false }); if (s.step === 2 && (!s.name.trim() || !validEmail || (sp.paper && !s.address.trim()))) { this.setState({ formError: 'Prénom, e-mail valide' + (sp.paper ? ' et adresse postale' : '') + ' requis.' }); return; } this.setState({ step: s.step + 1, formError: '' }); },
+      nextStep: () => { if (s.subPending) this.setState({ subPending: false }); if (s.step === 2 && (!s.name.trim() || !validEmail || (sp.paper && !s.address.trim()))) { this.setState({ formError: 'Prénom, e-mail valide' + (sp.paper ? ' et adresse postale' : '') + ' requis.' }); return; } if (s.step === 2 && sp.jeunes && !s.jeuneOk) { this.setState({ formError: 'Cochez la case qui certifie l’âge ou le statut pour BE+ Jeunes.' }); return; } if (s.step === 2 && sp.clubPro && !s.loggedIn) { this.setState({ formError: 'Club PRO : connectez-vous d’abord avec le compte du correspondant ou de l’encadrant du club.' }); return; } this.setState({ step: s.step + 1, formError: '' }); },
       prevStep: () => this.setState({ step: Math.max(1, s.step - 1), formError: '' }),
       confirmSub: () => {
         if (s.payBusy) return;
-        this.payOnline({ type: 'abonnement', formule: s.subPlan, periode: period === 'an' ? 'an' : 'mois', cadeau: !!s.isGift && !sp.arPro, email: s.email.trim(), nom: s.name.trim(), adresse: sp.paper ? s.address.trim() : '' }, () => {
+        this.payOnline({ type: 'abonnement', formule: s.subPlan, periode: period === 'an' ? 'an' : 'mois', cadeau: !!s.isGift && !sp.arPro && !sp.clubPro, jeunes: sp.jeunes ? !!s.jeuneOk : undefined, email: s.email.trim(), nom: s.name.trim(), adresse: sp.paper ? s.address.trim() : '' }, () => {
         // Paiement en ligne pas encore activé : la demande part à l'équipe, sans activer l'abonnement
         this.crmCapture({ name: s.name.trim(), email: s.email, source: 'Abonnement', type: s.isGift ? 'Supporter' : 'Abonné', consent: '?', note: sp.name + (s.isGift ? ' (cadeau)' : '') + ' · paiement à régler' });
         this.setState({ step: 4, subPending: true, orders: s.orders.concat([{ label: sp.name + (s.isGift ? ' (cadeau)' : ''), detail: eur(priceOf(s.subPlan)) + ' ' + perLabel, status: 'À régler' }]) });
@@ -3443,8 +3480,8 @@ class Component extends DCLogic {
         });
       },
       doneTitle: s.subPending ? 'Demande envoyée, merci ' + (s.name || '') : s.isGift ? 'Cadeau envoyé à ' + (s.name || 'votre proche') : 'Bienvenue, ' + (s.name || 'supporter'),
-      doneText: !s.subPending && sp.arPro ? 'L’Analyse vidéo Pro est débloquée sur ce compte : vidéo entière, rapport, captures et montage des temps forts.' : s.subPending ? 'Le paiement en ligne ouvre très bientôt. L’équipe Casa Besports vous écrit à ' + (s.email || 'votre adresse') + ' pour régler ' + sp.name + ' ; l’abonnement sera activé dès le paiement reçu.' : s.isGift ? 'Un e-mail avec la carte cadeau vient de partir.' : sp.gazette ? (sp.paper ? 'Votre premier numéro papier part au prochain bouclage. La liseuse est déjà ouverte.' : 'Le dernier numéro est disponible dans la liseuse.') : 'Tous les contenus Premium sont débloqués.',
-      doneCta: () => (!s.subPending && sp.arPro ? this.openAR('analyse') : s.subPending ? this.go('offers') : sp.gazette && !s.isGift ? this.setState({ readerOpen: true, page: 0 }) : this.go('article', { articleId: 'pointe-hague' })), doneCtaLabel: !s.subPending && sp.arPro ? 'Ouvrir l’analyse vidéo' : s.subPending ? 'Revenir aux abonnements' : sp.gazette && !s.isGift ? 'Ouvrir la Gazette' : 'Lire un article Premium',
+      doneText: !s.subPending && sp.clubPro ? 'Dernière étape : ouvrez le Vestiaire de votre club et touchez « Activer Club PRO ». Le badge et la vitrine de vos sponsors apparaissent alors sur la fiche du club.' + (sp.arPro ? ' L’Analyse vidéo Pro est déjà débloquée sur ce compte.' : '') : !s.subPending && sp.famille && !s.isGift ? 'BE+ Famille est actif. Ajoutez vos 3 proches dans Mon espace : il leur suffit ensuite de se connecter avec leur adresse e-mail.' : !s.subPending && sp.arPro ? 'L’Analyse vidéo Pro est débloquée sur ce compte : vidéo entière, rapport, captures et montage des temps forts.' : s.subPending ? 'Le paiement en ligne ouvre très bientôt. L’équipe Casa Besports vous écrit à ' + (s.email || 'votre adresse') + ' pour régler ' + sp.name + ' ; l’abonnement sera activé dès le paiement reçu.' : s.isGift ? 'Un e-mail avec la carte cadeau vient de partir.' : sp.gazette ? (sp.paper ? 'Votre premier numéro papier part au prochain bouclage. La liseuse est déjà ouverte.' : 'Le dernier numéro est disponible dans la liseuse.') : 'Tous les contenus Premium sont débloqués.',
+      doneCta: () => (!s.subPending && sp.clubPro ? this.go('vestiaire') : !s.subPending && sp.famille && !s.isGift ? this.go('account') : !s.subPending && sp.arPro ? this.openAR('analyse') : s.subPending ? this.go('offers') : sp.gazette && !s.isGift ? this.setState({ readerOpen: true, page: 0 }) : this.go('article', { articleId: 'pointe-hague' })), doneCtaLabel: !s.subPending && sp.clubPro ? 'Ouvrir le Vestiaire' : !s.subPending && sp.famille && !s.isGift ? 'Ajouter mes proches' : !s.subPending && sp.arPro ? 'Ouvrir l’analyse vidéo' : s.subPending ? 'Revenir aux abonnements' : sp.gazette && !s.isGift ? 'Ouvrir la Gazette' : 'Lire un article Premium',
       subPayLabel: s.payBusy ? 'Ouverture du paiement sécurisé…' : 'Payer ' + eur(priceOf(s.subPlan)) + ' ' + perLabel, payError: s.step === 3 ? s.formError : '',
       cancelLabel: s.paidSubs ? 'Gérer ou résilier' : 'Résilier',
       // Abonnement payé en ligne : espace client Stripe (carte, factures, résiliation)
@@ -3490,7 +3527,7 @@ class Component extends DCLogic {
       subscribed, notSubscribed: !subscribed, subStatus,
       displayName: s.name || s.email.split('@')[0] || 'supporter',
       alerts, followList, noFollows: followList.length === 0, savedArticles, noSaved: savedArticles.length === 0,
-      orders: s.orders, noOrders: s.orders.length === 0,
+      orders: s.orders, noOrders: s.orders.length === 0, famille: window.CasaOffres && V === 'account' ? window.CasaOffres.famille(this) : { show: false },
       logout: () => { if (window.CasaAuth && window.CasaAuth.on) window.CasaAuth.signOut().catch(() => {}); this.setState({ loggedIn: false, role: null, subs: { casab: false, gazette: null } }); this.go('home'); this.say('Vous êtes déconnecté'); },
       loginOpen: s.loginOpen, openLogin: () => this.setState({ loginOpen: true, linkSent: false, formError: '', loginMode: 'password', resetSent: false }), closeLogin: () => this.setState({ loginOpen: false }),
       linkSent: s.linkSent, linkNotSent: !s.linkSent,

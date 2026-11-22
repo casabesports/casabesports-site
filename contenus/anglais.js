@@ -270,7 +270,7 @@ window.CASA_EN = {
   "Tarif étudiant & licencié": "Student & licence-holder rate",
   "[REMISE] sur présentation de la licence du club.": "[DISCOUNT] on presentation of your club licence.",
   "Offre clubs": "Club offer",
-  "Résumé de match 290 € · Platinum sur mesure.": "Match summary €290 · tailor-made Platinum.",
+  "Club PRO 12,90 € par mois · Partenaires dès 39 € HT par mois.": "Club PRO €12.90 a month · Partners from €39 excl. VAT a month.",
   "Voir les offres pros": "See the professional offers",
   "Votre formule": "Your plan",
   "Continuer": "Continue",
