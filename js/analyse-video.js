@@ -36,7 +36,7 @@
     var c = '#cbar .av-wrap{flex:1;min-height:0;overflow-y:auto;padding:.8rem;display:flex;flex-direction:column;gap:.7rem;max-width:1100px;width:100%;margin:0 auto;box-sizing:border-box}' +
       '#cbar .av-drop{border:2px dashed rgba(255,255,255,.3);border-radius:16px;padding:2rem 1rem;text-align:center;display:flex;flex-direction:column;gap:.7rem;align-items:center}' +
       '#cbar .av-drop.on{border-color:#f2b33d;background:rgba(242,179,61,.08)}' +
-      '#cbar .av-drop b{font-family:"Cormorant Garamond",Georgia,serif;font-size:26px}' +
+      '#cbar .av-drop b{font-family:"League Spartan","Arial Black",sans-serif;font-weight:800;text-transform:uppercase;font-size:22px}' +
       '#cbar .av-drop p,#cbar .av-small{margin:0;font-size:13.5px;color:#c9d6e3;line-height:1.5;max-width:560px}' +
       '#cbar .av-player{flex:none;position:relative;background:#000;border-radius:12px;overflow:hidden;align-self:center;max-width:100%}' +
       '#cbar .av-player video{position:static;display:block;width:100%;height:100%;object-fit:contain}' +
@@ -51,7 +51,7 @@
       '#cbar .av-tabs{display:flex;gap:.3rem;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.14);padding-bottom:.4rem}' +
       '#cbar .av-sec{display:flex;flex-direction:column;gap:.5rem}' +
       '#cbar .av-ev{display:flex;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:8px;background:rgba(255,255,255,.05);font-size:13.5px}' +
-      '#cbar .av-ev button.t{border:0;background:#f2b33d;color:#0f2236;font:800 12px Mulish,sans-serif;border-radius:999px;padding:.25rem .55rem;cursor:pointer}' +
+      '#cbar .av-ev button.t{border:0;background:#f2b33d;color:#10283a;font:800 12px Mulish,sans-serif;border-radius:999px;padding:.25rem .55rem;cursor:pointer}' +
       '#cbar .av-ev .x{margin-left:auto;border:0;background:none;color:#c9d6e3;font-size:18px;cursor:pointer;min-width:32px;min-height:32px}' +
       '#cbar .av-dot{width:10px;height:10px;border-radius:50%;flex:none}' +
       '#cbar .av-tbl{width:100%;border-collapse:collapse;font-size:13.5px}' +
@@ -60,10 +60,10 @@
       '#cbar .av-tbl th{font:700 11px "Barlow Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#f2b33d}' +
       '#cbar .av-ans{background:rgba(255,255,255,.06);border-radius:12px;padding:.7rem .8rem;font-size:14.5px;line-height:1.55}' +
       '#cbar .av-ans .q{font-size:12.5px;color:#9aa6b4;margin-bottom:.2rem}' +
-      '#cbar .av-ans button{border:0;background:#f2b33d;color:#0f2236;font:800 12px Mulish,sans-serif;border-radius:999px;padding:.15rem .5rem;margin:0 .15rem;cursor:pointer}' +
+      '#cbar .av-ans button{border:0;background:#f2b33d;color:#10283a;font:800 12px Mulish,sans-serif;border-radius:999px;padding:.15rem .5rem;margin:0 .15rem;cursor:pointer}' +
       '#cbar .av-ia{border:1px solid rgba(242,179,61,.5);border-radius:12px;padding:.8rem;font-size:13.5px;line-height:1.5;color:#c9d6e3}' +
       '#cbar .av-ia b{color:#f6f0e1}' +
-      '#cbar .av-pro{display:inline-flex;align-items:center;gap:.3rem;font:800 11px "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#0f2236;background:#f2b33d;border-radius:999px;padding:.2rem .55rem}' +
+      '#cbar .av-pro{display:inline-flex;align-items:center;gap:.3rem;font:800 11px "Barlow Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#10283a;background:#f2b33d;border-radius:999px;padding:.2rem .55rem}' +
       '#cbar .av-pro.off{background:rgba(255,255,255,.12);color:#f6f0e1}';
     document.head.appendChild(el('style', { id: 'cbav-css' }, c));
   }
@@ -121,7 +121,7 @@
       canvas = el('canvas');
       player.appendChild(video); player.appendChild(canvas);
       lock = el('div', { class: 'av-lock', style: 'display:none' });
-      lock.innerHTML = '<b style="font-family:Cormorant Garamond,Georgia,serif;font-size:24px">Fin de l’essai gratuit</b><p class="av-small">L’essai couvre les 5 premières minutes. Avec Analyse vidéo Pro, toute la vidéo, le rapport, les captures et le montage des temps forts.</p>';
+      lock.innerHTML = '<b style="font-family:League Spartan,Arial Black,sans-serif;font-weight:800;text-transform:uppercase;font-size:20px">Fin de l’essai gratuit</b><p class="av-small">L’essai couvre les 5 premières minutes. Avec Analyse vidéo Pro, toute la vidéo, le rapport, les captures et le montage des temps forts.</p>';
       if (data.offre) lock.appendChild(btn('Découvrir l’offre Pro', data.offre, true));
       lock.appendChild(btn('Revenir au début', function () { lock.style.display = 'none'; video.currentTime = 0; }));
       player.appendChild(lock);
@@ -150,7 +150,7 @@
       panel = el('div', { class: 'av-sec' }); wrap.appendChild(panel);
 
       video.addEventListener('error', function () {
-        lock.innerHTML = '<b style="font-family:Cormorant Garamond,Georgia,serif;font-size:24px">Cette vidéo ne se lit pas ici</b><p class="av-small">Son format n’est pas reconnu par ce navigateur. Les vidéos d’iPhone (HEVC) se lisent dans Safari ; sur ordinateur Windows, exportez-la d’abord en MP4 (H.264), par exemple avec l’application Photos ou Clipchamp.</p>';
+        lock.innerHTML = '<b style="font-family:League Spartan,Arial Black,sans-serif;font-weight:800;text-transform:uppercase;font-size:20px">Cette vidéo ne se lit pas ici</b><p class="av-small">Son format n’est pas reconnu par ce navigateur. Les vidéos d’iPhone (HEVC) se lisent dans Safari ; sur ordinateur Windows, exportez-la d’abord en MP4 (H.264), par exemple avec l’application Photos ou Clipchamp.</p>';
         lock.appendChild(btn('Choisir une autre vidéo', function () { input.value = ''; input.click(); }, true));
         lock.style.display = 'flex';
       });
