@@ -196,6 +196,7 @@ class Component extends DCLogic {
       window.addEventListener('popstate', this._onPop);
     } catch (e) {}
     this.stripeReturn();
+    try { const gq = new URLSearchParams(location.search).get('groupe'); if (gq && typeof CasaDiscussions !== 'undefined') setTimeout(() => { this.go('clubhouse', { chTab: 'discussions' }); CasaDiscussions.invitation(this, gq); }, 0); } catch (e) {}
     try { const mq = new URLSearchParams(location.search).get('membre'); if (mq) setTimeout(() => { this.go('verifier', { mbQ: mq.slice(0, 20) }); this.checkMember(mq); }, 0); } catch (e) {}
     try { const vq = new URLSearchParams(location.search).get('verifier'); if (vq) setTimeout(() => this.go('verifier', { verifId: vq.slice(0, 20) }), 0); } catch (e) {}
     this.creaInit();
@@ -742,6 +743,7 @@ class Component extends DCLogic {
     // partenaire OlistO
     if (has(/olisto|credit|pret immo|emprunt|regroup|rachat de|assurance emprunteur|projet immobilier|immobilier|courtier|mensualite/)) return { text: 'Notre partenaire OlistO, réseau de courtage, accompagne les projets immobiliers, le regroupement de crédits et l’assurance emprunteur. Vous pouvez simuler une mensualité et votre taux d’endettement, puis demander à être rappelé.\nUn crédit vous engage et doit être remboursé. Vérifiez vos capacités de remboursement avant de vous engager.', actions: [act('Simuler avec OlistO', () => this.go('olisto'))] };
     // club house
+    if (has(/discussion|\bchat\b|tchat|messagerie entre|message prive|groupe prive|huis clos|entre amis|reseau social/)) return { text: 'Les Discussions du Club House : le chat entre amis BE+. Rejoignez un groupe ouvert (par sport, par club), créez un groupe à huis clos sur invitation, ou écrivez en privé à un ami avec son numéro de membre. Réservé aux membres de 15 ans et plus.', actions: [act('Ouvrir les Discussions', () => this.go('clubhouse', { chTab: 'discussions' }))] };
     if (has(/club ?house|clubhouse|communaute|forum|annonce|benevol.*cherche|sondage|carte membre|mes points|fidelite|classement des membres|evenement|covoit/)) {
       if (has(/covoit/)) return { text: 'Le covoiturage pour les matchs se trouve au Club House, rubrique Annonces & entraide.', actions: [act('Voir les trajets', () => this.go('clubhouse', { chTab: 'annonces', chAdCat: 'Covoiturage' }))] };
       if (has(/annonce|benevol/)) return { text: 'Petites annonces du Club House : matériel, bénévolat, joueurs, stages et covoiturage.', actions: [act('Voir les annonces', () => this.go('clubhouse', { chTab: 'annonces' }))] };
@@ -1870,8 +1872,8 @@ class Component extends DCLogic {
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
     // Le Vestiaire : en tête des services du quotidien
-    menuGroups.forEach((g) => { if (g.items.some((it) => it[1] === 'private')) g.items.unshift(['Le Vestiaire', 'vestiaire', 'Planning, présences et fil de mon club']); });
-    menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: v === 'ar:lineup' ? () => { this.setState({ moreOpen: false, menuOpen: false }); this.openAR('lineup'); } : goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
+    menuGroups.forEach((g) => { if (g.items.some((it) => it[1] === 'private')) g.items.unshift(['Le Vestiaire', 'vestiaire', 'Planning, présences et fil de mon club'], ['Discussions', 'clubhouse:discussions', 'Le chat entre amis : groupes ouverts ou à huis clos']); });
+    menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: v === 'ar:lineup' ? () => { this.setState({ moreOpen: false, menuOpen: false }); this.openAR('lineup'); } : v === 'clubhouse:discussions' ? goV('clubhouse', { chTab: 'discussions' }) : goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
     const moreNav = [].concat(...menuGroups.map((g) => g.items));
     // Accueil : toutes les rubriques du site, en accès direct
     const rubriques = [{ titre: 'L’essentiel', items: [['Le Terrain', 'live', 'Scores, agenda et classements'], ['Actualités', 'news', 'Récits et résultats'], ['Clubs', 'clubs', 'Les clubs et le Club House'], ['Boutique', 'shop', 'Maillots et collections'], ['Offres', 'offers', 'BE+, La Gazette et Casa PRO'], ['Partenaires', 'partners', 'Les entreprises qui nous soutiennent']].map(([label, v, sub]) => ({ label, sub, go: goV(v) })) }].concat(menuGroups.filter((g) => g.titre !== 'Équipe'));
@@ -3117,9 +3119,11 @@ class Component extends DCLogic {
       album: albumV,
       perks: X.partners.map((p) => { const claimed = s.claimed.indexOf(p.id) >= 0; return { name: p.name, mono: p.mono, color: p.color, perk: p.perk, status: claimed ? 'Activé' : s.subs.casab ? 'Disponible' : 'Avec BE+', stColor: claimed ? 'var(--success)' : 'var(--gold-text)', open: () => this.setState({ partnerId: p.id }) }; }) };
     // Club House épuré : trois onglets. Les événements se résument au « prochain rendez-vous » du fil, et les points à la carte membre (le classement n'est plus affiché)
-    const chTabsDef = [['fil', 'Le fil'], ['annonces', 'Entraide'], ['carte', 'Ma carte']];
+    // Discussions (js/discussions.js, supabase/discussions.sql) : le chat entre amis, groupes ouverts ou à huis clos, conversations privées
+    const DC = typeof CasaDiscussions !== 'undefined' ? CasaDiscussions.vals(this, { V: s.view, memberNo }) : { badge: 0, hasBadge: false, badgeTxt: '0' };
+    const chTabsDef = [['fil', 'Le fil'], ['discussions', DC.hasBadge ? 'Discussions · ' + DC.badgeTxt : 'Discussions'], ['annonces', 'Entraide'], ['carte', 'Ma carte']];
     const chTab = chTabsDef.some((t) => t[0] === s.chTab) ? s.chTab : 'fil';
-    const chTabs = chTabsDef.map(([id, label]) => Object.assign(pill(id === chTab), { label, sel: id === chTab ? 'true' : 'false', pick: () => this.setState({ chTab: id }) }));
+    const chTabs = chTabsDef.map(([id, label]) => Object.assign(pill(id === chTab), { label, sel: id === chTab ? 'true' : 'false', pick: () => { this.setState({ chTab: id }); } }));
     const ROOMS = ['Général', 'Football', 'Basket', 'Water-polo', 'Trail & course'];
     const room = ['Tous'].concat(ROOMS).indexOf(s.chRoom) >= 0 ? s.chRoom : 'Tous';
     const PCOL = ['#2e9e6b', '#6aa6c8', '#b07acc', '#d0473e', '#e8a830', '#3a4a78', '#8a4b2a'];
@@ -3160,7 +3164,7 @@ class Component extends DCLogic {
     const board = [];
     if (s.loggedIn) board.push({ name: meName + ' (vous)', p: pts, me: true });
     const boardV = board.sort((a, b) => b.p - a.p).map((b, i) => { const li = LV.reduce((a, l, k) => (b.p >= l[1] ? k : a), 0); return { rank: String(i + 1), name: b.name, points: b.p + ' pts', level: LV[li][0], weight: b.me ? '900' : '700', bg: b.me ? 'var(--surface-2)' : 'var(--surface)', rankBg: i < 3 ? 'var(--acc)' : 'var(--surface-2)', rankFg: i < 3 ? '#080f1a' : 'var(--ink)' }; });
-    const ch = { tFil: chTab === 'fil', tAnnonces: chTab === 'annonces', tEvents: chTab === 'events', tLigue: chTab === 'ligue', tCarte: chTab === 'carte',
+    const ch = { tFil: chTab === 'fil', tDiscussions: chTab === 'discussions', tAnnonces: chTab === 'annonces', tEvents: chTab === 'events', tLigue: chTab === 'ligue', tCarte: chTab === 'carte',
       posts: chPosts, rooms: ['Tous'].concat(ROOMS).map((r) => Object.assign(pill(r === room), { label: r, pick: () => this.setState({ chRoom: r }) })), roomOpts: ROOMS.map((v) => ({ v })),
       publish: () => { if (needLogin()) return; if (chf.text.trim().length < 3) { this.say('Écrivez quelques mots'); return; } saveCh({ posts: [{ id: 'm' + Date.now(), author: meName, room: chf.room, time: 'à l’instant', text: chf.text.trim().slice(0, 500), likes: 0, liked: false, comments: [], mine: true, staff: !!s.role }].concat(chState.posts) }); this.setState({ chf: Object.assign({}, chf, { text: '' }), chRoom: 'Tous' }); this.say('Publié au Club House · +5 pts'); },
       poll: pollV, nextEvent: chEvents[0] ? { title: nextEv.title, when: fmtDay(nextEv.date) + ' · ' + nextEv.time, place: nextEv.place } : { title: 'Aucun rendez-vous pour l’instant', when: 'Bientôt annoncé', place: 'Club House' }, nextGo: chEvents[0] ? chEvents[0].rsvp : null, nextLabel: chEvents[0] ? chEvents[0].btnLabel : '', hasNext: !!chEvents[0], goEvents: () => this.setState({ chTab: 'events' }), goCard: () => this.setState({ chTab: 'carte' }), goPronos: () => this.go('live', { dTab: 'pronos' }),
@@ -3673,7 +3677,7 @@ class Component extends DCLogic {
       isApp: V === 'app', appUrl, arModes, notif, installSteps, installApp, installLabel, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: pwaIn ? 'Vous êtes dans l’application.' : 'Gratuite, sans passer par un store. Fonctionne sur téléphone, tablette et ordinateur.',
       isOlisto: V === 'olisto', ol, goOlisto: () => this.go('olisto'),
       clubsSwitch: [['clubs', 'Clubs et disciplines', 'Tous les sports, les clubs et leurs résultats'], ['players', 'Joueurs', 'Les profils du Cotentin'], ['clubhouse', 'Club House', 'La communauté des supporters'], ['handisport', 'Handisport', 'Le sport adapté, par discipline']].map(([v, label, sub]) => ({ label, sub, sel: V === v ? 'true' : 'false', cls: V === v ? 'is-on' : '', go: () => this.go(v) })),
-      isClubhouse: V === 'clubhouse', card, cardColors, chTabs, ch, chf, chMe, chLevelColor: LV[lvIdx][2], chHome, goClubhouse: () => this.go('clubhouse'),
+      isClubhouse: V === 'clubhouse', dc: DC.page || { off: true }, dcBadge: DC.hasBadge, dcBadgeTxt: DC.badgeTxt, goDiscussions: () => this.go('clubhouse', { chTab: 'discussions' }), card, cardColors, chTabs, ch, chf, chMe, chLevelColor: LV[lvIdx][2], chHome, goClubhouse: () => this.go('clubhouse'),
       pvGroups, pvTitle, tm, isCulture: V === 'culture', cuTabs, cu, cuf, workOpen: !!woRaw, wo, closeWork: () => this.setState({ workIdx: null }), oeuvre, cultureHome, goCulture: () => this.go('culture'),
       hdrY: s.hdrY, showToTop: s.scrolled, toTop: () => { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} },
       bg, bgModes, bgColorOpts, teintes, teinteLibre, place, places, placeOpacity, placeOpen: s.placeOpen, pp, togglePlace: () => this.setState({ placeOpen: !s.placeOpen, placeIdx: X.places.indexOf(placeRaw) }), closePlace: () => this.setState({ placeOpen: false }),
