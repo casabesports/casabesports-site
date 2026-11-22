@@ -10,7 +10,7 @@
  * clubs   : [{ id, name, sport, city }]                            clubs supplémentaires
  */
 window.CASA_SPORT = {
-  maj: '2026-11-11T22:55:00+01:00',
+  maj: '2026-11-22T18:10:00+01:00',
   sources: [
     'https://us-avranches.fr/calendrier-resultats-2026-2027/'
   ],
@@ -22,7 +22,8 @@ window.CASA_SPORT = {
   },
   tables: {},
   matches: [
-    { id: 'national-1-2026-11-21-vendee-poire-football-us-avranches-msm', sport: 'Football', comp: 'national-1', date: '2026-11-21', time: '', home: 'Vendée Poiré Football', away: 'US Avranches MSM', hs: null, as: null, status: 'up', venue: 'Stade de l’Idonnière, Le Poiré-sur-Vie', source: 'https://us-avranches.fr/calendrier-resultats-2026-2027/' }
+    { id: 'national-1-2026-11-21-vendee-poire-football-us-avranches-msm', sport: 'Football', comp: 'national-1', date: '2026-11-21', time: '', home: 'Vendée Poiré Football', away: 'US Avranches MSM', hs: null, as: null, status: 'up', venue: 'Stade de l’Idonnière, Le Poiré-sur-Vie', source: 'https://us-avranches.fr/calendrier-resultats-2026-2027/' },
+    { id: 'national-1-2026-12-05-us-avranches-msm-stade-briochin', sport: 'Football', comp: 'national-1', date: '2026-12-05', time: '', home: 'US Avranches MSM', away: 'Stade Briochin', hs: null, as: null, status: 'up', venue: 'Stade René Fenouillère, Avranches', source: 'https://us-avranches.fr/calendrier-resultats-2026-2027/' }
   ],
   teamClub: { 'US Avranches MSM': 'us-avranches' },
   clubs: []
