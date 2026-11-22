@@ -55,7 +55,10 @@
     // Abonnements et commandes de la personne connectée (table abonnements / commandes, voir supabase/paiements.sql)
     mesAbonnements: function () {
       if (!A || !A.on) return Promise.resolve([]);
-      return A.db(function (c) { return c.from('abonnements').select('formule, periode, cadeau, statut, resiliation_prevue, fin, montant, cree_le').order('cree_le', { ascending: false }); }).then(function (r) { return r || []; }, function () { return []; });
+      var miens = A.db(function (c) { return c.from('abonnements').select('formule, periode, cadeau, statut, resiliation_prevue, fin, montant, cree_le').order('cree_le', { ascending: false }); }).then(function (r) { return r || []; }, function () { return []; });
+      // BE+ Famille : abonnements d'un proche qui nous a ajoutés (supabase/offres.sql ; ignoré si pas encore lancé)
+      var famille = A.db(function (c) { return c.rpc('mes_abonnements_famille'); }).then(function (r) { return (r || []).map(function (a) { return Object.assign({}, a, { partage: true }); }); }, function () { return []; });
+      return Promise.all([miens, famille]).then(function (r) { return r[0].concat(r[1]); });
     },
     mesCommandes: function () {
       if (!A || !A.on) return Promise.resolve([]);

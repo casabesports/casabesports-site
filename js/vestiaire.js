@@ -447,6 +447,7 @@ var CasaVestiaire = (function () {
       join: join, evForm: evFormVals(app, club), composer: composerVals(app, club, cd, sec === 'tout' ? 'club' : sec), gestion: staffVals(app, club, cd),
       quitter: membre ? function () { if (!window.confirm('Quitter le vestiaire de ' + (co ? co.name : 'ce club') + ' ? Vos réponses aux convocations seront effacées.')) return; Promise.all(mesClub.map(function (m) { return db(function (c) { return c.from('vestiaire_membres').delete().eq('id', m.id); }); })).then(function () { app.say('Vous avez quitté ce vestiaire.'); D.mine = null; loadMine(app); refresh(app, club); }, function (e) { app.say(e.message); }); } : null,
       canQuit: membre && !cd.staff,
+      pro: window.CasaOffres && co ? window.CasaOffres.vestiaire(app, club, co.name, !!cd.staff) : { show: false },
       czOn: !!co && (membre || !!cd.staff || s.role === 'admin'), czStaff: !!cd.staff,
       openCauseries: function () { app.openCauseries({ club: club }); }, nouvelleCauserie: function () { app.openCauseries({ club: club, nouvelle: true }); },
       cvMissing: D.cvMissing && s.role === 'admin',

@@ -33,7 +33,7 @@
     document.documentElement.setAttribute('data-cb-theme', t);
   })();
 </script>
-<link rel="preload" href="assets/polices/league-spartan-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/polices/mulish-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="assets/polices/polices.css">
+<link rel="preload" href="assets/polices/league-spartan-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/polices/mrs-saint-delafield-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/polices/mulish-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="assets/polices/polices.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="/assets/app/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/app/favicon-32.png">
@@ -193,6 +193,48 @@ html[data-cb-theme], body { background: var(--bg, #ffffff); }
 .pro-home { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border: 1px solid var(--line); border-left: 4px solid #e8a830; padding: 1.2rem 1.4rem; background: var(--surface) }
 .pro-home { padding: .8rem 1.1rem } .pro-home .pro-eb { margin-bottom: .3rem } .pro-home .pro-h2 { margin: 0; font-size: clamp(1.05rem, 2.2vw, 1.45rem) }
 @media (max-width: 760px) { .cw-img { aspect-ratio: 16 / 10; height: auto; min-height: 0 } .pro-card, .cw-band { grid-template-columns: 1fr } .pro-card { padding: 1.2rem; gap: 1.2rem } .hdr-pro { min-height: 32px; padding: 0 .5rem } }
+/* ---------- Offres et tarifs (grille du 2026-11-22, contenus/tarifs.js, js/offres.js) ---------- */
+.tf-intro { font-size: 14.5px; color: var(--text-2); max-width: 62ch; margin: 0 0 1rem; }
+.tf-fond { display: inline-block; font-size: 13.5px; font-weight: 700; color: var(--ink); background: var(--surface-2); border-left: 3px solid var(--sun, #f2b33d); padding: .55rem .8rem; margin: 0 0 1.2rem; }
+.tf-nivs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; align-items: start; }
+.tf-niv { position: relative; display: flex; flex-direction: column; gap: .55rem; background: var(--surface); border: 1.5px solid var(--line); padding: 1.4rem 1.2rem 1.2rem; min-width: 0; }
+.tf-niv.is-star { border: 2px solid var(--ink); }
+.tf-tag { position: absolute; top: -.75rem; left: 1rem; background: var(--sun, #f2b33d); color: #10283a; font: 700 11.5px/1 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; padding: .4rem .55rem .3rem; }
+.tf-nom { font: 800 1.15rem/1.1 'League Spartan', 'Arial Black', sans-serif; text-transform: uppercase; color: var(--ink); }
+.tf-prix { font: 700 2.3rem/1 'Barlow Condensed', 'Arial Narrow', sans-serif; color: var(--ink); font-variant-numeric: tabular-nums; }
+.tf-prix small { font-size: .95rem; font-weight: 600; color: var(--muted); }
+.tf-an { font-size: 13px; color: var(--muted); margin-top: -.3rem; }
+.tf-perks { list-style: none; margin: .2rem 0 .6rem; padding: 0; display: grid; gap: .4rem; }
+.tf-perks li { position: relative; padding-left: 1.4rem; font-size: 13.5px; line-height: 1.45; color: var(--text); }
+.tf-perks li::before { content: ''; position: absolute; left: 0; top: .35em; width: .75rem; height: .4rem; border-left: 2.5px solid var(--herbe, #2f6b4f); border-bottom: 2.5px solid var(--herbe, #2f6b4f); transform: rotate(-45deg); }
+.tf-niv .btn, .tf-niv .pro-cta { margin-top: auto; }
+.tf-h3 { font: 800 1.25rem/1.1 'League Spartan', 'Arial Black', sans-serif; text-transform: uppercase; color: var(--ink); margin: 2rem 0 .6rem; }
+.tf-bloc { margin-top: .4rem; }
+.tf-lignes { border: 1px solid var(--line); background: var(--surface); }
+.tf-l { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .4rem 1rem; align-items: baseline; padding: .75rem 1rem; border-bottom: 1px solid var(--line); }
+.tf-l:last-child { border-bottom: 0; }
+.tf-l b { display: block; color: var(--ink); font-size: 14.5px; }
+.tf-l span:not(.tf-l-p) { display: block; font-size: 13px; color: var(--muted); margin-top: .15rem; }
+.tf-l-p { font: 700 1.05rem/1.2 'Barlow Condensed', 'Arial Narrow', sans-serif; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
+@media (max-width: 520px) { .tf-l { grid-template-columns: 1fr; } .tf-l-p { text-align: left; } }
+.of-badge { display: inline-block; vertical-align: middle; background: var(--sun, #f2b33d); color: #10283a; font: 700 12px/1 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; padding: .38rem .55rem .3rem; }
+.of-badge-l { margin: 0 0 .6rem .4rem; }
+.of-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: .7rem; margin-top: .7rem; }
+.of-grid .is-wide { grid-column: 1 / -1; }
+.of-sp { display: grid; grid-template-columns: 1.6rem repeat(3, minmax(0, 1fr)) auto; gap: .5rem; align-items: end; padding: .6rem 0; border-bottom: 1px solid var(--line); }
+.of-sp-n { font: 800 1.1rem/2.6rem 'League Spartan', sans-serif; color: var(--muted); }
+@media (max-width: 760px) { .of-sp { grid-template-columns: 1fr; } .of-sp-n { line-height: 1; } }
+.of-vitrine { padding-top: 1.5rem; }
+.of-vit-t { font: 800 1.1rem/1.1 'League Spartan', 'Arial Black', sans-serif; text-transform: uppercase; color: var(--ink); margin: 0 0 .8rem; }
+.of-vit-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: .6rem; }
+.of-sp-c { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; min-height: 112px; padding: .8rem; background: var(--surface); border: 1px solid var(--line); text-decoration: none; color: var(--ink); text-align: center; }
+a.of-sp-c:hover { border-color: var(--ink); }
+.of-sp-c img { max-width: 100%; max-height: 56px; object-fit: contain; }
+.of-sp-i { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--rade, #10283a); color: #fff; font: 800 18px/1 'League Spartan', sans-serif; }
+.of-sp-nom { font-size: 13px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.of-fam { margin-top: 1rem; border: 1.5px solid var(--ink); padding: 1.1rem 1.2rem; }
+.of-fam-m { display: flex; justify-content: space-between; align-items: center; gap: .6rem; padding: .55rem 0; border-bottom: 1px solid var(--line); font-size: 14.5px; overflow-wrap: anywhere; }
+.of-fam-add { display: flex; flex-wrap: wrap; gap: .6rem; align-items: flex-end; margin-top: .8rem; }
 </style>
 <style>
 /* Casa Besports — styles globaux (utilisent les variables de theme.css) */
@@ -931,12 +973,17 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 @media (max-width: 760px) { .bn-pied { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); } }
 
 /* ---------- Ouverture de l’application : le bandeau se lève sur le logo ---------- */
-.bn-intro { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--bn-noir); color: var(--bn-blanc); cursor: pointer; animation: bnIntroOut .5s ease 2.9s forwards; }
+.bn-intro { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--bn-noir); color: var(--bn-blanc); cursor: pointer; animation: bnIntroOut .5s ease 3.5s forwards; }
 .bn-intro-in { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1.1rem; width: min(300px, 60vw); }
 .bn-intro-mot { position: relative; display: block; width: 100%; overflow: hidden; }
-.bn-intro-mot img { display: block; width: 100%; height: auto; clip-path: inset(0 100% 0 0); animation: bnDevoile .7s cubic-bezier(.7, 0, .2, 1) 1.05s forwards; }
-.bn-intro-mot::after { content: ""; position: absolute; top: -6%; bottom: -6%; left: 0; width: 100%; background: var(--bn-blanc); transform: scaleX(0); transform-origin: left center; animation: bnBalaye 1.15s cubic-bezier(.7, 0, .2, 1) .6s forwards; }
-.bn-intro-tag { font-family: var(--bn-font); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: clamp(11px, 2.6vw, 14px); color: var(--bn-gris); text-align: center; opacity: 0; animation: bnApparait .5s ease 1.85s forwards; }
+.bn-intro-mot img { display: block; width: 100%; height: auto; clip-path: inset(0 100% 0 0); animation: bnDevoile .7s cubic-bezier(.7, 0, .2, 1) 1.75s forwards; }
+.bn-intro-tag { margin-top: 2.7rem; font-family: var(--bn-font); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: clamp(11px, 2.6vw, 14px); color: var(--bn-gris); text-align: center; opacity: 0; animation: bnApparait .5s ease 2.4s forwards; }
+/* La signature manuscrite « powered by Kader Allou » remplace la bande blanche : elle s’écrit devant le logo,
+   puis descend se poser dessous pendant que le logo apparaît (police Mrs Saint Delafield, assets/polices) */
+.bn-intro-signe { position: absolute; left: 50%; top: calc(min(300px, 60vw) * 179 / 600); z-index: 2; transform: translate(-50%, -50%); white-space: nowrap; color: var(--bn-blanc); font-family: 'Mrs Saint Delafield', 'Brush Script MT', 'Segoe Script', cursive; font-weight: 400; line-height: 1; font-size: clamp(34px, 9vw, 52px); clip-path: inset(-20% 100% -30% -2%); animation: bnEcrit 1s cubic-bezier(.45, .05, .35, 1) .75s forwards, bnSignePose .5s cubic-bezier(.6, 0, .2, 1) 1.85s forwards; pointer-events: none; }
+.bn-intro-signe .sg-pb { font-size: .62em; margin-right: .18em; color: var(--bn-gris); }
+@keyframes bnEcrit { to { clip-path: inset(-20% -2% -30% -2%); } }
+@keyframes bnSignePose { from { top: calc(min(300px, 60vw) * 179 / 600); transform: translate(-50%, -50%); } to { top: calc(min(300px, 60vw) * 179 / 300 + .35rem); transform: translate(-50%, 0) scale(.72); } }
 .bn-intro .ci-skip { position: absolute; right: 16px; top: calc(16px + env(safe-area-inset-top, 0px)); min-height: 40px; padding: 0 1rem; border: 1.5px solid #5a5a5a; border-radius: 0; background: transparent; color: var(--bn-blanc); cursor: pointer; font-family: var(--bn-font); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
 @keyframes bnBalaye { 0% { transform: scaleX(0); transform-origin: left center; } 45% { transform: scaleX(1); transform-origin: left center; } 55% { transform: scaleX(1); transform-origin: right center; } 100% { transform: scaleX(0); transform-origin: right center; } }
 @keyframes bnDevoile { to { clip-path: inset(0 0 0 0); } }
@@ -959,7 +1006,7 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 @media (prefers-reduced-motion: reduce) {
   .bn-intro { animation: bnIntroOut .3s ease 1s forwards; }
   .bn-intro-mot img { animation: none; clip-path: none; }
-  .bn-intro-mot::after { display: none; }
+  .bn-intro-signe { animation: none; clip-path: none; top: calc(min(300px, 60vw) * 179 / 300 + .35rem); transform: translate(-50%, 0) scale(.72); }
   .bn-intro-tag { animation: none; opacity: 1; }
   .bn-intro-sym { display: none; }
   .bn-coll-img img, .bn-coll:hover .bn-coll-img img { transition: none; transform: none; }
@@ -4230,6 +4277,52 @@ img, video, canvas, svg { max-width: 100%; }
             </section>
           </sc-if>
 
+          <!-- Club PRO (js/offres.js) -->
+          <sc-if value="{{vs.pro.show}}" hint-placeholder-val="{{ false }}">
+            <section class="vs-box of-pro" aria-labelledby="vs-pro">
+              <span class="vs-k">Réservé au club</span><h3 id="vs-pro" class="vs-box-t" style="margin-bottom: .4rem">Club PRO<sc-if value="{{vs.pro.actif}}" hint-placeholder-val="{{ false }}"> <span class="of-badge">Actif</span></sc-if></h3>
+              <sc-if value="{{vs.pro.doitSabonner}}" hint-placeholder-val="{{ true }}">
+                <p class="vs-info" style="margin: 0 0 .7rem">Badge Club PRO et vitrine de vos sponsors sur la fiche du club, message à tout le club en notification, export des présences de la saison. Le Vestiaire, les causeries et Casa Line Up restent gratuits.</p>
+                <button type="button" class="btn btn-gold" onClick="{{vs.pro.offre}}">Voir Club PRO · 12,90 € par mois</button>
+              </sc-if>
+              <sc-if value="{{vs.pro.peutActiver}}" hint-placeholder-val="{{ false }}">
+                <p class="vs-info" style="margin: 0 0 .7rem">Votre abonnement Club PRO est actif. Un abonnement vaut pour un club : activez-le pour celui-ci.</p>
+                <button type="button" class="btn btn-gold" onClick="{{vs.pro.activer}}">{{vs.pro.activerLabel}}</button>
+              </sc-if>
+              <sc-if value="{{vs.pro.actif}}" hint-placeholder-val="{{ false }}">
+                <p class="vs-jour" style="margin-top: .2rem">Message à tout le club</p>
+                <div class="of-grid">
+                  <label class="lbl">À qui<x-select class="field" value="{{vs.pro.msg.section}}" onChange="{{vs.pro.msg.onSection}}"><sc-for list="{{vs.pro.msg.secOpts}}" as="o" hint-placeholder-count="3"><option value="{{o.v}}">{{o.l}}</option></sc-for></x-select></label>
+                  <label class="lbl">Titre<input class="field" maxlength="80" value="{{vs.pro.msg.titre}}" onChange="{{vs.pro.msg.onTitre}}" placeholder="Entraînement avancé à 18 h"></label>
+                  <label class="lbl is-wide">Message (facultatif)<textarea class="field" rows="2" maxlength="240" value="{{vs.pro.msg.texte}}" onChange="{{vs.pro.msg.onTexte}}" placeholder="Rendez-vous au stade, prévoyez la tenue de pluie."></textarea></label>
+                </div>
+                <p class="vs-info" style="margin: .4rem 0 .6rem">Une notification arrive sur le téléphone de chaque membre validé qui a activé les notifications. Cinq messages par jour au plus.</p>
+                <button type="button" class="btn btn-gold" onClick="{{vs.pro.msg.envoyer}}" disabled="{{vs.pro.msg.busy}}">{{vs.pro.msg.label}}</button>
+                <p class="vs-jour">Présences</p>
+                <p style="margin: .5rem 0 0"><button type="button" class="btn btn-ghost" onClick="{{vs.pro.exporter}}">{{vs.pro.exportLabel}}</button></p>
+                <p class="vs-jour">Vitrine des sponsors · {{vs.pro.sp.n}}</p>
+                <p class="vs-info" style="margin: .5rem 0">Vos sponsors apparaissent sur la fiche du club, avec un lien vers leur site.</p>
+                <sc-if value="{{vs.pro.sp.open}}" hint-placeholder-val="{{ false }}">
+                  <sc-for list="{{vs.pro.sp.lignes}}" as="l" hint-placeholder-count="2">
+                    <div class="of-sp">
+                      <span class="of-sp-n">{{l.num}}</span>
+                      <label class="lbl">Nom<input class="field" maxlength="60" value="{{l.nom}}" onChange="{{l.onNom}}" placeholder="Boulangerie du port"></label>
+                      <label class="lbl">Site (https://…)<input class="field" maxlength="300" value="{{l.lien}}" onChange="{{l.onLien}}" placeholder="https://"></label>
+                      <label class="lbl">Logo (adresse https:// d’une image)<input class="field" maxlength="300" value="{{l.logo}}" onChange="{{l.onLogo}}" placeholder="https://"></label>
+                      <button type="button" class="vs-lnk is-danger" onClick="{{l.retirer}}">Retirer</button>
+                    </div>
+                  </sc-for>
+                  <div style="display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .6rem">
+                    <sc-if value="{{vs.pro.sp.peutAjouter}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost" onClick="{{vs.pro.sp.ajouter}}">Ajouter un sponsor</button></sc-if>
+                    <button type="button" class="btn btn-gold" onClick="{{vs.pro.sp.enregistrer}}" disabled="{{vs.pro.sp.busy}}">{{vs.pro.sp.label}}</button>
+                    <button type="button" class="btn btn-ghost" onClick="{{vs.pro.sp.toggle}}">Fermer</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{vs.pro.sp.closed}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost" onClick="{{vs.pro.sp.toggle}}">Modifier la vitrine</button></sc-if>
+              </sc-if>
+            </section>
+          </sc-if>
+
           <!-- Le fil du club -->
           <section class="vs-box" aria-labelledby="vs-fil">
             <span class="vs-k">Public · séparé par section</span><h3 id="vs-fil" class="vs-box-t" style="margin-bottom: .5rem">Le fil du club</h3>
@@ -4610,6 +4703,7 @@ img, video, canvas, svg { max-width: 100%; }
       <div style="flex: 1 1 360px">
         <button type="button" class="cond" onClick="{{club.openSport}}" style="font-size: 14px; background: var(--surface-2); border: 0; padding: .5rem .8rem; border-radius: 0; cursor: pointer; color: var(--gold-text); margin-bottom: .6rem; min-height: 36px">{{club.sport}}</button>
         <sc-if value="{{club.hasHandi}}" hint-placeholder-val="{{ false }}"><button type="button" class="hs-badge hs-badge-btn" onClick="{{club.goHandi}}">Section handisport</button></sc-if>
+        <sc-if value="{{club.pro}}" hint-placeholder-val="{{ false }}"><span class="of-badge of-badge-l">Club PRO</span></sc-if>
         <h1 class="h1" style="font-size: clamp(2.4rem, 5vw, 4.2rem); margin-bottom: .5rem">{{club.name}}</h1>
         <p class="club-infos club-infos-l"><sc-if value="{{club.hasNiveau}}" hint-placeholder-val="{{ false }}"><span class="club-niv">{{club.niveau}}</span></sc-if><sc-if value="{{club.hasFondation}}" hint-placeholder-val="{{ false }}"><span>{{club.fondation}}</span></sc-if><sc-if value="{{club.hasStade}}" hint-placeholder-val="{{ false }}"><span>{{club.stade}}</span></sc-if></p>
         <button type="button" onClick="{{club.openCity}}" style="background: none; border: 0; padding: 0; cursor: pointer; color: var(--text-2); font-size: 1.05rem; display: inline-flex; align-items: center; gap: .35rem; min-height: 44px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="10" r="3"></circle><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"></path></svg>{{club.city}}</button>
@@ -4622,6 +4716,17 @@ img, video, canvas, svg { max-width: 100%; }
       </div>
     </div>
   </section>
+  <sc-if value="{{club.hasSponsors}}" hint-placeholder-val="{{ false }}">
+    <section class="wrap of-vitrine" aria-labelledby="of-vit">
+      <h2 id="of-vit" class="of-vit-t">Les partenaires du club</h2>
+      <div class="of-vit-g">
+        <sc-for list="{{club.sponsors}}" as="sp" hint-placeholder-count="3">
+          <sc-if value="{{sp.hasHref}}" hint-placeholder-val="{{ true }}"><a class="of-sp-c" href="{{sp.href}}" target="_blank" rel="noopener sponsored" aria-label="{{sp.aria}}"><sc-if value="{{sp.hasLogo}}" hint-placeholder-val="{{ false }}"><img src="{{sp.logo}}" alt="" loading="lazy"></sc-if><sc-if value="{{sp.noLogo}}" hint-placeholder-val="{{ true }}"><span class="of-sp-i">{{sp.ini}}</span></sc-if><span class="of-sp-nom">{{sp.nom}}</span></a></sc-if>
+          <sc-if value="{{sp.noHref}}" hint-placeholder-val="{{ false }}"><span class="of-sp-c"><sc-if value="{{sp.hasLogo}}" hint-placeholder-val="{{ false }}"><img src="{{sp.logo}}" alt="" loading="lazy"></sc-if><sc-if value="{{sp.noLogo}}" hint-placeholder-val="{{ true }}"><span class="of-sp-i">{{sp.ini}}</span></sc-if><span class="of-sp-nom">{{sp.nom}}</span></span></sc-if>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
   <section class="wrap" style="padding-top: 1.5rem">
     <div role="tablist" style="display: flex; gap: .25rem; border-bottom: 1px solid var(--line); flex-wrap: wrap">
       <sc-for list="{{clubTabs}}" as="t" hint-placeholder-count="3">
@@ -5497,7 +5602,7 @@ img, video, canvas, svg { max-width: 100%; }
     <div style="margin-top: 3rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem">
       <div style="border: 1px solid var(--line); border-radius: 0; padding: 1.25rem"><div class="ttl" style="font-size: 20px; margin-bottom: .3rem">Sans engagement</div><p style="margin: 0; font-size: 14px; color: var(--text-2)">Résiliable en un clic depuis Mon espace.</p></div>
       <!-- Tarif étudiant & licencié : à réafficher quand le montant de la remise sera fixé -->
-      <div style="border: 1px solid var(--line); border-radius: 0; padding: 1.25rem"><div class="ttl" style="font-size: 20px; margin-bottom: .3rem">Offre clubs</div><p style="margin: 0 0 .6rem; font-size: 14px; color: var(--text-2)">Résumé de match 290 € · Platinum sur mesure.</p><button type="button" class="lnk" onClick="{{goPartners}}" style="font-size: 15px">Voir les offres pros</button></div>
+      <div style="border: 1px solid var(--line); border-radius: 0; padding: 1.25rem"><div class="ttl" style="font-size: 20px; margin-bottom: .3rem">Clubs et commerces</div><p style="margin: 0 0 .6rem; font-size: 14px; color: var(--text-2)">Club PRO 12,90 € par mois · Partenaires dès 39 € HT par mois.</p><button type="button" class="lnk" onClick="{{goPro}}" style="font-size: 15px">Voir les offres pros</button></div>
     </div>
   </section>
 </sc-if>
@@ -5525,6 +5630,9 @@ img, video, canvas, svg { max-width: 100%; }
       <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem">
         <label class="lbl">{{nameLabel}}<input class="field" value="{{name}}" onChange="{{onName}}" placeholder="Prénom"></label>
         <label class="lbl">{{emailLabel}}<input class="field" type="email" value="{{email}}" onChange="{{onEmail}}" placeholder="vous@exemple.fr"></label>
+        <sc-if value="{{subJeunes}}" hint-placeholder-val="{{ false }}"><label class="lbl" style="flex-direction: row; align-items: flex-start; gap: .6rem; cursor: pointer"><input type="checkbox" checked="{{jeuneOk}}" onChange="{{toggleJeune}}" style="width: 22px; height: 22px; flex: none; accent-color: var(--ink)"><span style="font-weight: 600">{{jeuneLabel}}</span></label></sc-if>
+        <sc-if value="{{subFamille}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 14px; color: var(--text-2)">Après le paiement, vous ajoutez vos 3 proches dans Mon espace, avec leur adresse e-mail.</p></sc-if>
+        <sc-if value="{{subClubPro}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 14px; color: var(--text-2)">Utilisez le compte du correspondant ou d’un encadrant du club : c’est lui qui activera Club PRO dans le Vestiaire. Un abonnement vaut pour un club.</p></sc-if>
         <sc-if value="{{subNeedsAddress}}" hint-placeholder-val="{{ false }}"><label class="lbl">Adresse postale (envoi du magazine papier)<input class="field" value="{{address}}" onChange="{{onAddress}}" placeholder="N°, rue, code postal, ville"></label></sc-if>
         <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div style="color: var(--danger); font-weight: 700; font-size: 14px">{{formError}}</div></sc-if>
       </div>
@@ -5569,10 +5677,37 @@ img, video, canvas, svg { max-width: 100%; }
       </div>
     </sc-for>
   </section>
+  <sc-if value="{{partTarifs.has}}" hint-placeholder-val="{{ true }}">
+    <section class="wrap tf" id="partenaires-tarifs" style="padding-bottom: 3rem">
+      <div class="eb" style="margin-bottom: .5rem">Tarifs</div>
+      <h2 class="h2" style="margin-bottom: .6rem">{{partTarifs.titre}}</h2>
+      <p class="tf-intro">{{partTarifs.intro}}</p>
+      <sc-if value="{{partTarifs.hasFondateur}}" hint-placeholder-val="{{ true }}"><p class="tf-fond">{{partTarifs.fondateur}}</p></sc-if>
+      <div class="tf-nivs">
+        <sc-for list="{{partTarifs.niveaux}}" as="n" hint-placeholder-count="3">
+          <div class="{{n.cls}}">
+            <sc-if value="{{n.star}}" hint-placeholder-val="{{ false }}"><span class="tf-tag">Recommandé</span></sc-if>
+            <span class="tf-nom">{{n.nom}}</span>
+            <span class="tf-prix">{{n.mois}}<small> {{n.unite}} par mois</small></span>
+            <span class="tf-an">ou {{n.an}} {{n.unite}} par an</span>
+            <ul class="tf-perks"><sc-for list="{{n.perks}}" as="k" hint-placeholder-count="4"><li>{{k.t}}</li></sc-for></ul>
+            <button type="button" class="btn btn-dark" onClick="{{n.go}}">Choisir {{n.nom}}</button>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{partTarifs.hasCarte}}" hint-placeholder-val="{{ true }}">
+        <h3 class="tf-h3">À la carte</h3>
+        <div class="tf-lignes">
+          <sc-for list="{{partTarifs.carte}}" as="l" hint-placeholder-count="4"><div class="tf-l"><div><b>{{l.t}}</b><sc-if value="{{l.hasD}}" hint-placeholder-val="{{ false }}"><span>{{l.d}}</span></sc-if></div><span class="tf-l-p">{{l.prix}}</span></div></sc-for>
+        </div>
+        <p style="margin: 1rem 0 0"><button type="button" class="btn btn-ghost" onClick="{{partTarifs.carteGo}}">Demander une option à la carte</button></p>
+      </sc-if>
+    </section>
+  </sc-if>
   <section class="wrap" style="padding-bottom: 5rem; display: flex; flex-wrap: wrap; gap: 3rem">
     <div style="flex: 1 1 420px">
       <h2 class="h2" style="margin-bottom: 1rem">Devenir partenaire</h2>
-      <p style="color: var(--text-2); font-size: 1.05rem; line-height: 1.65; margin: 0 0 1.5rem">Visibilité sur le site, dans La Gazette, sur les maillots et pendant les directs du Terrain. Formules Club, Or et Platinum sur mesure.</p>
+      <p style="color: var(--text-2); font-size: 1.05rem; line-height: 1.65; margin: 0 0 1.5rem">Visibilité sur le site, dans l’application, dans La Gazette et sur nos réseaux. Trois niveaux, Club, Or et Platinum, avec leurs prix ci-dessus, et des options à la carte.</p>
       <div style="display: flex; gap: 2.5rem; flex-wrap: wrap">
         <div><div class="num" style="font-size: 40px; color: var(--ink)">25+</div><div class="eb" style="font-size: 13px; color: var(--muted)">Clubs suivis</div></div>
         <!-- Audience : à afficher seulement avec un chiffre réel mesuré -->
@@ -6707,6 +6842,37 @@ img, video, canvas, svg { max-width: 100%; }
           <button type="button" class="btn btn-gold" onClick="{{work.cur.go}}">{{work.cur.cta}}</button></div>
         <ul class="pro-list"><sc-for list="{{work.cur.items}}" as="it" hint-placeholder-count="4"><li>{{it.t}}</li></sc-for></ul>
       </div>
+      <div id="pro-tarifs" class="tf">
+        <sc-if value="{{work.hasClubPro}}" hint-placeholder-val="{{ true }}">
+          <div class="pro-eb pro-eb2" style="margin-top: 2rem">Club PRO · le Vestiaire aux couleurs du club</div>
+          <p class="tf-intro">Le Vestiaire, les causeries et Casa Line Up restent gratuits pour tous les clubs. Club PRO ajoute la vitrine de vos sponsors, le message à tout le club et l’export des présences. Sans engagement.</p>
+          <sc-if value="{{work.clubProActif}}" hint-placeholder-val="{{ false }}"><p class="pro-ar-ok">★ Votre abonnement Club PRO est actif. Activez-le dans le Vestiaire de votre club.</p></sc-if>
+          <div class="tf-nivs">
+            <sc-for list="{{work.clubPro}}" as="n" hint-placeholder-count="2">
+              <div class="{{n.cls}}">
+                <span class="tf-tag">{{n.tag}}</span>
+                <span class="tf-nom">{{n.name}}</span>
+                <span class="tf-prix">{{n.mois}}<small> TTC par mois</small></span>
+                <span class="tf-an">ou {{n.an}} par an (2 mois offerts)</span>
+                <ul class="tf-perks"><sc-for list="{{n.perks}}" as="k" hint-placeholder-count="4"><li>{{k.t}}</li></sc-for></ul>
+                <sc-if value="{{n.inactif}}" hint-placeholder-val="{{ true }}"><div class="pro-cta"><button type="button" class="btn btn-gold" onClick="{{n.mensuel}}">Au mois</button><button type="button" class="btn btn-ghost" onClick="{{n.annuel}}">À l’année</button></div></sc-if>
+                <sc-if value="{{n.actif}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-dark" onClick="{{n.vestiaire}}">Ouvrir le Vestiaire</button></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-for list="{{work.tarifs}}" as="b" hint-placeholder-count="1">
+          <div class="tf-bloc">
+            <h3 class="tf-h3">{{b.titre}}</h3>
+            <sc-if value="{{b.hasIntro}}" hint-placeholder-val="{{ true }}"><p class="tf-intro">{{b.intro}}</p></sc-if>
+            <div class="tf-lignes">
+              <sc-for list="{{b.lignes}}" as="l" hint-placeholder-count="3"><div class="tf-l"><div><b>{{l.t}}</b><sc-if value="{{l.hasD}}" hint-placeholder-val="{{ false }}"><span>{{l.d}}</span></sc-if></div><span class="tf-l-p">{{l.prix}}</span></div></sc-for>
+            </div>
+            <sc-if value="{{b.hasAstuce}}" hint-placeholder-val="{{ false }}"><p class="tf-fond">{{b.astuce}}</p></sc-if>
+            <p style="margin: .9rem 0 0"><button type="button" class="btn btn-ghost" onClick="{{b.go}}">Demander un devis</button></p>
+          </div>
+        </sc-for>
+      </div>
     </div>
 
     <div class="wrap" id="pro-ar">
@@ -6899,6 +7065,16 @@ img, video, canvas, svg { max-width: 100%; }
     <h2 class="h2" style="font-size: 2rem; margin: 3rem 0 1.25rem">Mes commandes et abonnements</h2>
     <sc-if value="{{noOrders}}" hint-placeholder-val="{{ true }}"><p style="color: var(--text-2)">Aucune commande pour l’instant. <button type="button" class="lnk" onClick="{{goShop}}" style="font-size: 15px">Voir la boutique</button></p></sc-if>
     <div style="display: flex; flex-direction: column; gap: .5rem"><sc-for list="{{orders}}" as="o" hint-placeholder-count="0"><div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: .75rem; border: 1px solid var(--line); border-radius: 0; padding: .9rem 1.1rem"><span style="font-weight: 800">{{o.label}}</span><span style="color: var(--muted); font-size: 14px">{{o.detail}}</span><span class="cond" style="font-size: 13px; color: var(--success)">{{o.status}}</span></div></sc-for></div>
+    <sc-if value="{{famille.show}}" hint-placeholder-val="{{ false }}">
+      <div class="of-fam">
+        <div class="ttl" style="font-size: 22px; margin-bottom: .3rem">Ma famille BE+</div>
+        <p style="margin: 0 0 .8rem; font-size: 14px; color: var(--text-2)">Ajoutez jusqu’à 3 proches avec leur adresse e-mail. Ils profitent de BE+ dès qu’ils se connectent avec cette adresse. Places libres : {{famille.places}}.</p>
+        <sc-for list="{{famille.membres}}" as="m" hint-placeholder-count="1"><div class="of-fam-m"><span>{{m.email}}</span><button type="button" class="vs-lnk is-danger" onClick="{{m.retirer}}">Retirer</button></div></sc-for>
+        <sc-if value="{{famille.peutAjouter}}" hint-placeholder-val="{{ true }}">
+          <div class="of-fam-add"><label class="lbl" style="flex: 1 1 240px">Adresse e-mail du proche<input class="field" type="email" value="{{famille.email}}" onChange="{{famille.onEmail}}" placeholder="prenom@exemple.fr"></label><button type="button" class="btn btn-dark" onClick="{{famille.ajouter}}" disabled="{{famille.busy}}">{{famille.label}}</button></div>
+        </sc-if>
+      </div>
+    </sc-if>
     <h2 class="h2" style="font-size: 2rem; margin: 3rem 0 1.25rem">Mes favoris</h2>
     <sc-if value="{{noSaved}}" hint-placeholder-val="{{ false }}"><p style="color: var(--text-2)">Ajoutez des articles avec l’icône marque-page.</p></sc-if>
     <div class="grid3"><sc-for list="{{savedArticles}}" as="a" hint-placeholder-count="2">
@@ -8382,6 +8558,7 @@ img, video, canvas, svg { max-width: 100%; }
     <div class="bn-intro-in">
       <span class="bn-intro-sym" aria-hidden="true"><svg class="bn-sym" viewBox="0 0 1000 1000" width="112" height="112" aria-hidden="true" focusable="false"><rect width="1000" height="1000" fill="#10283a"></rect><path transform="translate(150.0 339.1) scale(0.24382)" fill="#FFFFFF" d="M0 0H453Q566 0 662.5 31Q759 62 818.5 132.5Q878 203 878 323Q878 402 848.5 464Q819 526 770.5 565.5Q722 605 665 618Q715 624 762.5 646.5Q810 669 848.5 708.5Q887 748 909.5 806.5Q932 865 932 945Q932 1056 882.5 1140.5Q833 1225 738.5 1272.5Q644 1320 507 1320H0ZM299 1081H435Q499 1081 539.5 1061.5Q580 1042 599 1005.5Q618 969 618 918Q618 838 568.5 800.5Q519 763 430 763H299ZM299 529H420Q473 529 508.5 510Q544 491 562.5 456.5Q581 422 581 377Q581 296 535 267.5Q489 239 409 239H299Z M1034 0H1877V262H1332V531H1872V785H1332V1058H1877V1320H1034Z"></path><path transform="translate(150.0 339.1) scale(0.24382)" fill="#f2b33d" d="M2585 779V1067H2338V779H2050V534H2338V246H2585V534H2871V779Z"></path></svg></span>
       <span class="bn-intro-mot"><img src="assets/logo-be.svg" alt="BE+" width="300" height="179"></span>
+      <span class="bn-intro-signe" aria-label="powered by Kader Allou"><span class="sg-pb">powered by</span>Kader Allou</span>
       <span class="bn-intro-tag">Le sport local mérite une vitrine d’élite</span>
     </div>
     <button type="button" class="ci-skip" onClick="{{skipIntro}}">Passer</button>
@@ -9160,6 +9337,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="js/reseau.js?v=__VERSION__"></script>
 <script src="js/jeux.js?v=__VERSION__"></script>
 <script src="js/vestiaire.js?v=__VERSION__"></script>
+<script src="js/offres.js?v=__VERSION__"></script>
 <script src="js/profil.js?v=__VERSION__"></script>
 <script src="js/config.js?v=__VERSION__"></script>
 <script src="contenus/equipe.js?v=__VERSION__"></script>
@@ -9172,6 +9350,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="contenus/partenaires.js?v=__VERSION__"></script>
 <script src="contenus/abonnements.js?v=__VERSION__"></script>
 <script src="contenus/offres-pro.js?v=__VERSION__"></script>
+<script src="contenus/tarifs.js?v=__VERSION__"></script>
 <script src="contenus/clubhouse.js?v=__VERSION__"></script>
 <script src="contenus/articles.js?v=__VERSION__"></script>
 <script src="contenus/lieux.js?v=__VERSION__"></script>

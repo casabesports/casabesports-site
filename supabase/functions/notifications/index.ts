@@ -14,6 +14,8 @@
 //   lineup    connecté → { envoi } : prévient les destinataires d'une composition envoyée (Casa Lineup),
 //                       ou l'expéditeur quand on lui a répondu. Tables : supabase/lineups.sql
 //   causerie  staff   → { causerie } : prévient les joueurs autorisés d'une causerie publiée (supabase/causeries.sql)
+//   club      staff d'un club PRO → { club, section, titre, texte } : message à tout le club ou à une section
+//                       (licenciés, parents, staff validés dans le Vestiaire). 5 messages par jour au plus. Tables : supabase/offres.sql
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as webpush from 'jsr:@negrel/webpush@0.5.0';
 
@@ -172,6 +174,35 @@ Deno.serve(async (req) => {
         ? ' Lisible à partir du ' + new Date(z.ouvre_le).toLocaleString('fr-FR', { timeZone: 'Europe/Paris', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + '.' : '';
       const { data: appareils } = await service.from('push_abonnements').select('endpoint, p256dh, auth').in('user_id', cibles.slice(0, 500)).limit(5000);
       const r = await pousser(appareils ?? [], 'La causerie est arrivée', (z.auteur_nom ? 'Coach ' + z.auteur_nom + ' : ' : '') + String(z.titre).slice(0, 80) + '.' + ouvre, '/?causerie=' + z.id + '&club=' + encodeURIComponent(z.club));
+      return json({ ok: true, envoyees: r.envoyees });
+    }
+
+    // ----- Club PRO : le staff envoie un message à tout le club (ou à une section) -----
+    if (action === 'club') {
+      const moi = await utilisateur(req);
+      if (!moi) return json({ error: 'Connexion requise' }, 401);
+      const club = String(body.club ?? '').slice(0, 60);
+      const section = ['club', 'seniors', 'jeunes'].includes(body.section) ? body.section : 'club';
+      const titre = String(body.titre ?? '').trim().slice(0, 80);
+      const texte = String(body.texte ?? '').trim().slice(0, 240);
+      if (!club || !titre) return json({ error: 'Le titre est obligatoire' }, 400);
+      const { data: staff } = await clientDe(req).rpc('vs_staff', { c: club });
+      if (staff !== true) return json({ error: 'Réservé au staff du club' }, 403);
+      const { data: pro, error: ePro } = await service.rpc('club_pro_actif', { c: club });
+      if (ePro) return json({ error: 'Club PRO n’est pas encore installé (supabase/offres.sql).' }, 501);
+      if (pro !== true) return json({ error: 'Le message à tout le club fait partie de Club PRO.' }, 403);
+      const hier = new Date(Date.now() - 86400000).toISOString();
+      const { count } = await service.from('notifications_envoyees').select('id', { count: 'exact', head: true }).eq('par', moi).gte('cree_le', hier);
+      if ((count ?? 0) >= 5) return json({ error: 'Cinq messages envoyés ces dernières 24 heures : réessayez demain.' }, 429);
+      const { data } = await service.rpc('club_destinataires', { c: club, sec: section });
+      const cibles = ((data ?? []) as string[]).filter((u) => u && u !== moi);
+      const lien = '/#/vestiaire/' + encodeURIComponent(club);
+      let r = { envoyees: 0, echecs: 0, perimes: [] as unknown[] };
+      if (cibles.length) {
+        const { data: appareils } = await service.from('push_abonnements').select('endpoint, p256dh, auth').in('user_id', cibles.slice(0, 2000)).limit(10000);
+        r = await pousser(appareils ?? [], titre, texte, lien);
+      }
+      await service.from('notifications_envoyees').insert({ titre: '[' + club + '] ' + titre, texte: texte || null, lien, essai: false, envoyees: r.envoyees, echecs: r.echecs, retirees: r.perimes.length, par: moi });
       return json({ ok: true, envoyees: r.envoyees });
     }
 
