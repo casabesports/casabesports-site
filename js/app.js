@@ -1887,7 +1887,8 @@ class Component extends DCLogic {
 
     // ---------- actualités ----------
     const allA = ARTS.map(art);
-    const cats = ['Tous', 'Football', 'Basketball', 'Rugby', 'Water-polo', 'Trail'];
+    // Filtres = les sports des articles réellement publiés (plus de bouton qui mène à une liste vide)
+    const cats = ['Tous'].concat(Array.from(new Set(allA.map((a) => a.sport).concat(s.cat !== 'Tous' ? [s.cat] : []).filter(Boolean))).sort((x, y) => x.localeCompare(y, 'fr')));
     const q = norm(s.q.trim());
     const newsArticles = allA.filter((a) => (s.cat === 'Tous' || a.sport === s.cat) && (!s.premiumOnly || a.premium) && (!s.savedOnly || s.saved.indexOf(a.id) >= 0) &&
       (!q || norm(a.title + ' ' + a.dek + ' ' + a.tag + ' ' + a.sport + ' ' + a.clubs.map((c) => (clubById(c) || {}).name).join(' ')).includes(q)));
@@ -3384,7 +3385,7 @@ class Component extends DCLogic {
       toggleRemind: () => { this.toggleIn('reminders', 'm-cfa-avranches', 'Rappel activé : on vous prévient avant le coup d’envoi', 'Rappel retiré'); },
       remindLabel: s.reminders.indexOf('m-cfa-avranches') >= 0 ? 'Rappel activé ✓' : 'Me le rappeler', remindBg: s.reminders.indexOf('m-cfa-avranches') >= 0 ? 'var(--inv-bg)' : 'var(--surface)', remindFg: s.reminders.indexOf('m-cfa-avranches') >= 0 ? 'var(--on-inv)' : 'var(--ink)',
       hasFeed: feed.length > 0, feed,
-      homeArticles: homeOrder.slice(0, 3), homeProducts, videos, cityDots,
+      homeArticles: homeOrder.slice(0, 3), homeProducts, videos, noVideos: !videos.length, cityDots,
       q: s.q, onQ: (e) => this.setState({ q: e.target.value }), chips, newsArticles, newsEmpty: n === 0, countLabel: n + (n > 1 ? ' articles' : ' article'),
       resetNews: () => this.setState({ q: '', cat: 'Tous', premiumOnly: false, savedOnly: false }),
       togglePremiumOnly: () => this.setState({ premiumOnly: !s.premiumOnly }), premiumPressed: s.premiumOnly ? 'true' : 'false', premBg: s.premiumOnly ? 'var(--inv-bg)' : 'var(--surface)', premFg: s.premiumOnly ? 'var(--on-inv)' : 'var(--ink)',
