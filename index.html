@@ -3992,6 +3992,9 @@ img, video, canvas, svg { max-width: 100%; }
         </button></div>
       </sc-for>
     </div>
+    <sc-if value="{{noVideos}}" hint-placeholder-val="{{ false }}">
+      <div class="card" style="padding: 2rem 1.5rem; text-align: center; border: 1px solid var(--line)"><div class="ttl" style="font-size: 1.2rem; margin-bottom: .4rem">Les premières vidéos arrivent bientôt</div><p style="color: var(--text-2); margin: 0">Abonnez-vous au récap du lundi pour être prévenu dès leur mise en ligne.</p></div>
+    </sc-if>
   </section>
 </sc-if>
 
