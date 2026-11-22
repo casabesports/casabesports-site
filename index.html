@@ -3301,6 +3301,17 @@ img, video, canvas, svg { max-width: 100%; }
 @media (max-width: 560px) { .vs-cv { margin-left: -70px; } .vs-msg-in .btn { padding-left: .8rem; padding-right: .8rem; } }
 .vs-msg-in .btn { min-height: 44px; flex: none; }
 @media (max-width: 560px) { .vs-rep-n { width: 100%; } .vs-r { flex: 1 1 0; padding-left: .3rem; padding-right: .3rem; } .vs-head { padding: 1rem; } .vs-logo { width: 56px; height: 56px; font-size: 19px; } .vs-box { padding: .9rem .85rem 1rem; } .vs-liste-l { grid-template-columns: 1fr; gap: 0; } .vsh-in { padding: 1.1rem 1rem; } .vsh-col { padding: .8rem 1rem 1rem; } }
+/* ===== Fiche joueur : statistiques vérifiées et accès à Ma trajectoire (js/trajectoire.js) ===== */
+.pl-stats-h { margin-bottom: .5rem; }
+.pl-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: .5rem; }
+.pl-stat { background: var(--surface); padding: 1rem 1.1rem; }
+.pl-stat-v { font: 800 34px/1 'League Spartan', sans-serif; color: var(--ink); }
+.pl-stat-k { font: 700 12.5px/1.2 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: .35rem; }
+.pl-stats-src { font-size: 12px; color: var(--muted); margin: 0 0 2rem; }
+.pl-traj { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; padding: 1rem 1.1rem; margin-bottom: 2rem; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--sun, #f2b33d); }
+.pl-traj > div { flex: 1 1 280px; } .pl-traj p { margin: .35rem 0 0; font-size: 14px; color: var(--text-2); }
+.pf-traj { grid-column: 2; border-top: 3px solid var(--sun, #f2b33d); padding-top: 1rem; }
+@media (max-width: 640px) { .pf-traj { grid-column: auto; } }
 </style>
 <style>
 /* Casa Line Up : bouton d'accès (Clubs, Le Terrain) */
@@ -4996,17 +5007,24 @@ img, video, canvas, svg { max-width: 100%; }
         <sc-if value="{{pl.hasClub}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{pl.openClub}}" class="cond" style="font-size: 15px; background: var(--inv-bg); color: var(--on-inv); padding: .55rem .85rem; border-radius: 0; border: 0; cursor: pointer; min-height: 40px">{{pl.club}}</button></sc-if>
         <sc-if value="{{pl.noClub}}" hint-placeholder-val="{{ false }}"><span class="cond" style="font-size: 15px; background: var(--inv-bg); color: var(--on-inv); padding: .55rem .85rem; border-radius: 0">{{pl.club}}</span></sc-if>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 0; overflow: hidden; margin-bottom: 2rem">
-        <div style="background: var(--surface); padding: 1.1rem"><div class="eb" style="font-size: 13px">Matchs</div><div class="cond" style="font-size: 34px; letter-spacing: 0; color: var(--ink)">[—]</div></div>
-        <div style="background: var(--surface); padding: 1.1rem"><div class="eb" style="font-size: 13px">Buts / points</div><div class="cond" style="font-size: 34px; letter-spacing: 0; color: var(--ink)">[—]</div></div>
-        <div style="background: var(--surface); padding: 1.1rem"><div class="eb" style="font-size: 13px">Saison</div><div class="cond" style="font-size: 34px; letter-spacing: 0; color: var(--ink)">2026–27</div></div>
-      </div>
+      <!-- Statistiques de la saison : saisies dans Admin › Contenus › Joueurs après vérification (jamais inventées) -->
+      <sc-if value="{{pl.hasStats}}" hint-placeholder-val="{{ false }}">
+        <div class="pl-stats-h"><span class="eb">Statistiques de la saison {{pl.statsSaison}}</span></div>
+        <div class="pl-stats"><sc-for list="{{pl.stats}}" as="x" hint-placeholder-count="4"><div class="pl-stat"><div class="pl-stat-v">{{x.v}}</div><div class="pl-stat-k">{{x.k}}</div></div></sc-for></div>
+        <p class="pl-stats-src">{{pl.statsInfo}}</p>
+      </sc-if>
+      <sc-if value="{{pl.noStats}}" hint-placeholder-val="{{ true }}">
+        <div class="pl-traj">
+          <div><span class="eb">Statistiques</span><p>Pas encore de statistiques vérifiées pour ce profil. C’est vous ? Suivez votre saison dans <strong>Ma trajectoire</strong> (matchs, forme, objectifs, projection), puis proposez vos chiffres : l’équipe les vérifie avant de les afficher ici.</p></div>
+          <button type="button" class="btn btn-dark" onClick="{{pl.openTrajectoire}}">Ma trajectoire</button>
+        </div>
+      </sc-if>
       <div style="display: flex; gap: .6rem; flex-wrap: wrap">
         <button type="button" class="btn" onClick="{{pl.toggleFollow}}" style="background: {{pl.fBg}}; color: {{pl.fFg}}; border: 1.5px solid var(--ink)">{{pl.fLabel}}</button>
         <button type="button" class="btn btn-ghost" onClick="{{share}}">Partager le profil</button>
       </div>
       <sc-if value="{{pl.hasSource}}" hint-placeholder-val="{{ false }}"><p style="font-size: 12px; color: var(--muted); margin-top: 1.25rem; line-height: 1.5">{{pl.lieu}}<br>Effectif vérifié le {{pl.sourceDate}} sur <a href="{{pl.sourceWp}}" target="_blank" rel="noopener" style="color: inherit">Wikipédia</a> et <a href="{{pl.sourceWd}}" target="_blank" rel="noopener" style="color: inherit">Wikidata</a>. Une erreur ? Écrivez-nous depuis la page Contact.</p></sc-if>
-      <sc-if value="{{pl.noSource}}" hint-placeholder-val="{{ true }}"><p style="font-size: 13px; color: var(--muted); margin-top: 1.25rem">Statistiques alimentées par les feuilles de match du club.</p></sc-if>
+
     </div>
   </section>
 </sc-if>
@@ -7113,6 +7131,11 @@ img, video, canvas, svg { max-width: 100%; }
         <div class="pf-cv-t">Votre parcours de sportif, d’éducateur ou de bénévole, mis en page dans la charte Casa Besports et certifiable par l’équipe.</div>
         <span class="cv-badge {{cvv.prof.cvCls}}">{{cvv.prof.cvStatut}}</span>
         <div class="tr-row"><button type="button" class="btn btn-dark" onClick="{{cvv.prof.goCv}}">{{cvv.prof.cvLabel}}</button><button type="button" class="btn btn-ghost" onClick="{{goVerifier}}">Vérifier un certificat</button></div>
+      </div>
+      <div class="pf-cv pf-traj">
+        <div class="eb">Ma trajectoire · suivi de l’athlète</div>
+        <div class="pf-cv-t">Vos matchs ou vos chronos, votre forme et vos objectifs : vos statistiques par discipline, votre progression et la projection de votre fin de saison. Privé, sur votre appareil et dans votre compte.</div>
+        <div class="tr-row"><button type="button" class="btn btn-dark" onClick="{{goTrajectoire}}">Ouvrir Ma trajectoire</button></div>
       </div>
     </div>
     <sc-if value="{{cvv.prof.crop.open}}" hint-placeholder-val="{{ false }}">
@@ -9471,7 +9494,7 @@ img, video, canvas, svg { max-width: 100%; }
 <script>
   /* Chargement à la demande : la 3D (réalité augmentée) et la carte de Normandie ne sont téléchargées
      que lorsqu'on ouvre ces fonctions, pour que le site s'affiche plus vite. */
-  window.CASA_LIBS = { ar: ['js/three.min.js', 'js/analyse-video.js?v=__VERSION__', 'js/realite-augmentee.js?v=__VERSION__'], carte: ['js/leaflet.js?v=__VERSION__', 'js/carte-normandie.js?v=__VERSION__'], parcours: ['js/leaflet.js?v=__VERSION__', 'js/parcours.js?v=__VERSION__'], lineup: ['contenus/droits.js?v=__VERSION__', 'js/lineup.js?v=__VERSION__'], studio: ['js/studio.js?v=__VERSION__'], causeries: ['js/causeries-tableau.js?v=__VERSION__', 'js/causeries.js?v=__VERSION__'] };
+  window.CASA_LIBS = { ar: ['js/three.min.js', 'js/analyse-video.js?v=__VERSION__', 'js/realite-augmentee.js?v=__VERSION__'], carte: ['js/leaflet.js?v=__VERSION__', 'js/carte-normandie.js?v=__VERSION__'], parcours: ['js/leaflet.js?v=__VERSION__', 'js/parcours.js?v=__VERSION__'], lineup: ['contenus/droits.js?v=__VERSION__', 'js/lineup.js?v=__VERSION__'], studio: ['js/studio.js?v=__VERSION__'], causeries: ['js/causeries-tableau.js?v=__VERSION__', 'js/causeries.js?v=__VERSION__'], trajectoire: ['js/trajectoire.js?v=__VERSION__'] };
   window.CasaCharge = (function () {
     var done = {};
     function one(src) {

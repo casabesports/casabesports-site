@@ -1487,6 +1487,26 @@ class Component extends DCLogic {
     const D = this.data(), s = this.state;
     window.CasaCauseries.open({ club: o.club, clubs: D.clubs, isAdmin: s.role === 'admin', say: (m) => this.say(m), connect: () => this.setState({ loginOpen: true, linkSent: false }) }, { id: o.id || null, nouvelle: !!o.nouvelle });
   }
+  // Ma trajectoire (js/trajectoire.js) : le suivi de l'athlète (stats par discipline, forme, objectifs, projection), chargé à la demande
+  openTrajectoire(o) {
+    o = o || {};
+    if (typeof window === 'undefined') return;
+    if (!window.CasaTrajectoire && window.CasaCharge && !this._tjLoad) {
+      this._tjLoad = true; this.say('Ouverture de Ma trajectoire…');
+      window.CasaCharge(window.CASA_LIBS.trajectoire).then(() => { this._tjLoad = false; this.openTrajectoire(o); }).catch(() => { this._tjLoad = false; this.say('Ma trajectoire n’a pas pu se charger. Vérifiez votre connexion.'); });
+      return;
+    }
+    if (!window.CasaTrajectoire) return;
+    const s = this.state, prof = s.cvProf || {}, cv = prof.cv || {};
+    const nom = o.nom || [cv.prenom, cv.nom].filter(Boolean).join(' ') || s.name || '';
+    window.CasaTrajectoire.open({ cle: this.profileKey(), nom, discipline: o.discipline || '', club: o.club || '', photo: o.photo || prof.photo || '', say: (m) => this.say(m),
+      envoyer: (texte, p) => {
+        const email = (s.email || (window.CasaAuth && window.CasaAuth.user && window.CasaAuth.user.email) || '').trim();
+        if (!email) { this.setState({ loginOpen: true, linkSent: false }); return Promise.resolve(false); }
+        this.crmCapture({ name: (p && p.nom) || nom || email, email, source: 'Stats athlète', type: 'Joueur', consent: 'oui', subject: 'Mes statistiques de la saison', profile: 'Joueur', message: texte, note: 'Stats athlète — ' + ((p && p.club) || '') });
+        return Promise.resolve(true);
+      } }, { vue: o.vue });
+  }
   // Casa Line Up (js/lineup.js) : compositions d'équipe, téléchargé seulement quand on l'ouvre
   openLineup(o) {
     o = o || {};
@@ -2058,6 +2078,11 @@ class Component extends DCLogic {
       toggleFollow: () => this.toggleIn('followPlayers', curP.id, 'Vous suivez ' + curP.name, 'Vous ne suivez plus ' + curP.name),
       fLabel: pf ? 'Suivi ✓' : 'Suivre ce joueur', fBg: pf ? 'var(--inv-bg)' : 'var(--surface)', fFg: pf ? 'var(--on-inv)' : 'var(--ink)'
     });
+    // Statistiques de la saison : seulement celles saisies et vérifiées dans l'admin (jamais inventées)
+    const plStats = (Array.isArray(curP.statsSaison) ? curP.statsSaison : []).filter((x) => x && String(x.k || '').trim() && String(x.v == null ? '' : x.v).trim());
+    Object.assign(pl, { stats: plStats.map((x) => ({ k: String(x.k), v: String(x.v) })), hasStats: plStats.length > 0, noStats: plStats.length === 0,
+      statsSaison: curP.statsSaisonNom || '', statsInfo: [curP.statsSource ? 'Source : ' + curP.statsSource : '', curP.statsMaj ? 'mis à jour le ' + (/^\d{4}-\d{2}-\d{2}$/.test(curP.statsMaj) ? new Date(curP.statsMaj + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : curP.statsMaj) : ''].filter(Boolean).join(' · '),
+      openTrajectoire: () => this.openTrajectoire({ discipline: sportOf(curP), club: curP.clubLabel || '' }) });
 
     // ---------- carte ----------
     const lat0 = 49.78, lat1 = 48.6, lon0 = -1.98, lon1 = -0.2;
@@ -3365,7 +3390,7 @@ class Component extends DCLogic {
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
         ok: s.mbRes === 'ok', off: s.mbRes === 'off', none: s.mbRes === 'none', bad: s.mbRes === 'bad', format: s.mbRes === 'format',
         prenom: (s.mbInfo && s.mbInfo.prenom) || 'Membre', depuis: s.mbInfo && s.mbInfo.depuis ? 'Membre depuis ' + new Date(s.mbInfo.depuis).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '' },
-      rs: RS, cvv: CVV, isCv: V === 'cv', isVerifier: V === 'verifier', goCv: () => this.go('cv'), goVerifier: () => this.go('verifier', { verifId: '' }),
+      rs: RS, cvv: CVV, isCv: V === 'cv', isVerifier: V === 'verifier', goCv: () => this.go('cv'), goTrajectoire: () => this.openTrajectoire(), goVerifier: () => this.go('verifier', { verifId: '' }),
       hasAvatar: !!CVV.avatar, avatar: CVV.avatar, showInitial: s.loggedIn && !CVV.avatar,
       isClubRole, notClubRole: !isClubRole, canReseau, stReseau: s.studioTab === 'reseau' && canReseau, stClubAny: isClubRole && ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0,
       newPostLabel: isClubRole ? 'Nouveau contenu' : 'Nouvel article',
