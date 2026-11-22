@@ -11,7 +11,8 @@ puis Calvados, Orne, Eure, Seine-Maritime, puis les championnats nationaux
 où joue au moins un club normand.
 
 Écrit : contenus/sport-federations.js (window.CASA_SPORT_AUTO.Handball)
-Usage : python3 outils/import_handball.py [--zones manche,normandie,...] [--jours 14]
+Usage : python3 outils/import_handball.py [--zones manche,normandie,...] [--jours 14] [--calendrier]
+  --calendrier : écrit aussi le calendrier complet de la saison des compétitions seniors (contenus/calendriers/).
 """
 import argparse
 import datetime as dt
@@ -24,6 +25,9 @@ import time
 import unicodedata
 import urllib.error
 import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import calendriers as cal  # noqa: E402
 
 BASE = 'https://www.ffhandball.fr'
 UA = 'CasaBesports-import/1.0 (+https://casabesports.fr)'
@@ -135,9 +139,11 @@ def entier(v):
 
 
 class Import:
-    def __init__(self, saison_url, jours):
+    def __init__(self, saison_url, jours, calendrier=False):
         self.saison = saison_url
         self.jours = jours
+        self.calendrier = calendrier
+        self.calendriers = 0
         self.auj = dt.date.today()
         self.comps, self.tables, self.matches = [], {}, []
         self.clubs = {}       # ext_structureId -> {id, name, equipes:set}
@@ -219,43 +225,64 @@ class Import:
                         if len(nom_club(r['equipe_libelle'])) < len(c['name']):
                             c['name'] = nom_club(r['equipe_libelle'])
             self.tables[cid] = tab
-        # journées proches : résultats des N derniers jours et matchs des N prochains jours
+        # journées proches : résultats des N derniers jours et matchs des N prochains jours.
+        # Avec --calendrier, toutes les journées des compétitions seniors sont lues pour le calendrier complet
+        # (contenus/calendriers/<id>.json) : une journée terminée depuis plus de N jours n'est pas relue, une journée
+        # à venir est relue une fois par semaine (ou chaque jour si elle est dans la fenêtre des N jours).
         try:
             journees = json.loads(p.get('journees') or '[]')
         except ValueError:
             journees = []
         a, b = self.auj - dt.timedelta(days=self.jours), self.auj + dt.timedelta(days=self.jours)
+        complet = self.calendrier and niveau == 'Seniors'
+        ancien = (cal.lire(cid) or {}) if complet else {}
+        lues = dict(ancien.get('journees') or {}) if complet else {}
+        saison_m = []
         for j in journees:
             try:
                 d0 = dt.date.fromisoformat(j['date_debut'])
                 d1 = dt.date.fromisoformat(j.get('date_fin') or j['date_debut'])
             except (KeyError, ValueError):
                 continue
-            if d1 < a or d0 > b:
+            num = str(j.get('journee_numero'))
+            proche = not (d1 < a or d0 > b)
+            if not proche and not complet:
                 continue
+            if not proche and num in lues:
+                deja = [m for m in ancien.get('matches') or [] if str(m.get('j')) == num]
+                lu = dt.date.fromisoformat(lues[num])
+                if deja and (d1 < a or (self.auj - lu).days < 7):
+                    saison_m.extend(deja)  # journée déjà lue, rien à relire
+                    continue
             jl = composant(lire('%sjournee-%s/' % (url, j['journee_numero'])), 'competitions---rencontre-list')
+            lues[num] = self.auj.isoformat()
             for r in (jl or {}).get('rencontres') or []:
-                self.match(cid, url, r)
+                m = self.match(cid, r)
+                if not m:
+                    continue
+                m['j'] = num
+                saison_m.append(m)
+                if abs((dt.date.fromisoformat(m['date']) - self.auj).days) <= self.jours and not any(x['id'] == m['id'] for x in self.matches):
+                    self.matches.append({k: v for k, v in m.items() if k != 'j'})
+        if complet and saison_m:
+            self.calendriers += 1
+            cal.ecrire(cid, 'Handball', label, url, saison_m, lues)
 
-    def match(self, cid, url, r):
+    def match(self, cid, r):
         if not r.get('date') or not r.get('equipe1Libelle') or not r.get('equipe2Libelle'):
-            return
+            return None
         quand = dt.datetime.fromisoformat(r['date'])
         jour = quand.date()
-        if abs((jour - self.auj).days) > self.jours:
-            return  # match reporté loin de la journée : ignoré
         s1, s2 = r.get('equipe1Score'), r.get('equipe2Score')
         joue = s1 not in (None, '') and s2 not in (None, '')
         if joue and (entier(s1) is None or entier(s2) is None):
-            return  # forfait (« FO ») : pas de score à afficher
+            return None  # forfait (« FO ») : pas de score à afficher
         mid = '%s-%s' % (cid, r.get('ext_rencontreId') or (jour.isoformat() + '-' + slug(r['equipe1Libelle']) + '-' + slug(r['equipe2Libelle'])))
-        if any(m['id'] == mid for m in self.matches):
-            return
         # sport, salle et source : déduits de la compétition (fichier plus léger)
-        self.matches.append({'id': mid, 'comp': cid, 'date': jour.isoformat(), 'time': quand.strftime('%H:%M'),
-                             'home': r['equipe1Libelle'], 'away': r['equipe2Libelle'],
-                             'hs': entier(s1) if joue else None, 'as': entier(s2) if joue else None,
-                             'status': 'done' if joue else 'up'})
+        return {'id': mid, 'comp': cid, 'date': jour.isoformat(), 'time': quand.strftime('%H:%M'),
+                'home': r['equipe1Libelle'], 'away': r['equipe2Libelle'],
+                'hs': entier(s1) if joue else None, 'as': entier(s2) if joue else None,
+                'status': 'done' if joue else 'up'}
 
 
 def charger_slugs(saison):
@@ -279,6 +306,7 @@ def main():
     ap.add_argument('--zones', default=','.join(z[0] for z in ZONES))
     ap.add_argument('--jours', type=int, default=14)
     ap.add_argument('--sortie', default=SORTIE)
+    ap.add_argument('--calendrier', action='store_true', help='écrit aussi le calendrier complet de la saison des compétitions seniors')
     o = ap.parse_args()
 
     accueil = composant(lire(BASE + '/competitions/'), 'competitions---competition-main-menu') or {}
@@ -286,7 +314,7 @@ def main():
     if not sa.get('libelle'):
         sys.exit('Saison en cours introuvable sur ffhandball.fr : rien n’est modifié.')
     saison = 'saison-%s-%s' % (sa['libelle'].replace(' ', ''), sa['ext_saisonId'])
-    imp = Import(saison, o.jours)
+    imp = Import(saison, o.jours, o.calendrier)
     voulues = o.zones.split(',')
     for zid, typ, struct, label in ZONES:
         if zid in voulues:
@@ -323,7 +351,10 @@ def main():
               ' * { Discipline: { maj, source, comps: [{ id, label, zone, niveau, source }], tables, matches, clubs, teamClub } }\n */\n')
     with open(o.sortie, 'w', encoding='utf-8') as f:
         f.write(entete + 'window.CASA_SPORT_AUTO = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
-    print('Handball : %d compétitions, %d classements, %d matchs, %d clubs.' % (len(imp.comps), len(imp.tables), len(imp.matches), len(clubs)))
+    if o.calendrier:
+        cal.indexer()
+    print('Handball : %d compétitions, %d classements, %d matchs, %d clubs%s.' % (len(imp.comps), len(imp.tables), len(imp.matches), len(clubs),
+          (', %d calendriers complets' % imp.calendriers) if o.calendrier else ''))
     for e in imp.erreurs:
         print('  ! ' + e)
 

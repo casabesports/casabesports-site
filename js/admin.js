@@ -1513,7 +1513,7 @@
 
   // ================= AIDE =================
   // ---------- Résultats et classements (saisie à la main) ----------
-  var SP_SPORTS = ['Football', 'Basketball', 'Rugby', 'Water-polo', 'Natation', 'Judo', 'Tennis', 'Trail'];
+  var SP_SPORTS = ['Football', 'Basketball', 'Rugby', 'Handball', 'Volley-ball', 'Water-polo', 'Natation', 'Judo', 'Tennis', 'Trail'];
   function spBlank() { return { maj: null, sources: [], comps: {}, tables: {}, matches: [], teamClub: {}, clubs: [] }; }
   function spLoad() {
     var v = clone(window.CASA_SPORT) || {}; var b = spBlank();
@@ -1574,6 +1574,7 @@
       E('p', { class: 'cba-sub' }, 'Saisissez vous-même les classements, les scores et les prochains matchs. Ils s’affichent dans « Le Terrain » dès que vous publiez. Une case de score vide = match à venir.'),
       draftNote('CASA_SPORT', function (d) { S.sp = d; }),
       v.maj ? E('p', { class: 'cba-sub', style: 'margin-top:-.6rem' }, 'Dernière publication : ' + fmtDate(v.maj)) : null,
+      spEtat(),
       E('datalist', { id: 'cba-teams' }, spTeams().map(function (t) { return E('option', { value: t }); }))];
 
     // compétitions
@@ -1634,8 +1635,95 @@
             E('button', { type: 'button', class: 'cba-btn sm dan', style: 'margin-top:.6rem', onclick: function () { v.matches = v.matches.filter(function (x) { return x !== m; }); spMark(); render(); } }, 'Retirer ce match'));
         }) : E('p', { class: 'cba-sub', style: 'font-size:14px' }, 'Aucun match pour cette compétition.'),
         E('button', { type: 'button', class: 'cba-btn', onclick: function () { v.matches.push({ id: '', sport: cur.sport, comp: cur.id, date: new Date().toISOString().slice(0, 10), time: '15:00', home: '', away: '', hs: null, as: null, status: 'up', venue: '', source: '' }); spMark(); render(); } }, '+ Ajouter un match')));
+      out.push(spImport(cur));
     }
     return out;
+  }
+
+  // ---------- État des mises à jour automatiques ----------
+  function spEtat() {
+    var auto = window.CASA_SPORT_AUTO || {}, fic = (A.originalContent ? A.originalContent('CASA_SPORT') : window.CASA_SPORT) || {};
+    var lignes = [];
+    Object.keys(auto).forEach(function (sp) { var a = auto[sp] || {}; lignes.push([sp + ' (tous niveaux, import automatique)', a.maj, (a.comps || []).length + ' compétitions, ' + (a.matches || []).length + ' matchs à ±14 jours', a.source || '']); });
+    lignes.push(['Autres disciplines (tâche « Résultats et classements »)', fic.maj, ((fic.matches || []).length) + ' matchs', (fic.sources || []).join(', ')]);
+    var vieux = function (d) { return !d || (Date.now() - new Date(d).getTime()) > 2 * 86400000; };
+    var retard = lignes.filter(function (l) { return vieux(l[1]); });
+    return E('div', { class: 'cba-card' }, E('strong', {}, 'Mises à jour automatiques'),
+      E('p', { class: 'cba-sub', style: 'margin:.3rem 0 .6rem;font-size:14px' }, 'La tâche planifiée « Résultats et classements » tourne chaque jour vers 7 h 15 et 22 h 15. Les calendriers complets de la saison sont relus chaque matin. Football, basket et rugby : les fédérations refusent la lecture automatique, utilisez « Importer un calendrier » dans une compétition.'),
+      E('table', { class: 'cba-tbl' }, E('tbody', {}, lignes.map(function (l) {
+        return E('tr', {}, E('td', {}, E('strong', {}, l[0]), E('div', { class: 'cba-sub', style: 'font-size:12.5px' }, l[2])),
+          E('td', { style: 'white-space:nowrap' + (vieux(l[1]) ? ';color:var(--danger,#b3261e);font-weight:600' : '') }, l[1] ? fmtDate(l[1]) : 'jamais'));
+      }))),
+      retard.length ? E('p', { class: 'cba-note', style: 'margin:.8rem 0 0' }, 'Pas de mise à jour depuis plus de 2 jours pour : ' + retard.map(function (l) { return l[0].replace(/ \(.*$/, ''); }).join(', ') + '. Sur claude.ai › Code › Tâches planifiées, ouvrez « Résultats et classements » et cliquez « Run now ».') : null);
+  }
+
+  // ---------- Importer un calendrier (texte copié, fichier .ics ou .csv) ----------
+  function spImport(cur) {
+    var v = S.sp, st = S.spImp && S.spImp.comp === cur.id ? S.spImp : (S.spImp = { comp: cur.id, txt: '', res: null, pick: {} });
+    var cle = window.CasaImportCal ? window.CasaImportCal.cle : function (t) { return String(t || '').toLowerCase(); };
+    var auto = [], A2 = window.CASA_SPORT_AUTO || {}, CAL = window.CASA_CALENDRIERS || {};
+    Object.keys(A2).forEach(function (sp) { auto = auto.concat((A2[sp] || {}).matches || []); });
+    Object.keys(CAL).forEach(function (k) { auto = auto.concat(CAL[k].matches || []); });
+    function existant(m) {
+      var k = m.date + '|' + cle(m.home) + '|' + cle(m.away);
+      var ici = (v.matches || []).find(function (x) { return x.date + '|' + cle(x.home) + '|' + cle(x.away) === k; });
+      if (ici) return { ou: ici.comp === cur.id ? 'cette compétition' : 'une autre compétition', m: ici };
+      var au = auto.find(function (x) { return x.date + '|' + cle(x.home) + '|' + cle(x.away) === k; });
+      return au ? { ou: 'l’import automatique', m: au, auto: true } : null;
+    }
+    function analyser() {
+      if (!window.CasaImportCal) { toast('Lecteur de calendrier indisponible', true); return; }
+      st.res = window.CasaImportCal.lire(st.txt); st.pick = {};
+      st.res.matches.forEach(function (m, i) {
+        var e = existant(m); m._e = e;
+        // coché d'office : les nouveaux matchs, et les scores qui complètent un match déjà saisi ici
+        st.pick[i] = !e || (!e.auto && e.m.hs == null && m.hs != null);
+      });
+      render();
+    }
+    function ajouter() {
+      var n = 0, maj = 0;
+      st.res.matches.forEach(function (m, i) {
+        if (!st.pick[i]) return;
+        if (m._e && !m._e.auto) { if (m.hs != null) { m._e.m.hs = m.hs; m._e.m.as = m.as; maj++; } return; }
+        v.matches.push({ id: '', sport: cur.sport, comp: cur.id, date: m.date, time: m.time || '', home: m.home, away: m.away, hs: m.hs, as: m.as, status: m.hs == null ? 'up' : 'done', venue: m.venue || '', source: st.source || '' });
+        n++;
+      });
+      st.res = null; st.txt = ''; spMark(); render();
+      toast(n + ' match(s) ajouté(s)' + (maj ? ', ' + maj + ' score(s) mis à jour' : '') + '. Vérifiez avec « Aperçu sur le site », puis « Enregistrer et publier ».');
+    }
+    var box = [E('strong', {}, '4. Importer un calendrier dans « ' + cur.label + ' »'),
+      E('p', { class: 'cba-sub', style: 'margin:.3rem 0 .6rem;font-size:14px;line-height:1.55' },
+        'Ouvrez la page officielle du calendrier (fff.fr, ffbb, ffr, site du club…) dans votre navigateur, sélectionnez tout (Ctrl+A, ou appui long › Tout sélectionner sur téléphone), copiez, puis collez ici. Vous pouvez aussi choisir un fichier agenda (.ics) ou un tableau (.csv). Rien n’est publié avant « Enregistrer et publier ».'),
+      E('textarea', { class: 'cba-in', rows: 6, style: 'width:100%;font-family:inherit', placeholder: 'Exemple :\nSamedi 29 novembre 2026 - 18h00\nAS Cherbourg 2\nCS Carentan', 'aria-label': 'Calendrier à importer',
+        oninput: function (e) { st.txt = e.target.value; } }, st.txt),
+      E('div', { class: 'cba-row', style: 'margin-top:.5rem' },
+        E('label', { class: 'cba-btn' }, 'Choisir un fichier .ics ou .csv',
+          E('input', { type: 'file', accept: '.ics,.csv,.txt,text/calendar,text/csv,text/plain', style: 'display:none', onchange: function (e) {
+            var f = e.target.files && e.target.files[0]; if (!f) return;
+            var r = new FileReader(); r.onload = function () { st.txt = String(r.result || ''); analyser(); }; r.readAsText(f);
+          } })),
+        E('input', { class: 'cba-in', style: 'flex:1 1 220px', placeholder: 'Adresse de la page copiée (facultatif)', value: st.source || '', 'aria-label': 'Source', oninput: function (e) { st.source = e.target.value; } }),
+        E('button', { type: 'button', class: 'cba-btn pri', onclick: analyser }, 'Lire le calendrier'))];
+    if (st.res) {
+      var r = st.res, nb = r.matches.filter(function (m, i) { return st.pick[i]; }).length;
+      box.push(E('p', { class: 'cba-sub', style: 'margin:.8rem 0 .4rem' }, r.matches.length + ' match(s) trouvé(s)' + (r.format ? ' (' + r.format.toLowerCase() + ')' : '') +
+        (r.doublonsTexte ? ', ' + r.doublonsTexte + ' doublon(s) dans le texte retiré(s)' : '') + (r.ignorees ? ', ' + r.ignorees + ' ligne(s) incomplète(s) ignorée(s)' : '') + '. Décochez ce qui ne doit pas être ajouté.'));
+      if (r.matches.length) box.push(E('div', { style: 'overflow-x:auto' }, E('table', { class: 'cba-tbl' },
+        E('thead', {}, E('tr', {}, ['', 'Date', 'Heure', 'Domicile', 'Score', 'Extérieur', 'État'].map(function (h) { return E('th', {}, h); }))),
+        E('tbody', {}, r.matches.map(function (m, i) {
+          var e = m._e, etat = !e ? 'Nouveau' : e.auto ? 'Déjà lu automatiquement' : (e.m.hs == null && m.hs != null ? 'Déjà là : score ajouté' : 'Déjà dans ' + e.ou);
+          return E('tr', { style: e && !st.pick[i] ? 'opacity:.6' : null },
+            E('td', {}, E('input', { type: 'checkbox', checked: st.pick[i] || null, 'aria-label': 'Ajouter ce match', onchange: function (ev) { st.pick[i] = ev.target.checked; render(); } })),
+            E('td', { style: 'white-space:nowrap' }, new Date(m.date + 'T12:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })),
+            E('td', {}, m.time || '—'), E('td', {}, m.home), E('td', { style: 'white-space:nowrap' }, m.hs == null ? 'à venir' : m.hs + ' – ' + m.as), E('td', {}, m.away),
+            E('td', { style: 'font-size:12.5px;' + (e ? 'color:var(--gold-text,#8a6d00);font-weight:600' : 'color:#18705f;font-weight:600') }, etat));
+        })))));
+      box.push(E('div', { class: 'cba-row', style: 'margin-top:.6rem' },
+        E('button', { type: 'button', class: 'cba-btn pri', disabled: !nb || null, onclick: ajouter }, 'Ajouter ' + nb + ' match(s) à « ' + cur.label + ' »'),
+        E('button', { type: 'button', class: 'cba-btn', onclick: function () { st.res = null; render(); } }, 'Annuler')));
+    }
+    return E('div', { class: 'cba-card' }, box);
   }
   function spLoadKeep() { var f = spAllComps()[0]; S.spComp = f ? f.id : null; }
 

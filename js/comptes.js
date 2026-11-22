@@ -163,6 +163,9 @@
       // Liste à identifiants (articles…) : on garde la trace des éléments du fichier, pour que ceux ajoutés plus tard
       // dans le fichier (par l'automatisation « Rédaction quotidienne ») s'affichent quand même.
       if (Array.isArray(value) && Array.isArray(ORIG[key])) value = { __liste: value, __base: ORIG[key].map(function (x) { return x && x.id; }).filter(Boolean) };
+      // Résultats : on note les matchs et compétitions du fichier contenus/sport.js vus au moment de publier, pour que
+      // ceux que la tâche « Résultats et classements » ajoute ensuite s'affichent quand même (voir sportFusion).
+      if (key === 'CASA_SPORT' && value && ORIG[key]) value = Object.assign({}, value, { __fichier: sportIds(ORIG[key]) });
       return use(function (c) { return c.from('site_contenu').upsert({ cle: key, valeur: value, modifie_le: new Date().toISOString() }, { onConflict: 'cle' }); }).then(function () { applyContent(withKey(key, value)); });
     },
     resetContent: function (key) {
@@ -201,9 +204,44 @@
   CONTENT_KEYS.forEach(function (k) { try { ORIG[k] = JSON.parse(JSON.stringify(window[k] === undefined ? null : window[k])); } catch (e) { ORIG[k] = window[k]; } });
   function readCache() { try { var v = JSON.parse(localStorage.getItem(CKEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } }
   function withKey(k, v) { var cur = readCache(); cur[k] = v; return cur; }
+  function sportIds(sp) {
+    var comps = []; Object.keys((sp && sp.comps) || {}).forEach(function (d) { (sp.comps[d] || []).forEach(function (c) { if (c && c.id) comps.push(c.id); }); });
+    return { matches: ((sp && sp.matches) || []).map(function (m) { return m && m.id; }).filter(Boolean), comps: comps };
+  }
+  // Version publiée depuis l'admin + nouveautés du fichier contenus/sport.js (mis à jour automatiquement) :
+  // - un match ou une compétition ajouté au fichier après la publication s'affiche ;
+  // - un match laissé « à venir » dans l'admin prend le score que le fichier connaît maintenant ;
+  // - ce que l'admin a supprimé ne revient pas, ce que l'admin a saisi reste prioritaire.
+  function sportFusion(adm, fic) {
+    if (!adm || !fic || typeof adm !== 'object') return adm;
+    var out = JSON.parse(JSON.stringify(adm)), vu = adm.__fichier || null, depuis = String(adm.maj || '').slice(0, 10);
+    var nouveau = function (id, liste, m) { return vu ? liste.indexOf(id) < 0 : !!(m && m.date && depuis && m.date >= depuis); };
+    out.comps = out.comps || {}; out.tables = out.tables || {}; out.matches = out.matches || []; out.teamClub = out.teamClub || {};
+    var aComp = {}; Object.keys(out.comps).forEach(function (d) { (out.comps[d] || []).forEach(function (c) { aComp[c.id] = 1; }); });
+    Object.keys(fic.comps || {}).forEach(function (d) {
+      (fic.comps[d] || []).forEach(function (c) {
+        if (!c || !c.id || aComp[c.id] || (vu && vu.comps.indexOf(c.id) >= 0)) return;
+        (out.comps[d] = out.comps[d] || []).push(c); aComp[c.id] = 1;
+        if (fic.tables && fic.tables[c.id] && !out.tables[c.id]) out.tables[c.id] = fic.tables[c.id];
+      });
+    });
+    var aM = {}; out.matches.forEach(function (m) { if (m && m.id) aM[m.id] = m; });
+    (fic.matches || []).forEach(function (m) {
+      if (!m || !m.id) return;
+      var a = aM[m.id];
+      if (a) { if ((a.hs == null || a.hs === '') && m.hs != null && m.as != null) { a.hs = m.hs; a.as = m.as; a.status = 'done'; } return; }
+      if (!aComp[m.comp] || !nouveau(m.id, vu ? vu.matches : [], m)) return;
+      out.matches.push(m); aM[m.id] = m;
+    });
+    Object.keys(fic.teamClub || {}).forEach(function (t) { if (!out.teamClub[t]) out.teamClub[t] = fic.teamClub[t]; });
+    if (fic.maj && (!out.maj || fic.maj > out.maj)) out.majFichier = fic.maj;
+    delete out.__fichier;
+    return out;
+  }
   function applyContent(map, quiet) {
     CONTENT_KEYS.forEach(function (k) {
       var v = Object.prototype.hasOwnProperty.call(map, k) ? map[k] : ORIG[k];
+      if (k === 'CASA_SPORT' && v !== ORIG[k]) v = sportFusion(v, ORIG[k]);
       if (v && typeof v === 'object' && Array.isArray(v.__liste)) {
         var base = v.__base || [], have = {};
         v.__liste.forEach(function (x) { if (x && x.id) have[x.id] = 1; });

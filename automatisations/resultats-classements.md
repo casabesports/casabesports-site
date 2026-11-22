@@ -18,8 +18,25 @@ des équipes du Cotentin et de la Manche, à partir de sources publiques et grat
   (`window.CASA_SPORT_AUTO.Handball` : compétitions, classements complets, résultats et matchs à ±14 jours, clubs).
 - Ne modifie pas ce fichier à la main et ne recopie pas le handball dans `contenus/sport.js`.
 - S'il s'arrête avec un message d'erreur, le fichier n'est pas modifié : signale-le dans le compte rendu.
-- Puis lance `python3 outils/import_volley.py` (2 minutes, site de résultats FFVolley : comités de la Manche et du Calvados).
-- `node --check contenus/sport-federations.js` doit passer avant le commit.
+  **Passage du matin (vers 7 h)** : lance-le avec `--calendrier` (`python3 outils/import_handball.py --calendrier`). Il écrit
+  en plus le calendrier complet de la saison de chaque compétition seniors dans `contenus/calendriers/<id>.json`
+  (une journée déjà terminée n'est pas relue, une journée à venir est relue une fois par semaine : 10 à 30 minutes).
+  Passage du soir : sans `--calendrier`.
+- Puis lance `python3 outils/import_volley.py` (2 à 4 minutes, site de résultats FFVolley : comités de la Manche et du Calvados,
+  puis Élite, Nationale 2 et Nationale 3 là où joue un club normand ; calendriers complets dans `contenus/calendriers/`).
+- **Le lundi matin seulement** : lance aussi `python3 outils/import_joueurs_libres.py` (effectifs des clubs pros normands,
+  Wikipédia/Wikidata, mis à jour après les transferts). S'il échoue, garde le fichier tel quel et signale-le.
+- `node --check contenus/sport-federations.js` doit passer avant le commit, et chaque fichier de `contenus/calendriers/`
+  doit être du JSON valide (`python3 -c "import json,glob;[json.load(open(f)) for f in glob.glob('contenus/calendriers/*.json')]"`).
+- Ajoute `contenus/calendriers/` au commit (nouveaux fichiers compris).
+
+## Football, basket, rugby : bloqués pour les robots
+- FFF (epreuves.fff.fr, fff.fr, manche.fff.fr), FFBB (competitions.ffbb.com) et FFR refusent la lecture automatique
+  (erreur 403 ou robots.txt). **Ne cherche pas à contourner** (pas de changement d'identité du navigateur, pas d'API cachée).
+- Ces calendriers se saisissent dans Espace admin › Résultats › une compétition › « Importer un calendrier » :
+  l'administrateur colle le texte de la page officielle ou un fichier .ics/.csv, voit l'aperçu et les doublons, puis publie.
+- Ce qui est publié depuis l'admin reste prioritaire, mais tout match que tu ajoutes ensuite dans `contenus/sport.js`
+  s'affiche quand même (et un score que tu trouves complète un match laissé « à venir » dans l'admin).
 
 ## Ce qu'il faut couvrir
 - Toutes les compétitions où joue au moins une équipe première (seniors) d'un club listé dans `js/app.js` (`clubs`) ou dans `CASA_SPORT.clubs`.
@@ -34,4 +51,4 @@ des équipes du Cotentin et de la Manche, à partir de sources publiques et grat
 - Retire les matchs « up » passés depuis plus de 2 jours sans score connu.
 - `node --check contenus/sport.js` doit passer.
 - Rien de changé → pas de commit. Sinon commit sur `main` « Résultats et classements : <date> » puis `git push origin main`.
-- Compte rendu final court en français : compétitions mises à jour, sources inaccessibles.
+- Compte rendu final court en français : compétitions mises à jour, nombre de calendriers complets, sources inaccessibles.
