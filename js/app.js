@@ -123,7 +123,7 @@ class Component extends DCLogic {
       cart: [], cartOpen: false, ship: 'home', giftWrap: false, orderDone: false, orderNo: '', orders: [], payBusy: false, subPending: false, paidSubs: false, orderPaid: false,
       offerTab: 'Tout', readerOpen: false, page: 0, nlEmail: '', nlDone: false, tick: 0,
       hdrY: '0', scrolled: false, placeOverride: null, placeOpen: false, placeIdx: 0, partnerId: null, claimed: [],
-      aiOpen: false, aiInput: '', aiTyping: false, aiMsgs: [{ role: 'bot', text: 'Bonjour, je suis Casa IA. Posez-moi une question sur les scores, la boutique, la Gazette, les clubs ou l’histoire du Cotentin.', actions: [] }],
+      aiOpen: false, aiInput: '', aiTyping: false, aiMsgs: [{ role: 'bot', text: (typeof window !== 'undefined' && window.CASA_IA && window.CASA_IA.accueil) || 'Bonjour, je suis Casa IA. Posez-moi vos questions de sport et sur Casa Besports.', actions: [] }],
       readerFont: 1, quizAns: {}, gzVote: this.readLS('cb-gz-vote', null), theme: this.loadTheme(), homeLayout: this.readLS('cb-home-layout', 'dashboard'), mods: this.readLS('cb-accueil-v2', null), favSports: this.readLS('cb-fav-sports', []), favClubs: this.readLS('cb-fav-clubs', []), cfQ: '', bgCouleur: this.readLS('cb-bg-couleur', null), bgTeinte: this.readLS('cb-bg-teinte', null), customizeOpen: false, wxExtra: this.readLS('cb-wx-extra', []), wxCity: this.readLS('cb-wx-city', 'Cherbourg'), wxLive: {}, wxLoading: false, priv: null, privFor: null, pvTab: 'jour', pvList: 'courses', pf: {}, pvMember: 'all', chTab: 'fil', bgMode: this.readLS('cb-bg-mode', null), crmTab: 'home', crmSel: null, crmType: 'Tous', crmOwner: 'Tous', crmRev: 0, prodImg: 0, cardColor: this.readLS('cb-card-color', 'noir'), chRoom: 'Tous', chAdCat: 'Tout', chOpen: {}, chf: {}, chRev: 0, cuTab: 'expo', cuKind: 'Tous', workIdx: null, votes: this.readLS('cb-votes', {}), cuf: {}, cuSent: false, tmWork: 40, tmRest: 20, tmRounds: 8, tmRunning: false, tmPhase: 'ready', tmLeft: 40, tmRound: 1, sysDark: this.sysDark(), themeMenuOpen: false, themeAnim: false, legalDoc: 'mentions', role: null, accReq: null, accMotif: '', accBusy: false, studioTab: 'dash', posts: null, editId: 'p1', edMode: 'write', reviewNote: '', commentDraft: '', aiOutKind: null, stQ: '', stFilter: 'all', inviteEmail: '',
       rx: null, rxu: {}, rxServer: null, staffRole: 'redacteur',
       rsu: {}, cvu: {}, clubRoleId: 'esph', clubEditId: null, verifId: '',
@@ -704,22 +704,17 @@ class Component extends DCLogic {
     const t = (text || '').trim();
     if (!t) return;
     this.setState({ aiMsgs: this.state.aiMsgs.concat([{ role: 'user', text: t, actions: [] }]), aiInput: '', aiTyping: true });
-    const local = () => { const r = this.aiRespond(t); this.setState({ aiTyping: false }); this.aiPush({ role: 'bot', text: r.text, actions: r.actions || [] }); };
-    if (typeof window !== 'undefined' && window.CASA_API && typeof fetch === 'function') {
-      const history = this.state.aiMsgs.slice(-8).map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text })).concat([{ role: 'user', content: t }]);
-      fetch(window.CASA_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, view: this.state.view }) })
-        .then((r) => r.ok ? r.json() : Promise.reject(r.status))
-        .then((d) => {
-          const acts = [];
-          if (d.action && d.action.view) acts.push({ label: d.action.label || 'Ouvrir', run: () => this.go(d.action.view, d.action.params || {}) });
-          this.setState({ aiTyping: false });
-          this.aiPush({ role: 'bot', text: d.reply || '…', actions: acts });
-        })
-        .catch(local);
-    } else {
-      clearTimeout(this._ai);
-      this._ai = setTimeout(local, 450);
-    }
+    // Moteur intégré (js/app.js + js/casa-ia.js). Une réponse « pending » arrive plus tard : Wikipédia ou mode connecté.
+    const local = () => {
+      let r; try { r = this.aiRespond(t); } catch (e) { r = null; }
+      if (r && r.pending && typeof r.pending.then === 'function') {
+        r.pending.then((x) => { this.setState({ aiTyping: false }); this.aiPush({ role: 'bot', text: (x && x.text) || '…', actions: (x && x.actions) || [] }); });
+        return;
+      }
+      this.setState({ aiTyping: false }); this.aiPush({ role: 'bot', text: (r && r.text) || '…', actions: (r && r.actions) || [] });
+    };
+    clearTimeout(this._ai);
+    this._ai = setTimeout(local, 450);
   }
   aiRespond(raw) {
     const D = this.data(), X = this.more();
@@ -734,7 +729,9 @@ class Component extends DCLogic {
     const name = this.state.name ? ' ' + this.state.name.split(' ')[0] : '';
 
     if (has(/^(bonjour|salut|hello|coucou|bonsoir|hey)\b/)) return { text: 'Bonjour' + name + ' ! Je suis Casa IA. Je peux vous donner les scores, conseiller une tenue, ouvrir la Gazette, raconter l’histoire des lieux du Cotentin ou vous guider dans le site.', actions: [act('Scores en direct', () => this.go('live', { dTab: 'live' })), act('Conseil boutique', () => this.aiAsk('Une tenue chill à moins de 60 €'))] };
-    if (has(/\baide\b|que (peux|sais)|tu fais quoi|comment ca marche/)) return { text: 'Voici ce que je sais faire :\n• Scores, résultats, agenda et classements par discipline\n• Conseils boutique et ajout au panier (« ajoute le hoodie signature en M »)\n• Abonnements BE+ et La Gazette, ouverture d’une page précise\n• Histoire des lieux du Cotentin\n• Infos clubs, joueurs et partenaires\n• Navigation : « emmène-moi à la boutique »', actions: [] };
+    if (has(/\baide\b|que (peux|sais)|tu fais quoi|comment ca marche/)) return { text: 'Voici ce que je sais faire :\n• Casa Besports : notre histoire, le fondateur, BE+\n• Scores, résultats, agenda et classements par discipline, du département au national\n• Une équipe précise : « classement de Tourlaville », « prochain match de Saint-Lô »\n• Les niveaux de compétition, du département à l’international\n• Sport national et international, règles, histoire, athlètes (avec la source)\n• Conseils boutique et ajout au panier (« ajoute le hoodie signature en M »)\n• Abonnements BE+ et La Gazette, ouverture d’une page précise\n• Histoire des lieux du Cotentin\n• Infos clubs, joueurs et partenaires\n• Navigation : « emmène-moi à la boutique »', actions: [] };
+    // Casa Besports, niveaux de compétition, FAQ, équipes et championnats des fédérations (js/casa-ia.js)
+    if (typeof window !== 'undefined' && window.CasaIA) { const ia = window.CasaIA.avant(this, raw); if (ia) return ia; }
 
     if (has(/realite augmentee|\bar\b|compo|line ?up|composition|3d|selfie|photo supporter|application|appli/)) {
       if (has(/application|appli/) && !has(/compo|realite|3d/)) return { text: 'L’application Casa Besports réunit scores, Club House, Mon quotidien, la Gazette et les expériences en réalité augmentée. Elle s’installe sur l’écran d’accueil depuis le navigateur.', actions: [act('Découvrir l’application', () => this.go('app'))] };
@@ -830,13 +827,15 @@ class Component extends DCLogic {
     if (has(/resultat|dernier match|score final|gagne|perdu/)) {
       const sp = sportOf();
       const done = X.matches.filter((m) => m.sport === sp && m.status === 'done').sort((a, b) => (a.verified === b.verified ? (a.date > b.date ? -1 : 1) : a.verified ? -1 : 1)).slice(0, 4);
-      return { text: 'Derniers résultats ' + sp + ' :\n' + done.map((m) => '• ' + cbNomEquipe(m.home) + ' ' + score(m) + ' ' + cbNomEquipe(m.away) + '').join('\n'), actions: [act('Tous les résultats', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'results' }))] };
+      if (done.length) return { text: 'Derniers résultats ' + sp + ' :\n' + done.map((m) => '• ' + cbNomEquipe(m.home) + ' ' + score(m) + ' ' + cbNomEquipe(m.away) + '').join('\n'), actions: [act('Tous les résultats', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'results' }))] };
+      if (has(/basket|water|polo|rugby|foot/)) return { text: 'Pas encore de résultat ' + sp.toLowerCase() + ' enregistré sur BE+. Les résultats arrivent automatiquement quand la fédération les publie, ou sont saisis par la rédaction.', actions: [act('Ouvrir Le Terrain', () => this.go('live'))] };
     }
     if (has(/prochain|agenda|quand|calendrier|programme|ce week/)) {
       if (has(/pointe|hague|avranches|coupe/)) return { text: 'ES Pointe-Hague – US Avranches, 4e tour de la Coupe de France, à Beaumont-Hague. La date et l’heure restent à confirmer.', actions: [act('Activer un rappel', () => { this.toggleIn('reminders', 'm-cfa-avranches', 'Rappel activé', 'Rappel retiré'); }), act('Pronostiquer', () => this.setState({ matchId: 'm-cfa-avranches', aiOpen: false }))] };
       const sp = sportOf();
       const up = X.matches.filter((m) => m.sport === sp && m.status === 'up' && m.date).sort((a, b) => a.date < b.date ? -1 : 1).slice(0, 4);
-      return { text: 'Prochains matchs ' + sp + ' :\n' + up.map((m) => '• ' + m.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + m.time + ' : ' + cbNomEquipe(m.home) + ' – ' + cbNomEquipe(m.away)).join('\n'), actions: [act('Ouvrir l’agenda', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'agenda' }))] };
+      if (up.length) return { text: 'Prochains matchs ' + sp + ' :\n' + up.map((m) => '• ' + m.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + m.time + ' : ' + cbNomEquipe(m.home) + ' – ' + cbNomEquipe(m.away)).join('\n'), actions: [act('Ouvrir l’agenda', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'agenda' }))] };
+      if (has(/basket|water|polo|rugby|foot/)) return { text: 'Pas encore de match ' + sp.toLowerCase() + ' à venir enregistré sur BE+.', actions: [act('Ouvrir Le Terrain', () => this.go('live'))] };
     }
     const pl = D.players.find((p) => { const parts = n(p.name).split(' '); return parts.some((w) => w.length >= 5 && new RegExp('\\b' + w + '\\b').test(q)); });
     if (pl) return { text: pl.name + ' — n° ' + pl.num + ', ' + pl.role + ' · ' + pl.clubLabel + '.', actions: [act('Voir le profil', () => this.go('player', { playerId: pl.id }))] };
@@ -879,7 +878,9 @@ class Component extends DCLogic {
     const words = q.split(/[^a-z0-9]+/).filter((w) => w.length >= 5);
     let best = null, bestScore = 0;
     this.allArticles().forEach((a) => { const hay = n(a.title + ' ' + a.dek + ' ' + a.tag); const sc = words.filter((w) => hay.includes(w)).length; if (sc > bestScore) { best = a; bestScore = sc; } });
-    if (best && bestScore > 0) return { text: '« ' + best.title + ' »\n' + (best.points || []).map((x) => '• ' + x).join('\n'), actions: [act('Lire l’article', () => this.go('article', { articleId: best.id }))] };
+    if (best && bestScore >= Math.min(2, words.length)) return { text: '« ' + best.title + ' »\n' + (best.points || []).map((x) => '• ' + x).join('\n'), actions: [act('Lire l’article', () => this.go('article', { articleId: best.id }))] };
+    // Questions générales (sport national et international, règles, histoire…) : Wikipédia ou mode connecté
+    if (typeof window !== 'undefined' && window.CasaIA && typeof fetch === 'function') return { text: '', pending: window.CasaIA.apres(this, raw) };
     return { text: 'Je n’ai pas trouvé de réponse précise. Essayez par exemple : « classement basket », « un cadeau à moins de 30 € », « histoire du phare de Gatteville » ou « ouvre la Gazette page 12 ».', actions: [act('Scores en direct', () => this.go('live', { dTab: 'live' })), act('Boutique', () => this.go('shop'))] };
   }
   allArticles() {
@@ -3683,11 +3684,11 @@ class Component extends DCLogic {
       bg, bgModes, bgColorOpts, teintes, teinteLibre, place, places, placeOpacity, placeOpen: s.placeOpen, pp, togglePlace: () => this.setState({ placeOpen: !s.placeOpen, placeIdx: X.places.indexOf(placeRaw) }), closePlace: () => this.setState({ placeOpen: false }),
       partners, partnerTiers, partnerOpen: !!ptRaw, pt, closePartner: () => this.setState({ partnerId: null }),
       aiOpen: s.aiOpen, aiClosed: !s.aiOpen, aiAria: s.aiOpen ? 'Fermer Casa IA' : 'Ouvrir Casa IA, l’assistant', toggleAi: () => this.setState({ aiOpen: !s.aiOpen }),
-      aiMode: (typeof window !== 'undefined' && window.CASA_API) ? 'Connecté au modèle de langage · actions sur le site' : 'Moteur intégré · répond et agit sur le site',
+      aiMode: (typeof window !== 'undefined' && window.CASA_IA_CONNECTEE && s.loggedIn) ? 'Mode connecté · sport du monde entier, sources citées' : 'Sport local à international · répond et agit sur le site',
       aiMsgs: s.aiMsgs.map((m) => ({ isBot: m.role !== 'user', text: m.text, actions: m.actions || [], align: m.role === 'user' ? 'flex-end' : 'flex-start', bg: m.role === 'user' ? 'var(--inv-bg)' : 'var(--surface)', fg: m.role === 'user' ? 'var(--on-inv)' : 'var(--text)', border: m.role === 'user' ? 'var(--ink)' : 'var(--line)' })),
       aiTyping: s.aiTyping, aiInput: s.aiInput, onAiInput: (e) => this.setState({ aiInput: e.target.value }), aiSend: () => this.aiAsk(s.aiInput),
       aiReset: () => this.setState({ aiMsgs: [{ role: 'bot', text: 'Nouvelle conversation. Que puis-je faire pour vous ?', actions: [] }] }),
-      aiSuggest: ['Météo à Cherbourg', 'Ajoute du pain à ma liste de courses', 'Scores en direct', 'Classement R2', 'Tenue chill à moins de 60 €', 'Histoire du phare de Gatteville', 'Ouvre la Gazette page 5', 'Prochain match de Pointe-Hague'].map((l) => ({ label: l, run: () => this.aiAsk(l) })),
+      aiSuggest: ((typeof window !== 'undefined' && window.CASA_IA && window.CASA_IA.suggestions) || ['Qui est Casa Besports ?', 'Scores en direct', 'Météo à Cherbourg']).map((l) => ({ label: l, run: () => this.aiAsk(l) })),
       openAdmin: () => this.go('admin'),
       acctId: s.email || s.phone || '—', acctRole: s.role === 'admin' ? 'administrateur' : s.role === 'writer' ? (s.staffRole === 'collaborateur' ? 'rédaction · chef d’édition' : 'rédaction · rédacteur') : s.role === 'club' ? 'correspondant de club' : 'abonné' + (s.srvRole === 'erreur' ? ' (rôle non vérifié par le serveur)' : ''),
       accShow: s.loggedIn && !s.role, accNone: !s.accReq || s.accReq.statut === 'refusee', accPending: !!s.accReq && s.accReq.statut === 'en_attente', accRefused: !!s.accReq && s.accReq.statut === 'refusee',
