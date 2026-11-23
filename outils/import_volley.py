@@ -6,7 +6,9 @@ Source : le site de résultats officiel de la FFVolley (https://www.ffvbbeach.or
 pages publiques. Les données sont lues telles qu'elles sont publiées, sans rien estimer.
 
 Ordre : Comité de la Manche, puis Comité du Calvados (les autres comités normands et la Ligue
-seront ajoutés dès que leurs codes seront connus : il suffit de compléter COMITES).
+seront ajoutés dès que leurs codes seront connus : il suffit de compléter COMITES), puis les championnats
+nationaux (Élite, Nationale 2, Nationale 3) où joue un club normand.
+Calendrier complet de la saison de chaque compétition : contenus/calendriers/<id>.json (voir outils/calendriers.py).
 
 Écrit : contenus/sport-federations.js (window.CASA_SPORT_AUTO['Volley-ball']), sans toucher aux autres disciplines.
 Usage : python3 outils/import_volley.py [--jours 14]
@@ -21,6 +23,9 @@ import sys
 import time
 import unicodedata
 import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import calendriers as cal  # noqa: E402
 
 BASE = 'https://www.ffvbbeach.org/ffvbapp/resu/'
 UA = 'CasaBesports-import/1.0 (+https://casabesports.fr)'
@@ -62,6 +67,7 @@ def entier(v):
 def joli(t):
     t = (t or '').strip().lower()
     t = t.replace('feminine', 'féminine').replace('departemental', 'départemental').replace('compet lib', 'compet’lib').replace('calvados', 'Calvados')
+    t = re.sub(r'\bpoule ([a-z])\b', lambda m: 'poule ' + m.group(1).upper(), t)
     return t[:1].upper() + t[1:]
 
 
@@ -87,16 +93,42 @@ def lignes(page):
         yield [texte(c) for c in re.findall(r'<t[dh][^>]*>(.*?)</t[dh]>', tr, flags=re.S | re.I)]
 
 
+# Championnats nationaux (Élite, Nationale 2, Nationale 3) : on ne garde que les poules où joue un club normand.
+NATIONAL = 'ABCCS'
+NORMANDIE = ['caen', 'rouen', 'havre', 'cherbourg', 'saint-lo', 'st-lo', 'st lo', 'granville', 'avranches', 'coutances', 'valognes',
+             'carentan', 'tourlaville', 'hainneville', 'querqueville', 'martinvast', 'les pieux', 'bricquebec', 'barneville', 'equeurdreville', 'octeville', 'la hague', 'bayeux', 'lisieux', 'vire', 'falaise', 'honfleur',
+             'deauville', 'trouville', 'ouistreham', 'mondeville', 'herouville', 'ifs', 'colombelles', 'giberville', 'carpiquet', 'verson',
+             'douvres', 'alencon', 'flers', 'argentan', "l'aigle", 'laigle', 'evreux', 'vernon', 'louviers', 'val-de-reuil', 'val de reuil',
+             'bernay', 'pont-audemer', 'gisors', 'elbeuf', 'dieppe', 'fecamp', 'yvetot', 'bolbec', 'barentin', 'maromme', 'deville',
+             'darnetal', 'canteleu', 'mont-saint-aignan', 'mont saint aignan', 'bois-guillaume', 'bois guillaume', 'sotteville', 'quevilly',
+             'petit-couronne', 'oissel', 'saint-etienne-du-rouvray', 'st etienne du rouvray', 'montivilliers', 'harfleur', 'gonfreville',
+             'eu ', 'le treport', 'normandie', 'manche', 'calvados', 'cotentin', 'orne', 'eure ']
+
+
+def normand(equipe, connus):
+    n = ' ' + unicodedata.normalize('NFKD', equipe or '').encode('ascii', 'ignore').decode().lower() + ' '
+    if re.sub(r'\s*\d+$', '', (equipe or '').strip()) in connus:
+        return True
+    if re.search(r' (14|27|50|61|76) $', n):
+        return True  # numéro de département normand en fin de nom (ex. « Agglo Sud Volley-Ball 76 »)
+    return any(re.search(r'(^|[^a-z])' + re.escape(k.strip()) + r'([^a-z]|$)', n) for k in NORMANDIE)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--jours', type=int, default=14)
     ap.add_argument('--sortie', default=SORTIE)
+    ap.add_argument('--sans-national', action='store_true', help='ne pas lire les championnats nationaux')
     o = ap.parse_args()
     auj = dt.date.today()
     an = auj.year if auj.month >= 7 else auj.year - 1
     saison = '%d/%d' % (an, an + 1)
     comps, tables, matches, clubs, team_club, erreurs = [], {}, [], {}, {}, []
-    for codent, zone in COMITES:
+    calendriers = 0
+    connus = set()  # équipes des comités normands (pour reconnaître les clubs normands au niveau national)
+    entites = list(COMITES) + ([] if o.sans_national else [(NATIONAL, 'National')])
+    for codent, zone in entites:
+        national = codent == NATIONAL
         try:
             accueil = lire(BASE + 'vbspo_home.php?codent=' + codent)
         except Exception as e:
@@ -106,17 +138,19 @@ def main():
         for m in re.finditer(r'poule=([A-Z0-9]+)[^>]*>(.*?)</a>', accueil, re.S):
             code, lib = m.group(1), texte(m.group(2))
             lib = re.sub(r'^' + code + r'\s+', '', lib)
+            if national and (code == 'INT' or re.search(r'd[ée]l[ée]gations', lib, re.I)):
+                continue
             if code not in [p[0] for p in poules]:
                 poules.append((code, lib))
         for code, lib in poules:
-            url = '%svbspo_calendrier.php?saison=%s&codent=%s&poule=%s' % (BASE, saison, codent, code)
+            url = '%svbspo_calendrier.php?saison=%s&codent=%s&poule=%s&calend=COMPLET' % (BASE, saison, codent, code)
             try:
                 page = lire(url)
             except Exception as e:
                 erreurs.append('%s %s : %s' % (zone, lib, e))
                 continue
             cid = 'vb-%s-%s' % (codent.lower(), code.lower())
-            tab, entete = [], False
+            tab, entete, saison_m = [], False, []
             for c in lignes(page):
                 if len(c) > 6 and c[2:4] == ['Points', 'Jou.']:
                     entete = True
@@ -136,21 +170,32 @@ def main():
                         continue  # équipe exempte
                     j, m_, a = c[1].split('/')
                     jour = dt.date(2000 + int(a), int(m_), int(j))
-                    if abs((jour - auj).days) > o.jours:
-                        continue
                     s1, s2 = entier(c[6]), entier(c[7])
                     joue = s1 is not None and s2 is not None
                     if not joue and (c[6] or (c[7] and c[7].isdigit())):
                         continue  # score incomplet ou forfait : rien d'affiché
-                    matches.append({'id': '%s-%s' % (cid, slug(c[0])), 'comp': cid, 'date': jour.isoformat(), 'time': c[2] or '',
-                                    'home': dom, 'away': ext, 'hs': s1 if joue else None, 'as': s2 if joue else None,
-                                    'status': 'done' if joue else 'up', 'venue': '' if joue else nom_affiche(c[7])})
-            if not tab and not any(m['comp'] == cid for m in matches):
+                    saison_m.append({'id': '%s-%s' % (cid, slug(c[0])), 'comp': cid, 'date': jour.isoformat(), 'time': c[2] or '',
+                                     'home': dom, 'away': ext, 'hs': s1 if joue else None, 'as': s2 if joue else None,
+                                     'status': 'done' if joue else 'up', 'venue': '' if joue else nom_affiche(c[7])})
+            if not tab and not saison_m:
                 continue
-            comps.append({'id': cid, 'label': joli(lib), 'zone': zone, 'niveau': 'Seniors', 'source': url})
+            equipes = [r['team'] for r in tab] or [x for m in saison_m for x in (m['home'], m['away'])]
+            if national and not any(normand(e, connus) for e in equipes):
+                continue
+            matches.extend(m for m in saison_m if abs((dt.date.fromisoformat(m['date']) - auj).days) <= o.jours)
+            label = joli(lib)
+            comps.append({'id': cid, 'label': label, 'zone': zone, 'niveau': 'Seniors', 'source': url})
             tables[cid] = tab
+            # calendrier complet de la saison (chargé à la demande par le site)
+            if saison_m:
+                calendriers += 1
+                cal.ecrire(cid, 'Volley-ball', label, url, saison_m)
             for r in tab:
                 n = nom_affiche(re.sub(r'\s*\d+$', '', r['team']).strip() or r['team'])
+                if not national:
+                    connus.add(re.sub(r'\s*\d+$', '', r['team']).strip())
+                elif not normand(r['team'], connus):
+                    continue  # au national, seuls les clubs normands rejoignent la page Clubs
                 cl = clubs.setdefault(slug(n), {'id': 'vb-club-' + slug(n), 'name': n, 'sport': 'Volley-ball', 'city': '', 'zone': zone})
                 team_club[r['team']] = cl['id']
     if not comps:
@@ -168,7 +213,9 @@ def main():
     entete = txt[:txt.index('window.CASA_SPORT_AUTO')] if 'window.CASA_SPORT_AUTO' in txt else '/* Casa Besports : championnats lus sur les sites officiels des fédérations (outils/import_*.py). */\n'
     with open(o.sortie, 'w', encoding='utf-8') as f:
         f.write(entete + 'window.CASA_SPORT_AUTO = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')
-    print('Volley-ball : %d compétitions, %d matchs, %d clubs.' % (len(comps), len(matches), len(clubs)))
+    cal.indexer()
+    print('Volley-ball : %d compétitions (dont %d au national), %d matchs à ±%d jours, %d calendriers complets, %d clubs.' % (
+        len(comps), sum(1 for c in comps if c['zone'] == 'National'), len(matches), o.jours, calendriers, len(clubs)))
     for e in erreurs:
         print('  ! ' + e)
 

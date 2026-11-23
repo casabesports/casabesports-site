@@ -118,7 +118,7 @@ class Component extends DCLogic {
       formError: '', step: 1, period: 'mois', subPlan: 'casab', isGift: false, saved: [], follows: [], followPlayers: [], remind: false,
       summary: false, listening: false, radioT: '', wkDay: '', fontStep: 1, reaction: null, playing: false, goal: 'Visibilité',
       alerts: { matchs: true, articles: true, videos: false }, toast: '',
-      dSport: 'Football', dComp: 'r2', dTab: 'live', calMonth: 9, calDay: 10, matchId: null, pronos: {}, reminders: [],
+      dSport: 'Football', dComp: 'r2', dTab: 'live', calMonth: new Date().getMonth(), calYear: new Date().getFullYear(), calDay: new Date().getDate(), matchId: null, pronos: {}, reminders: [],
       shopLine: 'Tout', proTab: 'clubs', shopSort: 'pop', color: 0, size: null, qty: 1, persoName: '', persoNum: '', prodError: '', sizeGuide: false,
       cart: [], cartOpen: false, ship: 'home', giftWrap: false, orderDone: false, orderNo: '', orders: [], payBusy: false, subPending: false, paidSubs: false, orderPaid: false,
       offerTab: 'Tout', readerOpen: false, page: 0, nlEmail: '', nlDone: false, tick: 0,
@@ -304,6 +304,15 @@ class Component extends DCLogic {
       (A.matches || []).forEach((m) => { if (m && m.id && !seen[m.id]) { seen[m.id] = 1; matches.push(M(m.id, m.sport || sp, m.comp, m.date || null, m.time || '', m.home, m.away, m.hs == null ? null : m.hs, m.as == null ? null : m.as, m.status || (m.hs == null ? 'up' : 'done'), { verified: true, venue: m.venue || '', source: m.source || srcOf[m.comp] || '' })); } });
       Object.assign(autoTeamClub, A.teamClub || {});
     });
+    // Calendriers complets de la saison (contenus/calendriers/<id>.json), chargés à la demande quand on ouvre une compétition
+    {
+      const CAL = (typeof window !== 'undefined' && window.CASA_CALENDRIERS) || {};
+      const seen = {}; matches.forEach((x) => { seen[x.id] = 1; });
+      Object.keys(CAL).forEach((cid) => {
+        const c = CAL[cid] || {};
+        (c.matches || []).forEach((m) => { if (m && m.id && !seen[m.id]) { seen[m.id] = 1; matches.push(M(m.id, m.sport || c.sport, m.comp || cid, m.date || null, m.time || '', m.home, m.away, m.hs == null ? null : m.hs, m.as == null ? null : m.as, m.status || (m.hs == null ? 'up' : 'done'), { verified: true, venue: m.venue || '', source: m.source || c.source || '' })); } });
+      });
+    }
     const teamClubBase = { 'FCEH': 'fceh', 'AS Tourlaville Football': 'as-tourlaville', 'CS Carentan Football': 'cs-carentan', 'US Côte des Isles': 'us-cote-isles', 'SC Douve Divette': 'sc-douve', 'UC Briquebec': 'uc-briquebec', 'ES Pointe Hague': 'esph', 'US Avranches MSM': 'us-avranches', 'USON Mondeville FC': 'uson-mondeville', 'AS Cherbourg Football': 'as-cherbourg', 'Les Marais Cherbourg Basketball': 'marais-basket', 'UST Basket': 'ust-basket', 'PL Tourlaville Basket': 'pl-tourlaville', 'La Valognaise Basket': 'valognaise', 'Basket Club de la Hague': 'bc-hague', 'Les Redoutables': 'redoutables' };
     const clubNames = {}; this.data().clubs.forEach((c) => { clubNames[c.name] = c.id; });
     // une équipe lue chez la fédération dont le club existait déjà sur le site pointe vers la fiche existante
@@ -2132,19 +2141,22 @@ class Component extends DCLogic {
         bg: followed ? 'var(--note-bg)' : 'var(--surface)', rankBg: i === 0 ? accent : i === tbl.length - 1 ? 'var(--danger-bg)' : 'var(--surface-2)', rankFg: i === 0 ? 'var(--on-acc)' : 'var(--ink)',
         form: String(r.form || '').split('').map((l) => ({ l, bg: l === 'V' ? '#18705f' : l === 'N' ? '#8f9aa8' : 'var(--danger)' })), hasForm: !!r.form, teamN: cbNomEquipe(r.team), diffS: (Number(r.diff) > 0 ? '+' : '') + r.diff, podium: i < 3 ? 'is-top' : '', last: i === tbl.length - 1 && tbl.length > 3 ? 'is-last' : '', open: openClubByTeam(r.team) });
     });
-    // calendrier
-    const year = 2026, month = s.calMonth;
+    // calendrier complet de la compétition : chargé à la demande (contenus/calendriers/<id>.json)
+    if (dCompId && typeof window !== 'undefined' && window.CasaCalendrier) window.CasaCalendrier.charger(dCompId, () => { this._m = null; this.setState({ calTick: Date.now() }); });
+    // calendrier : mois par mois sur toute la saison (août à juillet), aujourd'hui repéré
+    const calNow = new Date();
+    const year = s.calYear || calNow.getFullYear(), month = s.calMonth == null ? calNow.getMonth() : s.calMonth;
     const first = new Date(year, month, 1);
     const offset = (first.getDay() + 6) % 7;
     const nDays = new Date(year, month + 1, 0).getDate();
-    const sportM = allM.filter((m) => m.sport === s.dSport && m.date);
+    const sportM = allM.filter((m) => m.sport === s.dSport && m.date && (!dCompId || m.compId === dCompId));
     const calCells = [];
     for (let i = 0; i < offset; i++) calCells.push({ n: '', disabled: true, aria: 'vide', border: 'transparent', bg: 'transparent', fg: 'var(--text)', dot: 'transparent', op: 1, pick: () => {} });
     for (let d = 1; d <= nDays; d++) {
       const iso = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
       const has = sportM.filter((m) => m.date === iso);
       const sel = s.calDay === d;
-      const today = month === 9 && d === 6;
+      const today = year === calNow.getFullYear() && month === calNow.getMonth() && d === calNow.getDate();
       calCells.push({ n: String(d), disabled: false, aria: d + ' ' + MONTHS_L[month] + (has.length ? ', ' + has.length + ' match(s)' : ''), border: today ? accent : sel ? 'var(--ink)' : 'var(--line)',
         bg: sel ? 'var(--inv-bg)' : 'var(--surface)', fg: sel ? 'var(--on-inv)' : 'var(--text)', dot: has.length ? (has.some((m) => m.status === 'live') ? '#e03040' : sel ? 'var(--on-inv)' : 'var(--ink)') : 'transparent', op: 1, pick: () => this.setState({ calDay: d }) });
     }
@@ -3449,7 +3461,8 @@ class Component extends DCLogic {
       liveCards, noLive: liveM.length === 0, resultRows, noResults: resultRows.length === 0, agendaRows, noAgenda: agendaRows.length === 0,
       hasTable: !!tbl, noTable: !tbl, tableRows,
       calHead: ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((l) => ({ l })), calCells, calTitle: MONTHS_L[month] + ' ' + year,
-      calPrev: () => this.setState({ calMonth: Math.max(8, month - 1), calDay: 1 }), calNext: () => this.setState({ calMonth: Math.min(11, month + 1), calDay: 1 }),
+      calPrev: () => this.setState(month === 0 ? { calMonth: 11, calYear: year - 1, calDay: 1 } : { calMonth: month - 1, calYear: year, calDay: 1 }),
+      calNext: () => this.setState(month === 11 ? { calMonth: 0, calYear: year + 1, calDay: 1 } : { calMonth: month + 1, calYear: year, calDay: 1 }),
       calDayLabel: s.calDay + ' ' + MONTHS_L[month].toLowerCase(), calDayMatches, calDayEmpty: calDayMatches.length === 0,
       pronoRows, pronoCount,
       matchOpen: !!mxRaw, mx, closeMatch: () => this.setState({ matchId: null }),

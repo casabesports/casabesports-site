@@ -15,3 +15,17 @@ changer l'heure ou les lancer tout de suite** (« Run now »).
 
 ## Déposer un sujet
 Voir `redaction/a-traiter/LISEZMOI.md`.
+
+## Ce qui se met à jour tout seul (vérifié le 2026-11-22)
+
+| Contenu | Fréquence | Comment |
+|---|---|---|
+| Handball : classements, résultats, matchs à ±14 jours (Manche, Normandie, 4 autres comités, national) | 7 h 15 et 22 h 15 | tâche « Résultats et classements », `outils/import_handball.py` |
+| Handball : calendrier complet de la saison (seniors) | chaque matin | même tâche, `--calendrier` → `contenus/calendriers/` |
+| Volley : comités Manche et Calvados + Élite, N2, N3 (clubs normands), calendriers complets | 7 h 15 et 22 h 15 | `outils/import_volley.py` |
+| Football N1 (US Avranches) | 7 h 15 et 22 h 15 | lu sur le site du club par la tâche |
+| Effectifs des clubs pros normands (Wikipédia) | le lundi matin | `outils/import_joueurs_libres.py` |
+| Météo du Terrain (4 villes) | toutes les 10 minutes | en direct dans le navigateur |
+| Football, basket, rugby (départemental → national) | à la main | les fédérations bloquent les robots : Espace admin › Résultats › « Importer un calendrier » (copier-coller de la page officielle, .ics ou .csv) |
+
+L'onglet Résultats de l'admin affiche la date de la dernière mise à jour de chaque source, en rouge au-delà de 2 jours.
