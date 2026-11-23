@@ -123,7 +123,7 @@ class Component extends DCLogic {
       cart: [], cartOpen: false, ship: 'home', giftWrap: false, orderDone: false, orderNo: '', orders: [], payBusy: false, subPending: false, paidSubs: false, orderPaid: false,
       offerTab: 'Tout', readerOpen: false, page: 0, nlEmail: '', nlDone: false, tick: 0,
       hdrY: '0', scrolled: false, placeOverride: null, placeOpen: false, placeIdx: 0, partnerId: null, claimed: [],
-      aiOpen: false, aiInput: '', aiTyping: false, aiMsgs: [{ role: 'bot', text: 'Bonjour, je suis Casa IA. Posez-moi une question sur les scores, la boutique, la Gazette, les clubs ou l’histoire du Cotentin.', actions: [] }],
+      aiOpen: false, aiInput: '', aiTyping: false, aiMsgs: [{ role: 'bot', text: (typeof window !== 'undefined' && window.CASA_IA && window.CASA_IA.accueil) || 'Bonjour, je suis Casa IA. Posez-moi vos questions de sport et sur Casa Besports.', actions: [] }],
       readerFont: 1, quizAns: {}, gzVote: this.readLS('cb-gz-vote', null), theme: this.loadTheme(), homeLayout: this.readLS('cb-home-layout', 'dashboard'), mods: this.readLS('cb-accueil-v2', null), favSports: this.readLS('cb-fav-sports', []), favClubs: this.readLS('cb-fav-clubs', []), cfQ: '', bgCouleur: this.readLS('cb-bg-couleur', null), bgTeinte: this.readLS('cb-bg-teinte', null), customizeOpen: false, wxExtra: this.readLS('cb-wx-extra', []), wxCity: this.readLS('cb-wx-city', 'Cherbourg'), wxLive: {}, wxLoading: false, priv: null, privFor: null, pvTab: 'jour', pvList: 'courses', pf: {}, pvMember: 'all', chTab: 'fil', bgMode: this.readLS('cb-bg-mode', null), crmTab: 'home', crmSel: null, crmType: 'Tous', crmOwner: 'Tous', crmRev: 0, prodImg: 0, cardColor: this.readLS('cb-card-color', 'noir'), chRoom: 'Tous', chAdCat: 'Tout', chOpen: {}, chf: {}, chRev: 0, cuTab: 'expo', cuKind: 'Tous', workIdx: null, votes: this.readLS('cb-votes', {}), cuf: {}, cuSent: false, tmWork: 40, tmRest: 20, tmRounds: 8, tmRunning: false, tmPhase: 'ready', tmLeft: 40, tmRound: 1, sysDark: this.sysDark(), themeMenuOpen: false, themeAnim: false, legalDoc: 'mentions', role: null, accReq: null, accMotif: '', accBusy: false, studioTab: 'dash', posts: null, editId: 'p1', edMode: 'write', reviewNote: '', commentDraft: '', aiOutKind: null, stQ: '', stFilter: 'all', inviteEmail: '',
       rx: null, rxu: {}, rxServer: null, staffRole: 'redacteur',
       rsu: {}, cvu: {}, clubRoleId: 'esph', clubEditId: null, verifId: '',
@@ -196,6 +196,7 @@ class Component extends DCLogic {
       window.addEventListener('popstate', this._onPop);
     } catch (e) {}
     this.stripeReturn();
+    try { const gq = new URLSearchParams(location.search).get('groupe'); if (gq && typeof CasaDiscussions !== 'undefined') setTimeout(() => { this.go('clubhouse', { chTab: 'discussions' }); CasaDiscussions.invitation(this, gq); }, 0); } catch (e) {}
     try { const mq = new URLSearchParams(location.search).get('membre'); if (mq) setTimeout(() => { this.go('verifier', { mbQ: mq.slice(0, 20) }); this.checkMember(mq); }, 0); } catch (e) {}
     try { const vq = new URLSearchParams(location.search).get('verifier'); if (vq) setTimeout(() => this.go('verifier', { verifId: vq.slice(0, 20) }), 0); } catch (e) {}
     this.creaInit();
@@ -712,22 +713,17 @@ class Component extends DCLogic {
     const t = (text || '').trim();
     if (!t) return;
     this.setState({ aiMsgs: this.state.aiMsgs.concat([{ role: 'user', text: t, actions: [] }]), aiInput: '', aiTyping: true });
-    const local = () => { const r = this.aiRespond(t); this.setState({ aiTyping: false }); this.aiPush({ role: 'bot', text: r.text, actions: r.actions || [] }); };
-    if (typeof window !== 'undefined' && window.CASA_API && typeof fetch === 'function') {
-      const history = this.state.aiMsgs.slice(-8).map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text })).concat([{ role: 'user', content: t }]);
-      fetch(window.CASA_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, view: this.state.view }) })
-        .then((r) => r.ok ? r.json() : Promise.reject(r.status))
-        .then((d) => {
-          const acts = [];
-          if (d.action && d.action.view) acts.push({ label: d.action.label || 'Ouvrir', run: () => this.go(d.action.view, d.action.params || {}) });
-          this.setState({ aiTyping: false });
-          this.aiPush({ role: 'bot', text: d.reply || '…', actions: acts });
-        })
-        .catch(local);
-    } else {
-      clearTimeout(this._ai);
-      this._ai = setTimeout(local, 450);
-    }
+    // Moteur intégré (js/app.js + js/casa-ia.js). Une réponse « pending » arrive plus tard : Wikipédia ou mode connecté.
+    const local = () => {
+      let r; try { r = this.aiRespond(t); } catch (e) { r = null; }
+      if (r && r.pending && typeof r.pending.then === 'function') {
+        r.pending.then((x) => { this.setState({ aiTyping: false }); this.aiPush({ role: 'bot', text: (x && x.text) || '…', actions: (x && x.actions) || [] }); });
+        return;
+      }
+      this.setState({ aiTyping: false }); this.aiPush({ role: 'bot', text: (r && r.text) || '…', actions: (r && r.actions) || [] });
+    };
+    clearTimeout(this._ai);
+    this._ai = setTimeout(local, 450);
   }
   aiRespond(raw) {
     const D = this.data(), X = this.more();
@@ -742,7 +738,9 @@ class Component extends DCLogic {
     const name = this.state.name ? ' ' + this.state.name.split(' ')[0] : '';
 
     if (has(/^(bonjour|salut|hello|coucou|bonsoir|hey)\b/)) return { text: 'Bonjour' + name + ' ! Je suis Casa IA. Je peux vous donner les scores, conseiller une tenue, ouvrir la Gazette, raconter l’histoire des lieux du Cotentin ou vous guider dans le site.', actions: [act('Scores en direct', () => this.go('live', { dTab: 'live' })), act('Conseil boutique', () => this.aiAsk('Une tenue chill à moins de 60 €'))] };
-    if (has(/\baide\b|que (peux|sais)|tu fais quoi|comment ca marche/)) return { text: 'Voici ce que je sais faire :\n• Scores, résultats, agenda et classements par discipline\n• Conseils boutique et ajout au panier (« ajoute le hoodie signature en M »)\n• Abonnements BE+ et La Gazette, ouverture d’une page précise\n• Histoire des lieux du Cotentin\n• Infos clubs, joueurs et partenaires\n• Navigation : « emmène-moi à la boutique »', actions: [] };
+    if (has(/\baide\b|que (peux|sais)|tu fais quoi|comment ca marche/)) return { text: 'Voici ce que je sais faire :\n• Casa Besports : notre histoire, le fondateur, BE+\n• Scores, résultats, agenda et classements par discipline, du département au national\n• Une équipe précise : « classement de Tourlaville », « prochain match de Saint-Lô »\n• Les niveaux de compétition, du département à l’international\n• Sport national et international, règles, histoire, athlètes (avec la source)\n• Conseils boutique et ajout au panier (« ajoute le hoodie signature en M »)\n• Abonnements BE+ et La Gazette, ouverture d’une page précise\n• Histoire des lieux du Cotentin\n• Infos clubs, joueurs et partenaires\n• Navigation : « emmène-moi à la boutique »', actions: [] };
+    // Casa Besports, niveaux de compétition, FAQ, équipes et championnats des fédérations (js/casa-ia.js)
+    if (typeof window !== 'undefined' && window.CasaIA) { const ia = window.CasaIA.avant(this, raw); if (ia) return ia; }
 
     if (has(/realite augmentee|\bar\b|compo|line ?up|composition|3d|selfie|photo supporter|application|appli/)) {
       if (has(/application|appli/) && !has(/compo|realite|3d/)) return { text: 'L’application Casa Besports réunit scores, Club House, Mon quotidien, la Gazette et les expériences en réalité augmentée. Elle s’installe sur l’écran d’accueil depuis le navigateur.', actions: [act('Découvrir l’application', () => this.go('app'))] };
@@ -751,6 +749,7 @@ class Component extends DCLogic {
     // partenaire OlistO
     if (has(/olisto|credit|pret immo|emprunt|regroup|rachat de|assurance emprunteur|projet immobilier|immobilier|courtier|mensualite/)) return { text: 'Notre partenaire OlistO, réseau de courtage, accompagne les projets immobiliers, le regroupement de crédits et l’assurance emprunteur. Vous pouvez simuler une mensualité et votre taux d’endettement, puis demander à être rappelé.\nUn crédit vous engage et doit être remboursé. Vérifiez vos capacités de remboursement avant de vous engager.', actions: [act('Simuler avec OlistO', () => this.go('olisto'))] };
     // club house
+    if (has(/discussion|\bchat\b|tchat|messagerie entre|message prive|groupe prive|huis clos|entre amis|reseau social/)) return { text: 'Les Discussions du Club House : le chat entre amis BE+. Rejoignez un groupe ouvert (par sport, par club), créez un groupe à huis clos sur invitation, ou écrivez en privé à un ami avec son numéro de membre. Réservé aux membres de 15 ans et plus.', actions: [act('Ouvrir les Discussions', () => this.go('clubhouse', { chTab: 'discussions' }))] };
     if (has(/club ?house|clubhouse|communaute|forum|annonce|benevol.*cherche|sondage|carte membre|mes points|fidelite|classement des membres|evenement|covoit/)) {
       if (has(/covoit/)) return { text: 'Le covoiturage pour les matchs se trouve au Club House, rubrique Annonces & entraide.', actions: [act('Voir les trajets', () => this.go('clubhouse', { chTab: 'annonces', chAdCat: 'Covoiturage' }))] };
       if (has(/annonce|benevol/)) return { text: 'Petites annonces du Club House : matériel, bénévolat, joueurs, stages et covoiturage.', actions: [act('Voir les annonces', () => this.go('clubhouse', { chTab: 'annonces' }))] };
@@ -837,13 +836,15 @@ class Component extends DCLogic {
     if (has(/resultat|dernier match|score final|gagne|perdu/)) {
       const sp = sportOf();
       const done = X.matches.filter((m) => m.sport === sp && m.status === 'done').sort((a, b) => (a.verified === b.verified ? (a.date > b.date ? -1 : 1) : a.verified ? -1 : 1)).slice(0, 4);
-      return { text: 'Derniers résultats ' + sp + ' :\n' + done.map((m) => '• ' + cbNomEquipe(m.home) + ' ' + score(m) + ' ' + cbNomEquipe(m.away) + '').join('\n'), actions: [act('Tous les résultats', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'results' }))] };
+      if (done.length) return { text: 'Derniers résultats ' + sp + ' :\n' + done.map((m) => '• ' + cbNomEquipe(m.home) + ' ' + score(m) + ' ' + cbNomEquipe(m.away) + '').join('\n'), actions: [act('Tous les résultats', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'results' }))] };
+      if (has(/basket|water|polo|rugby|foot/)) return { text: 'Pas encore de résultat ' + sp.toLowerCase() + ' enregistré sur BE+. Les résultats arrivent automatiquement quand la fédération les publie, ou sont saisis par la rédaction.', actions: [act('Ouvrir Le Terrain', () => this.go('live'))] };
     }
     if (has(/prochain|agenda|quand|calendrier|programme|ce week/)) {
       if (has(/pointe|hague|avranches|coupe/)) return { text: 'ES Pointe-Hague – US Avranches, 4e tour de la Coupe de France, à Beaumont-Hague. La date et l’heure restent à confirmer.', actions: [act('Activer un rappel', () => { this.toggleIn('reminders', 'm-cfa-avranches', 'Rappel activé', 'Rappel retiré'); }), act('Pronostiquer', () => this.setState({ matchId: 'm-cfa-avranches', aiOpen: false }))] };
       const sp = sportOf();
       const up = X.matches.filter((m) => m.sport === sp && m.status === 'up' && m.date).sort((a, b) => a.date < b.date ? -1 : 1).slice(0, 4);
-      return { text: 'Prochains matchs ' + sp + ' :\n' + up.map((m) => '• ' + m.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + m.time + ' : ' + cbNomEquipe(m.home) + ' – ' + cbNomEquipe(m.away)).join('\n'), actions: [act('Ouvrir l’agenda', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'agenda' }))] };
+      if (up.length) return { text: 'Prochains matchs ' + sp + ' :\n' + up.map((m) => '• ' + m.date.split('-').reverse().slice(0, 2).join('/') + ' à ' + m.time + ' : ' + cbNomEquipe(m.home) + ' – ' + cbNomEquipe(m.away)).join('\n'), actions: [act('Ouvrir l’agenda', () => this.go('live', { dSport: sp, dComp: (X.comps[sp] || [{}])[0].id, dTab: 'agenda' }))] };
+      if (has(/basket|water|polo|rugby|foot/)) return { text: 'Pas encore de match ' + sp.toLowerCase() + ' à venir enregistré sur BE+.', actions: [act('Ouvrir Le Terrain', () => this.go('live'))] };
     }
     const pl = D.players.find((p) => { const parts = n(p.name).split(' '); return parts.some((w) => w.length >= 5 && new RegExp('\\b' + w + '\\b').test(q)); });
     if (pl) return { text: pl.name + ' — n° ' + pl.num + ', ' + pl.role + ' · ' + pl.clubLabel + '.', actions: [act('Voir le profil', () => this.go('player', { playerId: pl.id }))] };
@@ -886,7 +887,9 @@ class Component extends DCLogic {
     const words = q.split(/[^a-z0-9]+/).filter((w) => w.length >= 5);
     let best = null, bestScore = 0;
     this.allArticles().forEach((a) => { const hay = n(a.title + ' ' + a.dek + ' ' + a.tag); const sc = words.filter((w) => hay.includes(w)).length; if (sc > bestScore) { best = a; bestScore = sc; } });
-    if (best && bestScore > 0) return { text: '« ' + best.title + ' »\n' + (best.points || []).map((x) => '• ' + x).join('\n'), actions: [act('Lire l’article', () => this.go('article', { articleId: best.id }))] };
+    if (best && bestScore >= Math.min(2, words.length)) return { text: '« ' + best.title + ' »\n' + (best.points || []).map((x) => '• ' + x).join('\n'), actions: [act('Lire l’article', () => this.go('article', { articleId: best.id }))] };
+    // Questions générales (sport national et international, règles, histoire…) : Wikipédia ou mode connecté
+    if (typeof window !== 'undefined' && window.CasaIA && typeof fetch === 'function') return { text: '', pending: window.CasaIA.apres(this, raw) };
     return { text: 'Je n’ai pas trouvé de réponse précise. Essayez par exemple : « classement basket », « un cadeau à moins de 30 € », « histoire du phare de Gatteville » ou « ouvre la Gazette page 12 ».', actions: [act('Scores en direct', () => this.go('live', { dTab: 'live' })), act('Boutique', () => this.go('shop'))] };
   }
   allArticles() {
@@ -1493,6 +1496,26 @@ class Component extends DCLogic {
     const D = this.data(), s = this.state;
     window.CasaCauseries.open({ club: o.club, clubs: D.clubs, isAdmin: s.role === 'admin', say: (m) => this.say(m), connect: () => this.setState({ loginOpen: true, linkSent: false }) }, { id: o.id || null, nouvelle: !!o.nouvelle });
   }
+  // Ma trajectoire (js/trajectoire.js) : le suivi de l'athlète (stats par discipline, forme, objectifs, projection), chargé à la demande
+  openTrajectoire(o) {
+    o = o || {};
+    if (typeof window === 'undefined') return;
+    if (!window.CasaTrajectoire && window.CasaCharge && !this._tjLoad) {
+      this._tjLoad = true; this.say('Ouverture de Ma trajectoire…');
+      window.CasaCharge(window.CASA_LIBS.trajectoire).then(() => { this._tjLoad = false; this.openTrajectoire(o); }).catch(() => { this._tjLoad = false; this.say('Ma trajectoire n’a pas pu se charger. Vérifiez votre connexion.'); });
+      return;
+    }
+    if (!window.CasaTrajectoire) return;
+    const s = this.state, prof = s.cvProf || {}, cv = prof.cv || {};
+    const nom = o.nom || [cv.prenom, cv.nom].filter(Boolean).join(' ') || s.name || '';
+    window.CasaTrajectoire.open({ cle: this.profileKey(), nom, discipline: o.discipline || '', club: o.club || '', photo: o.photo || prof.photo || '', say: (m) => this.say(m),
+      envoyer: (texte, p) => {
+        const email = (s.email || (window.CasaAuth && window.CasaAuth.user && window.CasaAuth.user.email) || '').trim();
+        if (!email) { this.setState({ loginOpen: true, linkSent: false }); return Promise.resolve(false); }
+        this.crmCapture({ name: (p && p.nom) || nom || email, email, source: 'Stats athlète', type: 'Joueur', consent: 'oui', subject: 'Mes statistiques de la saison', profile: 'Joueur', message: texte, note: 'Stats athlète — ' + ((p && p.club) || '') });
+        return Promise.resolve(true);
+      } }, { vue: o.vue });
+  }
   // Casa Line Up (js/lineup.js) : compositions d'équipe, téléchargé seulement quand on l'ouvre
   openLineup(o) {
     o = o || {};
@@ -1879,8 +1902,8 @@ class Component extends DCLogic {
     ];
     if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre']]) });
     // Le Vestiaire : en tête des services du quotidien
-    menuGroups.forEach((g) => { if (g.items.some((it) => it[1] === 'private')) g.items.unshift(['Le Vestiaire', 'vestiaire', 'Planning, présences et fil de mon club']); });
-    menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: v === 'ar:lineup' ? () => { this.setState({ moreOpen: false, menuOpen: false }); this.openAR('lineup'); } : goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
+    menuGroups.forEach((g) => { if (g.items.some((it) => it[1] === 'private')) g.items.unshift(['Le Vestiaire', 'vestiaire', 'Planning, présences et fil de mon club'], ['Discussions', 'clubhouse:discussions', 'Le chat entre amis : groupes ouverts ou à huis clos']); });
+    menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: v === 'ar:lineup' ? () => { this.setState({ moreOpen: false, menuOpen: false }); this.openAR('lineup'); } : v === 'clubhouse:discussions' ? goV('clubhouse', { chTab: 'discussions' }) : goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
     const moreNav = [].concat(...menuGroups.map((g) => g.items));
     // Accueil : toutes les rubriques du site, en accès direct
     const rubriques = [{ titre: 'L’essentiel', items: [['Le Terrain', 'live', 'Scores, agenda et classements'], ['Actualités', 'news', 'Récits et résultats'], ['Clubs', 'clubs', 'Les clubs et le Club House'], ['Boutique', 'shop', 'Maillots et collections'], ['Offres', 'offers', 'BE+, La Gazette et Casa PRO'], ['Partenaires', 'partners', 'Les entreprises qui nous soutiennent']].map(([label, v, sub]) => ({ label, sub, go: goV(v) })) }].concat(menuGroups.filter((g) => g.titre !== 'Équipe'));
@@ -2064,6 +2087,11 @@ class Component extends DCLogic {
       toggleFollow: () => this.toggleIn('followPlayers', curP.id, 'Vous suivez ' + curP.name, 'Vous ne suivez plus ' + curP.name),
       fLabel: pf ? 'Suivi ✓' : 'Suivre ce joueur', fBg: pf ? 'var(--inv-bg)' : 'var(--surface)', fFg: pf ? 'var(--on-inv)' : 'var(--ink)'
     });
+    // Statistiques de la saison : seulement celles saisies et vérifiées dans l'admin (jamais inventées)
+    const plStats = (Array.isArray(curP.statsSaison) ? curP.statsSaison : []).filter((x) => x && String(x.k || '').trim() && String(x.v == null ? '' : x.v).trim());
+    Object.assign(pl, { stats: plStats.map((x) => ({ k: String(x.k), v: String(x.v) })), hasStats: plStats.length > 0, noStats: plStats.length === 0,
+      statsSaison: curP.statsSaisonNom || '', statsInfo: [curP.statsSource ? 'Source : ' + curP.statsSource : '', curP.statsMaj ? 'mis à jour le ' + (/^\d{4}-\d{2}-\d{2}$/.test(curP.statsMaj) ? new Date(curP.statsMaj + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : curP.statsMaj) : ''].filter(Boolean).join(' · '),
+      openTrajectoire: () => this.openTrajectoire({ discipline: sportOf(curP), club: curP.clubLabel || '' }) });
 
     // ---------- carte ----------
     const lat0 = 49.78, lat1 = 48.6, lon0 = -1.98, lon1 = -0.2;
@@ -3129,9 +3157,11 @@ class Component extends DCLogic {
       album: albumV,
       perks: X.partners.map((p) => { const claimed = s.claimed.indexOf(p.id) >= 0; return { name: p.name, mono: p.mono, color: p.color, perk: p.perk, status: claimed ? 'Activé' : s.subs.casab ? 'Disponible' : 'Avec BE+', stColor: claimed ? 'var(--success)' : 'var(--gold-text)', open: () => this.setState({ partnerId: p.id }) }; }) };
     // Club House épuré : trois onglets. Les événements se résument au « prochain rendez-vous » du fil, et les points à la carte membre (le classement n'est plus affiché)
-    const chTabsDef = [['fil', 'Le fil'], ['annonces', 'Entraide'], ['carte', 'Ma carte']];
+    // Discussions (js/discussions.js, supabase/discussions.sql) : le chat entre amis, groupes ouverts ou à huis clos, conversations privées
+    const DC = typeof CasaDiscussions !== 'undefined' ? CasaDiscussions.vals(this, { V: s.view, memberNo }) : { badge: 0, hasBadge: false, badgeTxt: '0' };
+    const chTabsDef = [['fil', 'Le fil'], ['discussions', DC.hasBadge ? 'Discussions · ' + DC.badgeTxt : 'Discussions'], ['annonces', 'Entraide'], ['carte', 'Ma carte']];
     const chTab = chTabsDef.some((t) => t[0] === s.chTab) ? s.chTab : 'fil';
-    const chTabs = chTabsDef.map(([id, label]) => Object.assign(pill(id === chTab), { label, sel: id === chTab ? 'true' : 'false', pick: () => this.setState({ chTab: id }) }));
+    const chTabs = chTabsDef.map(([id, label]) => Object.assign(pill(id === chTab), { label, sel: id === chTab ? 'true' : 'false', pick: () => { this.setState({ chTab: id }); } }));
     const ROOMS = ['Général', 'Football', 'Basket', 'Water-polo', 'Trail & course'];
     const room = ['Tous'].concat(ROOMS).indexOf(s.chRoom) >= 0 ? s.chRoom : 'Tous';
     const PCOL = ['#2e9e6b', '#6aa6c8', '#b07acc', '#d0473e', '#e8a830', '#3a4a78', '#8a4b2a'];
@@ -3172,7 +3202,7 @@ class Component extends DCLogic {
     const board = [];
     if (s.loggedIn) board.push({ name: meName + ' (vous)', p: pts, me: true });
     const boardV = board.sort((a, b) => b.p - a.p).map((b, i) => { const li = LV.reduce((a, l, k) => (b.p >= l[1] ? k : a), 0); return { rank: String(i + 1), name: b.name, points: b.p + ' pts', level: LV[li][0], weight: b.me ? '900' : '700', bg: b.me ? 'var(--surface-2)' : 'var(--surface)', rankBg: i < 3 ? 'var(--acc)' : 'var(--surface-2)', rankFg: i < 3 ? '#080f1a' : 'var(--ink)' }; });
-    const ch = { tFil: chTab === 'fil', tAnnonces: chTab === 'annonces', tEvents: chTab === 'events', tLigue: chTab === 'ligue', tCarte: chTab === 'carte',
+    const ch = { tFil: chTab === 'fil', tDiscussions: chTab === 'discussions', tAnnonces: chTab === 'annonces', tEvents: chTab === 'events', tLigue: chTab === 'ligue', tCarte: chTab === 'carte',
       posts: chPosts, rooms: ['Tous'].concat(ROOMS).map((r) => Object.assign(pill(r === room), { label: r, pick: () => this.setState({ chRoom: r }) })), roomOpts: ROOMS.map((v) => ({ v })),
       publish: () => { if (needLogin()) return; if (chf.text.trim().length < 3) { this.say('Écrivez quelques mots'); return; } saveCh({ posts: [{ id: 'm' + Date.now(), author: meName, room: chf.room, time: 'à l’instant', text: chf.text.trim().slice(0, 500), likes: 0, liked: false, comments: [], mine: true, staff: !!s.role }].concat(chState.posts) }); this.setState({ chf: Object.assign({}, chf, { text: '' }), chRoom: 'Tous' }); this.say('Publié au Club House · +5 pts'); },
       poll: pollV, nextEvent: chEvents[0] ? { title: nextEv.title, when: fmtDay(nextEv.date) + ' · ' + nextEv.time, place: nextEv.place } : { title: 'Aucun rendez-vous pour l’instant', when: 'Bientôt annoncé', place: 'Club House' }, nextGo: chEvents[0] ? chEvents[0].rsvp : null, nextLabel: chEvents[0] ? chEvents[0].btnLabel : '', hasNext: !!chEvents[0], goEvents: () => this.setState({ chTab: 'events' }), goCard: () => this.setState({ chTab: 'carte' }), goPronos: () => this.go('live', { dTab: 'pronos' }),
@@ -3372,7 +3402,7 @@ class Component extends DCLogic {
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
         ok: s.mbRes === 'ok', off: s.mbRes === 'off', none: s.mbRes === 'none', bad: s.mbRes === 'bad', format: s.mbRes === 'format',
         prenom: (s.mbInfo && s.mbInfo.prenom) || 'Membre', depuis: s.mbInfo && s.mbInfo.depuis ? 'Membre depuis ' + new Date(s.mbInfo.depuis).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : '' },
-      rs: RS, cvv: CVV, isCv: V === 'cv', isVerifier: V === 'verifier', goCv: () => this.go('cv'), goVerifier: () => this.go('verifier', { verifId: '' }),
+      rs: RS, cvv: CVV, isCv: V === 'cv', isVerifier: V === 'verifier', goCv: () => this.go('cv'), goTrajectoire: () => this.openTrajectoire(), goVerifier: () => this.go('verifier', { verifId: '' }),
       hasAvatar: !!CVV.avatar, avatar: CVV.avatar, showInitial: s.loggedIn && !CVV.avatar,
       isClubRole, notClubRole: !isClubRole, canReseau, stReseau: s.studioTab === 'reseau' && canReseau, stClubAny: isClubRole && ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0,
       newPostLabel: isClubRole ? 'Nouveau contenu' : 'Nouvel article',
@@ -3686,17 +3716,17 @@ class Component extends DCLogic {
       isApp: V === 'app', appUrl, arModes, notif, installSteps, installApp, installLabel, openArHub: () => this.openAR('hub'), openLineupAR: () => this.openAR('lineup'), goApp: () => this.go('app'), appHint: pwaIn ? 'Vous êtes dans l’application.' : 'Gratuite, sans passer par un store. Fonctionne sur téléphone, tablette et ordinateur.',
       isOlisto: V === 'olisto', ol, goOlisto: () => this.go('olisto'),
       clubsSwitch: [['clubs', 'Clubs et disciplines', 'Tous les sports, les clubs et leurs résultats'], ['players', 'Joueurs', 'Les profils du Cotentin'], ['clubhouse', 'Club House', 'La communauté des supporters'], ['handisport', 'Handisport', 'Le sport adapté, par discipline']].map(([v, label, sub]) => ({ label, sub, sel: V === v ? 'true' : 'false', cls: V === v ? 'is-on' : '', go: () => this.go(v) })),
-      isClubhouse: V === 'clubhouse', card, cardColors, chTabs, ch, chf, chMe, chLevelColor: LV[lvIdx][2], chHome, goClubhouse: () => this.go('clubhouse'),
+      isClubhouse: V === 'clubhouse', dc: DC.page || { off: true }, dcBadge: DC.hasBadge, dcBadgeTxt: DC.badgeTxt, goDiscussions: () => this.go('clubhouse', { chTab: 'discussions' }), card, cardColors, chTabs, ch, chf, chMe, chLevelColor: LV[lvIdx][2], chHome, goClubhouse: () => this.go('clubhouse'),
       pvGroups, pvTitle, tm, isCulture: V === 'culture', cuTabs, cu, cuf, workOpen: !!woRaw, wo, closeWork: () => this.setState({ workIdx: null }), oeuvre, cultureHome, goCulture: () => this.go('culture'),
       hdrY: s.hdrY, showToTop: s.scrolled, toTop: () => { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} },
       bg, bgModes, bgColorOpts, teintes, teinteLibre, place, places, placeOpacity, placeOpen: s.placeOpen, pp, togglePlace: () => this.setState({ placeOpen: !s.placeOpen, placeIdx: X.places.indexOf(placeRaw) }), closePlace: () => this.setState({ placeOpen: false }),
       partners, partnerTiers, partnerOpen: !!ptRaw, pt, closePartner: () => this.setState({ partnerId: null }),
       aiOpen: s.aiOpen, aiClosed: !s.aiOpen, aiAria: s.aiOpen ? 'Fermer Casa IA' : 'Ouvrir Casa IA, l’assistant', toggleAi: () => this.setState({ aiOpen: !s.aiOpen }),
-      aiMode: (typeof window !== 'undefined' && window.CASA_API) ? 'Connecté au modèle de langage · actions sur le site' : 'Moteur intégré · répond et agit sur le site',
+      aiMode: (typeof window !== 'undefined' && window.CASA_IA_CONNECTEE && s.loggedIn) ? 'Mode connecté · sport du monde entier, sources citées' : 'Sport local à international · répond et agit sur le site',
       aiMsgs: s.aiMsgs.map((m) => ({ isBot: m.role !== 'user', text: m.text, actions: m.actions || [], align: m.role === 'user' ? 'flex-end' : 'flex-start', bg: m.role === 'user' ? 'var(--inv-bg)' : 'var(--surface)', fg: m.role === 'user' ? 'var(--on-inv)' : 'var(--text)', border: m.role === 'user' ? 'var(--ink)' : 'var(--line)' })),
       aiTyping: s.aiTyping, aiInput: s.aiInput, onAiInput: (e) => this.setState({ aiInput: e.target.value }), aiSend: () => this.aiAsk(s.aiInput),
       aiReset: () => this.setState({ aiMsgs: [{ role: 'bot', text: 'Nouvelle conversation. Que puis-je faire pour vous ?', actions: [] }] }),
-      aiSuggest: ['Météo à Cherbourg', 'Ajoute du pain à ma liste de courses', 'Scores en direct', 'Classement R2', 'Tenue chill à moins de 60 €', 'Histoire du phare de Gatteville', 'Ouvre la Gazette page 5', 'Prochain match de Pointe-Hague'].map((l) => ({ label: l, run: () => this.aiAsk(l) })),
+      aiSuggest: ((typeof window !== 'undefined' && window.CASA_IA && window.CASA_IA.suggestions) || ['Qui est Casa Besports ?', 'Scores en direct', 'Météo à Cherbourg']).map((l) => ({ label: l, run: () => this.aiAsk(l) })),
       openAdmin: () => this.go('admin'),
       acctId: s.email || s.phone || '—', acctRole: s.role === 'admin' ? 'administrateur' : s.role === 'writer' ? (s.staffRole === 'collaborateur' ? 'rédaction · chef d’édition' : 'rédaction · rédacteur') : s.role === 'club' ? 'correspondant de club' : 'abonné' + (s.srvRole === 'erreur' ? ' (rôle non vérifié par le serveur)' : ''),
       accShow: s.loggedIn && !s.role, accNone: !s.accReq || s.accReq.statut === 'refusee', accPending: !!s.accReq && s.accReq.statut === 'en_attente', accRefused: !!s.accReq && s.accReq.statut === 'refusee',
