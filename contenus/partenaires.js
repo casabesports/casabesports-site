@@ -6,6 +6,7 @@
  * perk : avantage offert (vide = pas d’encadré) · real : true pour un vrai partenaire
  * logoFond : couleur derrière le logo, pour qu’il remplisse son cadre (#ffffff blanc par défaut, #000000 noir…)
  * adresse · telephone : un numéro par ligne, avec le nom après un tiret (« 07 00 00 00 00 - Prénom Nom ») · horaires : une ligne par jour (« Lundi : fermé »)
+ * email : adresse de contact du partenaire (affichée sur sa fiche ; pour OlistO, les demandes du formulaire lui sont aussi transmises)
  * Modifiable depuis l’espace administrateur (Contenus du site). Une version modifiée en ligne passe avant ce fichier.
  */
 window.CASA_PARTENAIRES = [
@@ -20,6 +21,8 @@ window.CASA_PARTENAIRES = [
     "color": "#163a5f",
     "since": 2026,
     "perk": "Étude de votre projet offerte",
+    "telephone": "06 05 60 91 42 - Kader Allou",
+    "email": "k.allou@olisto.fr",
     "site": "https://olisto.fr/",
     "app": "",
     "desc": "Réseau de courtage en crédit immobilier, regroupement de crédits, assurance emprunteur, prêt professionnel et immobilier neuf. Partenaire Casa Besports.",

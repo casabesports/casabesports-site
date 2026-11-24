@@ -97,7 +97,7 @@ var CasaRedac = (function () {
   }
 
   /* ================= versions et comparaison ================= */
-  var SNAP_KEYS = ['title', 'dek', 'body', 'img', 'alt', 'tag', 'sport', 'clubs', 'premium', 'type', 'printTitle', 'video'];
+  var SNAP_KEYS = ['title', 'dek', 'body', 'img', 'alt', 'tag', 'sport', 'clubs', 'premium', 'type', 'printTitle', 'video', 'partage'];
   var snapOf = function (p) { var o = {}; SNAP_KEYS.forEach(function (k) { if (p[k] !== undefined) o[k] = clone(p[k]); }); return o; };
   var sameSnap = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
   function addVersion(p, who, label, force) {

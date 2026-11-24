@@ -33,7 +33,7 @@
     document.documentElement.setAttribute('data-cb-theme', t);
   })();
 </script>
-<link rel="preload" href="assets/polices/league-spartan-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/polices/mrs-saint-delafield-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/polices/mulish-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="assets/polices/polices.css">
+<link rel="preload" href="assets/polices/league-spartan-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="assets/polices/mulish-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="assets/polices/polices.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="/assets/app/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/app/favicon-32.png">
@@ -978,12 +978,106 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .bn-intro-mot { position: relative; display: block; width: 100%; overflow: hidden; }
 .bn-intro-mot img { display: block; width: 100%; height: auto; clip-path: inset(0 100% 0 0); animation: bnDevoile .7s cubic-bezier(.7, 0, .2, 1) 1.75s forwards; }
 .bn-intro-tag { margin-top: 2.7rem; font-family: var(--bn-font); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: clamp(11px, 2.6vw, 14px); color: var(--bn-gris); text-align: center; opacity: 0; animation: bnApparait .5s ease 2.4s forwards; }
-/* La signature manuscrite « powered by Kader Allou » remplace la bande blanche : elle s’écrit devant le logo,
-   puis descend se poser dessous pendant que le logo apparaît (police Mrs Saint Delafield, assets/polices) */
-.bn-intro-signe { position: absolute; left: 50%; top: calc(min(300px, 60vw) * 179 / 600); z-index: 2; transform: translate(-50%, -50%); white-space: nowrap; color: var(--bn-blanc); font-family: 'Mrs Saint Delafield', 'Brush Script MT', 'Segoe Script', cursive; font-weight: 400; line-height: 1; font-size: clamp(34px, 9vw, 52px); clip-path: inset(-20% 100% -30% -2%); animation: bnEcrit 1s cubic-bezier(.45, .05, .35, 1) .75s forwards, bnSignePose .5s cubic-bezier(.6, 0, .2, 1) 1.85s forwards; pointer-events: none; }
-.bn-intro-signe .sg-pb { font-size: .62em; margin-right: .18em; color: var(--bn-gris); }
+/* La signature « powered by Kader Allou » remplace la bande blanche : elle se dévoile devant le logo,
+   puis descend se poser dessous pendant que le logo apparaît (police League Spartan, celle de la marque BE+) */
+.bn-intro-signe { position: absolute; left: 50%; top: calc(min(300px, 60vw) * 179 / 600); z-index: 2; transform: translate(-50%, -50%); white-space: nowrap; color: var(--bn-blanc); font-family: var(--bn-font); font-weight: 800; letter-spacing: -.01em; line-height: 1; font-size: clamp(24px, 6.6vw, 36px); clip-path: inset(-20% 100% -30% -2%); animation: bnEcrit 1s cubic-bezier(.45, .05, .35, 1) .75s forwards, bnSignePose .5s cubic-bezier(.6, 0, .2, 1) 1.85s forwards; pointer-events: none; }
+.bn-intro-signe .sg-pb { font-size: .5em; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; margin-right: .5em; color: var(--bn-gris); vertical-align: .18em; }
 @keyframes bnEcrit { to { clip-path: inset(-20% -2% -30% -2%); } }
 @keyframes bnSignePose { from { top: calc(min(300px, 60vw) * 179 / 600); transform: translate(-50%, -50%); } to { top: calc(min(300px, 60vw) * 179 / 300 + .35rem); transform: translate(-50%, 0) scale(.72); } }
+.ol-contact { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; justify-content: space-between; border: 1.5px solid var(--ink); background: var(--surface); padding: 1.1rem 1.3rem; }
+/* Menu (bouton ☰) : le panneau tient toujours dans l'écran et défile ; « À propos », le compte et le thème restent accessibles
+   sans dézoomer, au-dessus de la barre d'onglets et des zones de sécurité de l'iPhone */
+.bn-hdr-wrap.is-menu { z-index: 60; transform: none !important; }
+.bn-menu-m { max-height: calc(100vh - 64px - env(safe-area-inset-top, 0px)); max-height: calc(100dvh - 64px - env(safe-area-inset-top, 0px)); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)) !important; }
+@media (max-width: 899px) {
+  .bn-menu-m { max-height: calc(100vh - 58px - 66px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); max-height: calc(100dvh - 58px - 66px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); padding-bottom: 1.25rem !important; }
+  .bn-menu-m .mn-navm { display: none; } /* déjà dans la barre d'onglets du bas */
+  .bn-menu-m .mn-mgrp:first-of-type { padding-top: .6rem; }
+}
+/* Mon espace › Apparence : repliée par défaut (une ligne), vignettes et options compactes une fois ouverte */
+.pf-app { margin-top: 2.5rem; border: 1px solid var(--line); background: var(--surface); }
+.pf-app-s { list-style: none; display: flex; align-items: center; gap: .85rem; padding: .8rem 1rem; cursor: pointer; min-height: 64px; }
+.pf-app-s::-webkit-details-marker { display: none; }
+.pf-app-sw { position: relative; flex: none; width: 52px; height: 36px; border: 1px solid var(--line-2); overflow: hidden; }
+.pf-app-sw span { position: absolute; left: 0; right: 0; top: 0; height: 8px; }
+.pf-app-sw i { position: absolute; right: 6px; bottom: 6px; width: 10px; height: 10px; border-radius: 50%; }
+.pf-app-st { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .1rem; }
+.pf-app-h { font-family: var(--bn-font); font-weight: 800; font-size: 1.3rem; line-height: 1.05; color: var(--ink); }
+.pf-app-cur { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-app-chev { flex: none; color: var(--muted); transition: transform .2s ease; }
+.pf-app[open] .pf-app-chev { transform: rotate(180deg); }
+.pf-app-b { padding: .2rem 1rem 1rem; border-top: 1px solid var(--line); padding-top: .9rem; }
+.pf-app-thm { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: .5rem; }
+.pf-app-thm .thm-opt { padding: .45rem; gap: .35rem; font-size: 14px; }
+.pf-app-thm .thm-sw { aspect-ratio: 16 / 7; }
+.pf-app-long { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.pf-app-opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: .4rem; }
+.pf-app-opts > button { padding: .55rem .75rem !important; }
+@media (max-width: 520px) {
+  .pf-app-thm { grid-template-columns: 1fr 1fr; }
+  .pf-app-thm .thm-sw { max-height: 54px; }
+  .pf-app-long { display: none; }
+  .pf-app-opts { grid-template-columns: 1fr 1fr; }
+  .pf-app-opts > button span + span { display: none !important; } /* sur téléphone : le nom de l'option suffit */
+}
+/* ---------- Partager sur mes réseaux (js/partage.js) ---------- */
+.sh-btn { display: inline-flex; align-items: center; gap: .45rem; }
+.sh-veil { position: fixed; inset: 0; z-index: 95; background: rgba(0, 0, 0, .55); }
+.sh-pan { position: fixed; z-index: 96; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(1040px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); display: flex; flex-direction: column; background: var(--bg); color: var(--text); border: 1.5px solid var(--ink); }
+.sh-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1rem 1.25rem .85rem; border-bottom: 1px solid var(--line); }
+.sh-t { margin: 0; font-family: var(--bn-font); font-weight: 800; font-size: 1.35rem; line-height: 1.1; color: var(--ink); }
+.sh-x { flex: none; width: 44px; height: 44px; border: 1.5px solid var(--line-2); background: var(--surface); color: var(--text); font-size: 22px; cursor: pointer; }
+.sh-b { overflow-y: auto; overscroll-behavior: contain; padding: 1rem 1.25rem 1.4rem; }
+.sh-etat { margin: 0 0 1rem; padding: .55rem .8rem; font-size: 14px; font-weight: 700; border-left: 4px solid var(--danger); background: var(--surface-2); }
+.sh-etat[data-on="true"] { border-left-color: var(--success); }
+.sh-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.5rem; }
+.sh-k { font-family: var(--bn-font); font-weight: 700; font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; }
+.sh-card { border: 1px solid var(--line-2); background: var(--surface); }
+.sh-card-img { position: relative; aspect-ratio: 1.91 / 1; background: #000; overflow: hidden; }
+.sh-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sh-busy { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .55); color: #fff; font-weight: 700; }
+.sh-card-t { display: flex; flex-direction: column; gap: .15rem; padding: .6rem .75rem .7rem; font-size: 13.5px; color: var(--text-2); border-top: 1px solid var(--line); }
+.sh-card-t strong { color: var(--text); font-size: 15px; line-height: 1.25; }
+.sh-host { font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.sh-imgs { display: flex; gap: .45rem; overflow-x: auto; padding-bottom: .3rem; }
+.sh-im, .sh-up { position: relative; flex: none; width: 92px; height: 62px; padding: 0; border: 2px solid var(--line-2); background: var(--surface-2); cursor: pointer; overflow: hidden; }
+.sh-im img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sh-im span { position: absolute; left: 0; bottom: 0; background: #000; color: #fff; font-size: 10.5px; font-weight: 700; padding: .1rem .3rem; }
+.sh-im[aria-checked="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 2px var(--bg); outline: 2px solid var(--ink); outline-offset: -2px; }
+.sh-up { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; font-size: 12px; font-weight: 800; color: var(--text); border-style: dashed; }
+.sh-up input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.sh-switch { display: flex; align-items: center; gap: .6rem; margin-top: .7rem; font-size: 14px; cursor: pointer; min-height: 44px; }
+.sh-switch input { width: 20px; height: 20px; accent-color: var(--ink); flex: none; }
+.sh-acces { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+.sh-acces button { text-align: left; padding: .65rem .8rem; border: 2px solid var(--line-2); background: var(--surface); color: var(--text); cursor: pointer; display: flex; flex-direction: column; gap: .1rem; }
+.sh-acces button span { font-size: 12.5px; color: var(--muted); }
+.sh-acces button[aria-checked="true"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+.sh-acces button[aria-checked="true"] span { color: var(--bg); opacity: .8; }
+.sh-note { margin: .45rem 0 0; font-size: 13px; color: var(--text-2); }
+.sh-msg { margin: .6rem 0 0; font-size: 13px; font-weight: 700; color: var(--text); }
+.sh-lnk { background: none; border: 0; padding: .3rem 0; min-height: 36px; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.sh-txt { width: 100%; min-height: 230px; padding: .75rem .85rem; resize: vertical; line-height: 1.5; font-size: 14px; }
+.sh-row { display: flex; flex-wrap: wrap; gap: .45rem .75rem; align-items: center; margin-top: .5rem; }
+.sh-nets { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .45rem; }
+.sh-net { text-align: left; padding: .6rem .7rem; border: 1.5px solid var(--line-2); background: var(--surface); color: var(--text); cursor: pointer; display: flex; flex-direction: column; gap: .2rem; min-height: 44px; }
+.sh-net:hover { border-color: var(--ink); }
+.sh-net[aria-disabled="true"] { opacity: .5; }
+.sh-net-n { font-family: var(--bn-font); font-weight: 800; font-size: 16px; }
+.sh-net-b { align-self: flex-start; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: .15rem .35rem; background: var(--ink); color: var(--bg); }
+.sh-net.is-bio .sh-net-b { background: transparent; color: var(--text); border: 1px solid var(--line-2); }
+.sh-net-t { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.sh-bio { margin-top: 1rem; padding: .8rem .9rem; border: 1px dashed var(--line-2); background: var(--surface); }
+.sh-bio code { display: block; font-size: 12.5px; word-break: break-all; color: var(--text-2); }
+@media (max-width: 760px) {
+  .sh-pan { top: auto; bottom: 0; left: 0; right: 0; transform: none; width: 100%; max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px)); border-width: 1.5px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .sh-grid { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
+  .sh-nets { grid-template-columns: 1fr 1fr; }
+}
+.ol-form-note { border: 1.5px solid #163a5f; background: var(--surface); padding: 1rem 1.1rem; margin-bottom: 1rem; }
+.ol-contact-t { flex: 1 1 300px; min-width: 0; }
+.ol-contact-b { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ol-contact-b .btn { text-transform: none; display: inline-flex; align-items: center; gap: .5rem; min-height: 48px; }
+@media (max-width: 520px) { .ol-contact-b, .ol-contact-b .btn { width: 100%; justify-content: center; } }
 .bn-intro .ci-skip { position: absolute; right: 16px; top: calc(16px + env(safe-area-inset-top, 0px)); min-height: 40px; padding: 0 1rem; border: 1.5px solid #5a5a5a; border-radius: 0; background: transparent; color: var(--bn-blanc); cursor: pointer; font-family: var(--bn-font); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
 @keyframes bnBalaye { 0% { transform: scaleX(0); transform-origin: left center; } 45% { transform: scaleX(1); transform-origin: left center; } 55% { transform: scaleX(1); transform-origin: right center; } 100% { transform: scaleX(0); transform-origin: right center; } }
 @keyframes bnDevoile { to { clip-path: inset(0 0 0 0); } }
@@ -3377,7 +3471,7 @@ img, video, canvas, svg { max-width: 100%; }
 </div>
 
 <!-- ================= EN-TÊTE : le bandeau noir du logo ================= -->
-<div class="bn-hdr-wrap" style="transform: translateY({{hdrY}})">
+<div class="bn-hdr-wrap {{menuWrapCls}}" style="transform: translateY({{hdrY}})">
 <header class="bn-hdr bn-scope">
   <div class="hdr-in">
     <button type="button" class="bn-logo-btn" onClick="{{goHome}}" aria-label="Accueil BE+">
@@ -3448,9 +3542,9 @@ img, video, canvas, svg { max-width: 100%; }
     </div>
   </div>
   <sc-if value="{{menuOpen}}" hint-placeholder-val="{{ false }}">
-    <div class="wrap" style="border-top: 1px solid var(--line); padding-bottom: 1rem; display: flex; flex-direction: column">
+    <div class="wrap bn-menu-m" style="border-top: 1px solid var(--line); padding-bottom: 1rem; display: flex; flex-direction: column">
       <sc-for list="{{nav}}" as="n" hint-placeholder-count="5">
-        <button type="button" onClick="{{n.go}}" class="cond" style="text-align: left; font-size: 22px; font-weight: 600; background: none; border: 0; border-bottom: 1px solid var(--line); padding: .85rem 0; cursor: pointer; color: {{n.color}}">{{n.label}}</button>
+        <button type="button" onClick="{{n.go}}" class="cond mn-navm" style="text-align: left; font-size: 22px; font-weight: 600; background: none; border: 0; border-bottom: 1px solid var(--line); padding: .85rem 0; cursor: pointer; color: {{n.color}}">{{n.label}}</button>
       </sc-for>
       <sc-for list="{{menuGroups}}" as="mg" hint-placeholder-count="3">
         <div class="mn-mgrp"><div class="mn-gt">{{mg.titre}}</div>
@@ -5950,6 +6044,7 @@ img, video, canvas, svg { max-width: 100%; }
                 <sc-for list="{{rs.club.ed.blocks}}" as="bk" hint-placeholder-count="3"><sc-if value="{{bk.isP}}" hint-placeholder-val="{{ true }}"><p style="line-height: 1.7; margin: 0 0 .9em">{{bk.t}}</p></sc-if><sc-if value="{{bk.isH}}" hint-placeholder-val="{{ false }}"><div class="ttl" style="font-size: 1.35rem; margin: 1em 0 .4em">{{bk.t}}</div></sc-if><sc-if value="{{bk.isQ}}" hint-placeholder-val="{{ false }}"><blockquote class="cl-q">{{bk.t}}</blockquote></sc-if><sc-if value="{{bk.isL}}" hint-placeholder-val="{{ false }}"><div style="display: flex; gap: .55rem; margin: 0 0 .4em"><span style="width: 7px; height: 7px; background: var(--ink); margin-top: .55rem; flex: none"></span><span>{{bk.t}}</span></div></sc-if></sc-for>
               </div>
             </div>
+            <sc-if value="{{rs.club.ed.canShare}}" hint-placeholder-val="{{ false }}"><div class="tr-row cl-actions" style="margin-bottom: .5rem"><button type="button" class="btn btn-gold sh-btn" onClick="{{rs.club.ed.share}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg>{{rs.club.ed.shareLabel}}</button></div></sc-if>
             <sc-if value="{{rs.club.ed.editable}}" hint-placeholder-val="{{ true }}"><div class="tr-row cl-actions"><button type="button" class="btn btn-ghost" onClick="{{rs.club.ed.save}}">Enregistrer le brouillon</button><button type="button" class="btn btn-dark" onClick="{{rs.club.ed.send}}">Envoyer à la rédaction</button><sc-if value="{{rs.club.ed.canRemove}}" hint-placeholder-val="{{ false }}"><button type="button" class="lnk" onClick="{{rs.club.ed.remove}}">Supprimer le brouillon</button></sc-if></div></sc-if>
           </div>
         </sc-if>
@@ -6152,7 +6247,7 @@ img, video, canvas, svg { max-width: 100%; }
                   <x-td style="text-align: left; max-width: 380px"><strong>{{sr.title}}</strong><sc-if value="{{sr.online}}" hint-placeholder-val="{{ false }}"> <span class="rx-badge" style="background: #d8efe6; color: #11583f">En ligne</span></sc-if><sc-if value="{{sr.hasSnip}}" hint-placeholder-val="{{ false }}"><div class="rx-snip"><sc-for list="{{sr.snip}}" as="sg" hint-placeholder-count="3"><sc-if value="{{sg.hit}}" hint-placeholder-val="{{ false }}"><mark class="rx-hit">{{sg.t}}</mark></sc-if><sc-if value="{{sg.plain}}" hint-placeholder-val="{{ true }}">{{sg.t}}</sc-if></sc-for></div></sc-if></x-td>
                   <x-td>{{sr.type}}</x-td><x-td>{{sr.author}}</x-td>
                   <x-td><span class="rx-badge" style="background: {{sr.sBg}}; color: {{sr.sFg}}">{{sr.sLabel}}</span></x-td><x-td class="num">{{sr.versions}}</x-td><x-td style="color: var(--muted); white-space: nowrap">{{sr.updated}}</x-td>
-                  <x-td><span style="display: inline-flex; gap: .3rem"><button type="button" onClick="{{sr.edit}}" class="cond rx-tbtn">Éditer</button><sc-if value="{{sr.canReview}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.review}}" class="cond rx-tbtn rx-tbtn-acc">Relire</button></sc-if><sc-if value="{{sr.canDelete}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.del}}" class="cond rx-tbtn rx-tbtn-del" data-sure="{{sr.delSure}}" aria-label="Supprimer « {{sr.title}} »">{{sr.delLabel}}</button></sc-if></span></x-td>
+                  <x-td><span style="display: inline-flex; gap: .3rem"><button type="button" onClick="{{sr.edit}}" class="cond rx-tbtn">Éditer</button><sc-if value="{{sr.canShare}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.share}}" class="cond rx-tbtn rx-tbtn-acc">Partager</button></sc-if><sc-if value="{{sr.canReview}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.review}}" class="cond rx-tbtn rx-tbtn-acc">Relire</button></sc-if><sc-if value="{{sr.canDelete}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{sr.del}}" class="cond rx-tbtn rx-tbtn-del" data-sure="{{sr.delSure}}" aria-label="Supprimer « {{sr.title}} »">{{sr.delLabel}}</button></sc-if></span></x-td>
                 </x-tr></sc-for></x-tbody>
               </x-table>
             </div>
@@ -6246,7 +6341,7 @@ img, video, canvas, svg { max-width: 100%; }
                 </div>
                 <textarea class="field studio-in" value="{{ed.body}}" onChange="{{edBody}}" onPaste="{{rx.ed.onPaste}}" aria-label="Corps de l’article" disabled="{{edLocked}}" style="min-height: 340px; padding: .9rem; line-height: 1.7; resize: vertical; border-radius: 0 0 6px 6px; font-family: ui-monospace, Menlo, monospace; font-size: 14px"></textarea>
                 <div class="rx-muted" style="margin: .35rem 0 0">{{rx.ed.typeHint}}<sc-if value="{{rx.ed.hasPasteMsg}}" hint-placeholder-val="{{ false }}"> <strong style="color: var(--text)">{{rx.ed.pasteMsg}}</strong></sc-if></div>
-                <label class="lbl" style="flex-direction: row; align-items: center; gap: .6rem; margin-top: .8rem; cursor: pointer"><input type="checkbox" checked="{{ed.premium}}" onChange="{{edPremium}}" disabled="{{edLocked}}" style="width: 20px; height: 20px; accent-color: var(--ink)">Contenu Premium (réservé aux abonnés BE+)</label>
+                <label class="lbl" style="flex-direction: row; align-items: center; gap: .6rem; margin-top: .8rem; cursor: pointer"><input type="checkbox" checked="{{ed.premium}}" onChange="{{edPremium}}" disabled="{{edLocked}}" style="width: 20px; height: 20px; accent-color: var(--ink)">Réservé aux abonnés BE+ (sinon lecture gratuite pour tous)</label>
               </sc-if>
               <sc-if value="{{edPreview}}" hint-placeholder-val="{{ false }}">
                 <div style="background: var(--surface); border-radius: 0; padding: 1.5rem 1.75rem; border: 1px solid var(--line)">
@@ -6274,6 +6369,7 @@ img, video, canvas, svg { max-width: 100%; }
                 <sc-if value="{{edCanSubmit}}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-dark" onClick="{{edSubmit}}">Soumettre à la relecture</button></sc-if>
                 <sc-if value="{{edCanPublishDirect}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-gold" onClick="{{edPublish}}">Publier</button></sc-if>
                 <sc-if value="{{rx.ed.canPublishNoReview}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-gold" onClick="{{rx.ed.publishNoReview}}">Publier sans relecture</button></sc-if>
+                <sc-if value="{{shrBtn.show}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-gold sh-btn" onClick="{{shrBtn.open}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg>{{shrBtn.label}}</button></sc-if>
                 <button type="button" class="btn btn-ghost" onClick="{{rx.ed.filSend}}">Envoyer sur le Fil</button>
                 <sc-if value="{{rx.ed.canPlace}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{rx.ed.placeInPage}}">Placer dans une page</button></sc-if>
                 <sc-if value="{{edLocked}}" hint-placeholder-val="{{ false }}"><span style="align-self: center; font-size: 14px; color: var(--muted)">{{edLockMsg}}</span></sc-if>
@@ -7080,6 +7176,13 @@ img, video, canvas, svg { max-width: 100%; }
         <label class="lbl">Sujet<input class="field" value="{{subject}}" onChange="{{onSubject}}"></label>
         <label class="lbl">Profil<x-select class="field" value="{{profile}}" onChange="{{onProfile}}"><x-option value="">Sélectionnez votre profil</x-option><x-option value="Club">Club</x-option><x-option value="Entreprise">Entreprise</x-option><x-option value="Joueur">Joueur</x-option><x-option value="Média">Média</x-option><x-option value="Abonné">Abonné</x-option><x-option value="Autre">Autre</x-option></x-select></label>
       </div>
+      <sc-if value="{{olForm.on}}" hint-placeholder-val="{{ false }}">
+        <div class="ol-form-note">
+          <div class="eb" style="margin-bottom: .35rem">Demande pour OlistO</div>
+          <p style="margin: 0 0 .8rem; font-size: 14px; color: var(--text-2); line-height: 1.55">Votre message arrive à Casa Besports et il est aussi transmis à {{olForm.nom}}, OlistO : <a href="{{olForm.mailHref}}" style="font-weight: 700; color: var(--text)">{{olForm.email}}</a> · <a href="{{olForm.telHref}}" style="font-weight: 700; color: var(--text)">{{olForm.tel}}</a>.</p>
+          <label class="lbl">Votre téléphone, pour être rappelé (facultatif)<input class="field" type="tel" inputmode="tel" autocomplete="tel" value="{{olForm.phone}}" onChange="{{olForm.onPhone}}" placeholder="06 00 00 00 00"></label>
+        </div>
+      </sc-if>
       <sc-if value="{{isJoueurForm}}" hint-placeholder-val="{{ false }}">
         <div style="border: 1px solid var(--line); padding: 1.1rem 1.2rem; margin-bottom: 1rem">
           <div class="eb" style="margin-bottom: .4rem">Ma fiche joueur</div>
@@ -7103,6 +7206,8 @@ img, video, canvas, svg { max-width: 100%; }
       <div style="background: var(--surface-2); border-radius: 0; padding: 2rem">
         <div class="ttl" style="font-size: 30px; margin-bottom: .5rem">Message envoyé</div>
         <p style="margin: 0 0 1.25rem; color: var(--text-2)">Merci {{name}}, l’équipe Casa Besports vous répond rapidement.</p>
+        <sc-if value="{{olForm.sentOk}}" hint-placeholder-val="{{ false }}"><p style="margin: -.6rem 0 1.25rem; color: var(--text-2)">Votre demande a aussi été transmise à {{olForm.nom}} (OlistO), qui vous recontacte.</p></sc-if>
+        <sc-if value="{{olForm.sentKo}}" hint-placeholder-val="{{ false }}"><div class="ol-form-note" style="margin: -.4rem 0 1.25rem"><p style="margin: 0 0 .7rem; font-size: 14px; color: var(--text-2)">Pour joindre OlistO tout de suite, écrivez ou appelez directement {{olForm.nom}} :</p><div class="ol-contact-b"><a class="btn btn-dark" href="{{olForm.mailFull}}">Écrire à {{olForm.email}}</a><a class="btn btn-ghost" href="{{olForm.telHref}}">Appeler le {{olForm.tel}}</a></div></div></sc-if>
         <div style="display: flex; gap: .6rem; flex-wrap: wrap"><button type="button" class="btn btn-dark" onClick="{{goHome}}">Retour à l’accueil</button><button type="button" class="btn btn-ghost" onClick="{{newMessage}}">Nouveau message</button></div>
       </div>
     </sc-if>
@@ -7179,12 +7284,15 @@ img, video, canvas, svg { max-width: 100%; }
       </div>
     </div>
         <button type="button" onClick="{{goPrivate}}" style="margin-top: 1.5rem; width: 100%; display: flex; align-items: center; gap: 1rem; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: 1rem 1.25rem; cursor: pointer; color: var(--text)"><span style="width: 44px; height: 44px; border-radius: 0; background: var(--surface-2); color: var(--gold-text); display: flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v15H4z M4 9h16 M8 3v4 M16 3v4"></path></svg></span><span style="flex: 1"><span style="display: block; font-weight: 800">Mon quotidien</span><span style="font-size: 13.5px; color: var(--muted)">Ma journée, agenda, listes, activité, budget sport</span></span><span class="cond" style="font-size: 13px; color: var(--gold-text)">Ouvrir →</span></button>
-    <section aria-labelledby="appearance-title" style="margin-top: 3rem">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem">
-        <div><div class="eb" style="margin-bottom: .3rem">Paramètres</div><h2 id="appearance-title" class="h2" style="font-size: 2rem">Apparence</h2></div>
-        <span style="font-size: 14px; color: var(--muted)">{{themeSavedNote}}</span>
-      </div>
-      <div role="radiogroup" aria-label="Thème de l’interface" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: .9rem">
+    <details class="pf-app" aria-labelledby="appearance-title">
+      <summary class="pf-app-s">
+        <span class="pf-app-sw" style="background: {{themeCur.bg}}"><span style="background: {{themeCur.bar}}"></span><i style="background: {{themeCur.acc}}"></i></span>
+        <span class="pf-app-st"><span class="eb" style="font-size: 11px">Paramètres</span><span id="appearance-title" class="pf-app-h">Apparence</span><span class="pf-app-cur">Thème {{themeCur.name}} · {{themeSavedNote}}</span></span>
+        <span class="pf-app-chev" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></span>
+      </summary>
+      <div class="pf-app-b">
+      <div class="lbl" style="margin: 0 0 .45rem">Thème</div>
+      <div role="radiogroup" aria-label="Thème de l’interface" class="pf-app-thm">
         <sc-for list="{{themes}}" as="th" hint-placeholder-count="5">
           <button type="button" class="thm-opt" role="radio" aria-checked="{{th.checked}}" onClick="{{th.pick}}">
             <span class="thm-sw" style="background: {{th.bg}}; display: block">
@@ -7196,25 +7304,26 @@ img, video, canvas, svg { max-width: 100%; }
               <span style="position: absolute; right: 0; top: 0; bottom: 0; width: {{th.split}}; background: #0b0b0b"></span>
             </span>
             <span style="display: flex; justify-content: space-between; align-items: center; gap: .5rem; width: 100%"><span style="font-weight: 800">{{th.name}}</span><sc-if value="{{th.isOn}}" hint-placeholder-val="{{ false }}"><span class="cond" style="font-size: 11px; padding: .25rem .5rem; border-radius: 0; background: var(--acc); color: var(--on-acc)">Sélectionné</span></sc-if></span>
-            <span style="font-size: 13px; color: var(--muted); line-height: 1.4">{{th.long}}</span>
+            <span class="pf-app-long">{{th.long}}</span>
           </button>
         </sc-for>
       </div>
-          <div class="lbl" style="margin: 1.5rem 0 .5rem">Arrière-plan des pages</div>
-      <div role="radiogroup" aria-label="Arrière-plan des pages" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .5rem">
+          <div class="lbl" style="margin: 1rem 0 .45rem">Arrière-plan des pages</div>
+      <div role="radiogroup" aria-label="Arrière-plan des pages" class="pf-app-opts">
         <sc-for list="{{bgModes}}" as="bm" hint-placeholder-count="3"><button type="button" role="radio" aria-checked="{{bm.checked}}" onClick="{{bm.pick}}" style="text-align: left; padding: .75rem .9rem; border-radius: 0; cursor: pointer; background: var(--surface); color: var(--text); border: 2px solid {{bm.border}}"><span style="display: block; font-weight: 800">{{bm.label}}</span><span style="font-size: 12.5px; color: var(--muted)">{{bm.sub}}</span></button></sc-for>
       </div>
-      <div class="lbl" style="margin: 1.25rem 0 .5rem">Photos de fond</div>
-      <div role="radiogroup" aria-label="Photos de fond" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .5rem">
+      <div class="lbl" style="margin: 1rem 0 .45rem">Photos de fond</div>
+      <div role="radiogroup" aria-label="Photos de fond" class="pf-app-opts">
         <sc-for list="{{bgColorOpts}}" as="bc" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{bc.checked}}" onClick="{{bc.pick}}" style="text-align: left; padding: .75rem .9rem; border-radius: 0; cursor: pointer; background: var(--surface); color: var(--text); border: 2px solid {{bc.border}}"><span style="display: block; font-weight: 800">{{bc.label}}</span><span style="font-size: 12.5px; color: var(--muted)">{{bc.sub}}</span></button></sc-for>
       </div>
-      <div class="lbl" style="margin: 1.25rem 0 .5rem">Couleur de l’arrière-plan</div>
+      <div class="lbl" style="margin: 1rem 0 .45rem">Couleur de l’arrière-plan</div>
       <div role="radiogroup" aria-label="Couleur de l’arrière-plan" style="display: flex; flex-wrap: wrap; gap: .5rem; align-items: center">
         <sc-for list="{{teintes}}" as="tc" hint-placeholder-count="8"><button type="button" role="radio" aria-checked="{{tc.checked}}" aria-label="{{tc.label}}" title="{{tc.label}}" onClick="{{tc.pick}}" style="width: 44px; height: 44px; border-radius: 50%; cursor: pointer; padding: 0; background: {{tc.sw}}; border: 3px solid {{tc.ring}}; box-shadow: inset 0 0 0 2px var(--surface); color: var(--muted); font-size: 18px; line-height: 1"><sc-if value="{{tc.isNone}}" hint-placeholder-val="{{ false }}">⌀</sc-if></button></sc-for>
         <label style="display: inline-flex; align-items: center; gap: .45rem; font-size: 14px; font-weight: 700; cursor: pointer; min-height: 44px">Autre couleur <input type="color" value="{{teinteLibre.value}}" onInput="{{teinteLibre.onInput}}" aria-label="Choisir une autre couleur" style="width: 44px; height: 36px; border: 1px solid var(--line-2); background: var(--surface); padding: 2px; cursor: pointer"></label>
       </div>
       <p style="margin: .5rem 0 0; font-size: 12.5px; color: var(--muted)">La teinte colore le fond uni et les photos de fond. <sc-if value="{{teinteLibre.isPerso}}" hint-placeholder-val="{{ false }}"><button type="button" class="lnk" onClick="{{teinteLibre.reset}}" style="font-size: 12.5px">Revenir au réglage du site</button></sc-if></p>
-    </section>
+      </div>
+    </details>
     <sc-if value="{{isStaff}}" hint-placeholder-val="{{ false }}"><div class="cb-deep" style="margin-top: 1.5rem; background: var(--inv-bg); color: var(--on-inv-2); border-radius: 0; padding: 1.25rem 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between"><span><strong style="color: var(--on-inv)">Espace rédaction</strong> · {{pendingCount}} article(s) en attente de relecture</span><button type="button" class="btn btn-gold" onClick="{{goStudio}}">Ouvrir l’espace rédaction</button></div></sc-if>
     <h2 class="h2" style="font-size: 2rem; margin: 3rem 0 1.25rem">Mes commandes et abonnements</h2>
     <sc-if value="{{noOrders}}" hint-placeholder-val="{{ true }}"><p style="color: var(--text-2)">Aucune commande pour l’instant. <button type="button" class="lnk" onClick="{{goShop}}" style="font-size: 15px">Voir la boutique</button></p></sc-if>
@@ -8409,6 +8518,18 @@ img, video, canvas, svg { max-width: 100%; }
     </div>
   </section>
 
+  <sc-if value="{{ol.hasContact}}" hint-placeholder-val="{{ true }}">
+    <section class="wrap" style="padding-top: 2rem">
+      <div class="ol-contact">
+        <div class="ol-contact-t"><div class="cond" style="font-size: 12px; color: var(--muted); margin-bottom: .3rem">Contact direct OlistO</div><div class="ttl" style="font-size: 24px; margin: 0">{{ol.nom}}</div><p style="margin: .3rem 0 0; color: var(--text-2); font-size: 14.5px; line-height: 1.5">Écrivez ou appelez directement. Les demandes envoyées depuis cette page lui sont aussi transmises par e-mail.</p></div>
+        <div class="ol-contact-b">
+          <sc-if value="{{ol.hasMail}}" hint-placeholder-val="{{ true }}"><a class="btn btn-dark" href="{{ol.mailHref}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14"></rect><path d="M3 7l9 6 9-6"></path></svg>{{ol.email}}</a></sc-if>
+          <sc-if value="{{ol.hasTel}}" hint-placeholder-val="{{ true }}"><a class="btn btn-ghost" href="{{ol.telHref}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg>{{ol.tel}}</a></sc-if>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
   <section class="wrap" style="padding-top: 2.5rem; padding-bottom: 1rem">
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem">
       <sc-for list="{{ol.services}}" as="sv" hint-placeholder-count="3">
@@ -8915,6 +9036,57 @@ img, video, canvas, svg { max-width: 100%; }
   </div>
 </sc-if>
 
+<!-- ================= PARTAGER SUR MES RÉSEAUX (js/partage.js) ================= -->
+<sc-if value="{{shr.open}}" hint-placeholder-val="{{ false }}">
+  <div class="sh-veil" onClick="{{shr.close}}"></div>
+  <section class="sh-pan" role="dialog" aria-modal="true" aria-labelledby="sh-t">
+    <header class="sh-h">
+      <div style="min-width: 0"><div class="eb" style="font-size: 12px; margin-bottom: .25rem">Partager sur mes réseaux</div><h2 id="sh-t" class="sh-t">{{shr.title}}</h2></div>
+      <button type="button" class="sh-x" onClick="{{shr.close}}" aria-label="Fermer">×</button>
+    </header>
+    <div class="sh-b">
+      <p class="sh-etat {{shr.enLigne}}" data-on="{{shr.enLigne}}">{{shr.etat}}</p>
+      <div class="sh-grid">
+        <div class="sh-col">
+          <div class="sh-k">1 · L’aperçu vu sur les réseaux</div>
+          <div class="sh-card">
+            <div class="sh-card-img"><sc-if value="{{shr.hasApercu}}" hint-placeholder-val="{{ true }}"><img src="{{shr.apercu}}" alt=""></sc-if><sc-if value="{{shr.busy}}" hint-placeholder-val="{{ false }}"><span class="sh-busy">Préparation…</span></sc-if></div>
+            <div class="sh-card-t"><span class="sh-host">{{shr.host}}</span><strong>{{shr.title}}</strong><span>{{shr.dek}}</span></div>
+          </div>
+          <div class="sh-k" style="margin-top: 1rem">Choisir l’image</div>
+          <div class="sh-imgs" role="radiogroup" aria-label="Image d’aperçu">
+            <label class="sh-up"><input type="file" accept="image/*" onChange="{{shr.onFile}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"></path></svg><span>Ma photo</span></label>
+            <sc-for list="{{shr.imgs}}" as="im" hint-placeholder-count="6"><button type="button" role="radio" aria-checked="{{im.sel}}" class="sh-im" onClick="{{im.pick}}" title="{{im.label}}"><img src="{{im.src}}" alt="{{im.label}}"><sc-if value="{{im.hasKind}}" hint-placeholder-val="{{ false }}"><span>{{im.kind}}</span></sc-if></button></sc-for>
+          </div>
+          <label class="sh-switch"><input type="checkbox" checked="{{shr.bandeau}}" onChange="{{shr.toggleBandeau}}"><span><strong>Bandeau BE+</strong> {{shr.bandeauTxt}}</span></label>
+          <div class="sh-k" style="margin-top: 1rem">2 · Lecture de l’article</div>
+          <div class="sh-acces" role="radiogroup" aria-label="Lecture de l’article">
+            <button type="button" role="radio" aria-checked="{{shr.gratuit}}" onClick="{{shr.setGratuit}}"><strong>Gratuite</strong><span>pour tous</span></button>
+            <button type="button" role="radio" aria-checked="{{shr.abonnes}}" onClick="{{shr.setAbonnes}}"><strong>Abonnés BE+</strong><span>début offert, suite réservée</span></button>
+          </div>
+          <p class="sh-note">{{shr.accesTxt}}</p>
+          <sc-if value="{{shr.hasMsg}}" hint-placeholder-val="{{ false }}"><p class="sh-msg" role="status">{{shr.msg}}</p></sc-if>
+        </div>
+        <div class="sh-col">
+          <div class="sh-k">3 · Le texte de la publication</div>
+          <textarea class="field sh-txt" value="{{shr.texte}}" onChange="{{shr.onTexte}}" aria-label="Texte de la publication"></textarea>
+          <div class="sh-row"><button type="button" class="btn btn-dark" onClick="{{shr.copierTexte}}">Copier le texte</button><button type="button" class="btn btn-ghost" onClick="{{shr.copierLien}}">Copier le lien</button><button type="button" class="sh-lnk" onClick="{{shr.resetTexte}}">Revenir au texte proposé</button></div>
+          <div class="sh-k" style="margin-top: 1.1rem">4 · Publier</div>
+          <div class="sh-nets">
+            <sc-for list="{{shr.reseaux}}" as="rz" hint-placeholder-count="7"><button type="button" class="sh-net {{rz.cls}}" onClick="{{rz.go}}" aria-disabled="{{rz.off}}"><span class="sh-net-n">{{rz.nom}}</span><span class="sh-net-b">{{rz.badge}}</span><span class="sh-net-t">{{rz.note}}</span></button></sc-for>
+          </div>
+          <div class="sh-bio">
+            <div class="sh-k" style="margin: 0 0 .35rem">Instagram et TikTok : le lien de la bio</div>
+            <code>{{shr.lienBio}}</code>
+            <div class="sh-row" style="margin-top: .5rem"><button type="button" class="btn btn-ghost" onClick="{{shr.copierBio}}">Copier le lien pour la bio</button></div>
+            <div class="sh-k" style="margin: .8rem 0 .35rem">Télécharger le visuel</div><div class="sh-row" style="margin-top: 0"><button type="button" class="sh-lnk" onClick="{{shr.dlPost}}">Publication 4:5</button><button type="button" class="sh-lnk" onClick="{{shr.dlStory}}">Story 9:16</button><button type="button" class="sh-lnk" onClick="{{shr.dlLien}}">Aperçu 1,91:1</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
 <!-- ================= BARRE D'ONGLETS MOBILE ================= -->
 <nav class="tabbar bn-scope" aria-label="Navigation principale mobile">
   <sc-for list="{{tabBar}}" as="tb" hint-placeholder-count="5">
@@ -9110,6 +9282,7 @@ img, video, canvas, svg { max-width: 100%; }
             <div>
               <sc-if value="{{pt.hasAdresse}}" hint-placeholder-val="{{ false }}"><div class="eb" style="font-size: 12px; margin-bottom: .3rem">Adresse</div><div style="line-height: 1.5; margin-bottom: .35rem">{{pt.adresse}}</div><a href="{{pt.mapsHref}}" target="_blank" rel="noopener" style="font-size: 14px; font-weight: 700; color: var(--text)">Itinéraire ↗</a></sc-if>
               <sc-if value="{{pt.hasTel}}" hint-placeholder-val="{{ false }}"><div class="eb" style="font-size: 12px; margin: .9rem 0 .3rem">Téléphone</div><sc-for list="{{pt.tels}}" as="tl" hint-placeholder-count="1"><div style="margin-bottom: .3rem"><a href="{{tl.href}}" style="font-weight: 700; color: var(--text)">{{tl.num}}</a><sc-if value="{{tl.hasNom}}" hint-placeholder-val="{{ false }}"><span style="color: var(--muted); font-size: 14px"> · {{tl.nom}}</span></sc-if></div></sc-for></sc-if>
+              <sc-if value="{{pt.hasEmail}}" hint-placeholder-val="{{ false }}"><div class="eb" style="font-size: 12px; margin: .9rem 0 .3rem">E-mail</div><a href="{{pt.mailHref}}" style="font-weight: 700; color: var(--text); word-break: break-all">{{pt.email}}</a></sc-if>
             </div>
             <sc-if value="{{pt.hasHoraires}}" hint-placeholder-val="{{ false }}"><div><div class="eb" style="font-size: 12px; margin-bottom: .3rem">Horaires</div><sc-for list="{{pt.horaires}}" as="hr" hint-placeholder-count="7"><div style="display: flex; justify-content: space-between; gap: .75rem; font-size: 14px; padding: .15rem 0; border-bottom: 1px solid var(--line)"><span>{{hr.j}}</span><span style="font-weight: 700">{{hr.h}}</span></div></sc-for></div></sc-if>
           </div>
@@ -9733,6 +9906,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="js/paiement.js?v=__VERSION__"></script>
 <script src="js/notifications.js?v=__VERSION__"></script>
 <script src="js/casa-ia.js?v=__VERSION__"></script>
+<script src="js/partage.js?v=__VERSION__"></script>
 <script src="js/app.js?v=__VERSION__"></script>
 <script src="js/import-calendrier.js?v=__VERSION__"></script>
 <script src="js/admin.js?v=__VERSION__"></script>

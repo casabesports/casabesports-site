@@ -49,6 +49,26 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':
 const clip = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; };
 const abs = (base, u) => { try { return u ? new URL(u, base + '/').href : ''; } catch (e) { return ''; } };
 
+// Image de partage d'un article : partage.img (choisie par l'auteur) ou img (une). Les images rangées dans l'article
+// (data:image/…) ne sont pas lisibles par Facebook, LinkedIn… : on donne l'adresse /partage-visuel/<id> qui les sert.
+function shareSrc(a) { return (a && a.partage && a.partage.img) || (a && a.img) || ''; }
+function shareImage(origin, a) {
+  const src = shareSrc(a);
+  if (!src) return '';
+  if (/^data:image\//.test(src)) return origin + '/partage-visuel/' + encodeURIComponent(a.id) + '?v=' + hash(src);
+  return abs(origin, src);
+}
+function hash(str) { let h = 5381; for (let i = 0; i < str.length; i += 7) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0; return h.toString(36); }
+async function shareVisual(ctx, origin, id) {
+  const D = await loadData(ctx, origin);
+  const a = D.articles.find((x) => x.id === id);
+  const m = String(shareSrc(a)).match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
+  if (!m) return new Response('Image introuvable', { status: 404 });
+  const bin = atob(m[2]); const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Response(bytes, { headers: { 'Content-Type': m[1], 'Cache-Control': 'public, max-age=86400' } });
+}
+
 // Même règle que js/comptes.js : une liste modifiée en ligne garde les nouveautés ajoutées aux fichiers
 function merge(file, online) {
   if (online == null) return Array.isArray(file) ? file : [];
@@ -74,10 +94,22 @@ async function loadData(ctx, origin) {
     });
     if (r.ok) (await r.json()).forEach((row) => { online[row.cle] = row.valeur; });
   } catch (e) {}
+  // Articles écrits et publiés depuis l'espace rédaction (supabase/redaction.sql : version en ligne seulement)
+  let redac = [];
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/articles_en_ligne', {
+      method: 'POST', body: '{}',
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+      cf: { cacheTtl: 60, cacheEverything: true }
+    });
+    if (r.ok) redac = (await r.json()).filter((x) => x && x.id && x.article).map((x) => Object.assign({}, x.article, { id: x.id, publierLe: x.publie_le, redaction: true }));
+  } catch (e) {}
   const now = Date.now();
   const visible = (a) => a && a.id && !a.brouillon && !(a.publierLe && new Date(a.publierLe).getTime() > now);
+  const base = merge(file.CASA_ARTICLES, online.CASA_ARTICLES);
+  const ids = new Set(base.map((a) => a && a.id));
   return {
-    articles: merge(file.CASA_ARTICLES, online.CASA_ARTICLES).filter(visible),
+    articles: redac.filter((a) => !ids.has(a.id)).concat(base).filter(visible),
     videos: merge(file.CASA_VIDEOS, online.CASA_VIDEOS).filter((v) => v && v.id),
     clubs: merge(file.CASA_CLUBS, online.CASA_CLUBS).filter((c) => c && c.id),
     joueurs: (function () {
@@ -107,13 +139,16 @@ function render(html, meta) {
   set(/<meta name="description" content="[^"]*">/, '<meta name="description" content="' + d + '">');
   set(/<meta property="og:title" content="[^"]*">/, '<meta property="og:title" content="' + t + '">');
   set(/<meta property="og:description" content="[^"]*">/, '<meta property="og:description" content="' + d + '">');
-  set(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="' + esc(meta.url) + '">');
+  // og:url : l'adresse réellement partagée (casabesports.pages.dev aujourd'hui, casabesports.fr après la bascule),
+  // pour qu'un clic sur l'aperçu Facebook, LinkedIn… ouvre bien ce site ; l'adresse canonique reste celle de SITE_URL
+  set(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="' + esc(meta.shareUrl || meta.url) + '">');
   set(/<meta property="og:type" content="[^"]*">/, '<meta property="og:type" content="' + (meta.type || 'website') + '">');
   set(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="' + esc(meta.url) + '">');
   set(/<meta name="twitter:title" content="[^"]*">/, '<meta name="twitter:title" content="' + t + '">');
   if (meta.image) {
     set(/<meta property="og:image" content="[^"]*">/, '<meta property="og:image" content="' + esc(meta.image) + '">');
     set(/<meta name="twitter:image" content="[^"]*">/, '<meta name="twitter:image" content="' + esc(meta.image) + '">');
+    if (meta.imageAlt) html = html.replace('</head>', '<meta property="og:image:alt" content="' + esc(meta.imageAlt) + '"></head>');
   }
   // Les adresses hreflang pointent vers la page elle-même
   set(/<link rel="alternate" hreflang="fr" href="[^"]*">/, '<link rel="alternate" hreflang="fr" href="' + esc(meta.url) + '">');
@@ -149,6 +184,8 @@ export async function onRequest(ctx) {
   const origin = String((ctx.env && ctx.env.SITE_URL) || (local ? url.origin : 'https://casabesports.fr')).replace(/\/$/, '');
   const path = url.pathname.replace(/\/+$/, '');
   if (path === '/sitemap.xml') return sitemap(ctx, origin);
+  const pv = path.match(/^\/partage-visuel\/([^/]+)$/);
+  if (pv) return shareVisual(ctx, origin, decodeURIComponent(pv[1]));
 
   const m = path.match(/^\/([a-z-]+)(?:\/([^/]+))?$/);
   const sec = m && SECTIONS[m[1]];
@@ -183,10 +220,12 @@ export async function onRequest(ctx) {
   if (kind === 'article') {
     const a = D.articles.find((x) => x.id === id);
     if (a) {
-      const img = abs(url.origin, a.img);
+      // Image d'aperçu : celle choisie par l'auteur pour les réseaux sociaux (« Partager sur mes réseaux »), sinon l'image de une.
+      // Une photo envoyée depuis l'appareil est rangée dans l'article : elle est servie par /partage-visuel/<article>.
+      const img = shareImage(url.origin, a);
       const published = a.publierLe || a.creeLe || '';
       meta = {
-        title: a.title + ' · ' + SUFFIX, desc: clip(a.dek || a.body, 200), url: pageUrl, image: img, type: 'article',
+        title: a.title + ' · ' + SUFFIX, desc: clip((a.premium ? 'Réservé aux abonnés BE+ · ' : '') + (a.dek || a.body), 200), url: pageUrl, shareUrl: url.origin + path, image: img, imageAlt: a.alt || a.title, type: 'article',
         article: { published, modified: a.modifieLe || '' },
         ld: [crumbs(a.title), Object.assign({
           '@context': 'https://schema.org', '@type': 'NewsArticle', headline: clip(a.title, 110), description: clip(a.dek, 300),
