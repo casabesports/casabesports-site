@@ -570,7 +570,8 @@ var CasaReseau = (function () {
           c.setPost(cur.id, { status: 'review' }, 'Envoyé à la rédaction par le correspondant de ' + club.name + '.'); self.say('Envoyé à la rédaction : vous serez prévenu ici');
         },
         remove: function () { if (cur.status !== 'draft') return; self.setState({ posts: (c.posts || []).filter(function (p) { return p.id !== cur.id; }), studioTab: 'club', clubEditId: null }); /* enregistré en ligne automatiquement (supabase/redaction.sql) */ self.say('Brouillon supprimé'); },
-        canRemove: cur.status === 'draft', back: function () { self.setState({ studioTab: 'clist' }); }
+        canRemove: cur.status === 'draft', back: function () { self.setState({ studioTab: 'clist' }); },
+        canShare: typeof CasaPartage !== 'undefined', share: function () { CasaPartage.open(self, cur.id); }, shareLabel: typeof CasaPartage !== 'undefined' && CasaPartage.enLigne(cur) ? 'Partager sur mes réseaux' : 'Préparer le partage sur mes réseaux'
       };
     }
     /* fiche du club */

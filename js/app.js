@@ -1243,6 +1243,22 @@ class Component extends DCLogic {
   // Un événement du site (formulaire, commande, newsletter, OlistO…) crée ou met à jour un contact
   // Envoi de chaque demande (contact, newsletter, commande, abonnement) à l'équipe :
   // 1) table Supabase « messages » (Espace admin › Messagerie) ; 2) Netlify Forms, seulement si le site tourne sur Netlify
+  // Coordonnées de contact d'un partenaire (contenus/partenaires.js : email, telephone « 06 … - Prénom Nom »)
+  partnerContact(p) {
+    const P = p || {};
+    const l = String(P.telephone || '').split('\n').map((x) => x.trim()).filter(Boolean)[0] || '';
+    const m = l.match(/^([+0-9][0-9 .+()]*[0-9])\s*(?:[-–—:·]\s*)?(.*)$/);
+    const tel = m ? m[1].trim() : l; const nom = (m && m[2].trim()) || P.name || '';
+    const email = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(P.email || '').trim()) ? String(P.email).trim() : '';
+    return { email, tel, nom, telHref: tel ? 'tel:' + tel.replace(/[^0-9+]/g, '').replace(/^0/, '+33') : '', mailHref: email ? 'mailto:' + email : '' };
+  }
+  // Demande faite depuis la page OlistO : transmise aussi par e-mail au contact OlistO (fonction Supabase « contact-olisto »)
+  forwardOlisto(d) {
+    const A = window.CasaAuth;
+    if (!A || !A.appel) { this.setState({ olFwd: 'ko' }); return; }
+    this.setState({ olFwd: 'envoi' });
+    A.appel('contact-olisto', d).then(() => this.setState({ olFwd: 'ok' }), () => this.setState({ olFwd: 'ko' }));
+  }
   sendLead(ev) {
     const d = { source: ev.source || 'Site', nom: ev.name || '', email: ev.email || '', telephone: ev.phone || '', ville: ev.city || '', profil: ev.profile || ev.type || '', sujet: ev.subject || '', message: ev.message || ev.note || '', consentement: ev.consent || '', page: location.href };
     try {
@@ -2403,7 +2419,8 @@ class Component extends DCLogic {
       // un numéro par ligne : « 07 00 00 00 00 - Prénom Nom »
       tels: String(ptBase.telephone || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => { const m = l.match(/^([+0-9][0-9 .+()]*[0-9])\s*(?:[-–—:·]\s*)?(.*)$/); const num = m ? m[1].trim() : l; return { num, nom: m ? m[2].trim() : '', hasNom: !!(m && m[2].trim()), href: 'tel:' + num.replace(/[^0-9+]/g, '').replace(/^0/, '+33') }; }),
       hasTel: !!String(ptBase.telephone || '').trim(), logoFond: ptBase.logoFond || '#ffffff',
-      horaires: ptHoraires, hasHoraires: ptHoraires.length > 0, hasInfos: !!(ptBase.adresse || ptBase.telephone || ptHoraires.length),
+      email: this.partnerContact(ptBase).email, hasEmail: !!this.partnerContact(ptBase).email, mailHref: this.partnerContact(ptBase).mailHref,
+      horaires: ptHoraires, hasHoraires: ptHoraires.length > 0, hasInfos: !!(ptBase.adresse || ptBase.telephone || ptBase.email || ptHoraires.length),
       note: 'Partenaire Casa Besports.',
       // OlistO : page dédiée ; autres vrais partenaires : bouton seulement s'ils offrent un avantage
       hasClaim: ptOlisto || !(ptRaw && ptRaw.real) || !!ptBase.perk,
@@ -3231,7 +3248,8 @@ class Component extends DCLogic {
     const setOl = (k) => (e) => this.setState({ [k]: e.target.value });
     const olP = (X.partners || []).find((p) => p.id === 'olisto') || {};
     const olSite = cbPartnerLink(olP.site, 'olisto', 'site'), olApp = cbPartnerLink(olP.app, 'olisto', 'application');
-    const ol = { siteHref: olSite, appHref: olApp, hasSite: !!olSite, hasApp: !!olApp, m: String(s.olM ?? 180000), d: String(s.olD ?? 20), t: String(s.olT ?? 3.5), a: String(s.olA ?? 0.25), r: String(s.olR ?? 3600), c: String(s.olC ?? 150),
+    const olK = this.partnerContact(olP);
+    const ol = { siteHref: olSite, appHref: olApp, hasSite: !!olSite, hasApp: !!olApp, hasContact: !!(olK.email || olK.tel), nom: olK.nom, email: olK.email, tel: olK.tel, hasMail: !!olK.email, hasTel: !!olK.tel, mailHref: olK.email ? olK.mailHref + '?subject=' + encodeURIComponent('Mon projet (vu sur Casa Besports)') : '', telHref: olK.telHref, m: String(s.olM ?? 180000), d: String(s.olD ?? 20), t: String(s.olT ?? 3.5), a: String(s.olA ?? 0.25), r: String(s.olR ?? 3600), c: String(s.olC ?? 150),
       onM: setOl('olM'), onD: setOl('olD'), onT: setOl('olT'), onA: setOl('olA'), onR: setOl('olR'), onC: setOl('olC'),
       monthly: e0(monthly), ins: e0(insM), interest: e0(base * nM - oM), debt: (Math.round(debtPct * 10) / 10).toString().replace('.', ',') + ' %',
       debtW: Math.min(100, debtPct / 50 * 100) + '%', debtColor: debtPct <= 33 ? 'var(--success)' : debtPct <= 35 ? 'var(--gold-text)' : 'var(--danger)',
@@ -3397,6 +3415,7 @@ class Component extends DCLogic {
     return {
       podcast, essentiel, isPodcast: V === 'podcast', goPodcast: () => this.go('podcast'),
       // Jeux : le quiz du bus (tous sports) et Devine le joueur (js/jeux.js)
+      shr: typeof CasaPartage !== 'undefined' && s.shr ? CasaPartage.vals(this, { libImgs }) : { open: false },
       isJeux: V === 'jeux', goJeux: () => this.go('jeux'), jx: V === 'jeux' && typeof CasaJeux !== 'undefined' ? CasaJeux.vals(this, { D }) : { tabs: [], quiz: {}, net: {}, devine: {} },
       isVestiaire: V === 'vestiaire', vs: VS.page, vsHome: VS.home, goVestiaire: () => this.go('vestiaire'), goVestiaireClub: () => this.go('vestiaire', { vsClub: s.clubId }),
       mb: { q: s.mbQ || '', onQ: (e) => this.setState({ mbQ: e.target.value, mbRes: null }), check: () => this.checkMember(s.mbQ), busy: s.mbRes === 'busy',
@@ -3407,7 +3426,7 @@ class Component extends DCLogic {
       isClubRole, notClubRole: !isClubRole, canReseau, stReseau: s.studioTab === 'reseau' && canReseau, stClubAny: isClubRole && ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0,
       newPostLabel: isClubRole ? 'Nouveau contenu' : 'Nouvel article',
       accent, heroOpacity: showBg ? Math.min(1, k * 2.2) : 0, sectionOpacity: showBg ? k * 0.45 : 0, progressW: progress + '%',
-      nav, moreNav, menuGroups, rubriques, menuOpen: s.menuOpen, toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
+      nav, moreNav, menuGroups, rubriques, menuOpen: s.menuOpen, menuWrapCls: s.menuOpen ? 'is-menu' : '', toggleMenu: () => this.setState({ menuOpen: !s.menuOpen, themeMenuOpen: false, moreOpen: false }),
       moreOpen: s.moreOpen, moreExp: s.moreOpen ? 'true' : 'false', toggleMore: () => this.setState({ moreOpen: !s.moreOpen }),
       gateways,
       isHome: V === 'home', isNews: V === 'news', isArticle: V === 'article', isVideos: V === 'videos', isVideo: V === 'video',
@@ -3559,8 +3578,15 @@ class Component extends DCLogic {
         if (joueur && (!s.jAge || !s.jPub)) { this.setState({ formError: 'Cochez les deux accords obligatoires pour que votre fiche puisse être publiée.' }); return; }
         if (joueur) { const fiche = 'FICHE JOUEUR — à ajouter dans Admin › Contenus › Joueurs après vérification\nNom : ' + s.name.trim() + '\nDiscipline : ' + s.jDisc.trim() + '\nClub : ' + s.jClub.trim() + '\nPoste : ' + ((s.jPoste || '').trim() || '—') + '\nPhoto : ' + ((s.jPhoto || '').trim() || 'à envoyer en réponse à ce message') + '\nAccords donnés le ' + new Date().toLocaleString('fr-FR') + ' : 15 ans ou plus, ou accord du représentant légal ✓ · publication du nom, club, poste et photo ✓ · droits sur la photo ' + (s.jDroits ? '✓' : 'non confirmés (ne pas publier la photo)') + '\n\n' + (s.message || '').trim();
           this.setState({ contactSent: true, formError: '' }); this.crmCapture({ name: s.name.trim(), email: s.email, source: 'Fiche joueur', type: 'Joueur', consent: 'oui', subject: s.subject || 'Fiche joueur', profile: 'Joueur', message: fiche, note: 'Fiche joueur — ' + s.jDisc.trim() + ' · ' + s.jClub.trim() }); return; }
-        if (!s.name.trim() || !validEmail || !s.message.trim()) { this.setState({ formError: 'Nom, e-mail valide et message sont requis.' }); return; } this.setState({ contactSent: true, formError: '' }); this.crmCapture({ name: s.name.trim(), email: s.email, source: /olisto/i.test(s.subject || '') ? 'Formulaire OlistO' : 'Formulaire contact', type: ({ Club: 'Club', Annonceur: 'Annonceur', Partenaire: 'Partenaire' })[s.profile] || 'Supporter', consent: '?', subject: s.subject, profile: s.profile, message: s.message.trim(), note: (s.subject ? s.subject + ' — ' : '') + s.message.trim().slice(0, 200) }); },
-      newMessage: () => this.setState({ contactSent: false, message: '', subject: '' }),
+        if (!s.name.trim() || !validEmail || !s.message.trim()) { this.setState({ formError: 'Nom, e-mail valide et message sont requis.' }); return; } this.setState({ contactSent: true, formError: '' }); const isOl = /olisto/i.test(s.subject || ''); if (isOl) this.forwardOlisto({ nom: s.name.trim(), email: s.email.trim(), telephone: (s.olPhone || '').trim(), sujet: s.subject || '', message: s.message.trim() }); this.crmCapture({ name: s.name.trim(), email: s.email, phone: isOl ? (s.olPhone || '').trim() : '', source: isOl ? 'Formulaire OlistO' : 'Formulaire contact', type: ({ Club: 'Club', Annonceur: 'Annonceur', Partenaire: 'Partenaire' })[s.profile] || 'Supporter', consent: '?', subject: s.subject, profile: s.profile, message: s.message.trim(), note: (s.subject ? s.subject + ' — ' : '') + s.message.trim().slice(0, 200) }); },
+      olForm: (() => {
+        const K = this.partnerContact((X.partners || []).find((p) => p.id === 'olisto'));
+        const on = /olisto/i.test(s.subject || '') && !!(K.email || K.tel);
+        const body = (s.message || '').trim() + '\n\n' + (s.name || '').trim() + (s.olPhone ? ' · ' + s.olPhone : '') + (s.email ? ' · ' + s.email : '');
+        return { on, nom: K.nom || 'OlistO', email: K.email, tel: K.tel, mailHref: K.mailHref, telHref: K.telHref, phone: s.olPhone || '', onPhone: (e) => this.setState({ olPhone: e.target.value }),
+          sentOk: on && s.olFwd === 'ok', sentKo: on && s.olFwd === 'ko' && !!K.email, mailFull: K.email ? K.mailHref + '?subject=' + encodeURIComponent(s.subject || 'Demande OlistO') + '&body=' + encodeURIComponent(body) : '' };
+      })(),
+      newMessage: () => this.setState({ contactSent: false, message: '', subject: '', olFwd: null }),
       goals, partnerContact: () => this.go('contact', { subject: 'Partenariat — ' + s.goal, profile: 'Entreprise', contactSent: false }),
       nlOpen: !s.nlDone, nlDone: s.nlDone, nlEmail: s.nlEmail, onNl: (e) => this.setState({ nlEmail: e.target.value }),
       subscribeNl: () => { if (/.+@.+\..+/.test(s.nlEmail)) { this.setState({ nlDone: true }); this.crmCapture({ email: s.nlEmail, name: s.nlEmail.split('@')[0], source: 'Newsletter', consent: 'oui', note: 'Inscription au récap du lundi' }); } else this.say('Saisissez un e-mail valide'); },
@@ -3670,7 +3696,7 @@ class Component extends DCLogic {
       searchOpen: s.searchOpen, openSearch: () => this.setState({ searchOpen: true, sq: '', menuOpen: false, moreOpen: false }), closeSearch: () => this.setState({ searchOpen: false }),
       sq: s.sq, onSq: (e) => this.setState({ sq: e.target.value }), noSq: !sq, sResults, sEmpty: !!sq && sResults.length === 0, quick,
       footLinks, reseaux, hasToast: !!s.toast, toast: s.toast,
-      themeAttr: curTheme, themingClass: s.themeAnim ? 'cb-theming' : '', themes, themeName, themeMenuOpen: s.themeMenuOpen, themeMenuExp: s.themeMenuOpen ? 'true' : 'false',
+      themeAttr: curTheme, themingClass: s.themeAnim ? 'cb-theming' : '', themes, themeName, themeCur: themes.find((t) => t.isOn) || themes[0], themeMenuOpen: s.themeMenuOpen, themeMenuExp: s.themeMenuOpen ? 'true' : 'false',
       toggleThemeMenu: () => this.setState({ themeMenuOpen: !s.themeMenuOpen, moreOpen: false }),
       openThemeFromFooter: () => { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} this.setState({ themeMenuOpen: true, hdrY: '0' }); },
       themeStatus: curTheme === 'auto' ? 'Automatique (actuellement ' + (s.sysDark ? 'sombre' : 'clair') + ')' : themeName,
@@ -3738,7 +3764,7 @@ class Component extends DCLogic {
       stCrm: s.studioTab === 'crm' && s.role === 'admin', crm,
       stDash: s.studioTab === 'dash' && !isClubRole, stList: s.studioTab === 'list' && !isClubRole, stQueue: s.studioTab === 'queue' && !isClubRole, stEdit: s.studioTab === 'edit' && !isClubRole, stMedia: s.studioTab === 'media' && !isClubRole, stTeam: s.studioTab === 'team' && !isClubRole,
       rx: RXV, stRowsEmpty: (RXV.list && RXV.list.rows || []).length === 0,
-      stRows: (RXV.list && RXV.list.rows ? RXV.list.rows : []).map((r) => { const p = posts.find((x) => x.id === r.id); return Object.assign({}, r, stV(p), { title: String(r.title || '').trim() || '(Sans titre)', canReview: isAdmin && p.status === 'review', edit: () => openEdit(p, 'write'), review: () => openEdit(p, 'preview'), canDelete: this.rxCanDelete(p), delSure: s.rxDelSure === p.id, delLabel: s.rxDelSure === p.id ? (p.online ? 'Confirmer : supprimer et retirer du site' : 'Confirmer la suppression') : 'Supprimer', del: () => this.rxDelete(p) }); }),
+      stRows: (RXV.list && RXV.list.rows ? RXV.list.rows : []).map((r) => { const p = posts.find((x) => x.id === r.id); return Object.assign({}, r, stV(p), { title: String(r.title || '').trim() || '(Sans titre)', canReview: isAdmin && p.status === 'review', edit: () => openEdit(p, 'write'), review: () => openEdit(p, 'preview'), canDelete: this.rxCanDelete(p), canShare: typeof CasaPartage !== 'undefined' && (isAdmin || this.rxMine(p)) && CasaPartage.enLigne(p), share: () => CasaPartage.open(this, p.id), delSure: s.rxDelSure === p.id, delLabel: s.rxDelSure === p.id ? (p.online ? 'Confirmer : supprimer et retirer du site' : 'Confirmer la suppression') : 'Supprimer', del: () => this.rxDelete(p) }); }),
       stFilters, stQ: s.stQ, onStQ: (e) => this.setState({ stQ: e.target.value }), goStudioList: () => this.setState({ studioTab: 'list' }),
       queue, queueEmpty: queue.length === 0, queueHint: isAdmin ? 'En tant qu’administrateur principal, vous seul pouvez approuver et publier.' : 'Vos articles soumis attendent la validation de l’administrateur principal.',
       newPost: () => { if (isClubRole) { this.setState({ studioTab: 'club' }); return; } const id = 'n' + Date.now(); const at = new Date().toISOString(); const p = { id, author: me.name, authorId: window.CasaAuth && window.CasaAuth.user ? window.CasaAuth.user.id : undefined, status: 'draft', updated: 'à l’instant', updatedAt: at, type: 'article', sport: 'Football', tag: '', clubs: [], img: 'assets/hero.jpg', alt: '', premium: false, schedule: '', title: 'Nouvel article', dek: '', body: '', log: [{ who: me.name, when: 'à l’instant', at, what: 'Brouillon créé.' }] }; if (typeof CasaRedac !== 'undefined') p.versions = CasaRedac.addVersion(p, me.name, 'Brouillon créé'); this.setState({ posts: [p].concat(posts), studioTab: 'edit', editId: id, edMode: 'write', aiOutKind: null }); },
@@ -3746,6 +3772,7 @@ class Component extends DCLogic {
       edWrite: s.edMode === 'write', edPreview: s.edMode === 'preview', edModes, sportOpts, edClubs, edImgs, toolbar,
       edTitle: (e) => upd({ title: e.target.value }), edDek: (e) => upd({ dek: e.target.value }), edSport: (e) => upd({ sport: e.target.value }), edTag: (e) => upd({ tag: e.target.value }),
       edSchedule: (e) => upd({ schedule: e.target.value }), edAlt: (e) => upd({ alt: e.target.value }), edBody: (e) => upd({ body: e.target.value }), edPremium: () => upd({ premium: !edRaw.premium }),
+      shrBtn: { show: !!edRaw.id && typeof CasaPartage !== 'undefined' && (isAdmin || this.rxMine(edRaw)), open: () => CasaPartage.open(this, edRaw.id), label: typeof CasaPartage !== 'undefined' && CasaPartage.enLigne(edRaw) ? 'Partager sur mes réseaux' : 'Préparer le partage' },
       edCanSave: !edLocked, edCanSubmit: !isAdmin && !edLocked && ['draft', 'corrections'].indexOf(edRaw.status) >= 0, edCanPublishDirect: isAdmin && edRaw.author === me.name && ['draft', 'corrections'].indexOf(edRaw.status) >= 0,
       edSave: () => { this.setPost(edRaw.id, {}, 'Brouillon enregistré.'); this.say(s.rxSrv === 'ok' ? 'Brouillon enregistré en ligne' : 'Brouillon enregistré'); },
       edCanDelete: !!edRaw.id && this.rxCanDelete(edRaw), edDelSure: s.rxDelSure === edRaw.id, edDelete: () => this.rxDelete(edRaw),
