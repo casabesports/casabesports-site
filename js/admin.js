@@ -189,6 +189,24 @@
     '.cba-msg{white-space:pre-wrap;line-height:1.55;margin:.8rem 0;padding:.9rem;background:var(--surface-2,#f6f6f6)}' +
     '.cba-kv{display:grid;grid-template-columns:110px 1fr;gap:.2rem .8rem;font-size:14px}.cba-kv dt{color:var(--muted,#666)}.cba-kv dd{margin:0;overflow-wrap:anywhere}' +
     '.cba-secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem}' +
+    '.cba-nb{display:inline-block;min-width:20px;padding:0 6px;background:var(--ink,#111);color:var(--bg,#fff);font-size:12px;line-height:20px;text-align:center;font-weight:800}' +
+    '.cba-fil{display:flex;flex-direction:column;gap:.7rem;margin-top:1rem}' +
+    '.cba-fil-m{border:1px solid var(--line,#ddd);border-left:4px solid var(--gold-text,#b8860b);padding:.7rem .8rem;background:var(--surface,#fff)}' +
+    '.cba-fil-m.is-env{border-left-color:var(--ink,#111);background:var(--surface-2,#f6f6f6)}' +
+    '.cba-fil-m .cba-msg{margin:.5rem 0}' +
+    '.cba-fil-h{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;font-size:14px}' +
+    '.cba-fil-h span{color:var(--muted,#666)}' +
+    '.cba-fil-h span.cba-tag{color:#fff}' +
+    '.cba-pj{margin:.2rem 0 .8rem;display:flex;flex-wrap:wrap;gap:.45rem;align-items:flex-start}' +
+    '.cba-pj .cba-lbl{width:100%}' +
+    '.cba-pj-it{display:inline-flex;gap:.5rem;align-items:center;border:1px solid var(--line,#ddd);padding:.35rem .6rem .35rem .35rem;color:inherit;text-decoration:none;max-width:320px;background:var(--surface,#fff)}' +
+    '.cba-pj-it[aria-disabled]{opacity:.6;pointer-events:none}' +
+    '.cba-pj-it strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:230px}' +
+    '.cba-pj-it small{display:block;font-size:12px;color:var(--muted,#666)}' +
+    '.cba-pj-img{width:56px;height:56px;object-fit:cover;display:block;background:var(--surface-2,#eee)}' +
+    '.cba-pj-ext{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;background:var(--ink,#111);color:var(--bg,#fff);font-weight:900;font-size:11px;flex:none}' +
+    '.cba-pj-chip{display:inline-flex;gap:.3rem;align-items:center;border:1px solid var(--line,#ddd);padding:.2rem .2rem .2rem .5rem;font-size:13px;background:var(--surface-2,#f6f6f6)}' +
+    '.cba-pj-chip button{border:0;background:none;font-size:18px;cursor:pointer;padding:0 .35rem;color:inherit}' +
     '.cba-tag{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;padding:.1rem .4rem;background:#8a5a00;color:#fff;margin-left:.3rem;vertical-align:middle}' +
     '.cba-ed details{border:1.5px solid var(--line,#ddd);margin:.5rem 0;background:var(--surface,#fff)}' +
     '.cba-ed summary{cursor:pointer;padding:.6rem .8rem;font-weight:800;display:flex;gap:.5rem;align-items:center;list-style:none}' +
@@ -342,49 +360,153 @@
       db(function (c) { return c.from('messages').update({ lu: true }).eq('id', m.id); }).catch(function () {});
     }
   }
+  // ---------- regroupement par personne ----------
+  // Une même personne = même adresse e-mail (sinon même téléphone, sinon même nom). Les réponses envoyées rejoignent son fil.
+  function cleDe(m) {
+    if (m.sens === 'envoye') return m.destinataire ? 'e:' + String(m.destinataire).trim().toLowerCase() : 'id:' + m.id;
+    if (m.email) return 'e:' + String(m.email).trim().toLowerCase();
+    if (m.telephone) return 't:' + String(m.telephone).replace(/[^0-9+]/g, '');
+    if (m.nom) return 'n:' + String(m.nom).trim().toLowerCase();
+    return 'id:' + m.id;
+  }
+  function fils() {
+    var map = {}, ordre = [];
+    S.msgs.forEach(function (m) {
+      var k = cleDe(m), f = map[k];
+      if (!f) { f = map[k] = { cle: k, msgs: [], nom: '', email: '', tel: '', dernier: m.recu_le, nonLus: 0, recus: 0, aTraiter: 0, sources: {} }; ordre.push(f); }
+      f.msgs.push(m);
+      if (m.sens !== 'envoye') {
+        f.recus++; if (!m.lu) f.nonLus++; if (!m.traite) f.aTraiter++;
+        if (!f.nom && m.nom) f.nom = m.nom; if (!f.email && m.email) f.email = m.email; if (!f.tel && m.telephone) f.tel = m.telephone;
+        if (m.source) f.sources[m.source] = 1;
+      } else if (!f.email && m.destinataire) f.email = m.destinataire;
+      if (m.recu_le > f.dernier) f.dernier = m.recu_le;
+    });
+    ordre.forEach(function (f) { f.msgs.sort(function (x, y) { return x.recu_le < y.recu_le ? 1 : -1; }); });
+    return ordre.sort(function (x, y) { return x.dernier < y.dernier ? 1 : -1; });
+  }
+  function grouper() { if (S.grouper == null) { try { S.grouper = localStorage.getItem('cba-msg-grouper') !== 'non'; } catch (e) { S.grouper = true; } } return S.grouper; }
+  function setGrouper(v) { S.grouper = v; try { localStorage.setItem('cba-msg-grouper', v ? 'oui' : 'non'); } catch (e) {} S.sel = null; S.selP = null; render(); }
+  function selectFil(f) {
+    S.selP = f.cle; S.sel = null; S.compose = null; render();
+    if (window.innerWidth < 900) setTimeout(function () { var c = root.querySelector('.cba-split > div:last-child'); if (c && c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30);
+    var ids = f.msgs.filter(function (m) { return m.sens !== 'envoye' && !m.lu; }).map(function (m) { m.lu = true; return m.id; });
+    if (ids.length) { render(); db(function (c) { return c.from('messages').update({ lu: true }).in('id', ids); }).catch(function () {}); }
+  }
+  // ---------- pièces jointes (lien temporaire, voir js/comptes.js) ----------
+  function kb(o) { o = +o || 0; return o >= 1048576 ? (o / 1048576).toFixed(1).replace('.', ',') + ' Mo' : Math.max(1, Math.round(o / 1024)) + ' Ko'; }
+  function viewPieces(m) {
+    var L = Array.isArray(m.pieces) ? m.pieces : []; if (!L.length) return null;
+    return E('div', { class: 'cba-pj' }, E('div', { class: 'cba-lbl', style: 'margin:0 0 .35rem' }, L.length > 1 ? L.length + ' pièces jointes' : 'Pièce jointe'),
+      L.map(function (p) {
+        var img = /^image\/(jpeg|png|webp|gif)$/i.test(p.type || '');
+        var a = E('a', { class: 'cba-pj-it', target: '_blank', rel: 'noopener', download: p.nom || '', 'aria-disabled': 'true' },
+          img ? E('img', { alt: '', class: 'cba-pj-img' }) : E('span', { class: 'cba-pj-ext' }, String(p.nom || '').split('.').pop().slice(0, 4).toUpperCase() || 'FICH'),
+          E('span', {}, E('strong', {}, p.nom || 'Fichier'), E('small', {}, (p.taille ? kb(p.taille) + ' · ' : '') + 'Ouvrir')));
+        if (A.pieceUrl) A.pieceUrl(p.chemin).then(function (u) { if (!u) return; a.href = u; a.removeAttribute('aria-disabled'); var im = a.querySelector('img'); if (im) im.src = u; },
+          function () { a.querySelector('small').textContent = 'Fichier introuvable (supabase/discussions-plus.sql lancé ?)'; });
+        return a;
+      }));
+  }
   function viewMsg() {
-    var list = S.msgs.filter(msgFilter);
-    var sel = S.msgs.find(function (m) { return m.id === S.sel; });
+    var par = grouper();
     var chips = [['tous', 'Reçus'], ['nonlus', 'Non lus'], ['site', 'Demandes du site'], ['mail', 'E-mails'], ['envoyes', 'Envoyés'], ['traites', 'Traités']];
-    var left = E('div', {},
-      E('div', { class: 'cba-row', style: 'margin-bottom:.6rem' }, chips.map(function (c) { return E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String(S.mf === c[0]), onclick: function () { S.mf = c[0]; render(); } }, c[1]); })),
-      E('input', { class: 'cba-in', type: 'search', placeholder: 'Rechercher un nom, un e-mail, un mot…', value: S.q, oninput: function (e) { S.q = e.target.value; var p = e.target.selectionStart; render(); var i = root.querySelector('input[type=search]'); if (i) { i.focus(); try { i.setSelectionRange(p, p); } catch (x) {} } }, style: 'margin-bottom:.6rem' }),
-      E('div', { class: 'cba-list' },
-        !S.loaded.msg ? E('div', { style: 'padding:1rem' }, 'Chargement…') :
+    var liste, right;
+    var sel = S.msgs.find(function (m) { return m.id === S.sel; });
+    var tous = par ? fils() : null;
+    var filSel = par && S.selP ? tous.find(function (f) { return f.cle === S.selP; }) : null;
+    if (par) {
+      liste = tous.filter(function (f) { return f.msgs.some(msgFilter); });
+      liste = !S.loaded.msg ? E('div', { style: 'padding:1rem' }, 'Chargement…') : liste.length ? liste.map(function (f) {
+        var derniers = f.msgs.filter(msgFilter), d = derniers[0] || f.msgs[0];
+        var qui = f.nom || f.email || f.tel || 'Anonyme';
+        return E('button', { type: 'button', class: 'cba-it' + (f.cle === S.selP ? ' on' : ''), onclick: function () { selectFil(f); } },
+          E('span', { class: 't' }, f.nonLus ? E('span', { class: 'cba-dot', 'aria-label': 'non lu' }) : null, qui,
+            f.msgs.length > 1 ? E('span', { class: 'cba-nb', title: f.msgs.length + ' messages' }, String(f.msgs.length)) : null,
+            f.recus && !f.aTraiter ? E('span', { class: 'cba-tag' }, 'traité') : null),
+          E('span', { class: 'm', style: 'display:block' }, (f.nom && f.email ? f.email + ' · ' : '') + fmtDate(f.dernier)),
+          E('span', { class: 'm', style: 'display:block' }, (d.sens === 'envoye' ? 'Vous : ' : '') + (Array.isArray(d.pieces) && d.pieces.length ? '📎 ' : '') + (d.sujet || d.message || '')));
+      }) : E('div', { style: 'padding:1rem;color:var(--muted)' }, 'Aucun message ici.');
+      right = S.compose ? viewCompose() : filSel ? viewFil(filSel) : null;
+    } else {
+      var list = S.msgs.filter(msgFilter);
+      liste = !S.loaded.msg ? E('div', { style: 'padding:1rem' }, 'Chargement…') :
         list.length ? list.map(function (m) {
           var who = m.sens === 'envoye' ? 'À : ' + (m.destinataire || '—') : (m.nom || m.email || m.telephone || 'Anonyme');
           return E('button', { type: 'button', class: 'cba-it' + (m.id === S.sel ? ' on' : ''), onclick: function () { selectMsg(m); } },
             E('span', { class: 't' }, m.sens !== 'envoye' && !m.lu ? E('span', { class: 'cba-dot', 'aria-label': 'non lu' }) : null, who, m.traite ? E('span', { class: 'cba-tag' }, 'traité') : null),
             E('span', { class: 'm', style: 'display:block' }, (m.source || '') + ' · ' + fmtDate(m.recu_le)),
-            E('span', { class: 'm', style: 'display:block' }, m.sujet || m.message || ''));
-        }) : E('div', { style: 'padding:1rem;color:var(--muted)' }, 'Aucun message ici.')),
+            E('span', { class: 'm', style: 'display:block' }, (Array.isArray(m.pieces) && m.pieces.length ? '📎 ' : '') + (m.sujet || m.message || '')));
+        }) : E('div', { style: 'padding:1rem;color:var(--muted)' }, 'Aucun message ici.');
+      right = S.compose ? viewCompose() : sel ? viewOneMsg(sel) : null;
+    }
+    var left = E('div', {},
+      E('div', { class: 'cba-row', style: 'margin-bottom:.6rem' }, chips.map(function (c) { return E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String(S.mf === c[0]), onclick: function () { S.mf = c[0]; render(); } }, c[1]); })),
+      E('div', { class: 'cba-row', style: 'margin-bottom:.6rem;font-size:14px' }, E('span', { style: 'color:var(--muted)' }, 'Affichage :'),
+        E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String(par), onclick: function () { setGrouper(true); } }, 'Par personne'),
+        E('button', { type: 'button', class: 'cba-chip', 'aria-pressed': String(!par), onclick: function () { setGrouper(false); } }, 'Un par un')),
+      E('input', { class: 'cba-in', type: 'search', placeholder: 'Rechercher un nom, un e-mail, un mot…', value: S.q, oninput: function (e) { S.q = e.target.value; var p = e.target.selectionStart; render(); var i = root.querySelector('input[type=search]'); if (i) { i.focus(); try { i.setSelectionRange(p, p); } catch (x) {} } }, style: 'margin-bottom:.6rem' }),
+      E('div', { class: 'cba-list' }, liste),
       E('div', { class: 'cba-row', style: 'margin-top:.6rem' },
-        E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { S.compose = { to: '', subject: '', text: '', replyTo: null }; S.sel = null; render(); } }, 'Écrire un message'),
+        E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { S.compose = { to: '', subject: '', text: '', replyTo: null, pieces: [] }; S.sel = null; S.selP = null; render(); } }, 'Écrire un message'),
         E('button', { type: 'button', class: 'cba-btn', onclick: function () { loadMsgs(); toast('Messagerie actualisée'); } }, 'Actualiser')));
-    var right = S.compose ? viewCompose() : sel ? viewOneMsg(sel) : E('div', { class: 'cba-card' }, E('p', { class: 'cba-sub', style: 'margin:0' }, 'Choisissez un message dans la liste. Les nouvelles demandes du site (contact, OlistO, newsletter, commandes, demandes d’accès) et les e-mails des adresses suivies arrivent ici.'));
-    return [E('h1', { class: 'cba-h' }, 'Messagerie'), E('p', { class: 'cba-sub' }, 'Demandes reçues par le site et e-mails des adresses que vous suivez.'),
+    right = right || E('div', { class: 'cba-card' }, E('p', { class: 'cba-sub', style: 'margin:0' }, par ? 'Choisissez une personne dans la liste : tous ses messages et vos réponses sont rassemblés, du plus récent au plus ancien.' : 'Choisissez un message dans la liste. Les nouvelles demandes du site (contact, OlistO, newsletter, commandes, demandes d’accès) et les e-mails des adresses suivies arrivent ici.'));
+    return [E('h1', { class: 'cba-h' }, 'Messagerie'), E('p', { class: 'cba-sub' }, 'Demandes reçues par le site et e-mails des adresses que vous suivez.' + (par ? ' Les messages d’une même personne sont regroupés.' : '')),
       E('div', { class: 'cba-split' }, left, E('div', {}, right, viewContacts()))];
   }
+  function repondreA(m) { S.compose = { to: m.email, subject: 'Re : ' + (m.sujet || 'votre message à Casa Besports'), text: '\n\n—\nKader Allou · Casa Besports', replyTo: m.id, pieces: [] }; render(); }
+  function boutonsMsg(m, court) {
+    return E('div', { class: 'cba-row' },
+      !court && m.email && m.sens !== 'envoye' ? E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { repondreA(m); } }, 'Répondre') : null,
+      m.sens !== 'envoye' ? E('button', { type: 'button', class: 'cba-btn' + (court ? ' sm' : ''), onclick: function () { var v = !m.traite; m.traite = v; render(); db(function (c) { return c.from('messages').update({ traite: v }).eq('id', m.id); }).catch(err); } }, m.traite ? 'Remettre à traiter' : 'Marquer comme traité') : null,
+      !court && m.sens !== 'envoye' ? E('button', { type: 'button', class: 'cba-btn', onclick: function () { m.lu = false; S.sel = null; render(); db(function (c) { return c.from('messages').update({ lu: false }).eq('id', m.id); }).catch(err); } }, 'Marquer non lu') : null,
+      !court && m.email && m.sens !== 'envoye' && !S.contacts.some(function (c) { return c.email === String(m.email).toLowerCase(); }) ? E('button', { type: 'button', class: 'cba-btn', onclick: function () { addContact(m.email, m.nom); } }, 'Suivre cette adresse') : null,
+      E('button', { type: 'button', class: 'cba-btn dan' + (court ? ' sm' : ''), onclick: function () { if (!confirm('Supprimer définitivement ce message ?')) return; db(function (c) { return c.from('messages').delete().eq('id', m.id); }).then(function () { S.msgs = S.msgs.filter(function (x) { return x.id !== m.id; }); S.sel = null; if (A.removePieces && Array.isArray(m.pieces)) A.removePieces(m.pieces.map(function (p) { return p.chemin; })).catch(function () {}); render(); toast('Message supprimé'); }, err); } }, 'Supprimer'));
+  }
+  function kvDe(m) { return [['Origine', m.source], ['Reçu le', fmtDate(m.recu_le)], ['Nom', m.nom], ['E-mail', m.email ? E('a', { href: 'mailto:' + m.email }, m.email) : null], ['Téléphone', m.telephone ? E('a', { href: 'tel:' + String(m.telephone).replace(/\s/g, '') }, m.telephone) : null], ['Ville', m.ville], ['Profil', m.profil], ['Sujet', m.sujet], ['Page', m.page], ['Destinataire', m.destinataire], ['Consentement', m.consentement]].filter(function (x) { return x[1]; }); }
   function viewOneMsg(m) {
-    var kv = [['Origine', m.source], ['Reçu le', fmtDate(m.recu_le)], ['Nom', m.nom], ['E-mail', m.email ? E('a', { href: 'mailto:' + m.email }, m.email) : null], ['Téléphone', m.telephone ? E('a', { href: 'tel:' + String(m.telephone).replace(/\s/g, '') }, m.telephone) : null], ['Ville', m.ville], ['Profil', m.profil], ['Sujet', m.sujet], ['Page', m.page], ['Destinataire', m.destinataire], ['Consentement', m.consentement]].filter(function (x) { return x[1]; });
     return E('div', { class: 'cba-card' },
       E('div', { class: 'cba-row', style: 'justify-content:space-between' }, E('strong', { style: 'font-size:1.15rem' }, m.sujet || (m.sens === 'envoye' ? 'Message envoyé' : 'Demande du site'))),
-      E('dl', { class: 'cba-kv' }, kv.map(function (x) { return [E('dt', {}, x[0]), E('dd', {}, x[1])]; })),
+      E('dl', { class: 'cba-kv' }, kvDe(m).map(function (x) { return [E('dt', {}, x[0]), E('dd', {}, x[1])]; })),
       E('div', { class: 'cba-msg' }, m.message || '(message vide)'),
-      E('div', { class: 'cba-row' },
-        m.email && m.sens !== 'envoye' ? E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { S.compose = { to: m.email, subject: 'Re : ' + (m.sujet || 'votre message à Casa Besports'), text: '\n\n—\nKader Allou · Casa Besports', replyTo: m.id }; render(); } }, 'Répondre') : null,
-        E('button', { type: 'button', class: 'cba-btn', onclick: function () { var v = !m.traite; m.traite = v; render(); db(function (c) { return c.from('messages').update({ traite: v }).eq('id', m.id); }).catch(err); } }, m.traite ? 'Remettre à traiter' : 'Marquer comme traité'),
-        m.sens !== 'envoye' ? E('button', { type: 'button', class: 'cba-btn', onclick: function () { m.lu = false; S.sel = null; render(); db(function (c) { return c.from('messages').update({ lu: false }).eq('id', m.id); }).catch(err); } }, 'Marquer non lu') : null,
-        m.email && m.sens !== 'envoye' && !S.contacts.some(function (c) { return c.email === String(m.email).toLowerCase(); }) ? E('button', { type: 'button', class: 'cba-btn', onclick: function () { addContact(m.email, m.nom); } }, 'Suivre cette adresse') : null,
-        E('button', { type: 'button', class: 'cba-btn dan', onclick: function () { if (!confirm('Supprimer définitivement ce message ?')) return; db(function (c) { return c.from('messages').delete().eq('id', m.id); }).then(function () { S.msgs = S.msgs.filter(function (x) { return x.id !== m.id; }); S.sel = null; render(); toast('Message supprimé'); }, err); } }, 'Supprimer')));
+      viewPieces(m),
+      boutonsMsg(m, false));
+  }
+  // Toute la conversation avec une personne
+  function viewFil(f) {
+    var dernierRecu = f.msgs.find(function (m) { return m.sens !== 'envoye' && m.email; });
+    var qui = f.nom || f.email || f.tel || 'Anonyme';
+    var aTraiter = f.msgs.filter(function (m) { return m.sens !== 'envoye' && !m.traite; });
+    return E('div', { class: 'cba-card' },
+      E('div', { class: 'cba-row', style: 'justify-content:space-between;align-items:flex-start' },
+        E('div', {}, E('strong', { style: 'font-size:1.2rem;display:block' }, qui),
+          E('span', { style: 'color:var(--muted);font-size:14px' }, [f.nom && f.email ? f.email : null, f.tel, f.msgs.length + ' message' + (f.msgs.length > 1 ? 's' : ''), Object.keys(f.sources).join(', ')].filter(Boolean).join(' · '))),
+        E('div', { class: 'cba-row' },
+          dernierRecu ? E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { repondreA(dernierRecu); } }, 'Répondre') : (f.email ? E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { S.compose = { to: f.email, subject: '', text: '', replyTo: null, pieces: [] }; render(); } }, 'Écrire') : null),
+          aTraiter.length > 1 ? E('button', { type: 'button', class: 'cba-btn', onclick: function () { var ids = aTraiter.map(function (m) { m.traite = true; return m.id; }); render(); db(function (c) { return c.from('messages').update({ traite: true }).in('id', ids); }).catch(err); } }, 'Tout marquer traité') : null,
+          f.email && !S.contacts.some(function (c) { return c.email === String(f.email).toLowerCase(); }) && f.recus ? E('button', { type: 'button', class: 'cba-btn', onclick: function () { addContact(f.email, f.nom); } }, 'Suivre cette adresse') : null)),
+      E('div', { class: 'cba-fil' }, f.msgs.map(function (m) {
+        var envoye = m.sens === 'envoye';
+        var info = kvDe(m).filter(function (x) { return ['Origine', 'Reçu le', 'Nom', 'E-mail', 'Destinataire', 'Sujet'].indexOf(x[0]) < 0; });
+        return E('div', { class: 'cba-fil-m' + (envoye ? ' is-env' : '') },
+          E('div', { class: 'cba-fil-h' }, E('strong', {}, envoye ? 'Vous' : (m.nom || qui)), E('span', {}, (envoye ? 'E-mail envoyé' : (m.source || 'Demande')) + ' · ' + fmtDate(m.recu_le)),
+            !envoye && !m.lu ? E('span', { class: 'cba-dot', 'aria-label': 'non lu' }) : null, m.traite && !envoye ? E('span', { class: 'cba-tag' }, 'traité') : null),
+          m.sujet ? E('div', { style: 'font-weight:800;margin-top:.35rem' }, m.sujet) : null,
+          info.length ? E('dl', { class: 'cba-kv', style: 'margin:.4rem 0 0' }, info.map(function (x) { return [E('dt', {}, x[0]), E('dd', {}, x[1])]; })) : null,
+          E('div', { class: 'cba-msg' }, m.message || '(message vide)'),
+          viewPieces(m),
+          boutonsMsg(m, true));
+      })));
   }
   function viewCompose() {
-    var C = S.compose;
+    var C = S.compose; C.pieces = C.pieces || [];
     var send = function () {
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(C.to.trim())) { toast('Adresse e-mail du destinataire invalide', true); return; }
       if (!C.text.trim()) { toast('Le message est vide', true); return; }
       S.busy = true; render();
-      A.sendMail(C.to.trim(), C.subject.trim() || 'Casa Besports', C.text, C.replyTo).then(function () {
+      // Les pièces jointes partent d'abord dans l'espace privé (dossier admin), puis Brevo les joint à l'e-mail
+      var depot = C.pieces.length ? Promise.all(C.pieces.map(function (p) { return p.piece ? Promise.resolve(p.piece) : A.uploadPiece('admin', p.file).then(function (x) { p.piece = x; return x; }); })) : Promise.resolve([]);
+      depot.then(function (pcs) { return A.sendMail(C.to.trim(), C.subject.trim() || 'Casa Besports', C.text, C.replyTo, pcs); }).then(function () {
         S.busy = false; S.compose = null; toast('Message envoyé'); loadMsgs();
         if (C.replyTo) db(function (c) { return c.from('messages').update({ traite: true }).eq('id', C.replyTo); }).catch(function () {});
       }, function (e) {
@@ -392,16 +514,27 @@
       });
     };
     var mailto = 'mailto:' + encodeURIComponent(C.to.trim()) + '?subject=' + encodeURIComponent(C.subject) + '&body=' + encodeURIComponent(C.text);
+    var fichiers = E('input', { type: 'file', multiple: true, accept: A.PIECES_ACCEPT || '', style: 'position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0', onchange: function (e) {
+      var L = Array.prototype.slice.call(e.target.files || []);
+      L.forEach(function (f) { if (C.pieces.length >= 5) { toast('5 pièces jointes au plus', true); return; } var er = A.pieceOk ? A.pieceOk(f) : ''; if (er) { toast(er, true); return; } C.pieces.push({ file: f, nom: f.name, taille: f.size }); });
+      render();
+    } });
     return E('div', { class: 'cba-card' },
       E('strong', { style: 'font-size:1.15rem' }, C.replyTo ? 'Répondre' : 'Nouveau message'),
       E('label', { class: 'cba-lbl' }, 'À'), E('input', { class: 'cba-in', type: 'email', value: C.to, oninput: function (e) { C.to = e.target.value; }, list: 'cba-contacts' }),
       E('datalist', { id: 'cba-contacts' }, S.contacts.map(function (c) { return E('option', { value: c.email }, c.nom || ''); })),
       E('label', { class: 'cba-lbl' }, 'Objet'), E('input', { class: 'cba-in', value: C.subject, oninput: function (e) { C.subject = e.target.value; } }),
       E('label', { class: 'cba-lbl' }, 'Message'), E('textarea', { class: 'cba-in', style: 'min-height:220px', value: C.text, oninput: function (e) { C.text = e.target.value; } }),
+      E('div', { class: 'cba-row', style: 'margin-top:.6rem' },
+        A.uploadPiece ? E('label', { class: 'cba-btn', style: 'position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:.35rem' }, '📎 Joindre un fichier', fichiers) : null,
+        E('span', { style: 'color:var(--muted);font-size:13px' }, 'Photos, PDF, Word, Excel · 10 Mo par fichier, 5 au plus')),
+      C.pieces.length ? E('div', { class: 'cba-row', style: 'margin-top:.5rem' }, C.pieces.map(function (p, i) {
+        return E('span', { class: 'cba-pj-chip' }, '📎 ' + p.nom + ' (' + kb(p.taille) + ')', E('button', { type: 'button', 'aria-label': 'Retirer ' + p.nom, onclick: function () { C.pieces.splice(i, 1); render(); } }, '×'));
+      })) : null,
       C.fallback ? E('div', { class: 'cba-note', style: 'margin-top:.8rem' }, C.raison ? 'L’envoi direct a échoué : ' + C.raison + '. En attendant, envoyez-le depuis votre messagerie habituelle : ' : 'L’envoi direct depuis le site n’est pas encore activé (voir Aide). Envoyez-le depuis votre messagerie habituelle : ',
-        E('a', { href: mailto, onclick: function () { db(function (c) { return c.from('messages').insert({ source: 'E-mail', sens: 'envoye', destinataire: C.to.trim(), sujet: C.subject, message: C.text, reponse_a: C.replyTo, lu: true, traite: true }); }).then(function () { loadMsgs(); }, function () {}); } }, 'ouvrir dans ma messagerie'), '.') : null,
+        E('a', { href: mailto, onclick: function () { db(function (c) { return c.from('messages').insert({ source: 'E-mail', sens: 'envoye', destinataire: C.to.trim(), sujet: C.subject, message: C.text, reponse_a: C.replyTo, lu: true, traite: true }); }).then(function () { loadMsgs(); }, function () {}); } }, 'ouvrir dans ma messagerie'), C.pieces.length ? ' (pensez à y joindre vos fichiers à la main).' : '.') : null,
       E('div', { class: 'cba-row', style: 'margin-top:.8rem' },
-        E('button', { type: 'button', class: 'cba-btn pri', disabled: S.busy || null, onclick: send }, S.busy ? 'Envoi…' : 'Envoyer'),
+        E('button', { type: 'button', class: 'cba-btn pri', disabled: S.busy || null, onclick: send }, S.busy ? (C.pieces.length ? 'Envoi des fichiers…' : 'Envoi…') : 'Envoyer'),
         E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.compose = null; render(); } }, 'Annuler')));
   }
   function addContact(email, nom) {

@@ -117,6 +117,8 @@ Tant que ce n'est pas fait, l'espace Rédaction affiche un bandeau « Étape à 
 
 Dès l'installation, toutes les demandes du site arrivent ici : contact, OlistO, newsletter, commandes, demandes d'accès. Filtres : Reçus, Non lus, Demandes du site, E-mails, Envoyés, Traités.
 
+Les messages d'une même personne (même e-mail, sinon même téléphone ou même nom) sont **regroupés** en un seul fil avec vos réponses (choix « Par personne » ; « Un par un » remet la liste détaillée). Les **pièces jointes** du formulaire de contact s'ouvrent depuis le message, et « 📎 Joindre un fichier » ajoute des fichiers à vos e-mails. Mise en place : docs/DISCUSSIONS.md, partie « Nouveautés ».
+
 **Répondre** : tant que l'envoi direct n'est pas activé, le site vous propose « ouvrir dans ma messagerie » (votre Outlook, avec le texte déjà rempli) et garde une trace de la réponse.
 
 ### Activer l'envoi direct depuis le site (gratuit, 15 minutes)

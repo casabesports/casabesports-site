@@ -196,6 +196,7 @@ class Component extends DCLogic {
       window.addEventListener('popstate', this._onPop);
     } catch (e) {}
     this.stripeReturn();
+    try { const dq = new URLSearchParams(location.search).get('discussion'); if (dq && typeof CasaDiscussions !== 'undefined') setTimeout(() => { this.go('clubhouse', { chTab: 'discussions' }); CasaDiscussions.ouvrirLien(this, dq); }, 0); } catch (e) {}
     try { const gq = new URLSearchParams(location.search).get('groupe'); if (gq && typeof CasaDiscussions !== 'undefined') setTimeout(() => { this.go('clubhouse', { chTab: 'discussions' }); CasaDiscussions.invitation(this, gq); }, 0); } catch (e) {}
     try { const mq = new URLSearchParams(location.search).get('membre'); if (mq) setTimeout(() => { this.go('verifier', { mbQ: mq.slice(0, 20) }); this.checkMember(mq); }, 0); } catch (e) {}
     try { const vq = new URLSearchParams(location.search).get('verifier'); if (vq) setTimeout(() => this.go('verifier', { verifId: vq.slice(0, 20) }), 0); } catch (e) {}
@@ -1271,7 +1272,19 @@ class Component extends DCLogic {
         fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }).catch(() => {});
       }
     } catch (e) {}
-    try { if (window.CasaAuth && window.CasaAuth.saveLead) window.CasaAuth.saveLead(d).catch(() => {}); } catch (e) {}
+    // Formulaire de contact : les pièces jointes partent d'abord dans l'espace privé (supabase/discussions-plus.sql), puis la demande les cite
+    const A = window.CasaAuth, att = ev.avecPieces ? (this.state.ctPieces || []) : [];
+    if (att.length && A && A.on && A.uploadPiece) {
+      this.setState({ ctPjEtat: 'envoi', ctPjErr: '', ctPjN: att.length });
+      Promise.all(att.map((p) => A.uploadPiece('contact', p.file)))
+        .then((pcs) => A.saveLead(Object.assign({}, d, { pieces: pcs })).then(() => this.setState({ ctPjEtat: 'ok', ctPieces: [] })))
+        .catch((e) => {
+          this.setState({ ctPjEtat: 'ko', ctPjErr: (e && e.message) || 'envoi impossible' });
+          A.saveLead(Object.assign({}, d, { message: d.message + '\n\n[Pièces jointes non reçues : ' + att.map((p) => p.nom).join(', ') + ']' })).catch(() => {});
+        });
+      return;
+    }
+    try { if (A && A.saveLead) A.saveLead(d).catch(() => {}); } catch (e) {}
   }
   crmCapture(ev) {
     this.sendLead(ev);
@@ -3601,8 +3614,8 @@ class Component extends DCLogic {
         if (joueur && (!s.name.trim() || !validEmail || !(s.jDisc || '').trim() || !(s.jClub || '').trim())) { this.setState({ formError: 'Nom, e-mail valide, discipline et club sont requis.' }); return; }
         if (joueur && (!s.jAge || !s.jPub)) { this.setState({ formError: 'Cochez les deux accords obligatoires pour que votre fiche puisse être publiée.' }); return; }
         if (joueur) { const fiche = 'FICHE JOUEUR — à ajouter dans Admin › Contenus › Joueurs après vérification\nNom : ' + s.name.trim() + '\nDiscipline : ' + s.jDisc.trim() + '\nClub : ' + s.jClub.trim() + '\nPoste : ' + ((s.jPoste || '').trim() || '—') + '\nPhoto : ' + ((s.jPhoto || '').trim() || 'à envoyer en réponse à ce message') + '\nAccords donnés le ' + new Date().toLocaleString('fr-FR') + ' : 15 ans ou plus, ou accord du représentant légal ✓ · publication du nom, club, poste et photo ✓ · droits sur la photo ' + (s.jDroits ? '✓' : 'non confirmés (ne pas publier la photo)') + '\n\n' + (s.message || '').trim();
-          this.setState({ contactSent: true, formError: '' }); this.crmCapture({ name: s.name.trim(), email: s.email, source: 'Fiche joueur', type: 'Joueur', consent: 'oui', subject: s.subject || 'Fiche joueur', profile: 'Joueur', message: fiche, note: 'Fiche joueur — ' + s.jDisc.trim() + ' · ' + s.jClub.trim() }); return; }
-        if (!s.name.trim() || !validEmail || !s.message.trim()) { this.setState({ formError: 'Nom, e-mail valide et message sont requis.' }); return; } this.setState({ contactSent: true, formError: '' }); const isOl = /olisto/i.test(s.subject || ''); if (isOl) this.forwardOlisto({ nom: s.name.trim(), email: s.email.trim(), telephone: (s.olPhone || '').trim(), sujet: s.subject || '', message: s.message.trim() }); this.crmCapture({ name: s.name.trim(), email: s.email, phone: isOl ? (s.olPhone || '').trim() : '', source: isOl ? 'Formulaire OlistO' : 'Formulaire contact', type: ({ Club: 'Club', Annonceur: 'Annonceur', Partenaire: 'Partenaire' })[s.profile] || 'Supporter', consent: '?', subject: s.subject, profile: s.profile, message: s.message.trim(), note: (s.subject ? s.subject + ' — ' : '') + s.message.trim().slice(0, 200) }); },
+          this.setState({ contactSent: true, formError: '' }); this.crmCapture({ avecPieces: true, name: s.name.trim(), email: s.email, source: 'Fiche joueur', type: 'Joueur', consent: 'oui', subject: s.subject || 'Fiche joueur', profile: 'Joueur', message: fiche, note: 'Fiche joueur — ' + s.jDisc.trim() + ' · ' + s.jClub.trim() }); return; }
+        if (!s.name.trim() || !validEmail || !s.message.trim()) { this.setState({ formError: 'Nom, e-mail valide et message sont requis.' }); return; } this.setState({ contactSent: true, formError: '' }); const isOl = /olisto/i.test(s.subject || ''); if (isOl) this.forwardOlisto({ nom: s.name.trim(), email: s.email.trim(), telephone: (s.olPhone || '').trim(), sujet: s.subject || '', message: s.message.trim() }); this.crmCapture({ avecPieces: true, name: s.name.trim(), email: s.email, phone: isOl ? (s.olPhone || '').trim() : '', source: isOl ? 'Formulaire OlistO' : 'Formulaire contact', type: ({ Club: 'Club', Annonceur: 'Annonceur', Partenaire: 'Partenaire' })[s.profile] || 'Supporter', consent: '?', subject: s.subject, profile: s.profile, message: s.message.trim(), note: (s.subject ? s.subject + ' — ' : '') + s.message.trim().slice(0, 200) }); },
       olForm: (() => {
         const K = this.partnerContact((X.partners || []).find((p) => p.id === 'olisto'));
         const on = /olisto/i.test(s.subject || '') && !!(K.email || K.tel);
@@ -3610,7 +3623,22 @@ class Component extends DCLogic {
         return { on, nom: K.nom || 'OlistO', email: K.email, tel: K.tel, mailHref: K.mailHref, telHref: K.telHref, phone: s.olPhone || '', onPhone: (e) => this.setState({ olPhone: e.target.value }),
           sentOk: on && s.olFwd === 'ok', sentKo: on && s.olFwd === 'ko' && !!K.email, mailFull: K.email ? K.mailHref + '?subject=' + encodeURIComponent(s.subject || 'Demande OlistO') + '&body=' + encodeURIComponent(body) : '' };
       })(),
-      newMessage: () => this.setState({ contactSent: false, message: '', subject: '', olFwd: null }),
+      newMessage: () => this.setState({ contactSent: false, message: '', subject: '', olFwd: null, ctPieces: [], ctPjEtat: null, ctPjErr: '' }),
+      // Pièces jointes du formulaire de contact (5 au plus, 10 Mo chacune)
+      ctPj: (() => {
+        const A = window.CasaAuth, on = !!(A && A.on && A.uploadPiece), L = s.ctPieces || [];
+        const ext = (n) => { const e = String(n || '').split('.'); return e.length > 1 ? e.pop().slice(0, 4).toUpperCase() : 'FICHIER'; };
+        const kb = (o) => o >= 1048576 ? (o / 1048576).toFixed(1).replace('.', ',') + ' Mo' : Math.max(1, Math.round(o / 1024)) + ' Ko';
+        return { on, accept: on ? A.PIECES_ACCEPT : '', liste: L.map((p) => ({ nom: p.nom, taille: kb(p.taille), ext: ext(p.nom), retirer: () => this.setState({ ctPieces: (this.state.ctPieces || []).filter((x) => x.id !== p.id) }) })),
+          has: L.length > 0, plein: L.length >= 5, pasPlein: L.length < 5,
+          onFichiers: (e) => {
+            const files = e && e.target && e.target.files ? Array.from(e.target.files) : []; try { e.target.value = ''; } catch (er) {}
+            const cur = (this.state.ctPieces || []).slice();
+            files.forEach((f) => { if (cur.length >= 5) { this.say('5 pièces jointes au plus'); return; } const er = A.pieceOk(f); if (er) { this.say(er); return; } cur.push({ id: Math.random().toString(36).slice(2), file: f, nom: f.name, taille: f.size }); });
+            this.setState({ ctPieces: cur });
+          },
+          envoi: s.ctPjEtat === 'envoi', ok: s.ctPjEtat === 'ok', ko: s.ctPjEtat === 'ko', err: s.ctPjErr || '', n: String(s.ctPjN || 0), nPlur: (s.ctPjN || 0) > 1 ? 's' : '' };
+      })(),
       goals, partnerContact: () => this.go('contact', { subject: 'Partenariat — ' + s.goal, profile: 'Entreprise', contactSent: false }),
       nlOpen: !s.nlDone, nlDone: s.nlDone, nlEmail: s.nlEmail, onNl: (e) => this.setState({ nlEmail: e.target.value }),
       subscribeNl: () => { if (/.+@.+\..+/.test(s.nlEmail)) { this.setState({ nlDone: true }); this.crmCapture({ email: s.nlEmail, name: s.nlEmail.split('@')[0], source: 'Newsletter', consent: 'oui', note: 'Inscription au récap du lundi' }); } else this.say('Saisissez un e-mail valide'); },
