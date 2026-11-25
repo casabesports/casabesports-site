@@ -6091,6 +6091,8 @@ img, video, canvas, svg { max-width: 100%; }
         </div>
         <button type="button" class="btn btn-gold" onClick="{{newPost}}" style="width: 100%; margin-top: 1rem">{{newPostLabel}}</button>
         <button type="button" class="btn btn-ghost" onClick="{{lu.open}}" style="width: 100%; margin-top: .5rem">Casa Line Up · compositions</button>
+        <button type="button" class="btn btn-ghost" onClick="{{badgeOpen}}" style="width: 100%; margin-top: .5rem">Mon badge BE+</button>
+        <button type="button" class="btn btn-ghost" onClick="{{trombiOpen}}" style="width: 100%; margin-top: .5rem">Trombinoscope</button>
         <sc-if value="{{showRoleSwitch}}" hint-placeholder-val="{{ true }}"><div style="border-top: 1px solid var(--line); margin-top: 1rem; padding-top: .9rem">
           <div class="cond" style="font-size: 11px; color: var(--muted); margin-bottom: .4rem">Démo : changer de rôle</div>
           <div style="display: flex; flex-wrap: wrap; gap: .3rem"><sc-for list="{{roleSwitch}}" as="rs" hint-placeholder-count="2"><button type="button" onClick="{{rs.pick}}" style="flex: 1 1 auto; white-space: nowrap; padding: 0 .55rem; min-height: 36px; border-radius: 0; cursor: pointer; font-size: 12.5px; font-weight: 700; background: {{rs.bg}}; color: {{rs.fg}}; border: 1px solid {{rs.border}}">{{rs.label}}</button></sc-for></div>
@@ -6282,6 +6284,7 @@ img, video, canvas, svg { max-width: 100%; }
             <sc-if value="{{rs.adm.isCv}}" hint-placeholder-val="{{ false }}">
               <p class="tr-p">Vérifiez l’identité de la personne, confirmez son parcours sportif auprès des clubs cités et regardez ses diplômes avant de certifier. Le certificat porte l’empreinte du CV : toute modification ultérieure fait tomber le sceau.</p>
               <sc-if value="{{cvv.adm.loading}}" hint-placeholder-val="{{ false }}"><p class="tr-muted pulse">Chargement…</p></sc-if>
+              <sc-if value="{{cvv.adm.hasErr}}" hint-placeholder-val="{{ false }}"><p class="rx-alert" role="status"><strong>Étape à faire :</strong> {{cvv.adm.err}}</p></sc-if>
               <sc-if value="{{cvv.adm.noRows}}" hint-placeholder-val="{{ false }}"><p class="tr-muted">Aucune demande de certification pour l’instant.</p></sc-if>
               <div class="rs-split">
                 <div class="rs-list"><sc-for list="{{cvv.adm.rows}}" as="r" hint-placeholder-count="2"><button type="button" class="rs-row" aria-current="{{r.cur}}" onClick="{{r.pick}}"><span class="rs-row-h"><span class="bn-etiq">{{r.ref}}</span><span class="cv-badge {{r.stCls}}">{{r.statut}}</span></span><strong>{{r.nom}}</strong><span class="tr-muted">{{r.email}} · {{r.at}}</span></button></sc-for></div>
@@ -10147,6 +10150,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <script src="js/notifications.js?v=__VERSION__"></script>
 <script src="js/casa-ia.js?v=__VERSION__"></script>
 <script src="js/partage.js?v=__VERSION__"></script>
+<script src="js/badge.js?v=__VERSION__"></script>
 <script src="js/app.js?v=__VERSION__"></script>
 <script src="js/import-calendrier.js?v=__VERSION__"></script>
 <script src="js/admin.js?v=__VERSION__"></script>

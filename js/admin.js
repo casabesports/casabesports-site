@@ -113,7 +113,7 @@
   var LONG = /^(description|transcription|handi|handiInfos|horaires|telephone|body|bodyEn|desc|texte|text|dek|dekEn|hook|moment|t|kicker|accroche|motif|message|why|citation|citationEn|note|lead|a|d|ours|solutions)$/;
 
   // ---------- état ----------
-  var S = { open: false, tab: 'msg', setup: null, msgs: [], mf: 'tous', q: '', sel: null, compose: null, contacts: [], team: [], reqs: [], subs: [], key: null, work: null, dirty: false, openCards: {}, images: [], busy: false, loaded: {} };
+  var S = { open: false, tab: 'msg', setup: null, msgs: [], mf: 'tous', q: '', sel: null, compose: null, contacts: [], team: [], reqs: [], subs: [], key: null, work: null, dirty: false, openCards: {}, images: [], busy: false, loaded: {}, val: { badges: [], cv: [], loaded: false, err: '' }, valNote: {} };
   var root, body, toastEl, pushed = false, timer = null;
 
   // ---------- outils ----------
@@ -256,7 +256,7 @@
     if (location.hash !== '#/admin') { try { history.pushState(null, '', '#/admin'); pushed = true; } catch (e) {} }
     try { document.title = 'Espace administrateur · Casa Besports'; } catch (e) {}
     if (A.myRole) A.myRole().then(function (r) { S.setup = r === 'admin' ? 'ok' : 'norole'; render(); }, function () { S.setup = 'sql'; render(); });
-    loadTab(S.tab);
+    loadTab(S.tab); if (S.tab !== 'valid') loadValid();
     timer = setInterval(function () { if (S.tab === 'msg' && !S.compose) loadMsgs(true); }, 60000);
   }
   function close(fromPop) {
@@ -298,6 +298,7 @@
     else if (t === 'clics') loadClics();
     else if (t === 'notif') loadNotif();
     else if (t === 'img') loadImages();
+    else if (t === 'valid') loadValid();
     render();
   }
   function setTab(t) {
@@ -315,7 +316,7 @@
     if (!root) return;
     var y = body ? body.scrollTop : 0;
     root.textContent = '';
-    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['subs', 'Abonnés', 0], ['clics', 'Clics boutiques', 0], ['notif', 'Notifications', 0], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
+    var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['subs', 'Abonnés', 0], ['clics', 'Clics boutiques', 0], ['notif', 'Notifications', 0], ['valid', 'Demandes à valider', pendingVal()], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
     add(root, E('div', { class: 'cba-top' },
       E('span', { class: 'cba-brand' }, E('span', { class: 'long' }, 'Casa Besports · '), 'Administration'),
       E('div', { class: 'cba-tabs', role: 'tablist' }, tabs.map(function (t) {
@@ -326,9 +327,80 @@
     var w = E('div', { class: 'cba-wrap' });
     if (S.setup === 'sql') add(w, E('div', { class: 'cba-note' }, E('strong', {}, 'Une étape à faire une seule fois. '), 'La base de l’espace administrateur n’est pas encore installée : ouvrez Supabase › SQL Editor › New query, collez le contenu du fichier supabase/administration.sql du dépôt, puis cliquez « Run ». Rechargez ensuite cette page. (Guide : docs/ESPACE-ADMIN.md)'));
     else if (S.setup === 'norole') add(w, E('div', { class: 'cba-note' }, 'Votre compte n’est pas reconnu comme administrateur par Supabase : vérifiez que votre adresse e-mail est confirmée et qu’elle figure dans la table « equipe » avec le rôle admin.'));
-    add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, subs: viewSubs, clics: viewClics, notif: viewNotif, team: viewTeam, help: viewHelp })[S.tab]());
+    add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, subs: viewSubs, clics: viewClics, notif: viewNotif, valid: viewValid, team: viewTeam, help: viewHelp })[S.tab]());
     add(body, w); add(root, body);
     body.scrollTop = y;
+  }
+
+  // ================= DEMANDES À VALIDER : badges BE+ et certifications de CV (supabase/badges.sql) =================
+  function valSql(e) { return /badges_be|cv_demandes|does not exist|PGRST20[25]|42P01|schema cache/i.test(String((e && (e.message || e.code)) || '')); }
+  function loadValid() {
+    return Promise.all([
+      db(function (c) { return c.from('badges_be').select('*').order('modifie_le', { ascending: false }).limit(300); }),
+      db(function (c) { return c.from('cv_demandes').select('ref, nom, email, statut, cree_le, decide_le, origine, note, certificat_id').order('cree_le', { ascending: false }).limit(300); })
+    ]).then(function (r) { S.val = { badges: r[0] || [], cv: r[1] || [], loaded: true, err: '' }; render(); },
+      function (e) { S.val = { badges: [], cv: [], loaded: true, err: valSql(e) ? 'sql' : ((e && e.message) || 'Chargement impossible') }; render(); });
+  }
+  function pendingVal() { return S.val.badges.filter(function (b) { return b.statut === 'en_attente'; }).length + S.val.cv.filter(function (d) { return d.statut === 'en attente'; }).length; }
+  function badgeDecide(b, decision) {
+    var motif = String(S.valNote[b.id] || '').trim();
+    if (['correction', 'refuser', 'suspendre'].indexOf(decision) >= 0 && !motif) { toast('Écrivez le motif dans la case : la personne le verra', true); return; }
+    if (decision === 'suspendre' && !confirm('Suspendre le badge ' + (b.numero || '') + ' ? Il disparaît du trombinoscope et son QR code affichera « non reconnu ».')) return;
+    db(function (c) { return c.rpc('badge_decider', { badge: b.id, decision: decision, motif: motif || null }); }).then(function (r) {
+      var x = Array.isArray(r) ? r[0] : r; delete S.valNote[b.id];
+      toast(decision === 'valider' || decision === 'reactiver' ? 'Badge validé : n° ' + ((x && x.numero) || '') : decision === 'correction' ? 'Correction demandée' : decision === 'refuser' ? 'Badge refusé' : 'Badge suspendu');
+      loadValid();
+    }, err);
+  }
+  function badgeCard(b) {
+    var face = E('div', { style: 'flex:0 0 150px;max-width:150px' }); face.innerHTML = window.CasaBadge ? window.CasaBadge.recto(b) : '';
+    var sv = face.querySelector('svg'); if (sv) { sv.style.width = '100%'; sv.style.height = 'auto'; sv.style.display = 'block'; }
+    var lab = { brouillon: 'Brouillon', en_attente: 'À valider', valide: 'Validé', correction: 'Correction demandée', refuse: 'Refusé', suspendu: 'Suspendu' }[b.statut] || b.statut;
+    var pend = b.statut === 'en_attente', on = b.statut === 'valide';
+    return E('div', { class: 'cba-card', style: 'display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-start' }, face,
+      E('div', { style: 'flex:1 1 260px;min-width:0' },
+        E('strong', {}, ((b.prenom || '') + ' ' + (b.nom || '')).trim() || '(sans nom)'), ' ', E('span', { class: 'cba-badge', style: 'background:' + (pend ? '#b7791f' : on ? '#2f6b4f' : '#7a8790') }, lab),
+        E('div', { style: 'color:var(--muted);margin:.2rem 0 .4rem' }, [b.fonction, b.club, b.discipline, b.ville].filter(Boolean).join(' · ')),
+        E('div', { style: 'font-size:13px;color:var(--muted)' }, (b.email || '') + (b.demande_le ? ' · envoyé le ' + fmtDate(b.demande_le) : '') + (b.numero ? ' · n° ' + b.numero : '') + (b.expire_le ? ' · valable jusqu’au ' + new Date(b.expire_le).toLocaleDateString('fr-FR') : '')),
+        b.presentation ? E('div', { class: 'cba-msg' }, b.presentation) : null,
+        b.note ? E('div', { style: 'font-size:13px;margin-top:.3rem' }, 'Dernier message envoyé : ' + b.note) : null,
+        !b.photo && pend ? E('div', { style: 'color:#9b1c2b;font-size:13px;margin-top:.3rem' }, 'Pas de photo.') : null,
+        E('input', { class: 'cba-in', style: 'margin-top:.6rem', placeholder: 'Motif ou message (obligatoire pour une correction, un refus ou une suspension)', value: S.valNote[b.id] || '', oninput: function (e) { S.valNote[b.id] = e.target.value; } }),
+        E('div', { class: 'cba-row' },
+          pend || b.statut === 'correction' || b.statut === 'refuse' ? E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { badgeDecide(b, 'valider'); } }, 'Valider le badge') : null,
+          b.statut === 'suspendu' ? E('button', { type: 'button', class: 'cba-btn pri', onclick: function () { badgeDecide(b, 'reactiver'); } }, 'Réactiver') : null,
+          pend ? E('button', { type: 'button', class: 'cba-btn', onclick: function () { badgeDecide(b, 'correction'); } }, 'Demander une correction') : null,
+          pend ? E('button', { type: 'button', class: 'cba-btn dan', onclick: function () { badgeDecide(b, 'refuser'); } }, 'Refuser') : null,
+          on ? E('button', { type: 'button', class: 'cba-btn dan', onclick: function () { badgeDecide(b, 'suspendre'); } }, 'Suspendre') : null,
+          on && b.numero ? E('a', { class: 'cba-btn', href: '/?badge=' + encodeURIComponent(b.numero), target: '_blank', rel: 'noopener' }, 'Voir au trombinoscope') : null,
+          b.email ? E('button', { type: 'button', class: 'cba-btn', onclick: function () { S.tab = 'msg'; S.compose = { to: b.email, subject: 'Votre badge BE+', text: '', replyTo: null }; loadTab('msg'); } }, 'Lui écrire') : null)));
+  }
+  function ouvrirCv(ref) {
+    close();
+    setTimeout(function () { var app = window.CasaSite; if (!app) return; app.setState({ rsu: Object.assign({}, app.state.rsu || {}, { adm: 'cv' }), cvu: Object.assign({}, app.state.cvu || {}, { cvSel: ref || '', cvChk: null }), cvAdm: null }); app._cvAdmL = false; app.go('studio', { studioTab: 'reseau' }); }, 450);
+  }
+  function viewValid() {
+    var V = S.val, bp = V.badges.filter(function (b) { return b.statut === 'en_attente'; }), bo = V.badges.filter(function (b) { return b.statut !== 'en_attente' && b.statut !== 'brouillon'; }), bd = V.badges.filter(function (b) { return b.statut === 'brouillon'; });
+    var cp = V.cv.filter(function (d) { return d.statut === 'en attente'; }), co = V.cv.filter(function (d) { return d.statut !== 'en attente'; });
+    var CVL = { certifie: 'Certifié', complement: 'Complément demandé', refusee: 'Refusé', retiree: 'Retirée par la personne' };
+    var cvRow = function (d) {
+      return E('div', { class: 'cba-card' }, E('strong', {}, d.nom || d.email || d.ref), ' ', E('span', { style: 'color:var(--muted)' }, (d.email || '') + ' · ' + fmtDate(d.cree_le) + ' · ' + d.ref),
+        d.statut !== 'en attente' ? E('div', { style: 'font-size:13px;margin-top:.2rem' }, (CVL[d.statut] || d.statut) + (d.certificat_id ? ' · n° ' + d.certificat_id : '') + (d.note ? ' · ' + d.note : '')) : null,
+        d.origine && /^appareil/.test(d.origine) ? E('div', { style: 'font-size:13px;color:var(--muted);margin-top:.2rem' }, 'Demande faite avant la mise en ligne, transmise automatiquement depuis l’appareil de la personne.') : null,
+        E('div', { class: 'cba-row' }, E('button', { type: 'button', class: d.statut === 'en attente' ? 'cba-btn pri' : 'cba-btn', onclick: function () { ouvrirCv(d.ref); } }, d.statut === 'en attente' ? 'Ouvrir le CV et vérifier' : 'Voir')));
+    };
+    var out = [E('h1', { class: 'cba-h' }, 'Demandes à valider'),
+      E('p', { class: 'cba-sub' }, 'Les badges BE+ envoyés par les correspondants et personnes agréées, et les demandes de certification des CV. Tout arrive ici, quel que soit l’appareil utilisé par la personne. Rien n’est publié sans votre validation.'),
+      E('div', { class: 'cba-row' }, E('button', { type: 'button', class: 'cba-btn', onclick: function () { loadValid(); toast('Liste actualisée'); } }, 'Actualiser'), E('a', { class: 'cba-btn', href: '/?trombinoscope', target: '_blank', rel: 'noopener' }, 'Voir le trombinoscope'))];
+    if (V.err === 'sql') { out.push(E('div', { class: 'cba-note' }, E('strong', {}, 'Une étape à faire une seule fois. '), 'Ouvrez Supabase › SQL Editor › New query, collez le contenu du fichier supabase/badges.sql du dépôt, puis cliquez « Run ». Rechargez ensuite cette page. Guide pas à pas : docs/BADGES-BE.md.')); return out; }
+    if (V.err) out.push(E('div', { class: 'cba-note' }, 'Chargement impossible : ' + V.err));
+    if (!V.loaded) { out.push(E('p', { style: 'color:var(--muted)' }, 'Chargement…')); return out; }
+    out.push(E('h2', { style: 'margin:1.2rem 0 .5rem' }, 'Badges BE+ à valider (' + bp.length + ')'), bp.length ? bp.map(badgeCard) : E('p', { style: 'color:var(--muted)' }, 'Aucun badge en attente.'));
+    out.push(E('h2', { style: 'margin:1.6rem 0 .5rem' }, 'Certifications de CV à vérifier (' + cp.length + ')'), cp.length ? cp.map(cvRow) : E('p', { style: 'color:var(--muted)' }, 'Aucune demande en attente.'));
+    if (bo.length) out.push(E('h2', { style: 'margin:1.6rem 0 .5rem' }, 'Badges déjà traités (' + bo.length + ')'), bo.map(badgeCard));
+    if (bd.length) out.push(E('p', { style: 'color:var(--muted);margin-top:1rem' }, bd.length + ' badge(s) en brouillon, pas encore envoyé(s) : ' + bd.map(function (b) { return ((b.prenom || '') + ' ' + (b.nom || '')).trim() || b.email; }).join(', ') + '.'));
+    if (co.length) out.push(E('h2', { style: 'margin:1.6rem 0 .5rem' }, 'Certifications déjà traitées (' + co.length + ')'), co.slice(0, 40).map(cvRow));
+    return out;
   }
 
   // ================= MESSAGERIE =================

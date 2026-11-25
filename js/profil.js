@@ -84,6 +84,14 @@ var CasaCV = (function () {
   var srvPublic = function () { return !!(window.CB && window.CB.call && window.CB_SERVER); };
   var srvStaff = function () { return !!(window.CB && window.CB.user && window.CB.call); };
   var call = function (m, p, b) { return window.CB.call(m, p, b); };
+  /* Supabase (supabase/badges.sql) : les demandes de certification sont enregistrées en ligne et visibles par l’administrateur sur tous ses appareils */
+  var sbOn = function () { var a = window.CasaAuth; return !!(a && a.on && a.db); };
+  var sbUser = function () { var a = window.CasaAuth; return sbOn() && a.user ? a.user : null; };
+  var sbAdmin = function (self) { return sbUser() && self.state.role === 'admin'; };
+  var sb = function (fn) { return window.CasaAuth.db(fn); };
+  var sbSql = function (e) { return /cv_demandes|cv_certificats|cv_decider|cv_verifier|does not exist|PGRST20[25]|42P01|42883|schema cache/i.test(String((e && (e.message || e.code)) || '')); };
+  var certDe = function (k) { return k ? { id: k.id, h: k.h, ph: k.ph || '', nom: k.nom, titre: k.titre, emisLe: k.emis_le, par: k.par, revoque: !!k.revoque } : null; };
+  var demDe = function (d) { return { ref: d.ref, at: d.cree_le, statut: d.statut, email: d.email, nom: d.nom, cv: d.cv, photo: d.photo || '', note: d.note || '', certificat_id: d.certificat_id, origine: d.origine }; };
   var U = function (self) { return self.state.cvu || {}; };
   var ui = function (self, p) { self.setState({ cvu: Object.assign({}, self.state.cvu || {}, p) }); };
   var pill = function (on) { return { bg: on ? 'var(--inv-bg)' : 'var(--surface)', fg: on ? 'var(--on-inv)' : 'var(--text)', border: on ? 'var(--ink)' : 'var(--line-2)', pressed: on ? 'true' : 'false' }; };
@@ -266,6 +274,26 @@ var CasaCV = (function () {
       var certState = !cert ? 'aucun' : !h || (P.photo && !ph) ? 'calcul' : cert.h === h && (cert.ph || '') === (ph || '') ? 'valide' : 'modifie';
       if (cert && cert.revoque) certState = 'revoque';
       var dem = P.dem;
+      /* demande faite avant la mise en ligne (restée sur cet appareil) : envoyée automatiquement à l’administrateur */
+      if (dem && dem.statut === 'en attente' && dem.key === 'demo' && !srvPublic() && sbUser() && !self._cvMig) {
+        self._cvMig = true;
+        var loc = readLS('cb-cvdem-v1', []).find(function (x) { return x.ref === dem.ref; }) || {};
+        sb(function (cl) { return cl.from('cv_demandes').insert({ email: loc.email || s.email || sbUser().email, nom: loc.nom || (cv.prenom + ' ' + cv.nom).trim(), cv: loc.cv || cv, photo: loc.photo || P.photo || '', origine: 'appareil ' + (dem.at || '') }).select('ref, cree_le').single(); }).then(function (r) {
+          writeLS('cb-cvdem-v1', readLS('cb-cvdem-v1', []).filter(function (x) { return x.ref !== dem.ref; }));
+          setProf(self, { dem: { ref: r.ref, key: 'sb', statut: 'en attente', at: dem.at || r.cree_le } }, true);
+          self.say('Votre demande de certification a bien été transmise à l’administrateur');
+        }).catch(function () { setTimeout(function () { self._cvMig = false; }, 60000); });
+      }
+      /* suivi de la demande de certification (Supabase) */
+      if (dem && dem.statut === 'en attente' && dem.key === 'sb' && sbUser() && !self._cvPoll && (c.V === 'account' || c.V === 'cv')) {
+        self._cvPoll = true;
+        sb(function (cl) { return cl.from('cv_demandes').select('ref, statut, note, certificat_id').eq('ref', dem.ref).maybeSingle(); }).then(function (r) {
+          if (!r || r.statut === 'en attente') return;
+          var patch = { dem: Object.assign({}, dem, { statut: r.statut, note: r.note || '' }) };
+          if (r.statut !== 'certifie' || !r.certificat_id) { setProf(self, patch, true); return; }
+          return sb(function (cl) { return cl.from('cv_certificats').select('*').eq('id', r.certificat_id).maybeSingle(); }).then(function (k) { if (k) patch.cert = certDe(k); setProf(self, patch, true); });
+        }).catch(function () {}).then(function () { setTimeout(function () { self._cvPoll = false; }, 30000); });
+      }
       /* suivi de la demande de certification (serveur) */
       if (dem && dem.statut === 'en attente' && dem.key && srvPublic() && !self._cvPoll && (c.V === 'account' || c.V === 'cv')) {
         self._cvPoll = true;
@@ -363,7 +391,16 @@ var CasaCV = (function () {
             var m = R.manque(prof(self).cv); if (m.length) { self.say('Complétez d’abord : ' + m.join(', ')); return; }
             if (!/.+@.+\..+/.test(s.email || '')) { self.say('Connectez-vous avec votre e-mail pour demander la certification'); return; }
             var payload = { cv: prof(self).cv, photo: prof(self).photo || '', email: s.email, nom: (cv.prenom + ' ' + cv.nom).trim() };
-            if (srvPublic()) {
+            var local = function (msg) {
+              var l = readLS('cb-cvdem-v1', []); var ref = 'CV-' + Date.now().toString(36).toUpperCase();
+              l.unshift({ ref: ref, at: new Date().toISOString(), statut: 'en attente', email: s.email, nom: payload.nom, cv: payload.cv, photo: payload.photo, profKey: keyOf(self), demo: true }); writeLS('cb-cvdem-v1', l);
+              setProf(self, { dem: { ref: ref, key: 'demo', statut: 'en attente', at: new Date().toISOString() } }); self.say(msg);
+            };
+            if (!srvPublic() && sbUser()) {
+              sb(function (cl) { return cl.from('cv_demandes').insert({ email: s.email, nom: payload.nom, cv: payload.cv, photo: payload.photo, origine: 'site' }).select('ref, cree_le').single(); })
+                .then(function (res) { setProf(self, { dem: { ref: res.ref, key: 'sb', statut: 'en attente', at: res.cree_le || new Date().toISOString() } }); self.say('Demande envoyée : l’administrateur vérifie votre parcours'); })
+                .catch(function (e) { if (sbSql(e)) local('Demande enregistrée : elle partira automatiquement vers l’administrateur dès l’activation du service'); else self.say((e && e.message) || 'Envoi impossible'); });
+            } else if (srvPublic()) {
               call('POST', '/cv/demandes', payload).then(function (res) { setProf(self, { dem: { ref: res.ref, key: res.key, statut: 'en attente', at: new Date().toISOString() } }); self.say('Demande envoyée : l’équipe vérifie votre parcours'); }).catch(function (e) { self.say(e.message || 'Envoi impossible'); });
             } else {
               var l = readLS('cb-cvdem-v1', []); var ref = 'CV-' + Date.now().toString(36).toUpperCase();
@@ -372,6 +409,7 @@ var CasaCV = (function () {
             }
           },
           retirer: function () {
+            if (dem && dem.key === 'sb' && sbUser()) sb(function (cl) { return cl.from('cv_demandes').update({ statut: 'retiree' }).eq('ref', dem.ref); }).catch(function () {});
             if (dem && dem.key && srvPublic()) call('DELETE', '/cv/demandes/' + encodeURIComponent(dem.ref) + '?k=' + encodeURIComponent(dem.key)).catch(function () {});
             if (!srvPublic()) writeLS('cb-cvdem-v1', readLS('cb-cvdem-v1', []).filter(function (x) { return !dem || x.ref !== dem.ref; }));
             setProf(self, { dem: null }); self.say('Demande retirée');
@@ -387,6 +425,7 @@ var CasaCV = (function () {
         var lancer = function () {
           var id = String(U(self).vq != null ? U(self).vq : (self.state.verifId || '')).trim().toUpperCase(); if (!id) return;
           if (srvPublic()) call('GET', '/cv/verifier/' + encodeURIComponent(id)).then(function (r2) { ui(self, { vres: Object.assign({ id: id }, r2) }); }).catch(function () { ui(self, { vres: { id: id, introuvable: true } }); });
+          else if (sbOn()) sb(function (cl) { return cl.rpc('cv_verifier', { cert: id }); }).then(function (l3) { var k = Array.isArray(l3) ? l3[0] : l3; ui(self, { vres: k ? { id: id, valide: !k.revoque, statut: k.revoque ? 'révoqué' : 'valide', nom: k.nom, titre: k.titre, emisLe: k.emis_le, par: k.par, h: k.h } : { id: id, introuvable: true } }); }).catch(function () { ui(self, { vres: { id: id, introuvable: true } }); });
           else { var l2 = readLS('cb-certs-demo-v1', {}); var x = l2[id] || l2[id.replace(/^CB-/, 'DEMO-')]; ui(self, { vres: x ? Object.assign({ id: id, valide: !x.revoque, statut: x.revoque ? 'révoqué' : 'valide', demo: true }, x) : { id: id, introuvable: true } }); }
         };
         if (vid && !res && !self._vAuto) { self._vAuto = vid; setTimeout(lancer, 0); }
@@ -435,7 +474,15 @@ var CasaCV = (function () {
     var srv = srvStaff();
     var data = self.state.cvAdm;
     if (!data) {
-      if (srv) { if (!self._cvAdmL) { self._cvAdmL = true; call('GET', '/cv/demandes').then(function (r) { self.setState({ cvAdm: { list: r.list || [], certs: r.certificats || [], srv: true } }); }).catch(function () { self.setState({ cvAdm: { list: [], certs: [], srv: true } }); }); } data = { list: [], certs: [], srv: true, loading: true }; }
+      if (!srv && sbAdmin(self)) {
+        if (!self._cvAdmL) { self._cvAdmL = true;
+          Promise.all([sb(function (cl) { return cl.from('cv_demandes').select('*').order('cree_le', { ascending: false }).limit(300); }), sb(function (cl) { return cl.from('cv_certificats').select('*').order('emis_le', { ascending: false }).limit(500); })])
+            .then(function (r) { self.setState({ cvAdm: { list: (r[0] || []).map(demDe), certs: (r[1] || []).map(certDe), srv: true, sb: true } }); })
+            .catch(function (e) { self.setState({ cvAdm: { list: [], certs: [], srv: true, sb: true, err: sbSql(e) ? 'Lancez supabase/badges.sql dans Supabase pour recevoir les demandes (guide : docs/BADGES-BE.md).' : (e && e.message) || 'Chargement impossible' } }); });
+        }
+        data = { list: [], certs: [], srv: true, sb: true, loading: true };
+      }
+      else if (srv) { if (!self._cvAdmL) { self._cvAdmL = true; call('GET', '/cv/demandes').then(function (r) { self.setState({ cvAdm: { list: r.list || [], certs: r.certificats || [], srv: true } }); }).catch(function () { self.setState({ cvAdm: { list: [], certs: [], srv: true } }); }); } data = { list: [], certs: [], srv: true, loading: true }; }
       else data = { list: readLS('cb-cvdem-v1', []), certs: Object.keys(readLS('cb-certs-demo-v1', {})).map(function (k) { return Object.assign({ id: k }, readLS('cb-certs-demo-v1', {})[k]); }), srv: false };
     }
     var reload = function () { self._cvAdmL = false; self.setState({ cvAdm: null }); };
@@ -451,6 +498,12 @@ var CasaCV = (function () {
         var all = R.CHECKS.every(function (k) { return k[0] === 'photo' && !sel.photo ? true : !!chk.c[k[0]]; });
         if (dec === 'certifier' && !all) { self.say('Cochez toutes les vérifications avant de certifier'); return; }
         if (dec !== 'certifier' && !String(chk.note || '').trim()) { self.say('Expliquez ce qui manque ou le motif (le membre le verra)'); return; }
+        if (data.sb) {
+          var go = function (certId, hs) { return sb(function (cl) { return cl.rpc('cv_decider', { demande: sel.ref, decision: dec, motif: chk.note || '', cert_id: certId, h: hs ? hs[0] : null, ph: hs ? hs[1] : null }); }); };
+          var p0 = dec === 'certifier' ? Promise.all([hash(R.canon(cvx)), sel.photo ? hash(sel.photo) : Promise.resolve('')]).then(function (hs) { var by = []; for (var j = 0; j < 6; j++) by.push(Math.floor(Math.random() * 256)); var cid = R.certIdFrom(by, new Date().getFullYear()); return go(cid, hs).then(function () { return cid; }); }) : go(null, null);
+          p0.then(function (cid) { reload(); set({ cvSel: '', cvChk: null }); self.say(dec === 'certifier' ? 'CV certifié : n° ' + cid : 'Réponse envoyée au membre'); }).catch(function (e) { self.say((e && e.message) || 'Décision impossible'); });
+          return;
+        }
         if (data.srv) { call('POST', '/cv/demandes/' + encodeURIComponent(sel.ref) + '/decision', { decision: dec, note: chk.note || '', checks: chk.c }).then(function (res) { reload(); set({ cvSel: '', cvChk: null }); self.say(dec === 'certifier' ? 'CV certifié : n° ' + res.certificat.id : 'Réponse envoyée au membre'); }).catch(function (e) { self.say(e.message); }); return; }
         /* démonstration : certificat spécimen calculé dans le navigateur */
         var at = new Date().toISOString(), list = readLS('cb-cvdem-v1', []);
@@ -476,7 +529,7 @@ var CasaCV = (function () {
         certifier: function () { decide('certifier'); }, complement: function () { decide('complement'); }, refuser: function () { decide('refuser'); }, close: function () { set({ cvSel: '' }); }, demo: !data.srv };
     }
     return {
-      loading: !!data.loading, rows: data.list.map(function (d) { var lab = { 'en attente': 'À vérifier', certifie: 'Certifié', complement: 'Complément demandé', refusee: 'Refusé', retiree: 'Retirée' }[d.statut] || d.statut; return { ref: d.ref, nom: d.nom, email: d.email, at: fmtDate(d.at), statut: lab, stCls: d.statut === 'certifie' ? 'cvst-ok' : d.statut === 'en attente' ? 'cvst-wait' : 'cvst-warn', cur: d.ref === u.cvSel ? 'true' : 'false', pick: function () { set({ cvSel: d.ref, cvChk: null }); } }; }),
+      loading: !!data.loading, err: data.err || '', hasErr: !!data.err, rows: data.list.map(function (d) { var lab = { 'en attente': 'À vérifier', certifie: 'Certifié', complement: 'Complément demandé', refusee: 'Refusé', retiree: 'Retirée' }[d.statut] || d.statut; return { ref: d.ref, nom: d.nom, email: d.email, at: fmtDate(d.at), statut: lab, stCls: d.statut === 'certifie' ? 'cvst-ok' : d.statut === 'en attente' ? 'cvst-wait' : 'cvst-warn', cur: d.ref === u.cvSel ? 'true' : 'false', pick: function () { set({ cvSel: d.ref, cvChk: null }); } }; }),
       noRows: data.list.length === 0, pending: pend.length, hasDetail: !!detail, detail: detail || { r: {}, checks: [] },
       certs: (data.certs || []).filter(function (k) { return readLS('cb-certs-masques', []).indexOf(k.id) < 0; }).map(function (k) { return { id: showId(k.id), canRemove: !!k.revoque,
         retirer: function () {
@@ -486,11 +539,13 @@ var CasaCV = (function () {
           reload(); self.say('Certificat retiré de la liste');
         }, nom: k.nom, titre: k.titre || '', emis: fmtDate(k.emisLe), statut: k.revoque ? 'Révoqué' : 'Valide', stCls: k.revoque ? 'cvst-warn' : 'cvst-ok', canRevoke: !k.revoque,
         revoquer: function () {
-          if (data.srv) call('POST', '/cv/certificats/' + encodeURIComponent(k.id) + '/revoquer', {}).then(function () { reload(); self.say('Certificat révoqué'); }).catch(function (e) { self.say(e.message); });
+          if (data.sb) sb(function (cl) { return cl.from('cv_certificats').update({ revoque: true }).eq('id', k.id); }).then(function () { reload(); self.say('Certificat révoqué'); }).catch(function (e) { self.say(e.message); });
+          else if (data.srv) call('POST', '/cv/certificats/' + encodeURIComponent(k.id) + '/revoquer', {}).then(function () { reload(); self.say('Certificat révoqué'); }).catch(function (e) { self.say(e.message); });
           else { var cs = readLS('cb-certs-demo-v1', {}); if (cs[k.id]) { cs[k.id].revoque = true; writeLS('cb-certs-demo-v1', cs); } reload(); self.say('Certificat révoqué'); }
         } }; }), hasCerts: (data.certs || []).filter(function (k) { return readLS('cb-certs-masques', []).indexOf(k.id) < 0; }).length > 0
     };
   }
+  R.recharger = function (self) { self._cvAdmL = false; self.setState({ cvAdm: null }); };
   R.pending = function (self) { var d = self.state.cvAdm; if (d) return d.list.filter(function (x) { return x.statut === 'en attente'; }).length; if (!srvStaff()) return readLS('cb-cvdem-v1', []).filter(function (x) { return x.statut === 'en attente'; }).length; return 0; };
 })(CasaCV);
 if (typeof module !== 'undefined' && module.exports) module.exports = CasaCV;
