@@ -152,16 +152,34 @@
   var CSS = '' +
     '#cba{position:fixed;inset:0;z-index:2147483000;background:var(--bg,#fff);color:var(--text,#111);display:flex;flex-direction:column;font-family:var(--font-body,system-ui,sans-serif);font-size:15px}' +
     '#cba *{box-sizing:border-box}' +
-    '.cba-top{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;background:var(--inv-bg,#0b0b0b);color:var(--on-inv,#fff);flex-wrap:wrap}' +
-    '.cba-brand{font-weight:900;letter-spacing:.02em;text-transform:uppercase;font-size:14px;margin-right:auto}' +
-    '@media(max-width:600px){.cba-brand .long{display:none}}' +
-    '.cba-tabs{display:flex;gap:.25rem;overflow-x:auto;width:100%;order:3;padding-bottom:.1rem}' +
-    '@media(min-width:900px){.cba-tabs{width:auto;order:0}}' +
-    '.cba-tab{border:1.5px solid transparent;background:transparent;color:inherit;font-weight:800;padding:.5rem .8rem;cursor:pointer;white-space:nowrap;font-size:14px;min-height:40px}' +
-    '.cba-tab[aria-selected="true"]{background:var(--on-inv,#fff);color:var(--inv-bg,#000)}' +
-    '.cba-badge{display:inline-block;min-width:20px;padding:0 5px;margin-left:.35rem;background:var(--danger,#c22);color:#fff;font-size:12px;line-height:20px;text-align:center}' +
-    '.cba-x{border:1.5px solid currentColor;background:transparent;color:inherit;padding:.45rem .8rem;font-weight:800;cursor:pointer;min-height:40px}' +
-    '.cba-body{flex:1;overflow:auto;padding:1.2rem 1rem 4rem}' +
+    '.cba-top{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;padding-top:calc(.55rem + env(safe-area-inset-top,0px));padding-left:calc(1rem + env(safe-area-inset-left,0px));padding-right:calc(1rem + env(safe-area-inset-right,0px));background:#10283a;color:#f1f5f6;border-bottom:1px solid rgba(255,255,255,.1);flex:none}' +
+    '.cba-burger{position:relative;width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;background:none;border:1px solid rgba(255,255,255,.22);border-radius:50%;color:inherit;cursor:pointer}' +
+    '.cba-burger-i{display:flex;flex-direction:column;gap:4px;width:18px}.cba-burger-i i{display:block;height:2px;background:currentColor}.cba-burger-i i:nth-child(2){width:70%}' +
+    '.cba-dot{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;padding:0 4px;border-radius:10px;background:#f2b33d;color:#10283a;font-size:11px;font-weight:900;line-height:19px;text-align:center}' +
+    '.cba-brand{display:flex;align-items:center;gap:.6rem;min-width:0}.cba-brand img{width:46px;height:auto;display:block}' +
+    '.cba-brand-t{font-family:var(--bn-font,sans-serif);font-weight:700;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#f2b33d;padding-left:.6rem;border-left:1px solid rgba(255,255,255,.2)}' +
+    '.cba-cur{margin-left:auto;font-family:var(--bn-font,sans-serif);font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}' +
+    '.cba-x{flex:none;border:1px solid rgba(255,255,255,.35);background:transparent;color:inherit;padding:.45rem .8rem;font-weight:800;cursor:pointer;min-height:40px;font-size:13px}' +
+    '.cba-x:hover{background:#f2b33d;color:#10283a;border-color:#f2b33d}' +
+    '.cba-main{flex:1;min-height:0;display:flex;position:relative}' +
+    '.cba-side{width:290px;flex:none;background:#10283a;color:#f1f5f6;overflow-y:auto;overscroll-behavior:contain;padding:.6rem 1.5rem 2rem;border-right:3px solid #f2b33d}' +
+    '.cba-side-h{display:none;align-items:center;justify-content:space-between;padding:.4rem 0 .8rem}' +
+    '.cba-side-tag{font-family:var(--bn-font,sans-serif);font-weight:700;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#f2b33d}' +
+    '.cba-side-x{width:44px;height:44px;border:1px solid rgba(255,255,255,.2);border-radius:50%;background:none;color:inherit;font-size:16px;cursor:pointer;margin-right:-.4rem}' +
+    '.cba-gt{display:flex;align-items:center;gap:.7rem;font-family:var(--bn-font,sans-serif);font-weight:700;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#f2b33d;padding:1rem 0 .4rem}' +
+    '.cba-gt::after{content:"";flex:1;height:1px;background:rgba(242,179,61,.35)}' +
+    '.cba-tabs{display:flex;flex-direction:column}' +
+    '.cba-tab{display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;border:0;border-bottom:1px solid rgba(255,255,255,.08);background:none;color:inherit;padding:.75rem 0;min-height:52px;cursor:pointer;font:inherit}' +
+    '.cba-tab-t{flex:1;font-family:var(--bn-font,sans-serif);font-weight:700;font-size:19px;line-height:1.05;letter-spacing:-.01em;text-transform:uppercase;transition:color .2s,transform .25s}' +
+    '.cba-tab-a{color:#f2b33d;opacity:.3;transition:opacity .2s,transform .25s}' +
+    '.cba-tab:hover .cba-tab-t{color:#f2b33d;transform:translateX(4px)}.cba-tab:hover .cba-tab-a{opacity:1}' +
+    '.cba-tab[aria-selected="true"] .cba-tab-t{color:#f2b33d}.cba-tab[aria-selected="true"] .cba-tab-a{opacity:1}' +
+    '.cba-tab[aria-selected="true"]{box-shadow:inset 3px 0 0 #f2b33d;padding-left:.8rem}' +
+    '.cba-badge{display:inline-block;min-width:20px;padding:0 5px;margin-left:.35rem;background:#f2b33d;color:#10283a;font-size:12px;font-weight:900;line-height:20px;text-align:center;border-radius:10px}' +
+    '@media(min-width:1100px){.cba-burger{display:none}.cba-cur{display:none}.cba-brand{margin-right:auto}}' +
+    '@media(max-width:1099px){.cba-side{position:absolute;top:0;bottom:0;left:0;z-index:3;width:min(360px,86vw);transform:translateX(-104%);transition:transform .3s cubic-bezier(.2,.8,.2,1);box-shadow:30px 0 80px -30px rgba(0,0,0,.7);padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px))}.cba-side.is-open{transform:none}.cba-side-h{display:flex}.cba-ov{position:absolute;inset:0;z-index:2;background:rgba(6,14,22,.55)}}' +
+    '@media(max-width:520px){.cba-brand-t{display:none}.cba-x{padding:.45rem .6rem}}' +
+    '.cba-body{flex:1;min-width:0;overflow:auto;padding:1.2rem 1rem calc(4rem + env(safe-area-inset-bottom,0px))}' +
     '.cba-wrap{max-width:1200px;margin:0 auto}' +
     '.cba-h{font-size:1.6rem;font-weight:900;margin:0 0 .3rem;text-transform:uppercase;letter-spacing:-.01em}' +
     '.cba-sub{color:var(--text-2,#555);margin:0 0 1rem}' +
@@ -317,18 +335,35 @@
     var y = body ? body.scrollTop : 0;
     root.textContent = '';
     var tabs = [['msg', 'Messagerie', unread()], ['content', 'Contenus du site', 0], ['sport', 'Résultats', 0], ['img', 'Images', 0], ['subs', 'Abonnés', 0], ['clics', 'Clics boutiques', 0], ['notif', 'Notifications', 0], ['valid', 'Demandes à valider', pendingVal()], ['team', 'Équipe et accès', pendingReqs()], ['help', 'Aide', 0]];
+    // Onglets en panneau latéral gauche (même style que le menu « Plus » du site) : toujours visible sur grand écran, tiroir sur téléphone
+    var cur = tabs.filter(function (t) { return t[0] === S.tab; })[0] || tabs[0];
+    var alerts = tabs.reduce(function (n, t) { return n + (t[2] || 0); }, 0);
+    var fermerSide = function () { S.side = false; render(); };
     add(root, E('div', { class: 'cba-top' },
-      E('span', { class: 'cba-brand' }, E('span', { class: 'long' }, 'Casa Besports · '), 'Administration'),
-      E('div', { class: 'cba-tabs', role: 'tablist' }, tabs.map(function (t) {
-        return E('button', { type: 'button', class: 'cba-tab', role: 'tab', 'aria-selected': String(S.tab === t[0]), onclick: function () { setTab(t[0]); } }, t[1], t[2] ? E('span', { class: 'cba-badge' }, String(t[2])) : null);
-      })),
+      E('button', { type: 'button', class: 'cba-burger', 'aria-label': 'Ouvrir le menu de l’administration', 'aria-expanded': String(!!S.side), onclick: function () { S.side = !S.side; render(); } },
+        E('span', { class: 'cba-burger-i', 'aria-hidden': 'true' }, E('i'), E('i'), E('i')), alerts ? E('span', { class: 'cba-dot' }, String(alerts)) : null),
+      E('span', { class: 'cba-brand' }, E('img', { src: 'assets/logo-be.svg', alt: 'BE+', width: '54', height: '32' }), E('span', { class: 'cba-brand-t' }, 'Administration')),
+      E('span', { class: 'cba-cur' }, cur[1]),
       E('button', { type: 'button', class: 'cba-x', onclick: function () { close(); } }, 'Voir le site ✕')));
+    var side = E('aside', { class: 'cba-side' + (S.side ? ' is-open' : ''), 'aria-label': 'Rubriques de l’administration' },
+      E('div', { class: 'cba-side-h' },
+        E('span', { class: 'cba-side-tag' }, 'Espace administrateur'),
+        E('button', { type: 'button', class: 'cba-side-x', 'aria-label': 'Fermer le menu', onclick: fermerSide }, '✕')),
+      E('div', { class: 'cba-gt' }, 'Rubriques'),
+      E('div', { class: 'cba-tabs', role: 'tablist', 'aria-orientation': 'vertical' }, tabs.map(function (t) {
+        return E('button', { type: 'button', class: 'cba-tab', role: 'tab', 'aria-selected': String(S.tab === t[0]), onclick: function () { S.side = false; setTab(t[0]); } },
+          E('span', { class: 'cba-tab-t' }, t[1]), t[2] ? E('span', { class: 'cba-badge' }, String(t[2])) : null, E('span', { class: 'cba-tab-a', 'aria-hidden': 'true' }, '→'));
+      })));
+    var main = E('div', { class: 'cba-main' });
+    add(main, side);
+    if (S.side) add(main, E('div', { class: 'cba-ov', 'aria-hidden': 'true', onclick: fermerSide }));
+    add(root, main);
     body = E('div', { class: 'cba-body' });
     var w = E('div', { class: 'cba-wrap' });
     if (S.setup === 'sql') add(w, E('div', { class: 'cba-note' }, E('strong', {}, 'Une étape à faire une seule fois. '), 'La base de l’espace administrateur n’est pas encore installée : ouvrez Supabase › SQL Editor › New query, collez le contenu du fichier supabase/administration.sql du dépôt, puis cliquez « Run ». Rechargez ensuite cette page. (Guide : docs/ESPACE-ADMIN.md)'));
     else if (S.setup === 'norole') add(w, E('div', { class: 'cba-note' }, 'Votre compte n’est pas reconnu comme administrateur par Supabase : vérifiez que votre adresse e-mail est confirmée et qu’elle figure dans la table « equipe » avec le rôle admin.'));
     add(w, ({ msg: viewMsg, content: viewContent, sport: viewSport, img: viewImages, subs: viewSubs, clics: viewClics, notif: viewNotif, valid: viewValid, team: viewTeam, help: viewHelp })[S.tab]());
-    add(body, w); add(root, body);
+    add(body, w); add(main, body);
     body.scrollTop = y;
   }
 

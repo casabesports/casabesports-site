@@ -2925,6 +2925,35 @@ html[data-decor="papier"] .art-txt { font-family: 'Source Serif 4', Georgia, ser
 .ab-btn-o { color: var(--ink); border-color: var(--line); }
 .ab-btn-o:hover { border-color: var(--ink); background: var(--surface-3); }
 .ab-cta .ab-btn-w:hover { color: var(--ink); border-color: var(--ink); }
+/* À propos dans le thème BE+ : League Spartan en capitales, titres en bandeau, or et bleu nuit, plus de typographie à empattements (texte inchangé) */
+.ab { --ab-serif: var(--font-body); }
+.ab-h1 { display: inline; background: #fff; color: #10283a !important; padding: .1em .22em .02em; -webkit-box-decoration-break: clone; box-decoration-break: clone; line-height: 1.16; font-size: clamp(2.3rem, 6vw, 4.6rem); }
+.ab-hero .ab-sub { margin-top: 1.4rem; font-style: normal; font-family: var(--bn-font); font-weight: 600; font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.35; }
+.ab-eb { font-family: var(--bn-font); font-weight: 700; font-size: 11px; letter-spacing: .24em; color: var(--gold-text); display: flex; align-items: center; gap: .8rem; }
+.ab-eb::after { content: ''; flex: 0 1 64px; height: 1px; background: currentColor; opacity: .45; }
+.ab-manif .ab-eb, .ab-sign .ab-eb, .ab-cta .ab-eb { justify-content: center; }
+.ab-sign .ab-eb::before { content: ''; flex: 0 1 64px; height: 1px; background: currentColor; opacity: .45; }
+.ab-sec-t { border-top: 0; padding-top: 0; }
+.ab-sec-t::after { flex: 1; }
+.ab-lead { font-family: var(--font-body); font-weight: 500; font-size: 1.08rem; line-height: 1.75; }
+.ab-lead:first-of-type { font-family: var(--bn-font); font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: -.02em; font-size: clamp(1.6rem, 3.6vw, 2.5rem); line-height: 1.05; }
+.ab-quote { border-left: 4px solid #f2b33d; padding: .2rem 0 .2rem 1.2rem; text-align: left; max-width: 30ch; margin: 3rem auto; }
+.ab-quote p { font-family: var(--bn-font); font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: -.02em; line-height: 1.05; font-size: clamp(1.7rem, 4.2vw, 2.8rem); max-width: none; }
+.ab-quote p::before, .ab-quote p::after { font-style: normal; }
+.ab-fin { font-family: var(--bn-font); font-style: normal; font-weight: 600; font-size: 1.1rem; letter-spacing: .01em; color: var(--ink); }
+.ab-year { font-family: var(--bn-font); font-weight: 800; font-size: clamp(2.6rem, 6vw, 4rem); letter-spacing: -.03em; }
+.ab-h3 { font-family: var(--bn-font); font-weight: 700; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.08; font-size: clamp(1.3rem, 2.2vw, 1.7rem); }
+.ab-p { font-weight: 500; font-size: 1.04rem; line-height: 1.75; }
+.ab-dot { border-radius: 0; width: 11px; height: 11px; margin-left: -5px; }
+.ab-h2 { display: inline; background: #10283a; color: #fff !important; padding: .1em .22em .02em; -webkit-box-decoration-break: clone; box-decoration-break: clone; line-height: 1.16; font-size: clamp(1.8rem, 4.4vw, 3.2rem); }
+.ab-pils { margin-top: 2.4rem; }
+.ab-pil-n { font-family: var(--bn-font); font-style: normal; font-weight: 800; font-size: 2.6rem; line-height: 1; letter-spacing: -.03em; color: var(--gold-text); margin: 0 0 .8rem; }
+.ab-sign-t { font-family: var(--bn-font); font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: -.025em; line-height: 1.02; }
+.ab-sign-s { font-family: var(--bn-font); font-weight: 600; }
+.ab-cta .ab-h2 { margin-bottom: 0; }
+.ab-cta .ab-cta-p:first-of-type { margin-top: 1.8rem; }
+.ab-cta-fin { font-family: var(--bn-font); font-style: normal; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; font-size: clamp(1.05rem, 1.8vw, 1.25rem); }
+.ab-btn { font-family: var(--bn-font); font-size: 13px; letter-spacing: .1em; }
 /* album du club : cartes joueurs */
 .ca-head { display: flex; justify-content: space-between; align-items: flex-end; gap: .6rem; flex-wrap: wrap; }
 .ca-t { font-size: clamp(22px, 3vw, 30px); }
