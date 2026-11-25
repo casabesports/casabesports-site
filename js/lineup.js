@@ -760,7 +760,7 @@
     main.appendChild(apercuBloc(L)); main.insertBefore(ed, main.firstChild);
     if (st.meta.repondreA) ed.appendChild(el('div', { class: 'cbl-warn' }, 'Vous modifiez la composition reçue de ' + (st.meta.repondreNom || 'un utilisateur') + '. Faites vos changements puis « Envoyer ma proposition » (dernière rubrique).'));
     if (!moi()) ed.appendChild(el('div', { class: 'cbl-warn' }, 'Sans compte, votre composition est gardée sur cet appareil. ', el('button', { type: 'button', class: 'cbl-btn sm', onclick: function () { var c = st.ctx.connect; if (c) { fermerForce(); c(); } } }, 'Se connecter'), ' pour l’enregistrer en ligne, l’envoyer et la publier.'));
-    else if (D.sqlMissing) ed.appendChild(el('div', { class: 'cbl-warn' }, 'Le partage en ligne n’est pas encore activé sur ce site (fichier supabase/lineups.sql à lancer une fois). En attendant, vos compositions restent sur cet appareil.'));
+    else if (D.sqlMissing) ed.appendChild(el('div', { class: 'cbl-warn' }, st.ctx.role === 'admin' ? 'Le partage en ligne n’est pas encore activé sur ce site (fichier supabase/lineups.sql à lancer une fois). En attendant, vos compositions restent sur cet appareil.' : 'Le partage en ligne arrive bientôt. En attendant, vos compositions restent sur cet appareil.'));
     ed.appendChild(secMatch(L));
     ed.appendChild(secJoueurs(L));
     ed.appendChild(secTactique(L));

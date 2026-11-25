@@ -256,7 +256,10 @@ class Component extends DCLogic {
     const KS = ['6 ans', '8 ans', '10 ans', '12 ans', 'S', 'M', 'L', 'XL', 'XXL'];
     // Produits de la boutique : contenus/boutique.js (la structure, les tailles et les couleurs restent ici)
     const colorOf = (c) => (typeof c === 'string' ? ({ marine: navy, sable: sand, ecru, 'écru': ecru, blanc: white, or: gold }[c.toLowerCase()] || { name: c, hex: '#0f2236' }) : c);
-    const products = ((typeof window !== 'undefined' && window.CASA_PRODUITS) || []).filter((o) => o && o.id && o.name).map((o) => P(Object.assign({ sizes: S, price: 0, type: 'tee', short: '', desc: '' }, o, { colors: (o.colors && o.colors.length ? o.colors : ['marine']).map(colorOf) })));
+    // Les « Créations Casa » (line: 'atelier', importées par l’administrateur depuis l’Atelier) passent par creaNorm, seulement si publiées
+    const prodSrc = ((typeof window !== 'undefined' && window.CASA_PRODUITS) || []);
+    const creaPub = (this.creaOnline() ? prodSrc.filter((o) => o && o.line === 'atelier') : (this._crea || [])).map((o) => this.creaNorm(o)).filter((p) => p.id && p.img && p.status === 'publie');
+    const products = prodSrc.filter((o) => o && o.id && o.name && o.line !== 'atelier').map((o) => P(Object.assign({ sizes: S, price: 0, type: 'tee', short: '', desc: '' }, o, { colors: (o.colors && o.colors.length ? o.colors : ['marine']).map(colorOf) }))).concat(creaPub);
     const paths = {
       tee: 'M38 22 L52 16 Q60 24 68 16 L82 22 L98 38 L86 50 L80 45 L80 104 L40 104 L40 45 L34 50 L22 38 Z',
       hoodie: 'M40 24 Q60 4 80 24 L98 40 L90 60 L82 54 L82 106 L38 106 L38 54 L30 60 L22 40 Z',
@@ -2245,16 +2248,17 @@ class Component extends DCLogic {
     const creaBanner = { show: hasCrea && (shopLineEff === 'Tout' || shopLineEff === 'Créations Casa'), sub: (() => { const ps = creaProducts.map((p) => p.price); const lo = Math.min.apply(null, ps.concat([1e9])), hi = Math.max.apply(null, ps.concat([0])); return creaProducts.length + (creaProducts.length > 1 ? ' pièces dessinées' : ' pièce dessinée') + ' dans l’Atelier Casa Besports, ' + (lo === hi ? 'à ' + eur0(lo) : 'de ' + eur0(lo) + ' à ' + eur0(hi)) + '.'; })(),
       cta: shopLineEff === 'Créations Casa' ? 'Voir toute la boutique' : 'Voir les créations', go: () => this.setState({ shopLine: shopLineEff === 'Créations Casa' ? 'Tout' : 'Créations Casa' }),
       items: creaSorted.slice(0, 3).map((p) => ({ img: p.img, price: eur0(p.price), aria: p.name + ', ' + eur0(p.price), open: () => openPr(p.id) })) };
-    const creaSrv = !!(window.CB_SERVER && window.CB); const creaTeamOn = creaSrv && !!window.CB.siteRole && ['admin', 'writer'].indexOf(window.CB.siteRole) >= 0; const creaChief = creaSrv && !!window.CB.user && ['admin', 'collaborateur'].indexOf(window.CB.user.role) >= 0;
-    const creaList = creaSrv ? (s.creaTeam || []) : (this._crea || []);
-    const creaItems = creaList.map((p) => { const st = p.status || 'publie'; const can = !creaSrv || creaChief; return { img: p.img, name: p.name, meta: (p.supportName ? p.supportName + ' · ' : '') + eur0(p.price) + (p.technique ? ' · ' + p.technique : ''), statusLabel: st === 'publie' ? 'En boutique' : st === 'retire' ? 'Retiré' : 'Brouillon',
-      open: () => { if (X.products.some((x) => x.id === p.id)) openPr(p.id); else this.say('Article pas encore en boutique'); }, canToggle: can, toggleLabel: st === 'publie' ? 'Retirer' : creaSrv ? 'Publier' : 'Remettre en boutique', toggle: () => this.creaSet(p.id, st === 'publie' ? 'retire' : 'publie'),
-      canDel: can || (creaSrv && st !== 'publie' && window.CB.user && p.byId === window.CB.user.id), delLabel: s.creaSure === p.id ? 'Confirmer la suppression' : 'Supprimer', del: () => this.creaDel(p.id) }; });
-    const crea = { show: creaSrv ? creaTeamOn : true, open: !!s.creaOpen, openAria: s.creaOpen ? 'true' : 'false', toggleLabel: s.creaOpen ? 'Masquer la liste' : 'Gérer les articles' + (creaList.length ? ' (' + creaList.length + ')' : ''),
-      toggle: () => { const o = !s.creaOpen; this.setState({ creaOpen: o }); if (o) this.creaTeamLoad(); }, onFile: (e) => { const f = e.target.files && e.target.files[0]; try { e.target.value = ''; } catch (er) {} this.creaImport(f); },
-      msg: s.creaMsg || '', items: creaItems, empty: !creaItems.length, emptyText: creaSrv ? 'Aucun article de l’Atelier pour l’instant : créez-en un dans l’Atelier › Studio Boutique.' : 'Aucun article importé sur cet appareil pour l’instant.',
-      lead: creaSrv ? 'Articles créés dans le Studio Boutique de l’Atelier' : 'Ajoutez les articles créés dans le Studio Boutique de l’Atelier',
-      help: creaSrv ? (creaChief ? 'Les articles envoyés depuis l’Atelier arrivent ici. Publiez-les pour les afficher dans la collection « Créations Casa » du site et de l’application.' : 'Les articles envoyés depuis l’Atelier arrivent en brouillon ; un chef d’édition ou l’administrateur les publie.') : 'Dans l’Atelier, Studio Boutique › Ajouter à la boutique (ou Exporter › Pack boutique) crée un fichier .casa-boutique.json : importez-le ici. Les articles importés restent sur cet appareil.' };
+    // Gestion des Créations Casa : réservée à l’administrateur (le site en ligne enregistre dans « Boutique : produits », que seul l’admin peut modifier)
+    const creaAdm = s.role === 'admin'; const creaOn = this.creaOnline();
+    const creaList = creaAdm ? this.creaRaw().map((p) => this.creaNorm(p)) : [];
+    const creaItems = creaList.map((p) => { const st = p.status || 'publie'; return { img: p.img, name: p.name, meta: (p.supportName ? p.supportName + ' · ' : '') + eur0(p.price) + (p.technique ? ' · ' + p.technique : ''), statusLabel: st === 'publie' ? 'En boutique' : st === 'retire' ? 'Retiré' : 'Brouillon',
+      open: () => { if (X.products.some((x) => x.id === p.id)) openPr(p.id); else this.say('Article pas encore en boutique'); }, canToggle: true, toggleLabel: st === 'publie' ? 'Retirer' : 'Remettre en boutique', toggle: () => this.creaSet(p.id, st === 'publie' ? 'retire' : 'publie'),
+      canDel: true, delLabel: s.creaSure === p.id ? 'Confirmer la suppression' : 'Supprimer', del: () => this.creaDel(p.id) }; });
+    const crea = { show: creaAdm, open: !!s.creaOpen, openAria: s.creaOpen ? 'true' : 'false', toggleLabel: s.creaOpen ? 'Masquer la liste' : 'Gérer les articles' + (creaList.length ? ' (' + creaList.length + ')' : ''),
+      toggle: () => this.setState({ creaOpen: !s.creaOpen }), onFile: (e) => { const f = e.target.files && e.target.files[0]; try { e.target.value = ''; } catch (er) {} this.creaImport(f); },
+      msg: s.creaMsg || '', items: creaItems, empty: !creaItems.length, emptyText: 'Aucun article de l’Atelier pour l’instant : importez un pack exporté par l’Atelier › Studio Boutique.',
+      lead: 'Visible par vous seul (administrateur)',
+      help: creaOn ? 'Importez le pack (.casa-boutique.json) exporté par l’Atelier, Studio Boutique › Exporter › Pack boutique. Les photos sont envoyées en ligne et l’article apparaît aussitôt dans la collection « Créations Casa » du site et de l’application, pour tous les visiteurs. « Retirer » le masque sans le supprimer.' : 'Dans l’Atelier, Studio Boutique › Exporter › Pack boutique crée un fichier .casa-boutique.json : importez-le ici. Sans connexion à la base, les articles importés restent sur cet appareil.' };
     // fiche produit
     const curPr = X.products.find((p) => p.id === s.productId) || X.products[0] || EMPTY_PROD;
     const ci = Math.min(s.color, curPr.colors.length - 1);
@@ -3802,7 +3806,29 @@ class Component extends DCLogic {
     return this._creaP;
   }
   creaDo(mode, fn) { return this.creaDb().then((db) => new Promise((res) => { if (!db) return res(null); try { const rq = fn(db.transaction('produits', mode).objectStore('produits')); rq.onsuccess = () => res(rq.result); rq.onerror = () => res(null); } catch (e) { res(null); } })); }
-  creaInit() { if (window.CB_SERVER) return; this.creaDo('readonly', (st) => st.getAll()).then((list) => { if (list && list.length) this.setCreated(list); }); }
+  // En ligne (Supabase branché) : les créations sont rangées dans « Boutique : produits » (table site_contenu, écriture réservée à l’admin).
+  // Sans base : ancien mode, rangées sur l’appareil (IndexedDB).
+  creaOnline() { return !!(window.CasaAuth && window.CasaAuth.on && window.CasaAuth.saveContent); }
+  creaInit() { if (this.creaOnline()) return; this.creaDo('readonly', (st) => st.getAll()).then((list) => { if (list && list.length) this.setCreated(list); }); }
+  creaRaw() { return this.creaOnline() ? ((window.CASA_PRODUITS || []).filter((o) => o && o.line === 'atelier')) : (this._crea || []); }
+  creaSave(list) {
+    const reste = (window.CASA_PRODUITS || []).filter((o) => !(o && o.line === 'atelier'));
+    return window.CasaAuth.saveContent('CASA_PRODUITS', reste.concat(list));
+  }
+  // Photos du pack (data:image…) envoyées dans le stockage « site » (dépôt réservé à l’admin) : renvoie le produit avec leurs adresses
+  creaUpload(a) {
+    const id = String(a.id || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 60) || ('art-' + Date.now()); const vus = {}; let k = 0;
+    const up = (u) => {
+      const m = typeof u === 'string' && /^data:image\/(jpeg|png|webp);base64,(.+)$/.exec(u); if (!m) return Promise.resolve(u);
+      if (vus[u]) return vus[u];
+      const bin = atob(m[2]); const arr = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      const path = 'boutique/' + id + '-' + Date.now().toString(36) + '-' + (k++) + '.' + (m[1] === 'jpeg' ? 'jpg' : m[1]);
+      return (vus[u] = window.CasaAuth.uploadImage(new Blob([arr], { type: 'image/' + m[1] }), path));
+    };
+    const p = Object.assign({}, a);
+    return Promise.all([up(p.img), Promise.all((Array.isArray(p.gallery) ? p.gallery : []).map(up)), Promise.all((Array.isArray(p.imgsByColor) ? p.imgsByColor : []).map((r) => Promise.all((Array.isArray(r) ? r : [r]).map(up))))])
+      .then(([img, gallery, rows]) => Object.assign(p, { img, gallery, imgsByColor: rows }));
+  }
   creaNorm(p) {
     const s = (v, n) => String(v == null ? '' : v).slice(0, n); const ok = (u) => (typeof u === 'string' && /^(data:image\/(jpeg|png|webp);base64,|\/media\/boutique\/|https:\/\/)/.test(u) ? u : '');
     const rows = (Array.isArray(p.imgsByColor) && p.imgsByColor.length ? p.imgsByColor : [Array.isArray(p.gallery) && p.gallery.length ? p.gallery : [p.img]]).map((r) => (Array.isArray(r) ? r : [r]).map(ok).filter(Boolean)).filter((r) => r.length);
@@ -3813,41 +3839,52 @@ class Component extends DCLogic {
   }
   // les créations publiées rejoignent le catalogue ; un panier ne garde que des articles encore en vente
   setCreated(list) {
-    const X = this.more(); const all = (list || []).map((p) => this.creaNorm(p)).filter((p) => p.id && p.img);
-    this._crea = all; X.products = X.products.filter((p) => p.line !== 'atelier').concat(all.filter((p) => p.status === 'publie'));
-    this.setState({ creaN: (this.state.creaN || 0) + 1, cart: this.state.cart.filter((l) => X.products.some((p) => p.id === l.id)) });
+    this._crea = (list || []).map((p) => this.creaNorm(p)).filter((p) => p.id && p.img); this._m = null;
+    const X = this.more(); this.setState({ creaN: (this.state.creaN || 0) + 1, cart: this.state.cart.filter((l) => X.products.some((p) => p.id === l.id)) });
   }
-  creaSrv() { return !!(window.CB_SERVER && window.CB && window.CB.boutique); }
-  creaTeamLoad() { if (!this.creaSrv()) return; window.CB.boutique.team().then((r) => this.setState({ creaTeam: r.produits || [] })).catch((e) => this.setState({ creaMsg: e.message })); }
   creaImport(file) {
+    if (this.state.role !== 'admin') { this.say('Réservé à l’administrateur du site.'); return; }
     if (!file) return; if (file.size > 90e6) { this.setState({ creaMsg: 'Fichier trop lourd.' }); return; }
     const fr = new FileReader();
     fr.onload = () => {
       let j = null; try { j = JSON.parse(fr.result); } catch (e) { j = null; }
       const arts = j && j.format === 'casa-boutique' && Array.isArray(j.articles) ? j.articles.slice(0, 60) : null;
       if (!arts || !arts.length) { this.setState({ creaMsg: 'Ce fichier n’est pas un pack de l’Atelier (.casa-boutique.json).' }); return; }
-      if (this.creaSrv()) {
-        const CB = window.CB; const chief = CB.user && ['admin', 'collaborateur'].indexOf(CB.user.role) >= 0; let n = 0; const errs = [];
-        const next = (i) => { if (i >= arts.length) { this.setState({ creaMsg: n + ' article(s) ajouté(s)' + (chief ? ', publié(s)' : ' en brouillon') + (errs.length ? ' · ' + errs.join(' ; ') : '') + '.' }); this.creaTeamLoad(); CB.boutique.reload(); return; }
-          const a = arts[i]; CB.boutique.put(a.id, { product: a, status: chief ? 'publie' : 'brouillon' }).then(() => { n++; next(i + 1); }).catch((e) => { errs.push((a.name || a.id) + ' : ' + e.message); next(i + 1); }); };
-        this.setState({ creaMsg: 'Envoi de ' + arts.length + ' article(s)…' }); next(0); return;
-      }
       const now = new Date().toISOString();
-      Promise.all(arts.map((a) => { const p = Object.assign({}, a); delete p.design; delete p.cost; delete p.costNote; p.status = 'publie'; p.importedAt = now; return this.creaDo('readwrite', (st) => st.put(p, String(p.id || ('art-' + Date.now())).slice(0, 80))); }))
-        .then(() => this.creaDo('readonly', (st) => st.getAll())).then((list) => { this.setCreated(list || []); this.setState({ creaMsg: arts.length + ' article(s) ajouté(s) à la collection Créations Casa.', creaOpen: true, shopLine: 'Créations Casa' }); });
+      const propre = (a) => { const p = Object.assign({}, a); delete p.design; delete p.cost; delete p.costNote; p.id = String(p.id || ('art-' + Date.now())).slice(0, 80); p.line = 'atelier'; p.status = 'publie'; p.importedAt = now; return p; };
+      if (this.creaOnline()) {
+        const prets = []; const errs = [];
+        const next = (i) => {
+          if (i >= arts.length) {
+            if (!prets.length) { this.setState({ creaMsg: 'Aucun article importé' + (errs.length ? ' : ' + errs.join(' ; ') : '.') }); return; }
+            const ids = prets.map((p) => p.id); const list = this.creaRaw().filter((p) => ids.indexOf(p.id) < 0).concat(prets);
+            this.creaSave(list).then(() => this.setState({ creaMsg: prets.length + ' article(s) en ligne dans la collection Créations Casa' + (errs.length ? ' · ' + errs.join(' ; ') : '') + '.', creaOpen: true, shopLine: 'Créations Casa' }),
+              (e) => this.setState({ creaMsg: 'Enregistrement impossible : ' + (e && e.message || 'erreur') }));
+            return;
+          }
+          const a = propre(arts[i]); this.setState({ creaMsg: 'Envoi des photos (' + (i + 1) + '/' + arts.length + ')…' });
+          this.creaUpload(a).then((p) => { prets.push(p); next(i + 1); }, (e) => { errs.push((a.name || a.id) + ' : ' + (e && e.message || 'photo refusée')); next(i + 1); });
+        };
+        next(0); return;
+      }
+      Promise.all(arts.map((a) => { const p = propre(a); return this.creaDo('readwrite', (st) => st.put(p, p.id)); }))
+        .then(() => this.creaDo('readonly', (st) => st.getAll())).then((list) => { this.setCreated(list || []); this.setState({ creaMsg: arts.length + ' article(s) ajouté(s) à la collection Créations Casa (sur cet appareil).', creaOpen: true, shopLine: 'Créations Casa' }); });
     };
     fr.onerror = () => this.setState({ creaMsg: 'Lecture du fichier impossible.' }); fr.readAsText(file);
   }
   creaSet(id, status) {
-    if (this.creaSrv()) { window.CB.boutique.statut(id, status).then(() => { this.creaTeamLoad(); window.CB.boutique.reload(); this.say(status === 'publie' ? 'Article publié dans la boutique' : 'Article retiré de la boutique'); }).catch((e) => this.say(e.message)); return; }
-    this.creaDo('readonly', (st) => st.get(id)).then((p) => (p ? this.creaDo('readwrite', (st) => st.put(Object.assign(p, { status }), id)) : null)).then(() => this.creaDo('readonly', (st) => st.getAll())).then((list) => { this.setCreated(list || []); this.say(status === 'publie' ? 'Article remis en boutique' : 'Article retiré de la boutique'); });
+    if (this.state.role !== 'admin') return;
+    if (this.creaOnline()) { const list = this.creaRaw().map((p) => (p.id === id ? Object.assign({}, p, { status }) : p)); this.creaSave(list).then(() => this.say(status === 'publie' ? 'Article remis dans la boutique' : 'Article retiré de la boutique'), (e) => this.say(e && e.message || 'Erreur')); return; }
+    this.creaDo('readonly', (st) => st.get(id)).then((p) => (p ? this.creaDo('readwrite', (st) => st.put(Object.assign(p, { status }), id)) : null)).then(() => this.creaDo('readonly', (st) => st.getAll())).then((list) => { this.setCreated(list || []); this.say(status === 'publie' ? 'Article remis dans la boutique' : 'Article retiré de la boutique'); });
   }
   creaDel(id) {
+    if (this.state.role !== 'admin') return;
     if (this.state.creaSure !== id) { this.setState({ creaSure: id }); clearTimeout(this._creaT); this._creaT = setTimeout(() => this.setState({ creaSure: '' }), 4000); return; }
     this.setState({ creaSure: '' });
-    if (this.creaSrv()) { window.CB.boutique.del(id).then(() => { this.creaTeamLoad(); window.CB.boutique.reload(); this.say('Article supprimé'); }).catch((e) => this.say(e.message)); return; }
+    if (this.creaOnline()) { this.creaSave(this.creaRaw().filter((p) => p.id !== id)).then(() => this.say('Article supprimé'), (e) => this.say(e && e.message || 'Erreur')); return; }
     this.creaDo('readwrite', (st) => st.delete(id)).then(() => this.creaDo('readonly', (st) => st.getAll())).then((list) => { this.setCreated(list || []); this.say('Article supprimé de cet appareil'); });
   }
+
   addLine(p, color, size, qty, perso, unit) {
     const u = unit ?? (p.priceBySize ? p.priceBySize[Math.max(0, p.sizes.indexOf(size))] : p.price);
     const cart = this.state.cart.slice();

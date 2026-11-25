@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
       const items: any[] = [];
       let net = 0;
       for (const l of lignes) {
-        const p = produits.find((x) => x && x.id === l.id);
+        const p = produits.find((x) => x && x.id === l.id && (!x.status || x.status === 'publie')); // une Création Casa retirée ne se vend plus
         if (!p) return json({ error: 'Un article du panier n’est plus disponible. Retirez-le puis réessayez.' }, 400);
         const qty = Math.max(1, Math.min(20, Math.floor(Number(l.qty) || 1)));
         const sizes = Array.isArray(p.sizes) ? p.sizes : null;

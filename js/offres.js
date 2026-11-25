@@ -93,7 +93,7 @@ window.CasaOffres = (function () {
         if (f.proBusy) return; set(app, { proBusy: true });
         A().db(function (c) { return c.rpc('club_pro_activer', { c: club }); })
           .then(function () { app.say('Club PRO est activé pour ' + (nomClub || 'le club') + '.'); chargerPro(app, true); },
-            function (e) { app.say(missing(e) ? 'Club PRO sera disponible dès que la base est mise à jour (supabase/offres.sql).' : e.message); })
+            function (e) { app.say(missing(e) ? (app.state.role === 'admin' ? 'Club PRO sera disponible dès que la base est mise à jour (supabase/offres.sql).' : 'Club PRO sera disponible très bientôt.') : e.message); })
           .then(function () { set(app, { proBusy: false }); });
       }
     };
