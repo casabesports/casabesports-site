@@ -279,7 +279,7 @@
           if (/rate limit|seconds/i.test(msg)) msg = 'Trop de demandes : patientez une minute puis réessayez.';
           else if (/invalid|expired/i.test(msg) && /token|otp/i.test(msg)) msg = 'Code incorrect ou expiré.';
           else if (/phone.*(provider|disabled)|unsupported phone/i.test(msg)) msg = 'La connexion par SMS n’est pas encore activée.';
-          else if (/supprimer_compte_doublon/i.test(msg)) msg = 'Suppression impossible pour l’instant (réglage Supabase à faire : supabase/comptes.sql).';
+          else if (/supprimer_compte_doublon/i.test(msg)) msg = 'Suppression impossible pour l’instant : écrivez-nous depuis la page Contact.';
           else if (/signups not allowed/i.test(msg)) msg = 'Les inscriptions sont fermées pour le moment.';
           else if (/invalid login credentials/i.test(msg)) msg = 'Identifiant ou mot de passe incorrect. Pas encore de mot de passe ? Choisissez « Connexion par lien ou SMS » avec l’e-mail ou le mobile utilisé la première fois : vous retrouverez votre compte, sans en créer un deuxième.';
           else if (/email not confirmed/i.test(msg)) msg = 'Adresse e-mail pas encore confirmée : ouvrez le lien reçu par e-mail.';

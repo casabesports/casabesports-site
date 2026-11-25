@@ -222,7 +222,7 @@ var CasaCauseries = (function () {
     st.saving = true; majSave();
     var p = z.id ? db(function (c) { return c.from('causeries').update(row).eq('id', z.id).select('id, statut, notifie').single(); }) : db(function (c) { return c.from('causeries').insert(row).select('id, statut, notifie').single(); });
     return p.then(function (r) { if (st && st.z === z) { z.id = r.id; z.notifie = r.notifie; } st.saving = false; st.savedAt = Date.now(); majSave(); if (!quiet) say('Causerie enregistrée.'); return r; },
-      function (e) { st.saving = false; majSave(missing(e) ? 'Lancez d’abord supabase/causeries.sql dans Supabase.' : msg(e)); throw e; });
+      function (e) { st.saving = false; majSave(missing(e) ? (st.ctx.isAdmin ? 'Lancez d’abord supabase/causeries.sql dans Supabase.' : 'Les causeries ne sont pas encore ouvertes : réessayez un peu plus tard.') : msg(e)); throw e; });
   }
   var saveT = null;
   function plusTard() { if (!st || !st.z) return; st.dirty = true; majSave(); clearTimeout(saveT); saveT = setTimeout(function () { if (st && st.z && st.z.id) enregistrer(true).then(function () { st.dirty = false; majSave(); }, function () {}); }, 1200); }
@@ -484,7 +484,7 @@ var CasaCauseries = (function () {
     sto(function (b) { return b.upload(path, f, { contentType: 'application/pdf', upsert: true }); }).then(function () {
       z.fichier = path; z.fichier_nom = String(f.name || 'document.pdf').slice(0, 160); if (z.genre !== 'pdf' && !z.contenu.mot && !(z.contenu.schemas || []).length) z.genre = 'pdf';
       return enregistrer(true);
-    }).then(function () { if (old && old !== path) sto(function (b) { return b.remove([old]); }).catch(function () {}); say('PDF ajouté.'); draw(); }, function (e) { say(missing(e) ? 'Lancez d’abord supabase/causeries.sql dans Supabase.' : 'PDF non envoyé : ' + msg(e)); });
+    }).then(function () { if (old && old !== path) sto(function (b) { return b.remove([old]); }).catch(function () {}); say('PDF ajouté.'); draw(); }, function (e) { say(missing(e) ? (st.ctx.isAdmin ? 'Lancez d’abord supabase/causeries.sql dans Supabase.' : 'Les causeries ne sont pas encore ouvertes : réessayez un peu plus tard.') : 'PDF non envoyé : ' + msg(e)); });
   }
   function pdfjs() { return window.pdfjsLib ? Promise.resolve(window.pdfjsLib) : charge(PDFJS).then(function () { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_W; return window.pdfjsLib; }); }
   function blobDe(path) { return sto(function (b) { return b.download(path); }); }
@@ -558,7 +558,7 @@ var CasaCauseries = (function () {
           sto(function (b) { return b.upload(path, bl, { contentType: 'image/jpeg', upsert: true }); }).then(function () {
             st.z.contenu.photos = st.z.contenu.photos || []; st.z.contenu.photos.push({ chemin: path, legende: legende.v.trim(), partie: partie.v }); if (st.z.genre !== 'photo' && !st.z.fichier && !st.z.contenu.mot && st.z.contenu.photos.length === 1 && !(st.z.contenu.schemas || []).length) st.z.genre = 'photo';
             return enregistrer(true);
-          }).then(function () { say('Photo ajoutée à la causerie.'); st.sous = 'photos'; draw(); if (reste.length) photoEditeur(reste[0], reste.slice(1)); }, function (e) { say(missing(e) ? 'Lancez d’abord supabase/causeries.sql dans Supabase.' : 'Photo non envoyée : ' + msg(e)); });
+          }).then(function () { say('Photo ajoutée à la causerie.'); st.sous = 'photos'; draw(); if (reste.length) photoEditeur(reste[0], reste.slice(1)); }, function (e) { say(missing(e) ? (st.ctx.isAdmin ? 'Lancez d’abord supabase/causeries.sql dans Supabase.' : 'Les causeries ne sont pas encore ouvertes : réessayez un peu plus tard.') : 'Photo non envoyée : ' + msg(e)); });
         }, 'image/jpeg', .86);
       }]], 'cz-modal-wide');
     }, function () { say('Cette image ne s’ouvre pas. Essayez une photo JPEG ou PNG.'); });

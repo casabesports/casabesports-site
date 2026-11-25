@@ -148,7 +148,7 @@ var CasaPartage = (function () {
       ui(app, { msg: 'Enregistré' });
     }, function (e) {
       var sql = /article_partage|function|schema cache/i.test(e && e.message || '');
-      ui(app, { msg: sql ? 'Article déjà envoyé : l’administrateur doit d’abord lancer supabase/partage.sql pour que ce choix soit enregistré.' : 'Non enregistré : ' + (e && e.message || 'erreur') });
+      ui(app, { msg: sql ? (app.state.role === 'admin' ? 'Article déjà envoyé : lancez d’abord supabase/partage.sql pour que ce choix soit enregistré.' : 'Ce choix ne peut pas encore être enregistré : réessayez plus tard.') : 'Non enregistré : ' + (e && e.message || 'erreur') });
     });
   }
   function refaire(app) {
