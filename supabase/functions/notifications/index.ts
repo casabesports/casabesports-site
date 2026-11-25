@@ -16,6 +16,8 @@
 //   causerie  staff   → { causerie } : prévient les joueurs autorisés d'une causerie publiée (supabase/causeries.sql)
 //   club      staff d'un club PRO → { club, section, titre, texte } : message à tout le club ou à une section
 //                       (licenciés, parents, staff validés dans le Vestiaire). 5 messages par jour au plus. Tables : supabase/offres.sql
+//   discussion connecté → { message } : prévient les membres d'une conversation du Club House selon le choix de chacun
+//                       (tout, seulement si on le cite, rien). Tables : supabase/discussions-plus.sql
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as webpush from 'jsr:@negrel/webpush@0.5.0';
 
@@ -78,10 +80,10 @@ async function estAdmin(req: Request) {
 }
 
 // Envoie un message à une liste d'appareils, retire ceux qui n'existent plus
-async function pousser(lignes: { endpoint: string; p256dh: string; auth: string }[], titre: string, texte: string, lien: string) {
+async function pousser(lignes: { endpoint: string; p256dh: string; auth: string }[], titre: string, texte: string, lien: string, tag?: string) {
   const contact = Deno.env.get('NOTIF_CONTACT') || Deno.env.get('EXPEDITEUR_EMAIL') || 'contact@casabesports.fr';
   const serveur = await webpush.ApplicationServer.new({ contactInformation: 'mailto:' + contact, vapidKeys: (await cles()).keys });
-  const message = JSON.stringify({ title: titre, body: texte, url: lien, tag: 'casa-' + Date.now().toString(36) });
+  const message = JSON.stringify({ title: titre, body: texte, url: lien, tag: tag || 'casa-' + Date.now().toString(36) });
   let envoyees = 0, echecs = 0; const perimes: string[] = []; const erreurs: string[] = [];
   for (let i = 0; i < lignes.length; i += 25) { // 25 appareils à la fois
     await Promise.all(lignes.slice(i, i + 25).map(async (s) => {
@@ -174,6 +176,30 @@ Deno.serve(async (req) => {
         ? ' Lisible à partir du ' + new Date(z.ouvre_le).toLocaleString('fr-FR', { timeZone: 'Europe/Paris', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + '.' : '';
       const { data: appareils } = await service.from('push_abonnements').select('endpoint, p256dh, auth').in('user_id', cibles.slice(0, 500)).limit(5000);
       const r = await pousser(appareils ?? [], 'La causerie est arrivée', (z.auteur_nom ? 'Coach ' + z.auteur_nom + ' : ' : '') + String(z.titre).slice(0, 80) + '.' + ouvre, '/?causerie=' + z.id + '&club=' + encodeURIComponent(z.club));
+      return json({ ok: true, envoyees: r.envoyees });
+    }
+
+    // ----- Discussions du Club House : un message vient d'être écrit, on prévient les membres qui l'ont choisi -----
+    if (action === 'discussion') {
+      const moi = await utilisateur(req);
+      if (!moi) return json({ error: 'Connexion requise' }, 401);
+      const id = String(body.message ?? '');
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return json({ error: 'Message invalide' }, 400);
+      const { data: m } = await service.from('discussions_messages').select('id, groupe_id, user_id, auteur, texte, pieces, notifie').eq('id', id).maybeSingle();
+      if (!m || m.user_id !== moi || m.notifie) return json({ ok: true, envoyees: 0 }); // seul l'auteur prévient, une seule fois
+      const { data: g } = await service.from('discussions_groupes').select('id, nom, type').eq('id', m.groupe_id).maybeSingle();
+      if (!g) return json({ ok: true, envoyees: 0 });
+      const { data, error } = await service.rpc('dc_destinataires', { mid: id });
+      if (error) return json({ error: 'Notifications des discussions pas encore installées (supabase/discussions-plus.sql).' }, 501);
+      const cibles = ((data ?? []) as string[]).filter((u) => u && u !== moi);
+      if (!cibles.length) return json({ ok: true, envoyees: 0 });
+      const pieces = Array.isArray(m.pieces) ? m.pieces.length : 0;
+      const contenu = String(m.texte || '').trim() || (pieces > 1 ? '📎 ' + pieces + ' pièces jointes' : '📎 Pièce jointe');
+      const auteur = m.auteur || 'Un membre';
+      const titre = g.type === 'prive' ? auteur + ' (message privé)' : String(g.nom).slice(0, 60);
+      const texte = (g.type === 'prive' ? '' : auteur + ' : ') + contenu.slice(0, 140);
+      const { data: appareils } = await service.from('push_abonnements').select('endpoint, p256dh, auth').in('user_id', cibles.slice(0, 1000)).limit(5000);
+      const r = await pousser(appareils ?? [], titre, texte, '/?discussion=' + g.id, 'dc-' + g.id);
       return json({ ok: true, envoyees: r.envoyees });
     }
 

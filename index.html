@@ -3248,6 +3248,52 @@ img, video, canvas, svg { max-width: 100%; }
 .dc-empty { margin: auto; text-align: center; padding: 3rem 1.5rem; max-width: 26rem; display: flex; flex-direction: column; gap: .5rem; align-items: center; }
 .dc-empty .dc-k { color: var(--gold-text, #9a6410); }
 .dc-empty-t { margin: 0; font: 800 clamp(1.4rem, 3vw, 2rem)/1.05 var(--bn-font, sans-serif); text-transform: uppercase; color: var(--ink, var(--text)); }
+/* Discussions : pièces jointes, infos du groupe, notifications */
+.dc-clip { flex: none; width: 46px; height: 46px; border: 1.5px solid var(--line-2); background: var(--surface); color: var(--text); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.dc-clip:hover, .dc-clip:focus-within { border-color: var(--rade, #10283a); background: var(--surface-2); }
+.dc-clip input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+.dc-att { display: flex; gap: .45rem; flex-wrap: wrap; padding: .55rem .8rem 0; background: var(--surface); border-top: 1px solid var(--line); }
+.dc-att-it { display: inline-flex; align-items: center; gap: .45rem; max-width: 100%; padding: .3rem .35rem .3rem .3rem; border: 1px solid var(--line-2); background: var(--surface-2); font-size: 13px; }
+.dc-att-it img { width: 38px; height: 38px; object-fit: cover; display: block; }
+.dc-att-it b { font-weight: 700; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.dc-att-it small { color: var(--muted); display: block; }
+.dc-att-x { border: 0; background: none; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; padding: .2rem .35rem; }
+.dc-att-x:hover { color: var(--danger, #b3261e); }
+.dc-ext { flex: none; width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; background: var(--rade, #10283a); color: #fff; font: 800 10px/1 var(--bn-font, sans-serif); letter-spacing: .03em; }
+.dc-envoi { padding: .4rem .8rem 0; font-size: 13px; color: var(--muted); background: var(--surface); }
+.dc-pj { display: flex; flex-direction: column; gap: .35rem; margin-bottom: .3rem; }
+.dc-m.is-mine .dc-pj { align-items: flex-end; }
+.dc-pj-img { display: block; padding: 0; border: 1px solid var(--line); background: var(--surface-2); cursor: zoom-in; max-width: min(280px, 70vw); }
+.dc-pj-img img { display: block; max-width: 100%; max-height: 260px; object-fit: cover; }
+.dc-pj-wait { width: 200px; height: 130px; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--line-2); color: var(--muted); font-size: 13px; background: var(--surface-2); }
+.dc-pj-f { display: inline-flex; align-items: center; gap: .55rem; padding: .4rem .7rem .4rem .4rem; border: 1px solid var(--line); background: var(--surface); color: var(--text); text-decoration: none; max-width: min(300px, 72vw); }
+.dc-pj-f:hover, .dc-pj-f:focus-visible { border-color: var(--rade, #10283a); }
+.dc-pj-f b { font-size: 14px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-pj-f small { font-size: 12px; color: var(--muted); display: block; }
+.dc-pj-f.is-wait { opacity: .6; pointer-events: none; }
+.dc-zoom { position: fixed; inset: 0; z-index: 2000; background: rgba(6, 16, 24, .88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .8rem; padding: 1rem; }
+.dc-zoom img { max-width: 100%; max-height: calc(100dvh - 120px); object-fit: contain; display: block; }
+.dc-zoom-b { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+.dc-zoom-b a, .dc-zoom-b button { min-height: 42px; padding: .5rem 1rem; border: 1.5px solid #fff; background: transparent; color: #fff; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.dc-zoom-b button:hover, .dc-zoom-b a:hover { background: #fff; color: #10283a; }
+.dc-choix { display: flex; flex-direction: column; gap: .4rem; }
+.dc-choix .dc-type { min-height: 0; }
+.dc-alerte { margin: 0; font-size: 13px; line-height: 1.45; padding: .55rem .7rem; border-left: 3px solid var(--sun, #f2b33d); background: var(--surface); color: var(--text-2); }
+.dc-btn.is-bell { padding-left: .6rem; padding-right: .6rem; }
+.dc-btn.is-bell.is-off { opacity: .65; }
+.dc-ag { padding: .6rem .7rem; border: 1px solid var(--line); background: var(--surface); margin-bottom: .4rem; display: flex; flex-direction: column; gap: .35rem; }
+.dc-ag-top { display: flex; gap: .5rem; align-items: flex-start; justify-content: space-between; }
+.dc-h-btn { all: unset; cursor: pointer; display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.dc-h-btn:focus-visible { outline: 2px solid var(--rade, #10283a); outline-offset: 2px; }
+.ct-pj { border: 1px solid var(--line); padding: .8rem .9rem; margin-bottom: 1rem; background: var(--surface); }
+.ct-pj-h { display: flex; gap: .6rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.ct-pj-h small { font-weight: 400; color: var(--muted); text-transform: none; letter-spacing: 0; }
+.ct-pj-add { position: relative; overflow: hidden; gap: .4rem; min-height: 42px; font-size: 14px; cursor: pointer; }
+.ct-pj-add input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+.dc-att.is-ct { padding: .6rem 0 0; border-top: 0; background: none; }
+.ct-pj-etat { margin: -.6rem 0 1.25rem; font-size: 14px; color: var(--text-2); }
+.ct-pj-etat.is-ok { color: var(--success, #2e7d4f); font-weight: 700; }
+.ct-pj-etat.is-ko { color: var(--danger, #b3261e); }
 /* ===== Le Vestiaire : l'espace commun des clubs et des joueurs (js/vestiaire.js) — thème Marée ===== */
 .vs-k { display: block; font: 700 11.5px/1.2 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .1em; color: var(--sun, #f2b33d); }
 /* Bloc de l'accueil */
@@ -6436,7 +6482,7 @@ img, video, canvas, svg { max-width: 100%; }
         <sc-if value="{{stMedia}}" hint-placeholder-val="{{ false }}">
           <div class="glass rx-card">
             <div class="rx-head"><div><div class="eb">Photos et vidéos de la rédaction</div><h1 class="h2">Médiathèque</h1></div>
-              <label class="btn btn-dark rx-sm rx-file">Importer des photos ou des vidéos<input type="file" accept="image/*,video/*" multiple onChange="{{rx.media.onUpload}}"></label>
+              <label class="btn btn-dark rx-sm rx-file">Importer des photos ou des vidéos<input type="file" accept="image/*,video/*" multiple="multiple" onChange="{{rx.media.onUpload}}"></label>
             </div>
             <div class="rx-tabs"><sc-for list="{{rx.media.tabs}}" as="mt" hint-placeholder-count="2"><button type="button" class="rx-tab" onClick="{{mt.pick}}" aria-pressed="{{mt.pressed}}" style="background: {{mt.bg}}; color: {{mt.fg}}; border-color: {{mt.border}}">{{mt.label}}</button></sc-for></div>
             <sc-if value="{{rx.media.isLib}}" hint-placeholder-val="{{ true }}">
@@ -7199,6 +7245,13 @@ img, video, canvas, svg { max-width: 100%; }
         </div>
       </sc-if>
       <label class="lbl" style="margin-bottom: 1rem">Message<textarea class="field" value="{{message}}" onChange="{{onMessage}}" style="min-height: 150px; padding: .8rem .9rem; resize: vertical"></textarea></label>
+      <sc-if value="{{ctPj.on}}" hint-placeholder-val="{{ true }}">
+        <div class="ct-pj">
+          <div class="ct-pj-h"><span class="lbl" style="margin: 0">Pièces jointes <small>(facultatif · photos, PDF, Word, Excel · 10 Mo par fichier, 5 au plus)</small></span>
+            <sc-if value="{{ctPj.pasPlein}}" hint-placeholder-val="{{ true }}"><label class="btn btn-ghost ct-pj-add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"></path></svg>Joindre un fichier<input type="file" multiple="multiple" accept="{{ctPj.accept}}" onChange="{{ctPj.onFichiers}}"></label></sc-if></div>
+          <sc-if value="{{ctPj.has}}" hint-placeholder-val="{{ false }}"><div class="dc-att is-ct"><sc-for list="{{ctPj.liste}}" as="cp" hint-placeholder-count="2"><span class="dc-att-it"><span class="dc-ext">{{cp.ext}}</span><span><b>{{cp.nom}}</b><small>{{cp.taille}}</small></span><button type="button" class="dc-att-x" onClick="{{cp.retirer}}" aria-label="Retirer {{cp.nom}}">×</button></span></sc-for></div></sc-if>
+        </div>
+      </sc-if>
       <sc-if value="{{formError}}" hint-placeholder-val="{{ false }}"><div style="color: var(--danger); font-weight: 700; font-size: 14px; margin-bottom: 1rem">{{formError}}</div></sc-if>
       <button type="button" class="btn btn-dark" onClick="{{sendContact}}">Envoyer le message</button>
     </sc-if>
@@ -7206,6 +7259,9 @@ img, video, canvas, svg { max-width: 100%; }
       <div style="background: var(--surface-2); border-radius: 0; padding: 2rem">
         <div class="ttl" style="font-size: 30px; margin-bottom: .5rem">Message envoyé</div>
         <p style="margin: 0 0 1.25rem; color: var(--text-2)">Merci {{name}}, l’équipe Casa Besports vous répond rapidement.</p>
+        <sc-if value="{{ctPj.envoi}}" hint-placeholder-val="{{ false }}"><p class="ct-pj-etat">Envoi de vos pièces jointes en cours… gardez la page ouverte quelques secondes.</p></sc-if>
+        <sc-if value="{{ctPj.ok}}" hint-placeholder-val="{{ false }}"><p class="ct-pj-etat is-ok">✓ {{ctPj.n}} pièce{{ctPj.nPlur}} jointe{{ctPj.nPlur}} bien reçue{{ctPj.nPlur}}.</p></sc-if>
+        <sc-if value="{{ctPj.ko}}" hint-placeholder-val="{{ false }}"><p class="ct-pj-etat is-ko">Votre message est bien arrivé, mais les pièces jointes n’ont pas pu être envoyées ({{ctPj.err}}). Vous pourrez les envoyer en réponse à notre e-mail.</p></sc-if>
         <sc-if value="{{olForm.sentOk}}" hint-placeholder-val="{{ false }}"><p style="margin: -.6rem 0 1.25rem; color: var(--text-2)">Votre demande a aussi été transmise à {{olForm.nom}} (OlistO), qui vous recontacte.</p></sc-if>
         <sc-if value="{{olForm.sentKo}}" hint-placeholder-val="{{ false }}"><div class="ol-form-note" style="margin: -.4rem 0 1.25rem"><p style="margin: 0 0 .7rem; font-size: 14px; color: var(--text-2)">Pour joindre OlistO tout de suite, écrivez ou appelez directement {{olForm.nom}} :</p><div class="ol-contact-b"><a class="btn btn-dark" href="{{olForm.mailFull}}">Écrire à {{olForm.email}}</a><a class="btn btn-ghost" href="{{olForm.telHref}}">Appeler le {{olForm.tel}}</a></div></div></sc-if>
         <div style="display: flex; gap: .6rem; flex-wrap: wrap"><button type="button" class="btn btn-dark" onClick="{{goHome}}">Retour à l’accueil</button><button type="button" class="btn btn-ghost" onClick="{{newMessage}}">Nouveau message</button></div>
@@ -8302,6 +8358,32 @@ img, video, canvas, svg { max-width: 100%; }
                   </div>
                 </sc-for>
               </sc-if>
+              <sc-if value="{{dc.hasAdminG}}" hint-placeholder-val="{{ false }}">
+                <div class="dc-h"><button type="button" class="dc-h-btn" onClick="{{dc.toggleAdminG}}" aria-expanded="{{dc.adminGOpen}}"><span>Tous les groupes · administration ({{dc.adminGN}})</span><span aria-hidden="true">▾</span></button></div>
+                <sc-if value="{{dc.adminGOpen}}" hint-placeholder-val="{{ false }}">
+                  <p class="dc-aide">Pour corriger le nom, la description, le sport ou le type d’un groupe. Les messages des groupes à huis clos restent privés.</p>
+                  <sc-for list="{{dc.adminG}}" as="ag" hint-placeholder-count="2">
+                    <div class="dc-ag">
+                      <div class="dc-ag-top"><span class="dc-og-b"><b>{{ag.titre}}</b><sc-if value="{{ag.hasDesc}}" hint-placeholder-val="{{ false }}"><span class="dc-og-d">{{ag.desc}}</span></sc-if><span class="dc-og-m"><span class="dc-tag {{ag.tcls}}">{{ag.type}}</span>{{ag.sous}}</span></span>
+                        <button type="button" class="dc-btn" onClick="{{ag.modifier}}">Modifier</button></div>
+                      <sc-if value="{{ag.ed.on}}" hint-placeholder-val="{{ false }}">
+                        <div class="dc-form">
+                    <label class="dc-l">Nom du groupe<input class="field" value="{{ag.ed.nom}}" onChange="{{ag.ed.onNom}}" maxlength="60"></label>
+                    <label class="dc-l">En deux mots (facultatif)<input class="field" value="{{ag.ed.desc}}" onChange="{{ag.ed.onDesc}}" maxlength="200" placeholder="De quoi on parle ici ?"></label>
+                    <label class="dc-l">Sport<x-select class="field" value="{{ag.ed.sport}}" onChange="{{ag.ed.onSport}}"><sc-for list="{{ag.ed.sports}}" as="o" hint-placeholder-count="8"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+                    <div class="dc-types" role="group" aria-label="Type de groupe">
+                      <button type="button" class="dc-type {{ag.ed.clsOuvert}}" aria-pressed="{{ag.ed.pOuvert}}" onClick="{{ag.ed.choisirOuvert}}"><b>Ouvert</b><span>Tout membre le trouve et le rejoint</span></button>
+                      <button type="button" class="dc-type {{ag.ed.clsHuis}}" aria-pressed="{{ag.ed.pHuis}}" onClick="{{ag.ed.choisirHuis}}"><b>🔒 Huis clos</b><span>Invisible, sur invitation seulement</span></button>
+                    </div>
+                    <sc-if value="{{ag.ed.versOuvert}}" hint-placeholder-val="{{ false }}"><p class="dc-alerte">Attention : en passant en groupe ouvert, tous les membres connectés pourront trouver le groupe et lire ses anciens messages.</p></sc-if>
+                    <sc-if value="{{ag.ed.versHuis}}" hint-placeholder-val="{{ false }}"><p class="dc-alerte">Le groupe disparaîtra de la liste des groupes ouverts. Les membres actuels restent ; les nouveaux entreront avec le code d’invitation.</p></sc-if>
+                    <div class="dc-acts"><button type="button" class="dc-btn is-dark" onClick="{{ag.ed.valider}}">Enregistrer</button><button type="button" class="dc-btn" onClick="{{ag.ed.annuler}}">Annuler</button></div>
+                  </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </sc-if>
             </aside>
 
             <!-- Colonne de droite : la conversation -->
@@ -8312,12 +8394,46 @@ img, video, canvas, svg { max-width: 100%; }
                   <span class="dc-av" style="background: {{dc.conv.color}}">{{dc.conv.ini}}</span>
                   <span class="dc-ch-t"><b>{{dc.conv.titre}}</b><span><span class="dc-tag {{dc.conv.tcls}}">{{dc.conv.type}}</span>{{dc.conv.sous}}</span></span>
                   <span class="dc-ch-a">
+                    <sc-if value="{{dc.conv.notifOn}}" hint-placeholder-val="{{ true }}"><button type="button" class="dc-btn is-ghost is-bell" onClick="{{dc.conv.voirNotif}}" aria-label="Notifications : {{dc.conv.notifTxt}}" title="Notifications : {{dc.conv.notifTxt}}">🔔</button></sc-if>
+                    <sc-if value="{{dc.conv.notifOff}}" hint-placeholder-val="{{ false }}"><button type="button" class="dc-btn is-ghost is-bell is-off" onClick="{{dc.conv.voirNotif}}" aria-label="Notifications coupées" title="Notifications coupées">🔕</button></sc-if>
+                    <sc-if value="{{dc.conv.modifiable}}" hint-placeholder-val="{{ false }}"><button type="button" class="dc-btn is-ghost" onClick="{{dc.conv.voirInfos}}">Modifier</button></sc-if>
                     <sc-if value="{{dc.conv.notPrive}}" hint-placeholder-val="{{ true }}"><button type="button" class="dc-btn is-ghost" onClick="{{dc.conv.voirMembres}}">Membres</button></sc-if>
                     <sc-if value="{{dc.conv.hasCode}}" hint-placeholder-val="{{ true }}"><button type="button" class="dc-btn is-sun" onClick="{{dc.conv.voirInviter}}">Inviter</button></sc-if>
                   </span>
                 </header>
                 <sc-if value="{{dc.conv.hasDesc}}" hint-placeholder-val="{{ false }}"><p class="dc-desc">{{dc.conv.desc}}</p></sc-if>
 
+                <sc-if value="{{dc.conv.panelInfos}}" hint-placeholder-val="{{ false }}">
+                  <div class="dc-panel">
+                    <span class="dc-k">Modifier les infos du groupe</span>
+                    <p class="dc-aide">Réservé au créateur du groupe et à l’équipe Casa Besports.</p>
+                    <div class="dc-form">
+                    <label class="dc-l">Nom du groupe<input class="field" value="{{dc.conv.ed.nom}}" onChange="{{dc.conv.ed.onNom}}" maxlength="60"></label>
+                    <label class="dc-l">En deux mots (facultatif)<input class="field" value="{{dc.conv.ed.desc}}" onChange="{{dc.conv.ed.onDesc}}" maxlength="200" placeholder="De quoi on parle ici ?"></label>
+                    <label class="dc-l">Sport<x-select class="field" value="{{dc.conv.ed.sport}}" onChange="{{dc.conv.ed.onSport}}"><sc-for list="{{dc.conv.ed.sports}}" as="o" hint-placeholder-count="8"><x-option value="{{o.v}}">{{o.l}}</x-option></sc-for></x-select></label>
+                    <div class="dc-types" role="group" aria-label="Type de groupe">
+                      <button type="button" class="dc-type {{dc.conv.ed.clsOuvert}}" aria-pressed="{{dc.conv.ed.pOuvert}}" onClick="{{dc.conv.ed.choisirOuvert}}"><b>Ouvert</b><span>Tout membre le trouve et le rejoint</span></button>
+                      <button type="button" class="dc-type {{dc.conv.ed.clsHuis}}" aria-pressed="{{dc.conv.ed.pHuis}}" onClick="{{dc.conv.ed.choisirHuis}}"><b>🔒 Huis clos</b><span>Invisible, sur invitation seulement</span></button>
+                    </div>
+                    <sc-if value="{{dc.conv.ed.versOuvert}}" hint-placeholder-val="{{ false }}"><p class="dc-alerte">Attention : en passant en groupe ouvert, tous les membres connectés pourront trouver le groupe et lire ses anciens messages.</p></sc-if>
+                    <sc-if value="{{dc.conv.ed.versHuis}}" hint-placeholder-val="{{ false }}"><p class="dc-alerte">Le groupe disparaîtra de la liste des groupes ouverts. Les membres actuels restent ; les nouveaux entreront avec le code d’invitation.</p></sc-if>
+                    <div class="dc-acts"><button type="button" class="dc-btn is-dark" onClick="{{dc.conv.ed.valider}}">Enregistrer</button><button type="button" class="dc-btn" onClick="{{dc.conv.ed.annuler}}">Annuler</button></div>
+                  </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{dc.conv.panelNotif}}" hint-placeholder-val="{{ false }}">
+                  <div class="dc-panel">
+                    <span class="dc-k">Notifications de cette conversation</span>
+                    <div class="dc-choix" role="group" aria-label="Notifications">
+                      <sc-for list="{{dc.conv.notifChoix}}" as="nc" hint-placeholder-count="3"><button type="button" class="dc-type {{nc.cls}}" aria-pressed="{{nc.pressed}}" onClick="{{nc.pick}}"><b>{{nc.l}}</b><span>{{nc.d}}</span></button></sc-for>
+                    </div>
+                    <sc-if value="{{dc.conv.appareil.actif}}" hint-placeholder-val="{{ false }}"><p class="dc-aide">✓ Les notifications sont activées sur cet appareil.</p></sc-if>
+                    <sc-if value="{{dc.conv.appareil.aActiver}}" hint-placeholder-val="{{ true }}"><p class="dc-alerte">Pour les recevoir sur ce téléphone ou cet ordinateur, activez d’abord les notifications de BE+ sur cet appareil.</p><div class="dc-acts"><button type="button" class="dc-btn is-sun" onClick="{{dc.conv.appareil.activer}}">Activer sur cet appareil</button></div></sc-if>
+                    <sc-if value="{{dc.conv.appareil.installer}}" hint-placeholder-val="{{ false }}"><p class="dc-alerte">Sur iPhone et iPad, les notifications arrivent seulement dans l’application installée : Safari › Partager › « Sur l’écran d’accueil », puis ouvrez BE+ depuis l’icône.</p></sc-if>
+                    <sc-if value="{{dc.conv.appareil.bloque}}" hint-placeholder-val="{{ false }}"><p class="dc-alerte">Les notifications sont bloquées dans les réglages de votre navigateur pour ce site. Autorisez-les dans les réglages, puis revenez ici.</p></sc-if>
+                    <sc-if value="{{dc.conv.appareil.nonSupporte}}" hint-placeholder-val="{{ false }}"><p class="dc-aide">Ce navigateur ne reçoit pas de notifications. Votre choix vaut pour vos autres appareils.</p></sc-if>
+                  </div>
+                </sc-if>
                 <sc-if value="{{dc.conv.panelInviter}}" hint-placeholder-val="{{ false }}">
                   <div class="dc-panel">
                     <span class="dc-k">Inviter des amis</span>
@@ -8352,14 +8468,30 @@ img, video, canvas, svg { max-width: 100%; }
                         <sc-if value="{{m.other}}" hint-placeholder-val="{{ true }}"><span class="dc-m-av"><sc-if value="{{m.showAvatar}}" hint-placeholder-val="{{ true }}"><span class="dc-av is-s" style="background: {{m.color}}">{{m.ini}}</span></sc-if></span></sc-if>
                         <div class="dc-m-b">
                           <sc-if value="{{m.showHead}}" hint-placeholder-val="{{ true }}"><span class="dc-m-h"><b>{{m.auteur}}</b><sc-if value="{{m.hasQualite}}" hint-placeholder-val="{{ true }}"> · {{m.qualite}}</sc-if></span></sc-if>
-                          <p class="dc-bulle">{{m.texte}}</p>
+                          <sc-if value="{{m.hasPieces}}" hint-placeholder-val="{{ false }}"><div class="dc-pj">
+                            <sc-for list="{{m.pieces}}" as="pj" hint-placeholder-count="1">
+                              <sc-if value="{{pj.img}}" hint-placeholder-val="{{ false }}"><button type="button" class="dc-pj-img" onClick="{{pj.voir}}" aria-label="Agrandir {{pj.nom}}"><img src="{{pj.url}}" alt="{{pj.nom}}" loading="lazy"></button></sc-if>
+                              <sc-if value="{{pj.imgAttente}}" hint-placeholder-val="{{ false }}"><div class="dc-pj-wait">Photo en cours de chargement…</div></sc-if>
+                              <sc-if value="{{pj.fichier}}" hint-placeholder-val="{{ true }}"><a class="dc-pj-f" href="{{pj.url}}" target="_blank" rel="noopener" download="{{pj.nom}}"><span class="dc-ext">{{pj.ext}}</span><span><b>{{pj.nom}}</b><small>{{pj.taille}} · Télécharger</small></span></a></sc-if>
+                            </sc-for>
+                          </div></sc-if>
+                          <sc-if value="{{m.hasTexte}}" hint-placeholder-val="{{ true }}"><p class="dc-bulle">{{m.texte}}</p></sc-if>
                           <span class="dc-m-f">{{m.heure}}<sc-if value="{{m.canReport}}" hint-placeholder-val="{{ true }}"> · <button type="button" class="dc-lk" onClick="{{m.signaler}}">Signaler</button></sc-if><sc-if value="{{m.canDel}}" hint-placeholder-val="{{ false }}"> · <button type="button" class="dc-lk" onClick="{{m.supprimer}}">Supprimer</button></sc-if></span>
                         </div>
                       </div>
                     </sc-for>
                   </div>
                 </div>
+                <sc-if value="{{dc.conv.hasAttente}}" hint-placeholder-val="{{ false }}">
+                  <div class="dc-att" aria-label="Pièces jointes à envoyer">
+                    <sc-for list="{{dc.conv.attente}}" as="at" hint-placeholder-count="2">
+                      <span class="dc-att-it"><sc-if value="{{at.img}}" hint-placeholder-val="{{ false }}"><img src="{{at.apercu}}" alt=""></sc-if><sc-if value="{{at.fichier}}" hint-placeholder-val="{{ true }}"><span class="dc-ext">{{at.ext}}</span></sc-if><span><b>{{at.nom}}</b><small>{{at.taille}}</small></span><button type="button" class="dc-att-x" onClick="{{at.retirer}}" aria-label="Retirer {{at.nom}}">×</button></span>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{dc.conv.hasEnvoiPieces}}" hint-placeholder-val="{{ false }}"><p class="dc-envoi">{{dc.conv.envoiPieces}}</p></sc-if>
                 <div class="dc-compo">
+                  <label class="dc-clip" title="Joindre une photo ou un document (10 Mo au plus)"><span class="dc-sr">Joindre une photo ou un document</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"></path></svg><input type="file" multiple="multiple" accept="{{dc.conv.accept}}" onChange="{{dc.conv.onFichiers}}"></label>
                   <label class="dc-compo-l"><span class="dc-sr">Votre message</span><textarea class="field" value="{{dc.conv.texte}}" onChange="{{dc.conv.onTexte}}" onKeyDown="{{dc.conv.onTouche}}" maxlength="1000" rows="1" placeholder="Écrire un message…"></textarea></label>
                   <button type="button" class="dc-send" onClick="{{dc.conv.envoyer}}" aria-label="Envoyer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2.5-6.5z"></path></svg></button>
                 </div>
@@ -8368,6 +8500,7 @@ img, video, canvas, svg { max-width: 100%; }
                   <sc-if value="{{dc.conv.noConfirm}}" hint-placeholder-val="{{ true }}"><button type="button" class="dc-lk" onClick="{{dc.conv.demanderQuitter}}">{{dc.conv.quitterLabel}}</button></sc-if>
                 </div>
               </sc-if>
+              <sc-if value="{{dc.hasZoom}}" hint-placeholder-val="{{ false }}"><div class="dc-zoom" role="dialog" aria-label="Photo"><img src="{{dc.zoom}}" alt="{{dc.zoomNom}}"><div class="dc-zoom-b"><a href="{{dc.zoom}}" target="_blank" rel="noopener" download="{{dc.zoomNom}}">Télécharger</a><button type="button" onClick="{{dc.fermerZoom}}">Fermer ✕</button></div></div></sc-if>
               <sc-if value="{{dc.noConv}}" hint-placeholder-val="{{ true }}"><div class="dc-empty">
                 <span class="dc-k">Discussions BE+</span>
                 <p class="dc-empty-t">Choisissez une conversation</p>

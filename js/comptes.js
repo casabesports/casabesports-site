@@ -97,8 +97,56 @@
     },
     recovery: false,
     // Demandes du formulaire de contact, newsletter, commandes : table « messages » (voir supabase/messages.sql)
+    // d.pieces (facultatif) : pièces jointes déjà déposées avec uploadPiece('contact', fichier)
     saveLead: function (d) {
-      return use(function (c) { return c.from('messages').insert({ source: d.source, nom: d.nom, email: d.email, telephone: d.telephone, ville: d.ville, profil: d.profil, sujet: d.sujet, message: d.message, consentement: d.consentement, page: d.page }); });
+      var ligne = { source: d.source, nom: d.nom, email: d.email, telephone: d.telephone, ville: d.ville, profil: d.profil, sujet: d.sujet, message: d.message, consentement: d.consentement, page: d.page };
+      if (d.pieces && d.pieces.length) ligne.pieces = d.pieces.slice(0, 5);
+      return use(function (c) { return c.from('messages').insert(ligne); });
+    },
+    // ---------- Pièces jointes (espace privé « pieces-jointes », voir supabase/discussions-plus.sql) ----------
+    // Formats acceptés et taille maximale (10 Mo par fichier)
+    PIECES_MAX: 10485760,
+    PIECES_ACCEPT: 'image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.txt,.csv',
+    pieceOk: function (f) {
+      if (!f) return 'Fichier introuvable';
+      if (f.size > A.PIECES_MAX) return '« ' + f.name + ' » dépasse 10 Mo';
+      var ok = /^image\//.test(f.type) || /\.(pdf|docx?|xlsx?|pptx?|odt|ods|txt|csv|jpe?g|png|webp|gif|heic|heif)$/i.test(f.name || '');
+      return ok ? '' : '« ' + f.name + ' » : format non accepté (photos, PDF, Word, Excel, PowerPoint, texte)';
+    },
+    // Dépose un fichier dans un dossier (« contact », « admin » ou « discussions/<id du groupe> ») : renvoie { chemin, nom, type, taille }
+    uploadPiece: function (dossier, f) {
+      var err = A.pieceOk(f); if (err) return Promise.reject(new Error(err));
+      var nom = String(f.name || 'fichier').slice(0, 120);
+      var propre = nom.normalize ? nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : nom;
+      propre = propre.replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(-80) || 'fichier';
+      var d = new Date(), alea = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      var chemin = dossier + '/' + d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + alea + '-' + propre;
+      var type = f.type || ({ pdf: 'application/pdf', doc: 'application/msword', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xls: 'application/vnd.ms-excel', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', txt: 'text/plain', csv: 'text/csv', heic: 'image/heic' })[String(nom.split('.').pop()).toLowerCase()] || 'application/octet-stream';
+      return use(function (c) { return c.storage.from('pieces-jointes').upload(chemin, f, { upsert: false, contentType: type }); }).then(function () {
+        return { chemin: chemin, nom: nom, type: type, taille: f.size || 0 };
+      }, function (e) {
+        var m = String(e && e.message || e);
+        if (/bucket not found|not found/i.test(m)) throw Object.assign(new Error('Les pièces jointes ne sont pas encore activées (supabase/discussions-plus.sql)'), { pasActive: true });
+        if (/mime|type/i.test(m)) throw new Error('« ' + nom + ' » : format non accepté');
+        if (/size|large|exceed/i.test(m)) throw new Error('« ' + nom + ' » dépasse 10 Mo');
+        throw e;
+      });
+    },
+    // Lien temporaire (1 heure) pour afficher ou télécharger une pièce jointe que l'on a le droit de voir
+    pieceUrl: (function () {
+      var cache = {};
+      return function (chemin, telecharger) {
+        var k = chemin + (telecharger ? '#dl' : ''), c0 = cache[k];
+        if (c0 && c0.t > Date.now() - 50 * 60000) return c0.p;
+        var p = use(function (c) { return c.storage.from('pieces-jointes').createSignedUrl(chemin, 3600, telecharger ? { download: telecharger === true ? true : String(telecharger) } : undefined); }).then(function (d) { return d && d.signedUrl; });
+        cache[k] = { t: Date.now(), p: p };
+        p.catch(function () { delete cache[k]; });
+        return p;
+      };
+    })(),
+    removePieces: function (chemins) {
+      chemins = (chemins || []).filter(Boolean); if (!chemins.length) return Promise.resolve();
+      return use(function (c) { return c.storage.from('pieces-jointes').remove(chemins); });
     },
     // Carte membre : enregistre le numéro dans la table « membres » (voir docs/CARTE-MEMBRE.md)
     registerMember: function (numero, prenom) {
@@ -175,8 +223,9 @@
     contentKeys: function () { return CONTENT_KEYS.slice(); },
     editedKeys: function () { return Object.keys(readCache()); },
     // Envoi d'un e-mail depuis la messagerie (fonction serveur « envoyer-email », voir docs/ESPACE-ADMIN.md)
-    sendMail: function (to, subject, text, replyTo) {
-      return A.appel('envoyer-email', { to: to, subject: subject, text: text, reponse_a: replyTo || null });
+    // pieces (facultatif) : fichiers déposés avec uploadPiece('admin', fichier), envoyés en pièces jointes de l'e-mail
+    sendMail: function (to, subject, text, replyTo, pieces) {
+      return A.appel('envoyer-email', { to: to, subject: subject, text: text, reponse_a: replyTo || null, pieces: pieces && pieces.length ? pieces : undefined });
     },
     // Appel d'une fonction serveur Supabase (Edge Function). En cas d'échec, on remonte la vraie raison
     // (fonction absente, clé manquante, refus…) ; e.pasActive = la fonction n'est pas encore déployée ou configurée.
