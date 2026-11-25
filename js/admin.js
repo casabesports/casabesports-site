@@ -32,7 +32,7 @@
     { key: 'CASA_PRODUITS', label: 'Boutique : produits', desc: 'Fiches produits : nom, prix, photos, tailles, couleurs.', item: 'name' },
     { key: 'CASA_VIDEOS', label: 'Vidéos', desc: 'Vidéos et vignettes.', item: 'title' },
     { key: 'CASA_PODCAST', label: 'Podcast · Casa Studio', desc: 'Les épisodes du podcast BE+ (page « Le podcast », lecteur Casa Studio). Fichier audio ou vidéo, ambiance (4 fonds Casa Besports ou votre image), invité, chapitres, extraits, transcription, partenaire (affiché « Contenu sponsorisé ») et date de publication programmée. Type : « Émission » ou « Réaction » (après-match). Qui : Joueur, Coach, Staff ou Supporter. Date au format 2026-11-16. Envoyez le fichier audio (.mp3 ou .m4a, 50 Mo maximum). Publiez une réaction seulement avec l’accord de la personne enregistrée.', item: 'title' },
-    { key: 'CASA_QUIZ', label: 'Jeux : questions du quiz', desc: 'Vos questions pour le « Quiz du bus » (rubrique Jeux). Une bonne réponse et trois mauvaises ; l’explication s’affiche après la réponse. Elles forment le thème « Questions de la rédaction » et passent aussi dans « Tous les sports ». N’ajoutez que des faits vérifiés.', item: 'question' },
+    { key: 'CASA_QUIZ', label: 'Jeux : questions du quiz', desc: 'Vos questions pour le « Quiz du bus » (rubrique Jeux). Une bonne réponse et trois mauvaises ; l’explication s’affiche après la réponse. Elles forment le thème « Questions de la rédaction » et passent aussi dans « Tous les sports ». « sport » : Football, Basket, Handball, Volley-ball ou Hockey (affiché en grand pendant la question ; vide = « Culture sport »). N’ajoutez que des faits vérifiés.', item: 'question' },
     { key: 'CASA_CULTURE', label: 'Culture', desc: 'Œuvres et photographies des salles Culture.', item: 'title' },
     { key: 'CASA_FONDS', label: 'Fonds de page', desc: 'L’image derrière chaque page du site.' },
     { key: 'CASA_APROPOS', label: 'À propos', desc: 'L’histoire de Casa Besports : ouverture, manifeste, étapes, piliers, conviction et appel final.' },
@@ -52,7 +52,7 @@
       // Casa Studio
       emission: '', invite: '', inviteRole: '', description: '', video: '', sousTitres: '', fond: 'auto', fondPerso: '', fondVideo: '',
       chapitres: [], extraits: [], transcription: '', sponsor: '', sponsorLien: '', publierLe: '' },
-    CASA_QUIZ: { id: '', question: '', bonne: '', faux1: '', faux2: '', faux3: '', explication: '', actif: true },
+    CASA_QUIZ: { id: '', sport: '', question: '', bonne: '', faux1: '', faux2: '', faux3: '', explication: '', actif: true },
     CASA_VIDEOS: { id: '', tag: '', date: '', img: '', alt: '', title: '', dek: '', url: '', dur: '' },
     CASA_CLUBS: { id: '', name: '', sport: 'Football', city: '', niveau: '', fondation: '', stade: '', logo: '', img: '', handi: '', handiInfos: '' },
     CASA_JOUEURS: { id: '', num: '', name: '', role: 'Attaquant', club: '', clubLabel: '', sport: '', img: '', masquer: false, statsSaisonNom: '', statsSaison: [{ k: '', v: '' }], statsSource: '', statsMaj: '' },
