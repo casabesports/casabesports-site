@@ -10049,7 +10049,7 @@ img, video, canvas, svg { max-width: 100%; }
 <script>
   /* Chargement à la demande : la 3D (réalité augmentée) et la carte de Normandie ne sont téléchargées
      que lorsqu'on ouvre ces fonctions, pour que le site s'affiche plus vite. */
-  window.CASA_LIBS = { ar: ['js/three.min.js', 'js/analyse-video.js?v=__VERSION__', 'js/realite-augmentee.js?v=__VERSION__'], carte: ['js/leaflet.js?v=__VERSION__', 'js/carte-normandie.js?v=__VERSION__'], parcours: ['js/leaflet.js?v=__VERSION__', 'js/parcours.js?v=__VERSION__'], lineup: ['contenus/droits.js?v=__VERSION__', 'js/lineup.js?v=__VERSION__'], studio: ['js/studio.js?v=__VERSION__'], causeries: ['js/causeries-tableau.js?v=__VERSION__', 'js/causeries.js?v=__VERSION__'], trajectoire: ['js/trajectoire.js?v=__VERSION__'] };
+  window.CASA_LIBS = { ar: ['js/three.min.js', 'js/analyse-video.js?v=__VERSION__', 'js/ar-main.js?v=__VERSION__', 'js/realite-augmentee.js?v=__VERSION__'], carte: ['js/leaflet.js?v=__VERSION__', 'js/carte-normandie.js?v=__VERSION__'], parcours: ['js/leaflet.js?v=__VERSION__', 'js/parcours.js?v=__VERSION__'], lineup: ['contenus/droits.js?v=__VERSION__', 'js/lineup.js?v=__VERSION__'], studio: ['js/studio.js?v=__VERSION__'], causeries: ['js/causeries-tableau.js?v=__VERSION__', 'js/causeries.js?v=__VERSION__'], trajectoire: ['js/trajectoire.js?v=__VERSION__'] };
   window.CasaCharge = (function () {
     var done = {};
     function one(src) {
