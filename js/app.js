@@ -3475,6 +3475,7 @@ class Component extends DCLogic {
       accent, heroOpacity: showBg ? Math.min(1, k * 2.2) : 0, sectionOpacity: showBg ? k * 0.45 : 0, progressW: progress + '%',
       nav, moreNav, menuGroups, rubriques, menuOpen: s.menuOpen, menuWrapCls: s.menuOpen ? 'is-menu' : '', toggleMenu: () => this.setState({ menuOpen: !s.menuOpen, themeMenuOpen: false, moreOpen: false }),
       moreOpen: s.moreOpen, moreExp: s.moreOpen ? 'true' : 'false', toggleMore: () => this.setState({ moreOpen: !s.moreOpen }),
+      drawerOpen: !!(s.menuOpen || s.moreOpen), closeDrawer: () => this.setState({ menuOpen: false, moreOpen: false }),
       gateways,
       isHome: V === 'home', isNews: V === 'news', isArticle: V === 'article', isVideos: V === 'videos', isVideo: V === 'video',
       isDisciplines: V === 'disciplines', isDiscipline: V === 'discipline', isClubs: V === 'clubs', isClub: V === 'club',
