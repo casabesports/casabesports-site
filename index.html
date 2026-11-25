@@ -984,27 +984,48 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .bn-intro-signe .sg-pb { font-size: .5em; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; margin-right: .5em; color: var(--bn-gris); vertical-align: .18em; }
 @keyframes bnEcrit { to { clip-path: inset(-20% -2% -30% -2%); } }
 .ol-contact { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; justify-content: space-between; border: 1.5px solid var(--ink); background: var(--surface); padding: 1.1rem 1.3rem; }
-/* Menu « Plus » (ordinateur) et ☰ (téléphone) : un seul panneau latéral à gauche, liste de texte simple sans encadrés */
+/* Menu « Plus » (ordinateur) et ☰ (téléphone) : un seul panneau latéral à gauche, liste éditoriale sans encadrés */
 .bn-hdr-wrap.is-menu { z-index: 60; transform: none !important; }
-.mn-ov { position: fixed; inset: 0; z-index: 90; background: rgba(8, 15, 26, .45); animation: mnFade .2s ease; }
-.mn-side { position: fixed; top: 0; left: 0; bottom: 0; z-index: 91; width: min(340px, 86vw); background: var(--surface) !important; color: var(--text); box-shadow: 20px 0 60px -30px rgba(8, 15, 26, .6); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); animation: mnIn .24s cubic-bezier(.2, .8, .2, 1); }
+.mn-ov { position: fixed; inset: 0; z-index: 90; background: rgba(6, 14, 22, .55); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: mnFade .25s ease; }
+.mn-side { position: fixed; top: 0; left: 0; bottom: 0; z-index: 91; width: min(400px, 88vw); background: #10283a !important; color: var(--text); box-shadow: 30px 0 80px -30px rgba(0, 0, 0, .7); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); border-right: 3px solid var(--gold-text); animation: mnIn .32s cubic-bezier(.2, .8, .2, 1); }
 @keyframes mnIn { from { transform: translateX(-100%); } to { transform: none; } }
 @keyframes mnFade { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .mn-side, .mn-ov { animation: none; } }
-.mn-side-h { display: flex; align-items: center; justify-content: space-between; padding: .9rem 1.25rem .6rem; }
-.mn-x { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 0; color: var(--text); cursor: pointer; margin-right: -.6rem; }
-.mn-side-b { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
-.mn-sg { padding-top: 1.1rem; }
-.mn-side .mn-gt { padding: 0 0 .3rem; }
-.mn-sl { display: block; width: 100%; text-align: left; background: none; border: 0; padding: .5rem 0; min-height: 44px; font: inherit; font-weight: 700; font-size: 18px; color: var(--text); cursor: pointer; }
-.mn-sl:hover, .mn-sl:focus-visible { color: var(--gold-text); }
-.mn-navs .mn-sl { font-size: 20px; }
-.mn-acc span { margin-left: .3rem; }
-.mn-themes { display: flex; flex-wrap: wrap; gap: .2rem 1.1rem; }
-.mn-tb { background: none; border: 0; padding: .45rem 0; min-height: 40px; font: inherit; font-size: 15px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+@keyframes mnUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.mn-side-h { display: flex; align-items: flex-start; justify-content: space-between; padding: 1.4rem 1.6rem 1.2rem; border-bottom: 1px solid rgba(255, 255, 255, .1); }
+.mn-brand { display: flex; flex-direction: column; gap: .55rem; }
+.mn-brand img { display: block; width: 80px; height: auto; }
+.mn-tag { font-family: var(--bn-font); font-weight: 600; font-size: 10px; letter-spacing: .16em; white-space: nowrap; text-transform: uppercase; color: var(--gold-text); }
+.mn-x { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1px solid rgba(255, 255, 255, .18); border-radius: 50%; color: var(--text); cursor: pointer; margin: -.2rem -.4rem 0 0; transition: background .2s, color .2s; }
+.mn-x:hover, .mn-x:focus-visible { background: var(--gold-text); color: #10283a; border-color: var(--gold-text); }
+.mn-side-b { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: .4rem 1.6rem 1.2rem; }
+.mn-sg { padding-top: 1.5rem; animation: mnUp .4s ease both; }
+.mn-sg:nth-child(2) { animation-delay: .05s; } .mn-sg:nth-child(3) { animation-delay: .1s; } .mn-sg:nth-child(4) { animation-delay: .15s; }
+.mn-side .mn-gt { display: flex; align-items: center; gap: .7rem; padding: 0 0 .5rem; font-size: 11px; letter-spacing: .24em; color: var(--gold-text); }
+.mn-side .mn-gt::after { content: ""; flex: 1; height: 1px; background: rgba(242, 179, 61, .35); }
+.mn-sl { position: relative; display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 1rem; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid rgba(255, 255, 255, .08); padding: .8rem 0; min-height: 56px; color: var(--text); cursor: pointer; font: inherit; }
+.mn-sl-t { font-family: var(--bn-font); font-weight: 700; font-size: 25px; line-height: 1; letter-spacing: -.02em; text-transform: uppercase; transition: color .2s, transform .25s; }
+.mn-sl-s { grid-column: 1; font-size: 13px; line-height: 1.35; color: var(--muted); margin-top: .35rem; }
+.mn-sl-a { grid-column: 2; grid-row: 1 / span 2; font-size: 20px; color: var(--gold-text); opacity: .35; transition: opacity .2s, transform .25s; }
+.mn-sl:hover .mn-sl-t, .mn-sl:focus-visible .mn-sl-t { color: var(--gold-text); transform: translateX(4px); }
+.mn-sl:hover .mn-sl-a, .mn-sl:focus-visible .mn-sl-a { opacity: 1; transform: translateX(3px); }
+.mn-navs .mn-sl-t { font-size: 28px; }
+.mn-side-f { padding: .8rem 1.6rem calc(1.1rem + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(255, 255, 255, .1); background: #0c2131; }
+.mn-acc { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .9rem; width: 100%; background: none; border: 0; padding: .2rem 0 .5rem; color: var(--text); cursor: pointer; text-align: left; font: inherit; }
+.mn-acc-i { width: 46px; height: 46px; border-radius: 50%; background: var(--gold-text); color: #10283a; display: flex; align-items: center; justify-content: center; font-family: var(--bn-font); font-weight: 800; font-size: 19px; }
+.mn-acc-t { display: flex; flex-direction: column; gap: .15rem; }
+.mn-acc-t strong { font-family: var(--bn-font); font-size: 18px; letter-spacing: .02em; text-transform: uppercase; }
+.mn-acc-t span { font-size: 13px; color: var(--muted); }
+.mn-acc .mn-sl-a { grid-column: 3; grid-row: auto; }
+.mn-acc:hover .mn-sl-a { opacity: 1; }
+.mn-themes { display: flex; flex-wrap: wrap; align-items: center; gap: .1rem .85rem; }
+.mn-th-l { flex-basis: 100%; font-family: var(--bn-font); font-weight: 700; font-size: 10.5px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+.mn-tb { background: none; border: 0; padding: .35rem 0; min-height: 40px; font: inherit; font-size: 13.5px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
 .mn-tb[aria-checked="true"] { color: var(--text); font-weight: 800; border-bottom-color: var(--gold-text); }
+body:has(.mn-side) .rt-fab { display: none !important; } /* le bouton Retoucher se range pendant que le menu est ouvert */
+@media (prefers-reduced-motion: reduce) { .mn-side, .mn-ov, .mn-sg { animation: none; } }
 @media (min-width: 1061px) { .mn-navs { display: none; } } /* sur ordinateur, ces rubriques sont déjà dans la barre du haut */
 @media (max-width: 899px) { .mn-navs { display: none; } } /* sur téléphone, elles sont dans la barre d'onglets du bas */
+@media (max-height: 700px) { .mn-sl-s { display: none; } .mn-sl { min-height: 48px; padding: .55rem 0; } }
 /* Mon espace › Apparence : repliée par défaut (une ligne), vignettes et options compactes une fois ouverte */
 .pf-app { margin-top: 2.5rem; border: 1px solid var(--line); background: var(--surface); }
 .pf-app-s { list-style: none; display: flex; align-items: center; gap: .85rem; padding: .8rem 1rem; cursor: pointer; min-height: 64px; }
@@ -3710,23 +3731,30 @@ img, video, canvas, svg { max-width: 100%; }
   <div class="mn-ov" onClick="{{closeDrawer}}" aria-hidden="true"></div>
   <aside class="mn-side bn-scope" role="dialog" aria-modal="true" aria-label="Menu">
     <div class="mn-side-h">
-      <img src="assets/logo-be.svg" alt="BE+" width="54" height="32">
-      <button type="button" class="mn-x" onClick="{{closeDrawer}}" aria-label="Fermer le menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      <div class="mn-brand">
+        <img src="assets/logo-be.svg" alt="BE+" width="80" height="48">
+        <span class="mn-tag">Le sport local du Nord Cotentin</span>
+      </div>
+      <button type="button" class="mn-x" onClick="{{closeDrawer}}" aria-label="Fermer le menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
     </div>
     <nav class="mn-side-b" aria-label="Rubriques">
-      <div class="mn-navs">
-        <sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button type="button" onClick="{{n.go}}" class="mn-sl mn-navm">{{n.label}}</button></sc-for>
+      <div class="mn-sg mn-navs">
+        <sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button type="button" onClick="{{n.go}}" class="mn-sl mn-navm"><span class="mn-sl-t">{{n.label}}</span><span class="mn-sl-a" aria-hidden="true">→</span></button></sc-for>
       </div>
       <sc-for list="{{menuGroups}}" as="mg" hint-placeholder-count="2">
         <div class="mn-sg"><div class="mn-gt">{{mg.titre}}</div>
-          <sc-for list="{{mg.items}}" as="n" hint-placeholder-count="4"><button type="button" onClick="{{n.go}}" class="mn-sl" title="{{n.sub}}">{{n.label}}</button></sc-for>
+          <sc-for list="{{mg.items}}" as="n" hint-placeholder-count="4"><button type="button" onClick="{{n.go}}" class="mn-sl"><span class="mn-sl-t">{{n.label}}</span><span class="mn-sl-s">{{n.sub}}</span><span class="mn-sl-a" aria-hidden="true">→</span></button></sc-for>
         </div>
       </sc-for>
-      <div class="mn-sg"><button type="button" class="mn-sl mn-acc" onClick="{{accountClick}}">{{accountLabel}} <span aria-hidden="true">→</span></button></div>
-      <div class="mn-sg" role="radiogroup" aria-label="Thème"><div class="mn-gt">Thème</div>
-        <div class="mn-themes"><sc-for list="{{themes}}" as="th" hint-placeholder-count="5"><button type="button" class="mn-tb" role="radio" aria-checked="{{th.checked}}" onClick="{{th.pick}}">{{th.short}}</button></sc-for></div>
-      </div>
     </nav>
+    <div class="mn-side-f">
+      <button type="button" class="mn-acc" onClick="{{accountClick}}">
+        <span class="mn-acc-i" aria-hidden="true"><sc-if value="{{loggedIn}}" hint-placeholder-val="{{ false }}">{{initial}}</sc-if><sc-if value="{{loggedOut}}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg></sc-if></span>
+        <span class="mn-acc-t"><strong>{{accountLabel}}</strong><sc-if value="{{loggedIn}}" hint-placeholder-val="{{ false }}"><span>Profil, abonnements et réglages</span></sc-if><sc-if value="{{loggedOut}}" hint-placeholder-val="{{ true }}"><span>Se connecter ou créer un compte</span></sc-if></span>
+        <span class="mn-sl-a" aria-hidden="true">→</span>
+      </button>
+      <div class="mn-themes" role="radiogroup" aria-label="Thème"><span class="mn-th-l">Thème</span><sc-for list="{{themes}}" as="th" hint-placeholder-count="5"><button type="button" class="mn-tb" role="radio" aria-checked="{{th.checked}}" onClick="{{th.pick}}">{{th.short}}</button></sc-for></div>
+    </div>
   </aside>
 </sc-if>
 
