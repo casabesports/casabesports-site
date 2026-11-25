@@ -12,6 +12,7 @@ Culture sport internationale, pensée pour les trajets en bus entre coéquipiers
   - **Chacun son téléphone** : une personne crée la partie (5, 10 ou 15 questions) et obtient un **code à 4 lettres**. Les autres tapent ce code. Tout le monde voit la même question en même temps ; la réponse s'affiche quand tout le monde a répondu ou que le chrono est fini. L'organisateur passe à la question suivante. Il faut un peu de réseau.
 - **Les points** : 10 par bonne réponse, plus un bonus de rapidité avec le chrono de 20 secondes (jusqu'à 10). Classement final avec podium, partage des scores.
 - Les questions déjà vues sur le téléphone repassent en dernier, pour varier d'un trajet à l'autre.
+- **La discipline de chaque question s'affiche en grand** au-dessus de la question (⚽ Football, 🏀 Basket, 🤾 Handball, 🏐 Volley-ball, 🏒 Hockey), avec sa couleur. Pour vos propres questions (admin), remplissez le champ « sport » ; vide = « Culture sport ».
 
 ### Le jeu « chacun son téléphone » : comment ça marche
 
@@ -25,6 +26,18 @@ Il passe par les canaux temps réel de Supabase (déjà branché pour les compte
 ## 2. Devine le joueur
 
 Un joueur du site par jour, à retrouver en 6 essais ; un indice de plus à chaque erreur (discipline, poste, ville, numéro, club, initiales). 6 points au premier essai, 1 au sixième.
+
+## 3. Mes cartes : les points des jeux débloquent les cartes joueurs
+
+Les points gagnés aux jeux vont dans une cagnotte, onglet **Mes cartes** :
+
+- Quiz du bus : les points de la partie (10 à 20 par bonne réponse). En solo et « chacun son téléphone », c'est automatique. Sur un téléphone qu'on se passe, la personne à qui appartient le téléphone touche **« C'est moi »** à côté de son prénom en fin de partie (une fois par partie).
+- Devine le joueur : 20 points par point du jeu (120 au premier essai).
+- **100 points = 1 carte**, au club de votre choix (les clubs suivis en premier). La carte d'un joueur pas encore collé est tirée au hasard et rejoint l'**album du club** (le même que la pochette du jour). L'album du club rappelle aussi qu'on peut gagner des cartes en jouant.
+- Limite : 500 points par jour, et une partie ne rapporte qu'une fois.
+- Les points et les cartes sont gardés sur le téléphone, pour le compte connecté (comme l'album). Aucun SQL.
+
+Pour changer le prix d'une carte ou la limite du jour : `PRIX_CARTE`, `MAX_JOUR` et `POINTS_DEVINE` dans `js/jeux.js`.
 
 ## Où sont les fichiers
 

@@ -2096,6 +2096,11 @@ class Component extends DCLogic {
           ini: ok ? String(p.name || '').split(/\s+/).map((w) => w.charAt(0)).join('').slice(0, 2).toUpperCase() : '?', open: ok ? p.open : () => {}, neuve }; })
     };
     club.album.hasDerniere = !!club.album.derniere;
+    // Les points des jeux (quiz du bus, Devine le joueur) débloquent aussi des cartes de cet album
+    const jxPts = typeof CasaJeux !== 'undefined' && CasaJeux._cagnotte ? CasaJeux._cagnotte().solde : 0, jxPrix = (typeof CasaJeux !== 'undefined' && CasaJeux.PRIX_CARTE) || 100;
+    club.album.jeuxOk = club.players.length > 0 && albNew.length > 0;
+    club.album.jeuxTxt = jxPrix + ' points = 1 carte. ' + (jxPts >= jxPrix ? 'Vous avez ' + jxPts + ' points : de quoi débloquer ' + Math.floor(jxPts / jxPrix) + ' carte' + (jxPts >= 2 * jxPrix ? 's' : '') + '.' : 'Vous avez ' + jxPts + ' point' + (jxPts > 1 ? 's' : '') + '.');
+    club.album.jeux = () => this.go('jeux', { jxTab: 'cartes', jxClub: curC.id });
     const tabs = [['articles', 'Articles'], ['matchs', 'Matchs'], ['players', 'Effectif'], ['album', 'Album du club'], ['infos', 'Infos club']];
     const clubTabs = tabs.map(([id, label]) => ({ label, sel: s.clubTab === id ? 'true' : 'false', color: s.clubTab === id ? 'var(--ink)' : 'var(--muted)', line: s.clubTab === id ? accent : 'transparent', pick: () => this.setState({ clubTab: id }) }));
 

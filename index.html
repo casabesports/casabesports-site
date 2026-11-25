@@ -3170,6 +3170,56 @@ img, video, canvas, svg { max-width: 100%; }
 .jx-opt.is-choisi { background: var(--jx-rade); border-color: var(--jx-rade); color: #fff; }
 .jx-sb span.is-moi { background: var(--jx-rade); color: #fff; } .jx-sb span.is-ok { box-shadow: inset 0 -3px 0 var(--jx-sun); }
 .jx-vide { border: 1px dashed var(--line-2); padding: 1.4rem; color: var(--text-2); line-height: 1.55; }
+/* trois onglets : quiz, devine, mes cartes */
+.jx-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 820px; }
+.jx-tab .jx-ok { width: auto; min-width: 18px; padding: 0 4px; }
+/* la discipline de la question, bien en vue */
+.jx-sport { display: inline-flex; align-items: center; gap: .55rem; margin: .1rem 0 .7rem; padding: .45rem .9rem .45rem .55rem; background: var(--sp-c, #10283a); color: var(--sp-t, #fff); font: 800 clamp(17px, 2.6vw, 21px)/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .06em; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); }
+.jx-sport .ic { display: inline-grid; place-items: center; width: 34px; height: 34px; background: rgba(255,255,255,.92); font-size: 21px; line-height: 1; }
+.jx-sport.is-foot { --sp-c: #2f6b4f; } .jx-sport.is-basket { --sp-c: #c95a22; } .jx-sport.is-hand { --sp-c: #2d5fa8; }
+.jx-sport.is-volley { --sp-c: #f2b33d; --sp-t: #10283a; } .jx-sport.is-hockey { --sp-c: #7cc0dd; --sp-t: #10283a; } .jx-sport.is-autre { --sp-c: #10283a; }
+.jx-q-meta { display: block; font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+/* points des jeux et cartes joueurs */
+.jx-ptsbar { display: flex; align-items: center; justify-content: space-between; gap: .5rem 1rem; flex-wrap: wrap; max-width: 820px; margin: -.6rem 0 1.3rem; padding: .55rem .6rem .55rem .9rem; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--jx-sun); font-size: 14px; color: var(--text-2); }
+.jx-ptsbar b { font: 800 18px/1 var(--bn-font, sans-serif); color: var(--ink); margin-right: .25rem; }
+.jx-ptsbar .lnk { font-size: 13px; font-weight: 800; padding: .2rem 0; min-height: 32px; border-bottom-width: 2px; }
+.jx-ptsbar > span { flex: 1 1 200px; }
+.jx-gain { display: flex; align-items: center; justify-content: space-between; gap: .5rem 1rem; flex-wrap: wrap; margin-top: 1rem; padding: .75rem .9rem; background: var(--jx-sun); color: #10283a; font-weight: 700; line-height: 1.35; }
+.jx-gain button { background: #10283a; color: #fff; border: 0; min-height: 42px; padding: .4rem .9rem; font: 800 14px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; border-radius: 0; }
+.jx-pod li.has-moi { grid-template-columns: 40px minmax(0, 1fr) auto auto; }
+.jx-moi { min-height: 36px; padding: .3rem .6rem; border: 1.5px solid var(--jx-sun); background: transparent; color: var(--jx-sun); font: 800 12px/1 var(--bn-font, sans-serif); text-transform: uppercase; letter-spacing: .05em; cursor: pointer; border-radius: 0; }
+.jx-moi:hover { background: var(--jx-sun); color: #10283a; }
+.jx-wallet { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.2rem; align-items: center; background: var(--jx-rade); color: #fff; padding: 1.3rem 1.3rem 1.1rem; border-bottom: 4px solid var(--jx-sun); }
+.jx-wallet-n { font: 800 clamp(3rem, 11vw, 4.6rem)/.9 var(--bn-font, sans-serif); color: var(--jx-sun); }
+.jx-wallet-n small { display: block; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: #c7d3dc; margin-top: .3rem; }
+.jx-wallet p { margin: 0 0 .55rem; color: #e3ebf0; line-height: 1.45; }
+.jx-wbar { height: 8px; background: rgba(255,255,255,.14); } .jx-wbar span { display: block; height: 100%; background: var(--jx-sun); }
+.jx-wstat { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin-top: .6rem; font-size: 12.5px; color: #9fb1bf; }
+.jx-regle { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+.jx-regle li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: .6rem; align-items: center; font-size: 14px; color: var(--text-2); }
+.jx-regle b { font: 800 15px/1 var(--bn-font, sans-serif); color: var(--ink); background: var(--surface-2); padding: .35rem .4rem; text-align: center; }
+.jx-new { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 1.1rem; align-items: start; }
+.jx-new .ca-c { cursor: default; width: 150px; }
+.jx-clubs { list-style: none; margin: 0; padding: 0; }
+.jx-club { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: .7rem; align-items: center; padding: .7rem 0; border-bottom: 1px solid var(--line); }
+.jx-club:last-child { border-bottom: 0; }
+.jx-club.is-on { background: linear-gradient(90deg, rgba(242,179,61,.16), transparent 70%); }
+.jx-club-l { width: 46px; height: 46px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: var(--jx-rade); color: var(--jx-sun); font: 800 16px/1 var(--bn-font, sans-serif); }
+.jx-club-l img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.jx-club-t { min-width: 0; } .jx-club-t b { display: block; font: 800 16px/1.15 var(--bn-font, sans-serif); color: var(--ink); text-transform: uppercase; }
+.jx-club-t small { display: block; font-size: 12.5px; color: var(--muted); margin-top: .15rem; }
+.jx-club-t .al-bar { margin: .35rem 0 0; max-width: 220px; }
+.jx-club-a { display: flex; flex-direction: column; align-items: flex-end; gap: .25rem; }
+.jx-club-a .btn { min-height: 42px; padding: .4rem .8rem; font-size: 14px; white-space: nowrap; }
+.jx-club-a .btn[disabled] { opacity: .45; cursor: default; }
+.jx-club-a .lnk { font-size: 13px; }
+@media (max-width: 640px) {
+  .jx-tab-t { font-size: 12.5px; letter-spacing: .01em; } .jx-tab { padding: .55rem .5rem; }
+  .jx-wallet { grid-template-columns: 1fr; gap: .6rem; }
+  .jx-new { grid-template-columns: 110px minmax(0, 1fr); } .jx-new .ca-c { width: 110px; }
+  .jx-club { grid-template-columns: 40px minmax(0, 1fr); } .jx-club-l { width: 40px; height: 40px; }
+  .jx-club-a { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
+}
 @media (max-width: 640px) {
   .jx-hero .wrap { padding-top: 1.4rem; padding-bottom: 2.3rem; } .jx-intro { font-size: 14.5px; line-height: 1.5; }
   .jx-tabs { margin-top: -1.2rem; }
@@ -4762,6 +4812,7 @@ img, video, canvas, svg { max-width: 100%; }
     </section>
     <section class="wrap" style="padding-bottom: 5rem">
       <div class="jx-tabs" role="tablist" aria-label="Les jeux"><sc-for list="{{jx.tabs}}" as="t" hint-placeholder-count="2"><button type="button" role="tab" class="jx-tab {{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.go}}"><span class="jx-tab-t">{{t.label}}<sc-if value="{{t.hasBadge}}" hint-placeholder-val="{{ false }}"><span class="jx-ok" aria-label="joué aujourd’hui">{{t.badge}}</span></sc-if></span><span class="jx-tab-s">{{t.sub}}</span></button></sc-for></div>
+      <sc-if value="{{jx.pts.show}}" hint-placeholder-val="{{ true }}"><div class="jx-ptsbar"><span>🎴 <b>{{jx.pts.solde}}</b> points · {{jx.pts.msg}}</span><button type="button" class="lnk" onClick="{{jx.pts.voir}}">Mes cartes joueurs</button></div></sc-if>
 
       <!-- ===== Quiz du bus : réglages ===== -->
       <sc-if value="{{jx.isQuiz}}" hint-placeholder-val="{{ true }}">
@@ -4847,6 +4898,7 @@ img, video, canvas, svg { max-width: 100%; }
             </sc-if>
 
             <sc-if value="{{jx.net.num}}" hint-placeholder-val="{{ false }}">
+              <div class="jx-sport {{jx.net.sport.sportCls}}" aria-label="Discipline : {{jx.net.sport.sport}}"><span class="ic" aria-hidden="true">{{jx.net.sport.sportIc}}</span>{{jx.net.sport.sport}}</div>
               <div class="jx-qh"><span class="jx-k" style="color: var(--muted)">{{jx.net.num}} · {{jx.net.theme}}</span><sc-if value="{{jx.net.chrono}}" hint-placeholder-val="{{ false }}"><span class="jx-sec {{jx.net.urgent}}" aria-live="off">{{jx.net.reste}} s</span></sc-if></div>
               <div class="jx-prog" aria-hidden="true"><sc-if value="{{jx.net.chrono}}" hint-placeholder-val="{{ false }}"><div class="{{jx.net.urgent}}" style="width: {{jx.net.chronoPct}}"></div></sc-if></div>
               <h2 class="jx-q">{{jx.net.q}}</h2>
@@ -4869,6 +4921,7 @@ img, video, canvas, svg { max-width: 100%; }
                 <p class="jx-p" style="color: #c7d3dc">{{jx.net.sous}}</p>
                 <ol class="jx-pod"><sc-for list="{{jx.net.podium}}" as="p" hint-placeholder-count="3"><li class="{{p.cls}}"><span class="r">{{p.rang}}</span><span class="n">{{p.nom}}<small>{{p.detail}} bonnes réponses</small></span><span class="p">{{p.pts}}</span></li></sc-for></ol>
               </div>
+              <sc-if value="{{jx.net.hasGain}}" hint-placeholder-val="{{ false }}"><div class="jx-gain" role="status"><span>🎴 {{jx.net.gain}}</span><button type="button" onClick="{{jx.net.voirCartes}}">Mes cartes</button></div></sc-if>
               <div class="jx-act"><sc-if value="{{jx.net.hote}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn jx-cta" onClick="{{jx.net.rejouer}}">Rejouer avec les mêmes</button></sc-if><button type="button" class="btn" onClick="{{jx.net.partager}}" style="background: transparent; color: var(--ink); border: 2px solid var(--ink)">Partager les scores</button></div>
             </sc-if>
 
@@ -4880,6 +4933,7 @@ img, video, canvas, svg { max-width: 100%; }
         <sc-if value="{{jx.quiz.enJeu}}" hint-placeholder-val="{{ false }}">
           <div class="jx-quiz">
             <sc-if value="{{jx.quiz.multi}}" hint-placeholder-val="{{ false }}"><div class="jx-tour"><span>Au tour de</span><b>{{jx.quiz.tourDe}}</b></div></sc-if>
+            <div class="jx-sport {{jx.quiz.sport.sportCls}}" aria-label="Discipline : {{jx.quiz.sport.sport}}"><span class="ic" aria-hidden="true">{{jx.quiz.sport.sportIc}}</span>{{jx.quiz.sport.sport}}</div>
             <div class="jx-qh"><span class="jx-k" style="color: var(--muted)">{{jx.quiz.num}} · {{jx.quiz.theme}}</span><sc-if value="{{jx.quiz.chrono}}" hint-placeholder-val="{{ false }}"><span class="jx-sec {{jx.quiz.urgent}}" aria-live="off">{{jx.quiz.reste}} s</span></sc-if></div>
             <div class="jx-prog" aria-hidden="true"><sc-if value="{{jx.quiz.chrono}}" hint-placeholder-val="{{ false }}"><div class="{{jx.quiz.urgent}}" style="width: {{jx.quiz.chronoPct}}"></div></sc-if></div>
             <h2 class="jx-q">{{jx.quiz.q}}</h2>
@@ -4901,8 +4955,10 @@ img, video, canvas, svg { max-width: 100%; }
               <div class="jx-k">Fin de partie</div>
               <div class="jx-big">{{jx.quiz.titre}}</div>
               <p class="jx-p" style="color: #c7d3dc">{{jx.quiz.sous}}</p>
-              <ol class="jx-pod"><sc-for list="{{jx.quiz.podium}}" as="p" hint-placeholder-count="3"><li class="{{p.cls}}"><span class="r">{{p.rang}}</span><span class="n">{{p.nom}}<small>{{p.detail}} bonnes réponses</small></span><span class="p">{{p.pts}}</span></li></sc-for></ol>
+              <sc-if value="{{jx.quiz.demandeMoi}}" hint-placeholder-val="{{ false }}"><p class="jx-p" style="color: #f2b33d; margin: .8rem 0 0; font-weight: 700">À qui est ce téléphone ? Touchez « C’est moi » à côté de votre prénom : vos points vont à vos cartes joueurs.</p></sc-if>
+              <ol class="jx-pod"><sc-for list="{{jx.quiz.podium}}" as="p" hint-placeholder-count="3"><li class="{{p.cls}} {{p.cMoiCls}}"><span class="r">{{p.rang}}</span><span class="n">{{p.nom}}<small>{{p.detail}} bonnes réponses</small></span><span class="p">{{p.pts}}</span><sc-if value="{{p.cMoi}}" hint-placeholder-val="{{ false }}"><button type="button" class="jx-moi" onClick="{{p.moi}}" aria-label="{{p.moiAria}}">C’est moi</button></sc-if></li></sc-for></ol>
             </div>
+            <sc-if value="{{jx.quiz.hasGain}}" hint-placeholder-val="{{ false }}"><div class="jx-gain" role="status"><span>🎴 {{jx.quiz.gain}}</span><button type="button" onClick="{{jx.quiz.voirCartes}}">Mes cartes</button></div></sc-if>
             <div class="jx-act"><button type="button" class="btn jx-cta" onClick="{{jx.quiz.rejouer}}">Nouvelle partie</button><button type="button" class="btn" onClick="{{jx.quiz.partager}}" style="background: transparent; color: var(--ink); border: 2px solid var(--ink)">Partager les scores</button><button type="button" class="btn" onClick="{{jx.quiz.reglages}}" style="background: transparent; color: var(--ink); border: 2px solid var(--ink)">Changer les réglages</button></div>
           </div>
         </sc-if>
@@ -4923,7 +4979,7 @@ img, video, canvas, svg { max-width: 100%; }
               <button type="button" class="btn" onClick="{{jx.devine.passer}}" style="min-height: 50px; background: transparent; color: var(--ink); border: 2px solid var(--ink)">Indice suivant</button>
             </div>
             <datalist id="jx-noms"><sc-for list="{{jx.devine.noms}}" as="n" hint-placeholder-count="3"><option value="{{n.n}}"></option></sc-for></datalist>
-            <p class="jx-note">{{jx.devine.reste}} · Plus vous trouvez tôt, plus vous marquez (6 points au premier essai).</p>
+            <p class="jx-note">{{jx.devine.reste}} · Plus vous trouvez tôt, plus vous marquez (6 points au premier essai, soit 120 points pour vos cartes joueurs).</p>
             <sc-if value="{{jx.devine.hasEssais}}" hint-placeholder-val="{{ false }}"><div class="jx-rates" aria-label="Réponses déjà tentées"><sc-for list="{{jx.devine.essais}}" as="e" hint-placeholder-count="2"><span>{{e.nom}}</span></sc-for></div></sc-if>
           </sc-if>
           <sc-if value="{{jx.devine.fini}}" hint-placeholder-val="{{ false }}">
@@ -4932,11 +4988,82 @@ img, video, canvas, svg { max-width: 100%; }
                 <sc-if value="{{jx.devine.hasImg}}" hint-placeholder-val="{{ false }}"><img src="{{jx.devine.img}}" alt="{{jx.devine.nom}}" loading="lazy"></sc-if>
                 <div><div class="jx-k" style="color: var(--muted)">{{jx.devine.resultat}}</div><div class="jx-h2" style="font-size: 26px; margin: .4rem 0 .2rem">{{jx.devine.nom}}</div><div style="color: var(--text-2)">{{jx.devine.role}} · {{jx.devine.club}}</div></div>
               </div>
+              <sc-if value="{{jx.devine.hasGain}}" hint-placeholder-val="{{ false }}"><div class="jx-gain" role="status"><span>🎴 {{jx.devine.gain}}</span><button type="button" onClick="{{jx.devine.voirCartes}}">Mes cartes</button></div></sc-if>
               <p class="jx-note">Série de joueurs trouvés : {{jx.devine.serie}} jour(s). Un nouveau joueur demain.</p>
               <div class="jx-act"><button type="button" class="btn btn-dark" onClick="{{jx.devine.partager}}">Partager</button><button type="button" class="btn" onClick="{{jx.devine.fiche}}" style="background: transparent; color: var(--ink); border: 2px solid var(--ink)">Voir sa fiche</button></div>
             </div>
           </sc-if>
           <sc-if value="{{jx.devine.vide}}" hint-placeholder-val="{{ false }}"><p class="jx-vide">Le jeu se prépare : il a besoin de fiches joueurs sur le site.</p></sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===== Mes cartes : les points des jeux débloquent les cartes des joueurs des clubs ===== -->
+      <sc-if value="{{jx.isCartes}}" hint-placeholder-val="{{ false }}">
+        <div class="jx-set">
+          <div class="jx-wallet">
+            <div class="jx-wallet-n">{{jx.cartes.solde}}<small>points</small></div>
+            <div>
+              <p>{{jx.cartes.prochaine}}</p>
+              <div class="jx-wbar" aria-hidden="true"><span style="width: {{jx.cartes.pct}}"></span></div>
+              <div class="jx-wstat"><span>{{jx.cartes.cartes}} carte(s) débloquée(s) avec les jeux</span><span>{{jx.cartes.total}} points gagnés en tout</span><span>{{jx.cartes.aujourdhui}}</span></div>
+            </div>
+          </div>
+
+          <sc-if value="{{jx.cartes.hasDer}}" hint-placeholder-val="{{ false }}">
+            <div class="jx-card">
+              <div class="jx-new">
+                <div class="ca-c is-ok {{jx.cartes.der.neuveCls}}">
+                  <sc-if value="{{jx.cartes.der.hasNum}}" hint-placeholder-val="{{ false }}"><span class="ca-num">{{jx.cartes.der.num}}</span></sc-if>
+                  <span class="ca-ph"><sc-if value="{{jx.cartes.der.hasImg}}" hint-placeholder-val="{{ false }}"><img src="{{jx.cartes.der.img}}" alt="" loading="lazy"></sc-if><sc-if value="{{jx.cartes.der.noImg}}" hint-placeholder-val="{{ true }}"><span>{{jx.cartes.der.ini}}</span></sc-if></span>
+                  <span class="ca-n">{{jx.cartes.der.name}}</span>
+                  <span class="ca-r">{{jx.cartes.der.role}}</span>
+                  <sc-if value="{{jx.cartes.der.neuve}}" hint-placeholder-val="{{ false }}"><span class="ca-new">Nouvelle</span></sc-if>
+                </div>
+                <div>
+                  <div class="jx-k" style="color: var(--muted)">Dernière carte débloquée</div>
+                  <div class="jx-h2" style="font-size: 24px; margin: .4rem 0 .2rem">{{jx.cartes.der.name}}</div>
+                  <div style="color: var(--text-2)">{{jx.cartes.der.role}} · {{jx.cartes.der.club}}</div>
+                  <div class="jx-act"><button type="button" class="btn btn-dark" onClick="{{jx.cartes.der.album}}">Voir l’album du club</button><button type="button" class="btn" onClick="{{jx.cartes.der.fiche}}" style="background: transparent; color: var(--ink); border: 2px solid var(--ink)">Sa fiche</button></div>
+                  <sc-if value="{{jx.cartes.der.pasSuivi}}" hint-placeholder-val="{{ false }}"><p class="jx-note">Suivez {{jx.cartes.der.club}} pour ouvrir aussi sa pochette du jour. <button type="button" class="lnk" onClick="{{jx.cartes.der.suivre}}">Suivre le club</button></p></sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{jx.cartes.hasVos}}" hint-placeholder-val="{{ false }}">
+            <div class="jx-card">
+              <h2>Vos clubs</h2>
+              <p class="jx-p">Choisissez le club : la carte d’un joueur que vous n’avez pas encore est tirée au hasard dans son effectif.</p>
+              <ul class="jx-clubs"><sc-for list="{{jx.cartes.vos}}" as="c" hint-placeholder-count="2"><li class="jx-club {{c.cls}}">
+                <span class="jx-club-l"><sc-if value="{{c.hasLogo}}" hint-placeholder-val="{{ false }}"><img src="{{c.logo}}" alt="" loading="lazy"></sc-if><sc-if value="{{c.noLogo}}" hint-placeholder-val="{{ true }}">{{c.ini}}</sc-if></span>
+                <span class="jx-club-t"><b>{{c.name}}</b><small>{{c.how}} · {{c.n}} / {{c.total}} cartes</small><span class="al-bar" aria-hidden="true"><span style="width: {{c.pct}}"></span></span></span>
+                <span class="jx-club-a"><button type="button" class="btn jx-cta" disabled="{{c.dis}}" onClick="{{c.debloquer}}">{{c.btn}}</button><button type="button" class="lnk" onClick="{{c.album}}">Voir l’album</button></span>
+              </li></sc-for></ul>
+            </div>
+          </sc-if>
+          <sc-if value="{{jx.cartes.hasAutres}}" hint-placeholder-val="{{ false }}">
+            <div class="jx-card">
+              <h2><sc-if value="{{jx.cartes.hasVos}}" hint-placeholder-val="{{ false }}">Les autres clubs</sc-if><sc-if value="{{jx.cartes.pasVos}}" hint-placeholder-val="{{ false }}">Choisissez un club</sc-if></h2>
+              <sc-if value="{{jx.cartes.pasVos}}" hint-placeholder-val="{{ false }}"><p class="jx-p">La carte d’un joueur que vous n’avez pas encore est tirée au hasard dans l’effectif du club. Les clubs que vous suivez passent en premier.</p></sc-if>
+              <ul class="jx-clubs"><sc-for list="{{jx.cartes.autres}}" as="c" hint-placeholder-count="3"><li class="jx-club {{c.cls}}">
+                <span class="jx-club-l"><sc-if value="{{c.hasLogo}}" hint-placeholder-val="{{ false }}"><img src="{{c.logo}}" alt="" loading="lazy"></sc-if><sc-if value="{{c.noLogo}}" hint-placeholder-val="{{ true }}">{{c.ini}}</sc-if></span>
+                <span class="jx-club-t"><b>{{c.name}}</b><small>{{c.how}} · {{c.n}} / {{c.total}} cartes</small><span class="al-bar" aria-hidden="true"><span style="width: {{c.pct}}"></span></span></span>
+                <span class="jx-club-a"><button type="button" class="btn jx-cta" disabled="{{c.dis}}" onClick="{{c.debloquer}}">{{c.btn}}</button><button type="button" class="lnk" onClick="{{c.album}}">Voir l’album</button></span>
+              </li></sc-for></ul>
+            </div>
+          </sc-if>
+          <sc-if value="{{jx.cartes.rien}}" hint-placeholder-val="{{ false }}"><p class="jx-vide">Les cartes arrivent dès que les effectifs des clubs sont publiés.</p></sc-if>
+
+          <div class="jx-card">
+            <h2>Comment gagner des points</h2>
+            <ul class="jx-regle">
+              <li><b>10 à 20</b><span>par bonne réponse au quiz du bus (plus vous répondez vite avec le chrono, plus vous marquez)</span></li>
+              <li><b>20 à 120</b><span>en trouvant le joueur du jour à Devine le joueur (120 au premier essai)</span></li>
+              <li><b>{{jx.cartes.prix}}</b><span>points pour débloquer une carte joueur, au club de votre choix</span></li>
+            </ul>
+            <p class="jx-note">Jusqu’à {{jx.cartes.max}} points par jour. Sur un téléphone partagé, celui qui touche « C’est moi » en fin de partie récupère ses points. Les points et les cartes sont gardés sur ce téléphone, pour le compte connecté.</p>
+            <div class="jx-act"><button type="button" class="btn jx-cta" onClick="{{jx.cartes.jouer}}">Jouer au quiz du bus</button></div>
+          </div>
         </div>
       </sc-if>
     </section>
@@ -5102,6 +5229,7 @@ img, video, canvas, svg { max-width: 100%; }
           <sc-if value="{{club.album.peutOuvrir}}" hint-placeholder-val="{{ false }}"><p>Votre pochette du jour vous attend.</p><button type="button" class="wk-radio" onClick="{{club.album.ouvrir}}">Ouvrir ma pochette du jour</button></sc-if>
           <sc-if value="{{club.album.dejaOuvert}}" hint-placeholder-val="{{ false }}"><p><sc-if value="{{club.album.hasDerniere}}" hint-placeholder-val="{{ false }}">Carte du jour : <b>{{club.album.derniere}}</b>. </sc-if>Prochaine pochette demain. Suivez un joueur pour coller sa carte tout de suite.</p></sc-if>
           <sc-if value="{{club.album.complet}}" hint-placeholder-val="{{ false }}"><p><b>Album complet.</b> Vous avez toutes les cartes de l'effectif publié.</p></sc-if>
+          <sc-if value="{{club.album.jeuxOk}}" hint-placeholder-val="{{ false }}"><p>🎴 Gagnez aussi des cartes en jouant : {{club.album.jeuxTxt}}</p><button type="button" class="lnk" onClick="{{club.album.jeux}}" style="font-size: 15px">Jouer et débloquer</button></sc-if>
         </div>
         <sc-if value="{{club.album.has}}" hint-placeholder-val="{{ true }}">
           <div class="ca-grid">

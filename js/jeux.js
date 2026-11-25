@@ -8,6 +8,8 @@
  *     Chrono de 20 s facultatif, 10 points par bonne réponse + bonus de rapidité, podium final.
  *     Questions : contenus/quiz-sports.js, plus celles ajoutées dans Admin › Contenus › « Jeux : questions du quiz ».
  *  2. Devine le joueur : un joueur du site par jour, 6 essais, un indice de plus à chaque erreur.
+ *  3. Mes cartes : les points gagnés aux jeux débloquent les cartes des joueurs des clubs (albums des clubs).
+ *     100 points = 1 carte, 500 points au plus par jour. Chaque question affiche sa discipline en grand.
  *
  * Réglages, prénoms et parties gardés sur l'appareil (localStorage « cb-jeux-v1 »). En réseau, seuls le prénom,
  * les questions et les réponses de la partie passent par le canal, rien n'est enregistré en ligne.
@@ -45,6 +47,17 @@ var CasaJeux = (function () {
   // (mêmes questions en même temps, salle à code, via Supabase Realtime ; voir « 3. En réseau »).
   var CHRONO = 20, MAX_JOUEURS = 10, NB_RESEAU = [5, 10, 15];
   var SPORTS = ['Football', 'Basket', 'Handball', 'Volley-ball', 'Hockey'];
+  // La discipline de chaque question, bien visible pendant le jeu : pictogramme, nom, couleur
+  var SPORT_INFO = { 'Football': ['⚽', 'is-foot'], 'Basket': ['🏀', 'is-basket'], 'Handball': ['🤾', 'is-hand'], 'Volley-ball': ['🏐', 'is-volley'], 'Hockey': ['🏒', 'is-hockey'] };
+  function sportNorm(x) {
+    var n = norm(x); if (!n) return '';
+    if (/foot/.test(n)) return 'Football'; if (/basket/.test(n)) return 'Basket'; if (/hand/.test(n)) return 'Handball'; if (/volley/.test(n)) return 'Volley-ball'; if (/hockey/.test(n)) return 'Hockey';
+    return String(x).trim().slice(0, 30);
+  }
+  function badgeSport(sport) {
+    var inf = SPORT_INFO[sport] || ['🏟️', 'is-autre'];
+    return { sport: sport || 'Culture sport', sportIc: inf[0], sportCls: inf[1], hasSport: true };
+  }
   var reglages = (function () {
     var r = mem.quizReg || {};
     return { mode: r.mode === 'reseau' ? 'reseau' : 'tour', sport: SPORTS.indexOf(r.sport) >= 0 ? r.sport : '', themes: Array.isArray(r.themes) ? r.themes : [],
@@ -58,7 +71,7 @@ var CasaJeux = (function () {
   function sportDe(themeId) { return (themes().find(function (t) { return t.id === themeId; }) || {}).sport || ''; }
   function questionsRedaction() {
     return (Array.isArray(window.CASA_QUIZ) ? window.CASA_QUIZ : []).filter(function (q) { return q && q.actif !== false && q.question && q.bonne && (q.faux1 || q.faux2 || q.faux3); })
-      .map(function (q, i) { return { id: 'r-' + (q.id || i), theme: 'redaction', q: q.question, bonne: q.bonne, faux: [q.faux1, q.faux2, q.faux3].filter(Boolean), why: q.explication || '' }; });
+      .map(function (q, i) { return { id: 'r-' + (q.id || i), theme: 'redaction', sport: sportNorm(q.sport), q: q.question, bonne: q.bonne, faux: [q.faux1, q.faux2, q.faux3].filter(Boolean), why: q.explication || '' }; });
   }
   function banque() {
     return (Array.isArray(window.CASA_QUIZ_FOOT) ? window.CASA_QUIZ_FOOT : []).filter(function (x) { return Array.isArray(x) && x[1] && x[2]; })
@@ -81,6 +94,7 @@ var CasaJeux = (function () {
     return neuves.concat(deja).slice(0, Math.min(n, pool.length)).map(function (q) { return Object.assign({}, q, { options: melange([q.bonne].concat(q.faux), r) }); });
   }
   function marquerVue(id) { mem.vus = mem.vus.filter(function (x) { return x !== id; }).concat([id]).slice(-600); save(); }
+  function sportQ(q) { return (q && (q.sport || sportDe(q.theme))) || ''; }
   function themeLabel(id) { var t = themes().find(function (x) { return x.id === id; }); return t ? t.label : ''; }
   function pointsPour(ms) { var reste = Math.max(0, CHRONO - Math.floor(ms / 1000)); return reglages.chrono ? 10 + Math.round(reste / 2) : 10; }
 
@@ -98,7 +112,7 @@ var CasaJeux = (function () {
     var joueurs = reglages.joueurs.length ? reglages.joueurs : ['Vous'];
     var qs = tirer(joueurs.length * reglages.parJoueur);
     if (!qs.length) { dire('Aucune question avec ces réglages.'); return; }
-    partie = { qs: qs, tour: 0, reponse: null, debut: Date.now(), fini: false, solo: !reglages.joueurs.length, joueurs: joueurs.map(function (nom) { return { nom: nom, pts: 0, bonnes: 0, rep: 0 }; }) };
+    partie = { id: 'q' + Date.now().toString(36), credit: null, qs: qs, tour: 0, reponse: null, debut: Date.now(), fini: false, solo: !reglages.joueurs.length, joueurs: joueurs.map(function (nom) { return { nom: nom, pts: 0, bonnes: 0, rep: 0 }; }) };
     lancerMinuteur(); rafraichir();
     try { var el = document.querySelector('.jx-tabs'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
   }
@@ -113,7 +127,7 @@ var CasaJeux = (function () {
   function suivant() {
     if (!partie) return;
     partie.tour++; partie.reponse = null; partie.debut = Date.now();
-    if (partie.tour >= partie.qs.length) { partie.fini = true; arreterMinuteur(); }
+    if (partie.tour >= partie.qs.length) { partie.fini = true; arreterMinuteur(); if (partie.solo) recupererTour(partie.joueurs[0]); }
     rafraichir(); versLeJeu();
   }
   function quitter() { partie = null; arreterMinuteur(); rafraichir(); }
@@ -122,6 +136,13 @@ var CasaJeux = (function () {
     if (reglages.joueurs.length >= MAX_JOUEURS) { dire(MAX_JOUEURS + ' joueurs au maximum.'); return; }
     if (reglages.joueurs.some(function (x) { return norm(x) === norm(nom); })) { dire(nom + ' est déjà dans la partie.'); return; }
     reglages.joueurs.push(nom); garderReglages(); app.setState({ jxNom: '' });
+  }
+  // Fin de partie sur un téléphone : les points du propriétaire du téléphone vont à ses cartes joueurs (une fois par partie)
+  function recupererTour(j) {
+    if (!partie || !partie.fini || partie.credit) return;
+    var g = crediter(j.pts, partie.id);
+    partie.credit = { nom: j.nom, pts: g.pts, plafond: g.plafond };
+    rafraichir();
   }
   var MEDAILLES = ['🥇', '🥈', '🥉'];
   function podium(joueurs) {
@@ -140,7 +161,7 @@ var CasaJeux = (function () {
     return {
       sports: [{ id: '', label: 'Tous les sports', n: tout.length }].concat(SPORTS.map(function (x) { return { id: x, label: x, n: parSport[x] || 0 }; })).filter(function (x) { return x.n > 0; }).map(function (x) {
         var on = reglages.sport === x.id;
-        return { label: x.label, n: String(x.n), cls: on ? 'is-on' : '', sel: on ? 'true' : 'false', pick: function () { reglages.sport = x.id; reglages.themes = []; garderReglages(); rafraichir(); } };
+        return { label: (SPORT_INFO[x.id] ? SPORT_INFO[x.id][0] + ' ' : '') + x.label, n: String(x.n), cls: on ? 'is-on' : '', sel: on ? 'true' : 'false', pick: function () { reglages.sport = x.id; reglages.themes = []; garderReglages(); rafraichir(); } };
       }),
       hasThemes: thVisibles.length > 0,
       themes: (sp && thVisibles.length > 1 ? [{ id: '', label: 'Tout ' + (sp === 'Football' ? 'le foot' : sp === 'Hockey' ? 'le hockey' : sp === 'Handball' ? 'le hand' : sp === 'Basket' ? 'le basket' : 'le volley'), n: thVisibles.reduce(function (a, t) { return a + compte[t.id]; }, 0) }] : []).concat(thVisibles.map(function (t) { return { id: t.id, label: t.label, n: compte[t.id] }; })).map(function (t) {
@@ -183,7 +204,10 @@ var CasaJeux = (function () {
         reglage: false, enJeu: false, fini: true, solo: partie.solo, multi: !partie.solo,
         titre: partie.solo ? meilleur.bonnes + ' bonne' + (meilleur.bonnes > 1 ? 's' : '') + ' réponse' + (meilleur.bonnes > 1 ? 's' : '') + ' sur ' + meilleur.rep : meilleur.nom + ' gagne !',
         sous: partie.solo ? meilleur.pts + ' points' : 'avec ' + meilleur.pts + ' points',
-        podium: classement.map(function (j, i) { return { rang: MEDAILLES[i] || String(i + 1), nom: j.nom, pts: String(j.pts), detail: j.bonnes + '/' + j.rep, cls: i === 0 ? 'is-top' : '' }; }),
+        podium: classement.map(function (j, i) { return { rang: MEDAILLES[i] || String(i + 1), nom: j.nom, pts: String(j.pts), detail: j.bonnes + '/' + j.rep, cls: i === 0 ? 'is-top' : '',
+          cMoi: !partie.solo && !partie.credit, cMoiCls: !partie.solo && !partie.credit ? 'has-moi' : '', moi: function () { recupererTour(j); }, moiAria: 'C’est moi, ' + j.nom + ' : récupérer mes points' }; }),
+        demandeMoi: !partie.solo && !partie.credit,
+        gain: partie.credit ? texteGain(partie.credit.pts, partie.credit.plafond, partie.solo ? '' : partie.credit.nom) : '', hasGain: !!partie.credit, voirCartes: voirCartes,
         rejouer: demarrer, reglages: quitter, partager: function () { partager(textePartage(classement)); }
       };
     }
@@ -194,6 +218,7 @@ var CasaJeux = (function () {
     return {
       reglage: false, enJeu: true, fini: false, solo: partie.solo, multi: !partie.solo,
       tourDe: j.nom, num: 'Question ' + (partie.tour + 1) + ' / ' + partie.qs.length, theme: themeLabel(q.theme), q: q.q,
+      sport: badgeSport(sportQ(q)),
       chrono: reglages.chrono && !repondu, reste: String(reste), chronoPct: Math.round((CHRONO - ecoule) / CHRONO * 100) + '%', urgent: reste <= 5 ? 'is-urgent' : '',
       options: q.options.map(function (o) {
         var juste = o === q.bonne, choisi = rep === o;
@@ -256,7 +281,8 @@ var CasaJeux = (function () {
   function etatPublic() {
     var e = net.etat, q = e.i >= 0 && e.i < net.qs.length ? net.qs[e.i] : null;
     var m = { t: 'etat', phase: e.phase, joueurs: e.joueurs, i: e.i, total: net.qs.length, chrono: net.chrono, repondus: Object.keys(net.reponses) };
-    if (q && (e.phase === 'q' || e.phase === 'rev')) m.q = { q: q.q, options: q.options, theme: themeLabel(q.theme) };
+    m.pid = net.pid;
+    if (q && (e.phase === 'q' || e.phase === 'rev')) m.q = { q: q.q, options: q.options, theme: themeLabel(q.theme), sport: sportQ(q) };
     if (e.phase === 'q' && net.chrono) m.restant = Math.max(0, CHRONO * 1000 - (Date.now() - net.debut));
     if (e.phase === 'rev') { m.rev = { bonne: q.bonne, why: q.why, choix: {} }; Object.keys(net.reponses).forEach(function (id) { m.rev.choix[id] = net.reponses[id].o; }); }
     return m;
@@ -265,7 +291,7 @@ var CasaJeux = (function () {
   function creerSalle() {
     var nom = prenomReseau(); if (!nom) { dire('Écrivez d’abord votre prénom.'); return; }
     var qs = tirer(reglages.nbReseau); if (!qs.length) { dire('Aucune question avec ces réglages.'); return; }
-    net = { role: 'hote', code: nouveauCode(), statut: 'connexion', qs: qs, chrono: reglages.chrono, reponses: {}, debut: 0,
+    net = { role: 'hote', code: nouveauCode(), pid: Date.now().toString(36), statut: 'connexion', qs: qs, chrono: reglages.chrono, reponses: {}, debut: 0,
       etat: { phase: 'salle', i: -1, joueurs: [{ id: MOI, nom: nom, pts: 0, bonnes: 0, rep: 0 }] } };
     net.canal = ouvrirCanal(net.code, recuHote, statutNet);
     net.battement = setInterval(diffuser, 2500);
@@ -301,11 +327,12 @@ var CasaJeux = (function () {
   function questionSuivante() {
     var e = net.etat; e.i++; net.reponses = {}; net.debut = Date.now();
     e.phase = e.i >= net.qs.length ? 'fin' : 'q';
+    if (e.phase === 'fin') { var moi = e.joueurs.find(function (x) { return x.id === MOI; }); if (moi) net.credit = crediter(moi.pts, net.code + ':' + net.pid + ':' + MOI); }
     diffuser(); versLeJeu();
   }
   function rejouerSalle() {
     var qs = tirer(reglages.nbReseau); if (!qs.length) return;
-    net.qs = qs; net.reponses = {}; net.etat.i = -1; net.etat.phase = 'salle';
+    net.qs = qs; net.reponses = {}; net.etat.i = -1; net.etat.phase = 'salle'; net.pid = Date.now().toString(36); net.credit = null;
     net.etat.joueurs.forEach(function (j) { j.pts = 0; j.bonnes = 0; j.rep = 0; });
     diffuser();
   }
@@ -330,6 +357,11 @@ var CasaJeux = (function () {
     var avant = net.etat;
     if (!avant || avant.i !== m.i || avant.phase !== m.phase) { if (!avant || avant.i !== m.i) net.maRep = null; if (m.phase === 'q') versLeJeu(); }
     if (m.phase === 'q' && m.restant != null && (!avant || avant.i !== m.i || avant.phase !== 'q')) net.fin = Date.now() + m.restant;
+    if (m.phase === 'fin' && m.pid && (!avant || avant.phase !== 'fin')) {
+      var moi = (m.joueurs || []).find(function (x) { return x.id === MOI; });
+      if (moi) net.credit = crediter(moi.pts, net.code + ':' + m.pid + ':' + MOI);
+    }
+    if (m.phase !== 'fin') net.credit = null;
     net.etat = m; net.introuvable = false; rafraichir();
   }
   function repondreReseau(o) {
@@ -372,13 +404,14 @@ var CasaJeux = (function () {
       base.fin = true; base.titre = best.nom + (best.id === MOI ? ' (vous)' : '') + ' gagne !'; base.sous = 'avec ' + best.pts + ' points';
       base.podium = cl.map(function (j, i) { return { rang: MEDAILLES[i] || String(i + 1), nom: j.nom + (j.id === MOI ? ' (vous)' : ''), pts: String(j.pts), detail: j.bonnes + '/' + j.rep, cls: i === 0 ? 'is-top' : '' }; });
       base.rejouer = rejouerSalle; base.partager = function () { partager(textePartage(cl)); };
+      base.gain = net.credit ? texteGain(net.credit.pts, net.credit.plafond, '') : ''; base.hasGain = !!net.credit; base.voirCartes = voirCartes;
       return base;
     }
     var q = e.q || { q: '', options: [] };
     var restantMs = hote ? (e.restant || 0) : Math.max(0, net.fin - Date.now()), reste = Math.ceil(restantMs / 1000);
     var rev = e.phase === 'rev' ? e.rev : null, nbRep = (e.repondus || []).length;
     base.question = e.phase === 'q'; base.revele = !!rev;
-    base.num = 'Question ' + (e.i + 1) + ' / ' + e.total; base.theme = q.theme; base.q = q.q;
+    base.num = 'Question ' + (e.i + 1) + ' / ' + e.total; base.theme = q.theme; base.q = q.q; base.sport = badgeSport(q.sport || '');
     base.chrono = e.chrono && e.phase === 'q'; base.reste = String(reste); base.chronoPct = Math.round(restantMs / (CHRONO * 10)) + '%'; base.urgent = reste <= 5 ? 'is-urgent' : '';
     base.options = (q.options || []).map(function (o) {
       var cls = rev ? (o === rev.bonne ? 'is-juste' : o === monRep ? 'is-faux' : 'is-off') : (monRep ? (o === monRep ? 'is-choisi' : 'is-off') : '');
@@ -438,7 +471,7 @@ var CasaJeux = (function () {
       if (etat.fini) return;
       var g = String(essai == null ? saisie : essai).trim(); if (!g) { dire('Écrivez un nom, ou touchez « Indice suivant ».'); return; }
       etat.e.push(g);
-      if (norm(g) === norm(p.name)) { etat.fini = true; etat.gagne = true; etat.pts = ESSAIS + 1 - etat.e.length; }
+      if (norm(g) === norm(p.name)) { etat.fini = true; etat.gagne = true; etat.pts = ESSAIS + 1 - etat.e.length; etat.credit = crediter(etat.pts * POINTS_DEVINE, 'devine:' + d); }
       else if (etat.e.length >= ESSAIS) { etat.fini = true; etat.pts = 0; }
       save(); app.setState({ jxDev: '' });
     };
@@ -457,28 +490,118 @@ var CasaJeux = (function () {
       nom: p.name, role: p.role, club: p.clubLabel || '', img: p.img || '', hasImg: !!p.img,
       fiche: function () { app.go('player', { playerId: p.id }); },
       pts: String(etat.pts || 0), resultat: etat.gagne ? 'Trouvé en ' + etat.e.length + ' essai' + (etat.e.length > 1 ? 's' : '') + ' : ' + (etat.pts || 0) + ' point' + ((etat.pts || 0) > 1 ? 's' : '') + '.' : 'Pas cette fois. Un nouveau joueur demain.',
+      gain: etat.credit ? texteGain(etat.credit.pts, etat.credit.plafond, '') : '', hasGain: !!(etat.credit), voirCartes: voirCartes,
       serie: String(serie(mem.devine, function (x) { return x.gagne; })),
       partager: function () { partager('Devine le joueur · ' + d.split('-').reverse().slice(0, 2).join('/') + '\n' + (etat.gagne ? grille + ' trouvé en ' + etat.e.length + '/' + ESSAIS : grille + ' raté') + '\n' + adresse()); }
+    };
+  }
+
+  /* ================= 3. Mes cartes : les points des jeux débloquent les cartes des joueurs des clubs ================= */
+  // Les points gagnés au quiz et à Devine le joueur s'additionnent dans une cagnotte (sur l'appareil, par compte).
+  // 100 points = 1 carte, au choix du club ; la carte rejoint l'album du club (même album que la pochette du jour).
+  var PRIX_CARTE = 100, MAX_JOUR = 500, POINTS_DEVINE = 20;
+  function clePts() { return 'cb-jeux-points:' + (app && app.profileKey ? app.profileKey() : 'compte'); }
+  function cleAlbum() { return 'cb-album:' + (app && app.profileKey ? app.profileKey() : 'compte'); }
+  function lireLS(k, d) { try { var v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } }
+  function ecrireLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function cagnotte() {
+    var v = lireLS(clePts(), {}) || {};
+    return { solde: Math.max(0, +v.solde || 0), total: Math.max(0, +v.total || 0), cartes: Math.max(0, +v.cartes || 0), jour: v.jour || '', duJour: +v.duJour || 0,
+      parties: Array.isArray(v.parties) ? v.parties : [], derniere: v.derniere || null };
+  }
+  // Ajoute des points (une seule fois par partie), dans la limite de MAX_JOUR par jour
+  function crediter(pts, idPartie) {
+    pts = Math.max(0, Math.round(+pts || 0));
+    var c = cagnotte(), d = jour();
+    if (idPartie && c.parties.indexOf(idPartie) >= 0) return { pts: 0, plafond: false, deja: true };
+    if (c.jour !== d) { c.jour = d; c.duJour = 0; }
+    var gain = Math.min(pts, Math.max(0, MAX_JOUR - c.duJour));
+    c.solde += gain; c.total += gain; c.duJour += gain;
+    if (idPartie) c.parties = c.parties.concat([idPartie]).slice(-80);
+    ecrireLS(clePts(), c);
+    if (gain > 0) dire('+' + gain + ' points pour vos cartes joueurs');
+    return { pts: gain, plafond: gain < pts };
+  }
+  function texteGain(pts, plafond, nom) {
+    var c = cagnotte(), n = Math.floor(c.solde / PRIX_CARTE);
+    var t = (nom ? nom + ' : ' : '') + (pts > 0 ? '+' + pts + ' points pour vos cartes joueurs' : 'Pas de points cette fois');
+    if (plafond) t += ' (limite de ' + MAX_JOUR + ' points par jour atteinte)';
+    return t + ' · ' + (n > 0 ? n + ' carte' + (n > 1 ? 's' : '') + ' à débloquer' : 'encore ' + (PRIX_CARTE - c.solde % PRIX_CARTE) + ' points pour la prochaine carte');
+  }
+  function voirCartes() { if (app) { app.setState({ jxTab: 'cartes' }); try { var el = document.querySelector('.jx-tabs'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} } }
+  function initiales(n) { return String(n || '').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase(); }
+  function debloquer(club, manquants) {
+    var c = cagnotte();
+    if (c.solde < PRIX_CARTE) { dire('Il faut ' + PRIX_CARTE + ' points pour débloquer une carte. Jouez au quiz ou à Devine le joueur.'); return; }
+    if (!manquants.length) { dire('Vous avez déjà toutes les cartes de ' + club.name + '.'); return; }
+    var p = manquants[Math.floor(Math.random() * manquants.length)];
+    var alb = lireLS(cleAlbum(), {}) || {}, m = alb[club.id] && Array.isArray(alb[club.id].cartes) ? alb[club.id] : { cartes: [], jour: '' };
+    if (m.cartes.indexOf(p.id) < 0) m.cartes = m.cartes.concat([p.id]);
+    alb[club.id] = m; ecrireLS(cleAlbum(), alb);
+    c.solde -= PRIX_CARTE; c.cartes += 1; c.derniere = { id: p.id, club: club.id, jour: jour() };
+    ecrireLS(clePts(), c);
+    dire('Nouvelle carte : ' + p.name);
+    app.setState({ jxClub: club.id, albTick: (app.state.albTick || 0) + 1 }); rafraichir();
+  }
+  function valsCartes(s, ctx) {
+    var D = ctx.D || {}, c = cagnotte(), follows = s.follows || [], suivis = s.followPlayers || [];
+    var alb = lireLS(cleAlbum(), {}) || {};
+    var aCarte = function (clubId, p) { var m = alb[clubId]; return (m && Array.isArray(m.cartes) && m.cartes.indexOf(p.id) >= 0) || suivis.indexOf(p.id) >= 0; };
+    var clubs = (D.clubs || []).map(function (cl) {
+      var joueurs = (D.players || []).filter(function (p) { return p.club === cl.id; });
+      return { c: cl, joueurs: joueurs, manquants: joueurs.filter(function (p) { return !aCarte(cl.id, p); }), suivi: follows.indexOf(cl.id) >= 0 };
+    }).filter(function (x) { return x.joueurs.length > 0; });
+    clubs.sort(function (a, b) { return (b.suivi - a.suivi) || a.c.name.localeCompare(b.c.name, 'fr'); });
+    var peut = c.solde >= PRIX_CARTE;
+    var ligne = function (x) {
+      var n = x.joueurs.length - x.manquants.length, complet = !x.manquants.length;
+      return { name: x.c.name, how: [x.c.sport, x.c.city].filter(Boolean).join(' · '), logo: x.c.logo || '', hasLogo: !!x.c.logo, noLogo: !x.c.logo, ini: initiales(x.c.name),
+        n: String(n), total: String(x.joueurs.length), pct: Math.round(n / x.joueurs.length * 100) + '%', suivi: x.suivi,
+        complet: complet, peut: peut && !complet, bloque: !peut && !complet, cls: x.c.id === s.jxClub ? 'is-on' : '',
+        btn: complet ? 'Album complet' : 'Débloquer · ' + PRIX_CARTE + ' pts', dis: complet || !peut ? 'true' : 'false',
+        debloquer: function () { debloquer(x.c, x.manquants); },
+        album: function () { app.go('club', { clubId: x.c.id, clubTab: 'album' }); } };
+    };
+    var vos = clubs.filter(function (x) { return x.suivi; }).map(ligne), autres = clubs.filter(function (x) { return !x.suivi; }).map(ligne);
+    var der = null;
+    if (c.derniere) {
+      var p = (D.players || []).find(function (x) { return x.id === c.derniere.id; }), cl = (D.clubs || []).find(function (x) { return x.id === c.derniere.club; });
+      if (p && cl) der = { name: p.name, role: p.role || '', club: cl.name, num: p.num || '', hasNum: !!p.num, img: p.img || '', hasImg: !!p.img, noImg: !p.img, ini: initiales(p.name),
+        neuve: c.derniere.jour === jour(), neuveCls: c.derniere.jour === jour() ? 'is-neuve' : '', pasSuivi: follows.indexOf(cl.id) < 0,
+        fiche: function () { app.go('player', { playerId: p.id }); }, album: function () { app.go('club', { clubId: cl.id, clubTab: 'album' }); },
+        suivre: function () { app.toggleIn('follows', cl.id, 'Vous suivez ' + cl.name + ' : son album est ouvert', 'Vous ne suivez plus ' + cl.name); } };
+    }
+    var dj = c.jour === jour() ? c.duJour : 0;
+    return {
+      solde: String(c.solde), dispo: String(Math.floor(c.solde / PRIX_CARTE)), prix: String(PRIX_CARTE), max: String(MAX_JOUR), devine: String(POINTS_DEVINE),
+      prochaine: c.solde >= PRIX_CARTE ? 'Vous pouvez débloquer ' + Math.floor(c.solde / PRIX_CARTE) + ' carte' + (Math.floor(c.solde / PRIX_CARTE) > 1 ? 's' : '') + ' : choisissez le club ci-dessous.' : 'Encore ' + (PRIX_CARTE - c.solde) + ' points pour débloquer une carte.',
+      pct: (c.solde >= PRIX_CARTE ? 100 : Math.round(c.solde / PRIX_CARTE * 100)) + '%',
+      total: String(c.total), cartes: String(c.cartes), aujourdhui: dj + ' / ' + MAX_JOUR + ' points gagnés aujourd’hui',
+      der: der, hasDer: !!der,
+      vos: vos, hasVos: vos.length > 0, pasVos: !vos.length, autres: autres, hasAutres: autres.length > 0, rien: !clubs.length,
+      jouer: function () { app.setState({ jxTab: 'quiz' }); }
     };
   }
 
   /* ================= la page ================= */
   function vals(a, ctx) {
     app = a;
-    var s = a.state, tab = s.jxTab === 'devine' ? 'devine' : 'quiz';
-    var ongl = [['quiz', 'Le quiz du bus', 'Foot, basket, hand, volley, hockey'], ['devine', 'Devine le joueur', '6 essais, 1 joueur par jour']];
+    var s = a.state, tab = s.jxTab === 'devine' || s.jxTab === 'cartes' ? s.jxTab : 'quiz';
+    var cg = cagnotte();
+    var ongl = [['quiz', 'Le quiz du bus', 'Foot, basket, hand, volley, hockey'], ['devine', 'Devine le joueur', '6 essais, 1 joueur par jour'], ['cartes', 'Mes cartes', cg.solde + ' points']];
     var dv = mem.devine[jour()];
     var Q = tab === 'quiz' ? valsQuiz(s) : {}, N = tab === 'quiz' ? valsReseau(s) : {};
     if (N.actif) { Q.reglage = false; Q.enJeu = false; Q.fini = false; }
     Q.reglageTour = !!(Q.reglage && Q.modeTour); Q.reglageReseau = !!(Q.reglage && Q.modeReseau);
     return {
       tabs: ongl.map(function (o) {
-        var badge = o[0] === 'devine' && dv && dv.fini ? '✓' : '';
+        var badge = o[0] === 'devine' && dv && dv.fini ? '✓' : o[0] === 'cartes' && cg.solde >= PRIX_CARTE ? String(Math.floor(cg.solde / PRIX_CARTE)) : '';
         return { label: o[1], sub: o[2], badge: badge, hasBadge: !!badge, cls: tab === o[0] ? 'is-on' : '', sel: tab === o[0] ? 'true' : 'false', go: function () { a.setState({ jxTab: o[0] }); } };
       }),
-      isQuiz: tab === 'quiz', isDevine: tab === 'devine',
-      quiz: Q, net: N, devine: tab === 'devine' ? valsDevine(s, ctx) : {}
+      isQuiz: tab === 'quiz', isDevine: tab === 'devine', isCartes: tab === 'cartes',
+      pts: { solde: String(cg.solde), dispo: Math.floor(cg.solde / PRIX_CARTE), msg: cg.solde >= PRIX_CARTE ? Math.floor(cg.solde / PRIX_CARTE) + ' carte' + (cg.solde >= 2 * PRIX_CARTE ? 's' : '') + ' joueur à débloquer' : 'Encore ' + (PRIX_CARTE - cg.solde) + ' points pour une carte joueur', voir: voirCartes, show: tab !== 'cartes' },
+      quiz: Q, net: N, devine: tab === 'devine' ? valsDevine(s, ctx) : {}, cartes: tab === 'cartes' ? valsCartes(s, ctx) : {}
     };
   }
-  return { vals: vals, _banque: banque, _indices: indices, _selection: selection };
+  return { vals: vals, _banque: banque, _indices: indices, _selection: selection, _crediter: crediter, _cagnotte: cagnotte, PRIX_CARTE: PRIX_CARTE };
 })();
