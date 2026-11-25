@@ -104,7 +104,7 @@ var CasaBadge = (function () {
       '<text x="180" y="748" style="' + COND + ';font-weight:600;font-size:17px;letter-spacing:2px" fill="#C9D6DD">N° DE BADGE</text>' +
       '<text x="180" y="782" style="' + FONTS + ';font-weight:800;font-size:30px;letter-spacing:1px" fill="#FFFFFF">' + esc(ok ? b.numero : 'EN ATTENTE') + '</text>' +
       '<text x="180" y="810" style="' + TXT + ';font-weight:600;font-size:16px" fill="#C9D6DD">' + esc(ok ? 'Valable jusqu’au ' + fmtDate(b.expire_le) : 'Numéro attribué à la validation') + '</text>' +
-      '<text x="180" y="834" style="' + TXT + ';font-weight:600;font-size:15px" fill="' + SOLEIL + '">Scannez · trombinoscope BE+</text>';
+      '<text x="180" y="834" style="' + TXT + ';font-weight:600;font-size:15px" fill="' + SOLEIL + '">Scannez pour vérifier</text>';
     if (!ok) s += '<g transform="rotate(-28 270 420)"><rect x="-30" y="388" width="600" height="64" fill="' + SOLEIL + '" opacity=".93"/><text x="270" y="432" text-anchor="middle" style="' + FONTS + ';font-weight:800;font-size:30px;letter-spacing:3px" fill="' + RADE + '">' + (b.statut === 'suspendu' ? 'BADGE SUSPENDU' : 'SPÉCIMEN · NON VALIDÉ') + '</text></g>';
     return s + '</svg>';
   }
@@ -120,10 +120,10 @@ var CasaBadge = (function () {
       '<text x="270" y="570" text-anchor="middle" style="' + TXT + ';font-weight:600;font-size:17px" fill="#C9D6DD">réservée aux correspondants et personnes agréées</text>' +
       '<text x="270" y="598" text-anchor="middle" style="' + TXT + ';font-weight:700;font-size:17px" fill="' + SOLEIL + '">' + esc(court(lienAppli())) + '</text>' +
       '<rect x="40" y="628" width="460" height="1.5" fill="#35546A"/>';
-    var txt = ok ? 'Ce badge atteste que son titulaire est agréé par Casa Besports pour la saison ' + saison(b.expire_le) + '. Il reste la propriété de Casa Besports et ne vaut que s’il apparaît au trombinoscope.'
+    var txt = ok ? 'Ce badge atteste que son titulaire est agréé par Casa Besports pour la saison ' + saison(b.expire_le) + '.'
       : 'Badge non encore validé par Casa Besports : il ne donne aucun accès tant que l’administrateur ne l’a pas validé.';
     lignes(txt, 52, 4).forEach(function (l, i) { s += '<text x="270" y="' + (664 + i * 24) + '" text-anchor="middle" style="' + TXT + ';font-weight:500;font-size:16.5px" fill="#DCE5EA">' + esc(l) + '</text>'; });
-    s += '<text x="270" y="790" text-anchor="middle" style="' + TXT + ';font-weight:600;font-size:15px" fill="#C9D6DD">Vérification : QR code au recto · ' + esc(court(lienTrombi())) + '</text>' +
+    s += '<text x="270" y="752" text-anchor="middle" style="' + TXT + ';font-weight:600;font-size:15px" fill="#C9D6DD">Vérification : scannez le QR code au recto</text>' +
       '<text x="270" y="822" text-anchor="middle" style="' + COND + ';font-weight:600;font-size:16px;letter-spacing:2px" fill="#8FA6B4">CASA BESPORTS · LE SPORT DANS LA MANCHE</text>';
     return s + '</svg>';
   }
