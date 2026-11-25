@@ -1,0 +1,6 @@
+MediaPipe Tasks Vision 0.10.21 (Google, licence Apache 2.0) : https://github.com/google-ai-edge/mediapipe
+Fichiers copiés depuis le paquet npm @mediapipe/tasks-vision@0.10.21 (vision_bundle.mjs + wasm SIMD)
+et le modèle officiel hand_landmarker.task (float16, version 1).
+Utilisés par js/ar-main.js : piloter « Ma compo AR » avec la main devant la caméra.
+Tout tourne sur l'appareil : aucune image de la caméra n'est envoyée sur internet.
+Les appareils sans WebAssembly SIMD (très anciens) chargent la variante « nosimd » depuis cdn.jsdelivr.net.

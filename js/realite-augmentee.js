@@ -129,7 +129,7 @@
   }
   function gyro(S, perm) {
     var base = null, Lm = S.limits, off = false;
-    function on(e) { if (e.beta == null) return; if (!base) base = { b: e.beta, g: e.gamma }; S.view.pitch = Math.max(Lm.pmin, Math.min(Lm.pmax, 0.9 + (e.beta - base.b) * -0.012)); S.view.yaw = (e.gamma - base.g) * 0.012; S.placeCam(); }
+    function on(e) { if (e.beta == null) return; if (!base) base = { b: e.beta, g: e.gamma }; S.view.pitch = Math.max(Lm.pmin, Math.min(Lm.pmax, 0.9 + (e.beta - base.b) * -0.012)); S.view.yaw = (e.gamma - base.g) * 0.012 + (S.view.yawOff || 0); S.placeCam(); }
     (perm || askMotion()).then(function (r) { if (r === 'granted' && !off) window.addEventListener('deviceorientation', on); });
     return function () { off = true; window.removeEventListener('deviceorientation', on); };
   }
@@ -957,7 +957,7 @@
     }
     function setDiorama(on) { state.dio = on; sky.visible = !on; scene.fog.near = on ? 1e4 : (state.fog ? state.fog[0] : 8); scene.fog.far = on ? 2e4 : (state.fog ? state.fog[1] : 40); }
     function tick() { sky.position.copy(S.camera.position); }
-    return { apply: apply, setExtent: setExtent, setFog: setFog, setDiorama: setDiorama, tick: tick, state: state, sun: sun };
+    return { apply: apply, setExtent: setExtent, setFog: setFog, setDiorama: setDiorama, tick: tick, state: state, sun: sun, hemi: hemi };
   }
 
   /* ---------- Carte autour du stade + bâtiments réels ---------- */
@@ -1092,7 +1092,7 @@
     function toPos(pct) { var f = fitOf(); return new THREE.Vector3((pct[0] / 100 - 0.5) * W * f, y0u, (pct[1] / 100 - 0.5) * H * f); }
     function fromPos(p) { var f = fitOf(); return [Math.round((p.x / (W * f) + 0.5) * 1000) / 10, Math.round((p.z / (H * f) + 0.5) * 1000) / 10]; }
     function hScale() { return L.scale === 'reelle' ? 1.75 / u : sp().h; }
-    function ambience() { if (!stad) return; var s = env.apply({ mode: L.amb, lat: place ? place.lat : 49.64, lon: place ? place.lon : -1.62, bearing: place ? place.bearing : 0, lamps: stad.lamps, masts: stad.masts, indoor: stad.indoor }); renderChip(s.label); }
+    function ambience() { room = null; if (!stad) return; var s = env.apply({ mode: L.amb, lat: place ? place.lat : 49.64, lon: place ? place.lon : -1.62, bearing: place ? place.bearing : 0, lamps: stad.lamps, masts: stad.masts, indoor: stad.indoor }); renderChip(s.label); }
     function renderChip(extra) {
       var x = sp(), t;
       if (!place) t = 'Recherche du terrain réel autour de <b>' + esc(teamLieu().nom) + '</b>…';
@@ -1175,23 +1175,94 @@
     var ray = new THREE.Raycaster(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), drag = null;
     function ndc(e) { var r = stage.getBoundingClientRect(); return new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); }
     function pick(e) { if (sim) return null; ray.setFromCamera(ndc(e), S.camera); var hits = ray.intersectObjects(tokens.map(function (t) { return t.g; }), true); if (!hits.length) return null; var o = hits[0].object; while (o && o.userData.index == null) o = o.parent; return o; }
-    stage.addEventListener('pointerdown', function (e) { var o = pick(e); if (o) { drag = o; stage.setPointerCapture(e.pointerId); setHint(o.userData.index === 'ball' ? 'Déplacez ' + (BALLS[sp().ball] || {}).label.toLowerCase() : String(o.userData.index).charAt(0) === 'o' ? 'Déplacez l’adversaire n° ' + (+String(o.userData.index).slice(1) + 1) : 'Déplacez ' + names()[o.userData.index]); } });
-    stage.addEventListener('pointermove', function (e) {
-      if (!drag) return; plane.constant = -y0u * S.root.scale.y - S.root.position.y; ray.setFromCamera(ndc(e), S.camera); var p = new THREE.Vector3(); if (!ray.ray.intersectPlane(plane, p)) return; S.root.worldToLocal(p);
+    function dragLabel(o) { return o.userData.index === 'ball' ? 'Déplacez ' + (BALLS[sp().ball] || {}).label.toLowerCase() : String(o.userData.index).charAt(0) === 'o' ? 'Déplacez l’adversaire n° ' + (+String(o.userData.index).slice(1) + 1) : 'Déplacez ' + names()[o.userData.index]; }
+    var lift = 0; // hauteur du joueur « soulevé » par la main (il retombe en le lâchant)
+    function groundAt(e) { plane.constant = -y0u * S.root.scale.y - S.root.position.y; ray.setFromCamera(ndc(e), S.camera); var p = new THREE.Vector3(); if (!ray.ray.intersectPlane(plane, p)) return null; return S.root.worldToLocal(p); }
+    function moveDrag(e, off) {
+      var p = groundAt(e); if (!p) return; if (off) { p.x += off.x; p.z += off.z; }
       var mx = W / 2 + (drag.userData.index === 'ball' ? sp().mg / u : 0), mz = H / 2 + (drag.userData.index === 'ball' ? sp().mg / u : 0);
-      p.x = Math.max(-mx, Math.min(mx, p.x)); p.z = Math.max(-mz, Math.min(mz, p.z)); drag.position.set(p.x, y0u, p.z);
-    });
-    stage.addEventListener('pointerup', function () {
-      if (!drag) return; var x = sp();
-      if (drag.userData.index === 'ball') { L.ball[x.id] = fromPos(drag.position); bounce(drag); }
+      p.x = Math.max(-mx, Math.min(mx, p.x)); p.z = Math.max(-mz, Math.min(mz, p.z)); drag.position.set(p.x, y0u + lift, p.z);
+    }
+    function endDrag() {
+      var x = sp(); drag.position.y = y0u;
+      if (drag.userData.index === 'ball') { L.ball[x.id] = fromPos(drag.position); }
       else if (String(drag.userData.index).charAt(0) === 'o') { var O = oppBase().slice(); O[+String(drag.userData.index).slice(1)] = fromPos(drag.position); L.oppPos = L.oppPos || {}; L.oppPos[x.id] = O; }
       else { var F = ((L.pos[x.id] && L.pos[x.id].length === x.forms[form()].length) ? L.pos[x.id] : x.forms[form()]).slice(); F[drag.userData.index] = fromPos(drag.position); L.pos[x.id] = F; }
-      save(); drag = null; setHint('Faites glisser un joueur ou le ballon · deux doigts pour zoomer');
-    });
+      bounce(drag); save(); drag = null; lift = 0;
+    }
+    stage.addEventListener('pointerdown', function (e) { if (hand.mode === 'drag') return; var o = pick(e); if (o) { drag = o; stage.setPointerCapture(e.pointerId); setHint(dragLabel(o)); } });
+    stage.addEventListener('pointermove', function (e) { if (drag && hand.mode !== 'drag') moveDrag(e); });
+    stage.addEventListener('pointerup', function () { if (!drag || hand.mode === 'drag') return; endDrag(); setHint('Faites glisser un joueur ou le ballon · deux doigts pour zoomer'); });
+    /* ----- Pilotage à la main devant la caméra (js/ar-main.js) : pincer pour saisir, deux mains pour zoomer ----- */
+    var handOn = false, hand = { mode: null, hover: null };
+    function nearest(h) {
+      // la main n'est pas aussi précise qu'un doigt sur l'écran : on prend le joueur le plus proche du point de pince
+      var r = stage.getBoundingClientRect(), best = null, bd = Math.max(40, h.size * 0.3), v = new THREE.Vector3();
+      var o = pick({ clientX: r.left + h.x, clientY: r.top + h.y }); if (o) return o;
+      if (sim) return null;
+      tokens.forEach(function (t) { t.g.getWorldPosition(v); v.project(S.camera); var sx = (v.x + 1) / 2 * r.width, sy = (1 - v.y) / 2 * r.height, d = Math.hypot(sx - h.x, sy - h.y); if (d < bd) { bd = d; best = t.g; } });
+      return best;
+    }
+    function hover(o) { if (hand.hover === o) return; if (hand.hover) hand.hover.scale.setScalar(hand.hover.userData.s0 || 1); hand.hover = o; if (o) { o.userData.s0 = o.scale.x; o.scale.setScalar(o.userData.s0 * 1.18); } }
+    function clampDist(d) { return Math.max(S.limits.dmin, Math.min(S.limits.dmax, d)); }
+    function freeView() { if (L.angle !== 'libre') setAngle('libre'); }
+    S.handFrame = function (hands) {
+      if (!handOn) return;
+      var r = stage.getBoundingClientRect(), P = hands.filter(function (h) { return h.pinch; });
+      function ev(h) { return { clientX: r.left + h.x, clientY: r.top + h.y }; }
+      if (P.length >= 2) {
+        // deux mains qui pincent : on écarte pour zoomer, on fait tourner pour faire pivoter le terrain
+        if (drag) endDrag();
+        var a = P[0], b = P[1], D = Math.hypot(a.x - b.x, a.y - b.y) || 1, A = Math.atan2(b.y - a.y, b.x - a.x);
+        if (hand.mode !== 'two') { hand.mode = 'two'; hand.D0 = D; hand.A0 = A; hand.d0 = S.view.dist; hand.y0 = S.view.yaw; hand.o0 = S.view.yawOff || 0; freeView(); hover(null); setHint('Écartez les mains pour zoomer, rapprochez-les pour dézoomer'); }
+        S.view.dist = clampDist(hand.d0 * hand.D0 / D); var dy = A - hand.A0; S.view.yaw = hand.y0 - dy; S.view.yawOff = hand.o0 - dy; S.placeCam();
+        return;
+      }
+      if (P.length === 1) {
+        var h = P[0];
+        if (hand.mode === 'two' || !hand.mode) {
+          // on saisit le joueur qui était en surbrillance juste avant de pincer (sinon le plus proche de la pince)
+          var o = hand.mode || sim ? null : (hand.hover || nearest(h));
+          if (o) { hover(null); drag = o; lift = 0; hand.mode = 'drag'; var g0 = groundAt(ev(h)); hand.off = g0 ? { x: o.position.x - g0.x, z: o.position.z - g0.z } : null; setHint('✊ ' + dragLabel(o) + ' · ouvrez les doigts pour le poser'); }
+          else { hand.mode = 'view'; hand.x0 = h.x; hand.yy0 = h.y; hand.s0 = h.size; hand.d0 = S.view.dist; hand.y0 = S.view.yaw; hand.o0 = S.view.yawOff || 0; hand.p0 = S.view.pitch; freeView(); hover(null); setHint('Main sur le terrain : glissez pour tourner, avancez la main pour zoomer'); }
+        }
+        if (hand.mode === 'drag' && drag) { lift += (0.012 - lift) * 0.25; moveDrag(ev(h), hand.off); return; }
+        if (hand.mode === 'view') {
+          // une main qui pince dans le vide : glisser = tourner autour, rapprocher la main de la caméra = zoomer
+          var w = r.width || 1, dy2 = (h.x - hand.x0) / w * 3.2;
+          S.view.yaw = hand.y0 - dy2; S.view.yawOff = hand.o0 - dy2;
+          if (!dioOn) S.view.pitch = Math.max(S.limits.pmin, Math.min(S.limits.pmax, hand.p0 + (h.y - hand.yy0) / (r.height || 1) * 2));
+          S.view.dist = clampDist(hand.d0 * Math.pow(hand.s0 / h.size, 1.6)); S.placeCam();
+        }
+        return;
+      }
+      // main ouverte : on lâche ce qu'on tenait, et le joueur visé grossit un peu
+      if (drag && hand.mode === 'drag') { endDrag(); }
+      if (hand.mode) setHint('✋ Pincez (pouce + index) un joueur pour le saisir · deux mains pour zoomer');
+      hand.mode = null;
+      hover(hands.length && !sim ? nearest(hands[0]) : null);
+    };
+    S.setHand = function (on) {
+      handOn = on; if (!on) { if (drag && hand.mode === 'drag') endDrag(); hand.mode = null; hover(null); }
+      setHint(on ? '✋ Montrez votre main à la caméra · pincez (pouce + index) un joueur pour le saisir' : (dioOn ? 'Joueurs, ballon et lignes du terrain posés sur l’image de votre caméra' : 'Faites glisser un joueur ou le ballon · deux doigts pour zoomer'));
+    };
+    // lumière de la pièce : en mode caméra, les joueurs prennent la couleur et la luminosité de ce que filme la caméra
+    var room = null, roomT = 0;
+    function roomTick() {
+      if (!dioOn || !st.video || !window.CasaMain) { if (room) { room = null; ambience(); } return; }
+      var now = performance.now(); if (now - roomT < 400) return; roomT = now;
+      var m = window.CasaMain.roomLight(st.video); if (!m) return;
+      if (!room) room = { exp: S.renderer.toneMappingExposure, hc: env.hemi.color.clone(), hg: env.hemi.groundColor.clone(), si: env.sun.intensity, sc: env.sun.color.clone() };
+      var tint = new THREE.Color(m.r, m.g, m.b).convertSRGBToLinear(), mx = Math.max(tint.r, tint.g, tint.b, 1e-3); tint.multiplyScalar(1 / mx);
+      var f = Math.max(0.55, Math.min(1.3, 0.5 + m.lum * 1.15));
+      S.renderer.toneMappingExposure += (room.exp * f - S.renderer.toneMappingExposure) * 0.35;
+      env.hemi.color.copy(room.hc).lerp(tint, 0.55); env.hemi.groundColor.copy(room.hg).lerp(tint.clone().multiplyScalar(0.6), 0.5);
+      env.sun.color.copy(room.sc).lerp(tint, 0.35);
+    }
     var bounceT = null; function bounce(g) { bounceT = { g: g, t0: performance.now() }; }
     orbitControls(S, stage, function (e) { return !!pick(e); });
     S.tick = function (t) {
-      env.tick(); if (stad) stad.ticks.forEach(function (f) { f(t); });
+      env.tick(); if (stad) stad.ticks.forEach(function (f) { f(t); }); roomTick();
       if (sim) simTick(performance.now()); camTick(); if (sim) return;
       if (bounceT) { var k = (performance.now() - bounceT.t0) / 700; if (k > 1) { bounceT.g.position.y = y0u; bounceT = null; } else bounceT.g.position.y = y0u + Math.abs(Math.sin(k * Math.PI * 2.5)) * (1 - k) * 0.03; }
     };
@@ -1807,7 +1878,7 @@
   function close() {
     if (!st) return; try { if (st.xr) st.xr.end(); } catch (e) {} cancelAnimationFrame(st.raf);
     if (st.stream) st.stream.getTracks().forEach(function (t) { t.stop(); });
-    if (st.stopGyro) st.stopGyro(); if (st.S && st.S.stop) st.S.stop(); if (st.S) { window.removeEventListener('resize', st.S.resize); st.S.renderer.dispose(); }
+    if (st.stopGyro) st.stopGyro(); if (window.CasaMain) window.CasaMain.stop(); if (st.S && st.S.stop) st.S.stop(); if (st.S) { window.removeEventListener('resize', st.S.resize); st.S.renderer.dispose(); }
     if (st.av) st.av.close();
     st.root.remove(); document.documentElement.style.overflow = ''; st = null;
   }
@@ -1847,11 +1918,48 @@
     // barre de modes : caméra / 3D / AR
     var modes = el('div', { class: 'cbar-row', style: 'position:absolute;left:12px;right:12px;top:56px;z-index:3' });
     var bCam = btn('Caméra', function () {
-      if (st.video) { st.stream.getTracks().forEach(function (t) { t.stop(); }); st.video.remove(); st.video = null; st.stream = null; if (st.stopGyro) st.stopGyro(); st.stopGyro = null; bCam.setAttribute('aria-pressed', 'false'); if (S.onCamera) S.onCamera(false); return; }
-      var perm = askMotion();
-      startCamera(stage, 'environment').then(function () { bCam.setAttribute('aria-pressed', 'true'); if (S.onCamera) S.onCamera(true); st.stopGyro = gyro(S, perm); setHint('Le terrain est posé sur ce que filme votre caméra · inclinez le téléphone'); }).catch(function (err) { notice(stage, cameraMessage(err)); });
+      if (st.video) { handStop(); stopCam(); return; }
+      camOn(askMotion());
     });
+    var facing = 'environment';
+    function stopCam() { if (!st.video) return; st.stream.getTracks().forEach(function (t) { t.stop(); }); st.video.remove(); st.video = null; st.stream = null; if (st.stopGyro) st.stopGyro(); st.stopGyro = null; bCam.setAttribute('aria-pressed', 'false'); if (S.onCamera) S.onCamera(false); }
+    function camOn(perm) {
+      return startCamera(stage, facing).then(function (v) { bCam.setAttribute('aria-pressed', 'true'); if (S.onCamera) S.onCamera(true); if (st.stopGyro) st.stopGyro(); st.stopGyro = facing === 'user' ? null : gyro(S, perm); if (!handActive) setHint('Le terrain est posé sur ce que filme votre caméra · inclinez le téléphone'); return v; })
+        .catch(function (err) { notice(stage, cameraMessage(err)); throw err; });
+    }
     bCam.setAttribute('aria-pressed', 'false'); modes.appendChild(bCam);
+    // ✋ Main : on pilote la compo avec la main devant la caméra, sans toucher l'écran (le doigt marche toujours)
+    var handActive = false, bHand = null, bFlip = null;
+    function handStop() { handActive = false; if (window.CasaMain) window.CasaMain.stop(); if (S.setHand) S.setHand(false); if (bHand) bHand.setAttribute('aria-pressed', 'false'); if (bFlip) bFlip.style.display = 'none'; }
+    function handGuide() {
+      if (LS.get('cbar-main-vu', false)) return; LS.set('cbar-main-vu', true);
+      var o = el('div', { class: 'cbar-sheet', style: 'background:rgba(5,9,15,.88);display:flex;align-items:center' });
+      o.innerHTML = '<div><h3>Piloter avec la main</h3><div class="cbar-keys">' +
+        '<div><b>✋ Viser</b>Montrez votre main à la caméra : le joueur visé grossit.</div>' +
+        '<div><b>🤏 Saisir</b>Pincez pouce + index sur un joueur, déplacez la main, ouvrez les doigts pour le poser.</div>' +
+        '<div><b>↔ Tourner</b>Pincez dans le vide et glissez : le terrain tourne.</div>' +
+        '<div><b>🔍 Zoomer</b>Pincez dans le vide et avancez la main vers la caméra (ou reculez-la). Téléphone posé : pincez avec les deux mains et écartez-les.</div>' +
+        '</div><p style="font-size:13.5px;color:#c9d6e3;line-height:1.5">Astuce : tenez le téléphone d’une main et passez l’autre main devant la caméra arrière, à 30-50 cm, dans un endroit bien éclairé. Tout est calculé sur votre téléphone, aucune image n’est envoyée.</p></div>';
+      var r = el('div', { class: 'cbar-row' }); r.appendChild(btn('C’est parti', function () { o.remove(); }, true)); o.firstChild.appendChild(r); stage.appendChild(o);
+    }
+    if (mode === 'lineup') {
+      bHand = btn('✋ Main', function () {
+        if (handActive) { handStop(); return; }
+        if (!window.CasaMain) { toast('Pilotage à la main indisponible'); return; }
+        handActive = true; bHand.setAttribute('aria-pressed', 'true'); handGuide();
+        var ready = st.video ? Promise.resolve(st.video) : camOn(askMotion());
+        ready.then(function (v) {
+          return window.CasaMain.start({ stage: stage, video: v, mirror: facing === 'user', onHands: function (h) { if (S.handFrame) S.handFrame(h); }, onStatus: setHint });
+        }).then(function (ok) { if (!ok || !handActive) return; if (S.setHand) S.setHand(true); bFlip.style.display = ''; })
+          .catch(function (e) { handStop(); if (window.console) console.warn(e); if (st.video) toast('Suivi de la main indisponible sur cet appareil : utilisez le doigt'); });
+      });
+      bHand.setAttribute('aria-pressed', 'false'); bHand.title = 'Piloter avec la main devant la caméra'; modes.appendChild(bHand);
+      // caméra avant : téléphone posé ou ordinateur, pour jouer avec les deux mains
+      bFlip = btn('🔄 Caméra', function () {
+        facing = facing === 'user' ? 'environment' : 'user'; stopCam();
+        camOn(null).then(function (v) { if (window.CasaMain && handActive) window.CasaMain.setVideo(v, facing === 'user'); toast(facing === 'user' ? 'Caméra avant : posez le téléphone et utilisez vos deux mains' : 'Caméra arrière'); }).catch(function () {});
+      }, false, 'display:none'); bFlip.title = 'Changer de caméra'; modes.appendChild(bFlip);
+    }
     (S.stageButtons || []).forEach(function (b) { modes.appendChild(b); });
     // plein écran : on masque les barres et la scène prend tout l'écran (l'iPhone n'a pas le vrai plein écran du navigateur)
     var bFull = btn('⛶ Plein écran', function () { setFull(!root.classList.contains('cbar-full')); });
