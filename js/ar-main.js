@@ -19,7 +19,7 @@
   function create(m, files, delegate) {
     return m.HandLandmarker.createFromOptions(files, {
       baseOptions: { modelAssetPath: BASE + 'hand_landmarker.task', delegate: delegate },
-      runningMode: 'VIDEO', numHands: 2, minHandDetectionConfidence: 0.55, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5
+      runningMode: 'VIDEO', numHands: 2, minHandDetectionConfidence: 0.5, minHandPresenceConfidence: 0.5, minTrackingConfidence: 0.5
     });
   }
   function load() {
