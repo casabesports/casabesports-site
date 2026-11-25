@@ -5620,7 +5620,7 @@ img, video, canvas, svg { max-width: 100%; }
 
     <sc-if value="{{showWeather}}" hint-placeholder-val="{{ true }}">
       <section aria-labelledby="meteo-title" style="margin-bottom: 1.75rem">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .5rem; margin-bottom: .6rem"><h2 id="meteo-title" class="cond" style="font-size: 15px; color: var(--gold-text); margin: 0">Météo des terrains</h2><span style="font-size: 12.5px; color: var(--muted)">{{wxMaj}} · Open-Meteo</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .5rem; margin-bottom: .6rem"><h2 id="meteo-title" class="cond" style="font-size: 15px; color: var(--gold-text); margin: 0">Météo des terrains</h2><span style="font-size: 12.5px; color: var(--muted)">{{wxMaj}} · Open-Meteo · <button type="button" class="lnk" onClick="{{goMeteo}}" style="font-size: 12.5px">Prévisions détaillées</button></span></div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: .6rem">
           <sc-for list="{{weather}}" as="w" hint-placeholder-count="4">
             <div style="display: flex; align-items: center; gap: .75rem; background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: .75rem .9rem">

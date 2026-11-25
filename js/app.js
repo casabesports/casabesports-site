@@ -1926,19 +1926,24 @@ class Component extends DCLogic {
     const nav = navDefs.map(([label, v, groupe], i) => ({ label, groupe, cls: i > 0 && navDefs[i - 1][2] !== groupe ? 'nav-sep' : '', color: activeSec === v ? 'var(--ink)' : 'var(--muted)', line: activeSec === v ? accent : 'transparent', go: () => this.go(v) }));
     // Menu « Plus » regroupé en trois familles (les mêmes rubriques alimentent l'accès direct de l'accueil)
     const goV = (v, extra) => () => this.go(v, extra || {});
+    const mapGo = (items) => items.map(([label, v, sub]) => ({ label, sub, go: v === 'ar:lineup' ? () => { this.setState({ moreOpen: false, menuOpen: false }); this.openAR('lineup'); } : v.indexOf('badge:') === 0 ? () => { this.setState({ moreOpen: false, menuOpen: false }); if (window.CasaBadge) { if (v === 'badge:mon') window.CasaBadge.ouvrir(); else window.CasaBadge.trombinoscope(); } } : v === 'clubhouse:discussions' ? goV('clubhouse', { chTab: 'discussions' }) : goV(v) }));
+    // Menu « Plus » épuré (sans doublons) : seulement ce qu'on ne trouve nulle part ailleurs.
+    // Retirés car accessibles ailleurs : Le Vestiaire (barre du haut et du bas), Discussions (Clubs › Club House),
+    // Mon quotidien (Mon espace), Météo (Le Terrain), Espace administrateur et rédaction (boutons Admin / Rédaction, Mon espace),
+    // Mon badge BE+ (Espace rédaction), Trombinoscope (Espace rédaction et pied de page)
     const menuGroups = [
-      // Menu « Plus » allégé : 10 rubriques en trois familles courtes (les joueurs sont dans la rubrique Clubs)
-      { titre: 'À voir, à écouter', items: [['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Ma compo AR', 'ar:lineup', 'Votre équipe posée sur le vrai terrain, en réalité augmentée'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine']] },
-      { titre: 'Au quotidien', items: [['Mon quotidien', 'private', 'Agenda, listes, activité, budget sport'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['Jeux', 'jeux', 'Le quiz du bus, devine le joueur']] },
-      { titre: 'Casa Besports', items: [['Offres', 'offers', 'Les abonnements BE+'], ['Partenaires', 'partners', 'Commerces et marques partenaires'], ['À propos', 'about', 'Notre histoire'], ['Trombinoscope', 'badge:trombi', 'Les correspondants agréés BE+'], ['Contact', 'contact', 'Écrire à la rédaction']] }
+      { titre: 'À voir, à jouer', items: mapGo([['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Ma compo AR', 'ar:lineup', 'Votre équipe posée sur le vrai terrain, en réalité augmentée'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine'], ['Jeux', 'jeux', 'Le quiz du bus, devine le joueur']]) },
+      { titre: 'Casa Besports', items: mapGo([['Offres', 'offers', 'Les abonnements BE+'], ['Partenaires', 'partners', 'Commerces et marques partenaires'], ['À propos', 'about', 'Notre histoire'], ['Contact', 'contact', 'Écrire à la rédaction']]) }
     ];
-    if (s.role) menuGroups.unshift({ titre: 'Équipe', items: (s.role === 'admin' ? [['Espace administrateur', 'admin', 'Contenus, messagerie, équipe']] : []).concat([['Espace rédaction', 'studio', s.role === 'admin' ? 'Relecture et publication' : 'Rédiger et soumettre'], ['Mon badge BE+', 'badge:mon', 'Mon badge de correspondant, avec QR code']]) });
-    // Le Vestiaire : en tête des services du quotidien
-    menuGroups.forEach((g) => { if (g.items.some((it) => it[1] === 'private')) g.items.unshift(['Le Vestiaire', 'vestiaire', 'Planning, présences et fil de mon club'], ['Discussions', 'clubhouse:discussions', 'Le chat entre amis : groupes ouverts ou à huis clos']); });
-    menuGroups.forEach((g) => { g.items = g.items.map(([label, v, sub]) => ({ label, sub, go: v === 'ar:lineup' ? () => { this.setState({ moreOpen: false, menuOpen: false }); this.openAR('lineup'); } : v.indexOf('badge:') === 0 ? () => { this.setState({ moreOpen: false, menuOpen: false }); if (window.CasaBadge) { if (v === 'badge:mon') window.CasaBadge.ouvrir(); else window.CasaBadge.trombinoscope(); } } : v === 'clubhouse:discussions' ? goV('clubhouse', { chTab: 'discussions' }) : goV(v, v === 'studio' ? { studioTab: s.role === 'admin' ? 'queue' : s.role === 'club' ? 'club' : 'dash' } : null) })); });
+    // « Toutes les rubriques » (bloc facultatif de l'accueil) reste le plan complet du site
+    const planGroups = [
+      { titre: 'À voir, à écouter', items: mapGo([['Le podcast', 'podcast', 'Émissions et réactions d’après-match'], ['Ma compo AR', 'ar:lineup', 'Votre équipe posée sur le vrai terrain, en réalité augmentée'], ['Culture', 'culture', 'Œuvres, parcours et patrimoine']]) },
+      { titre: 'Au quotidien', items: mapGo([['Le Vestiaire', 'vestiaire', 'Planning, présences et fil de mon club'], ['Discussions', 'clubhouse:discussions', 'Le chat entre amis : groupes ouverts ou à huis clos'], ['Mon quotidien', 'private', 'Agenda, listes, activité, budget sport'], ['Météo', 'meteo', 'Prévisions et conditions de jeu'], ['Jeux', 'jeux', 'Le quiz du bus, devine le joueur']]) },
+      { titre: 'Casa Besports', items: mapGo([['Offres', 'offers', 'Les abonnements BE+'], ['Partenaires', 'partners', 'Commerces et marques partenaires'], ['À propos', 'about', 'Notre histoire'], ['Trombinoscope', 'badge:trombi', 'Les correspondants agréés BE+'], ['Contact', 'contact', 'Écrire à la rédaction']]) }
+    ];
     const moreNav = [].concat(...menuGroups.map((g) => g.items));
     // Accueil : toutes les rubriques du site, en accès direct
-    const rubriques = [{ titre: 'L’essentiel', items: [['Le Terrain', 'live', 'Scores, agenda et classements'], ['Actualités', 'news', 'Récits et résultats'], ['Clubs', 'clubs', 'Les clubs et le Club House'], ['Boutique', 'shop', 'Maillots et collections'], ['Offres', 'offers', 'BE+, La Gazette et Casa PRO'], ['Partenaires', 'partners', 'Les entreprises qui nous soutiennent']].map(([label, v, sub]) => ({ label, sub, go: goV(v) })) }].concat(menuGroups.filter((g) => g.titre !== 'Équipe'));
+    const rubriques = [{ titre: 'L’essentiel', items: [['Le Terrain', 'live', 'Scores, agenda et classements'], ['Actualités', 'news', 'Récits et résultats'], ['Clubs', 'clubs', 'Les clubs et le Club House'], ['Boutique', 'shop', 'Maillots et collections'], ['Offres', 'offers', 'BE+, La Gazette et Casa PRO'], ['Partenaires', 'partners', 'Les entreprises qui nous soutiennent']].map(([label, v, sub]) => ({ label, sub, go: goV(v) })) }].concat(planGroups);
 
     // ---------- accueil ----------
     const liveCount = allM.filter((m) => m.status === 'live').length;
@@ -2741,7 +2746,7 @@ class Component extends DCLogic {
     const reseaux = [['instagram', 'Instagram'], ['youtube', 'YouTube'], ['tiktok', 'TikTok'], ['facebook', 'Facebook'], ['x', 'X'], ['linkedin', 'LinkedIn']]
       .filter(([k]) => /^https:\/\/\S+$/.test(String(RSX[k] || '').trim())).map(([k, label]) => ({ label, href: String(RSX[k]).trim() }));
     // Pied de page : seulement les liens qu'on ne retrouve pas dans « Toutes les rubriques »
-    const footLinks = [['Casa PRO', 'work'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier']].map(([label, v]) => ({ label, go: () => this.go(v) }));
+    const footLinks = [['Casa PRO', 'work'], ['Contact', 'contact'], ['Vérifier une carte membre', 'verifier'], ['Trombinoscope des correspondants', 'badge:trombi']].map(([label, v]) => ({ label, go: v === 'badge:trombi' ? () => { if (window.CasaBadge) window.CasaBadge.trombinoscope(); } : () => this.go(v) }));
 
     const progress = { handisport: 30, home: 8, news: 20, article: 45, video: 45, videos: 20, disciplines: 20, discipline: 40, clubs: 20, club: 45, players: 20, player: 60, map: 30, offers: 30, checkout: 30 + s.step * 17, partners: 40, about: 40, contact: 50, account: 50, live: 35, shop: 25, product: 55, order: 85, studio: 50, legal: 40, meteo: 30, private: 45, culture: 35, clubhouse: 40, olisto: 45, app: 30, cv: 60, verifier: 40 }[s.view] || 10;
 
