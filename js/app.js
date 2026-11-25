@@ -2509,8 +2509,8 @@ class Component extends DCLogic {
     const openEdit = (p, mode) => this.go('studio', { studioTab: 'edit', editId: p.id, edMode: mode || 'write', reviewNote: '', aiOutKind: null, formError: '' });
     const isClubRole = s.role === 'club';
     const canReseau = isAdmin || (s.role === 'writer' && (s.staffRole || 'redacteur') === 'collaborateur');
-    const studioTabs = isClubRole ? [['club', 'Mon club'], ['clist', 'Mes contenus'], ['fiche', 'Fiche du club'], ['charte', 'Bonnes pratiques']]
-      : [['dash', 'Tableau de bord'], ['list', 'Articles'], ['queue', 'Relecture'], ['une', 'La une'], ['prod', 'Éditions · Gazette'], ['media', 'Médiathèque'], ['fil', 'Le Fil'], ['ia', 'IA'], ['team', 'Équipe et règles']].concat(canReseau ? [['reseau', 'Réseau']] : []).concat(me.role === 'admin' ? [['exports', 'Exports'], ['crm', 'CRM & agents']] : []);
+    const studioTabs = isClubRole ? [['club', 'Mon club'], ['clist', 'Mes contenus'], ['fiche', 'Fiche du club'], ['charte', 'Bonnes pratiques'], ['guides', 'Manuels et exemples']]
+      : [['dash', 'Tableau de bord'], ['list', 'Articles'], ['queue', 'Relecture'], ['une', 'La une'], ['prod', 'Éditions · Gazette'], ['media', 'Médiathèque'], ['fil', 'Le Fil'], ['ia', 'IA'], ['team', 'Équipe et règles'], ['guides', 'Manuels et exemples']].concat(canReseau ? [['reseau', 'Réseau']] : []).concat(me.role === 'admin' ? [['exports', 'Exports'], ['crm', 'CRM & agents']] : []);
     const curTab = s.studioTab;
     const studioNav0 = studioTabs.map(([id, label]) => ({ label, bg: curTab === id || (curTab === 'edit' && id === 'list') ? 'var(--inv-bg)' : 'transparent', fg: curTab === id || (curTab === 'edit' && id === 'list') ? 'var(--on-inv)' : 'var(--text)', hasBadge: id === 'queue' && pending.length > 0, badge: String(pending.length), go: () => this.setState({ studioTab: id }), cur: curTab === id || (curTab === 'edit' && id === 'list') || (curTab === 'cedit' && id === 'clist') ? 'page' : 'false' }));
     const roleSwitch = [['admin', 'Admin', ''], ['writer', 'Chef d’édition', 'collaborateur'], ['writer', 'Rédactrice', 'redacteur'], ['club', 'Correspondant club', '']].map(([id, label, sr]) => { const on = s.role === id && (id === 'admin' || id === 'club' || (s.staffRole || 'redacteur') === sr); return { label, bg: on ? 'var(--inv-bg)' : 'var(--surface)', fg: on ? 'var(--on-inv)' : 'var(--text)', border: on ? 'var(--ink)' : 'var(--line-2)', pick: () => this.setState(Object.assign({ role: id, studioTab: id === 'club' ? 'club' : ['club', 'clist', 'fiche', 'charte', 'cedit'].indexOf(s.studioTab) >= 0 ? 'dash' : s.studioTab }, sr ? { staffRole: sr } : {})) }; });
@@ -2577,6 +2577,26 @@ class Component extends DCLogic {
     const RXV = typeof CasaRedac !== 'undefined' ? CasaRedac.vals(this, { isAdmin, staffRole, clubRole: s.role === 'club', posts, ARTS, G: this.gazette(), libImgs, videos: D.videos, edRaw, upd, edLocked, checksOf: (p) => this.checksOf(p), blocksOf: (b) => this.blocksOf(b), clubById,
       openEditById: (id) => { const p = this.posts().find((x) => x.id === id); if (p) openEdit(p, 'write'); }, go: (v, x) => this.go(v, x), table: X.tables.r2, matches: allM, wxText }) : { ed: {}, list: { rows: [] }, badges: {}, aide: {}, dlg: {}, wf: {} };
     RXV.crumb = (studioTabs.find((t) => t[0] === s.studioTab) || ['', s.studioTab === 'edit' || s.studioTab === 'cedit' ? 'Éditeur' : 'Tableau de bord'])[1];
+    // Manuels et exemples : un manuel par outil de la rédaction (js/manuels.js)
+    const manCopier = (kind, A, CH) => {
+      const at = new Date().toISOString();
+      if (kind === 'club') {
+        const club = clubById(s.clubRoleId) || D.clubs[0]; const m = CasaReseau.modele('cr'); const comp = m.compose(CH, club.name); const id = 'c' + Date.now();
+        const p = { id, author: me.name, status: 'draft', updated: 'à l’instant', updatedAt: at, type: m.type, sport: club.sport === 'Multisport' ? 'Autre' : club.sport, tag: m.tag, clubs: [club.id], img: '', alt: '', credit: '', premium: false, schedule: '',
+          title: comp.title.slice(0, 80), dek: comp.dek, body: comp.body, log: [{ who: me.name, when: 'à l’instant', at, what: 'Brouillon créé à partir de l’exemple du manuel (compte rendu de match).' }], source: 'club', clubId: club.id, clubName: club.name, clubForm: { modele: m.id, champs: Object.assign({}, CH), photoOk: false } };
+        this.setState({ posts: [p].concat(posts), studioTab: 'cedit', clubEditId: id, manId: null });
+        this.say('Brouillon créé : remplacez l’exemple par votre match.');
+        return;
+      }
+      const id = 'n' + Date.now();
+      const p = { id, author: me.name, authorId: window.CasaAuth && window.CasaAuth.user ? window.CasaAuth.user.id : undefined, status: 'draft', updated: 'à l’instant', updatedAt: at, type: A.type, sport: A.sport, tag: A.tag, clubs: [], img: 'assets/hero.jpg', alt: A.alt, premium: false, schedule: '',
+        title: A.titre, dek: A.chapeau, body: A.corps, log: [{ who: me.name, when: 'à l’instant', at, what: 'Brouillon créé à partir de l’exemple du manuel.' }] };
+      if (typeof CasaRedac !== 'undefined') p.versions = CasaRedac.addVersion(p, me.name, 'Brouillon créé (exemple du manuel)');
+      this.setState({ posts: [p].concat(posts), studioTab: 'edit', editId: id, edMode: 'write', aiOutKind: null, manId: null });
+      this.say('Brouillon créé : remplacez l’exemple par votre article.');
+    };
+    const MAN = typeof CasaManuels !== 'undefined' ? CasaManuels.vals(this, { isAdmin, staffRole: s.staffRole || 'redacteur', clubRole: isClubRole, tab: s.studioTab, go: (t) => this.setState({ studioTab: t }), lineup: () => this.openLineup({ sport: s.dSport || null }), copier: manCopier,
+      aideOpen: (id) => this.setState({ rxu: Object.assign({}, s.rxu || {}, { aideOpen: true, aideId: id }) }) }) : { items: [], ici: { show: false } };
     const studioNav = studioNav0.map((n, i) => { const id = studioTabs[i][0]; const b = id === 'fil' ? RXV.badges.fil : id === 'prod' ? RXV.badges.prod : 0; return b ? Object.assign({}, n, { hasBadge: true, badge: String(b) }) : n; });
     const team = X.team.map((m) => ({ name: m.id === 'admin' ? (s.role === 'admin' && s.name.trim() ? s.name : m.name) : m.name, mail: m.mail, role: m.role === 'admin' ? 'Administrateur principal' : 'Rédacteur', c1: '✓', c2: '✓', c3: m.role === 'admin' ? '✓' : '—', c4: m.role === 'admin' ? '✓' : '—' }));
 
@@ -3761,7 +3781,7 @@ class Component extends DCLogic {
       isStaff: !!s.role, isAdmin, notAdmin: !isAdmin, hasPending: pending.length > 0, pendingCount: String(pending.length),
       goStudio: () => (s.role ? this.go('studio', { studioTab: s.role === 'club' ? 'club' : isAdmin && pending.length ? 'queue' : 'dash' }) : this.setState({ loginOpen: true, linkSent: false })),
       isStudio: V === 'studio' && !!s.role, me, studioNav, roleSwitch, showRoleSwitch: false, kpis, dashList, dashListEmpty: dashList.length === 0, dashListTitle: isAdmin ? 'À relire en priorité' : 'Mes articles en cours', activity, notClubTabs: !isClubRole,
-      stCrm: s.studioTab === 'crm' && s.role === 'admin', crm,
+      stCrm: s.studioTab === 'crm' && s.role === 'admin', crm, stGuides: s.studioTab === 'guides', man: MAN,
       stDash: s.studioTab === 'dash' && !isClubRole, stList: s.studioTab === 'list' && !isClubRole, stQueue: s.studioTab === 'queue' && !isClubRole, stEdit: s.studioTab === 'edit' && !isClubRole, stMedia: s.studioTab === 'media' && !isClubRole, stTeam: s.studioTab === 'team' && !isClubRole,
       rx: RXV, stRowsEmpty: (RXV.list && RXV.list.rows || []).length === 0,
       stRows: (RXV.list && RXV.list.rows ? RXV.list.rows : []).map((r) => { const p = posts.find((x) => x.id === r.id); return Object.assign({}, r, stV(p), { title: String(r.title || '').trim() || '(Sans titre)', canReview: isAdmin && p.status === 'review', edit: () => openEdit(p, 'write'), review: () => openEdit(p, 'preview'), canDelete: this.rxCanDelete(p), canShare: typeof CasaPartage !== 'undefined' && (isAdmin || this.rxMine(p)) && CasaPartage.enLigne(p), share: () => CasaPartage.open(this, p.id), delSure: s.rxDelSure === p.id, delLabel: s.rxDelSure === p.id ? (p.online ? 'Confirmer : supprimer et retirer du site' : 'Confirmer la suppression') : 'Supprimer', del: () => this.rxDelete(p) }); }),

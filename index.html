@@ -976,14 +976,13 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
 .bn-intro { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--bn-noir); color: var(--bn-blanc); cursor: pointer; animation: bnIntroOut .5s ease 3.5s forwards; }
 .bn-intro-in { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1.1rem; width: min(300px, 60vw); }
 .bn-intro-mot { position: relative; display: block; width: 100%; overflow: hidden; }
-.bn-intro-mot img { display: block; width: 100%; height: auto; clip-path: inset(0 100% 0 0); animation: bnDevoile .7s cubic-bezier(.7, 0, .2, 1) 1.75s forwards; }
-.bn-intro-tag { margin-top: 2.7rem; font-family: var(--bn-font); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: clamp(11px, 2.6vw, 14px); color: var(--bn-gris); text-align: center; opacity: 0; animation: bnApparait .5s ease 2.4s forwards; }
-/* La signature « powered by Kader Allou » remplace la bande blanche : elle se dévoile devant le logo,
-   puis descend se poser dessous pendant que le logo apparaît (police League Spartan, celle de la marque BE+) */
-.bn-intro-signe { position: absolute; left: 50%; top: calc(min(300px, 60vw) * 179 / 600); z-index: 2; transform: translate(-50%, -50%); white-space: nowrap; color: var(--bn-blanc); font-family: var(--bn-font); font-weight: 800; letter-spacing: -.01em; line-height: 1; font-size: clamp(24px, 6.6vw, 36px); clip-path: inset(-20% 100% -30% -2%); animation: bnEcrit 1s cubic-bezier(.45, .05, .35, 1) .75s forwards, bnSignePose .5s cubic-bezier(.6, 0, .2, 1) 1.85s forwards; pointer-events: none; }
+.bn-intro-mot img { display: block; width: 100%; height: auto; clip-path: inset(0 100% 0 0); animation: bnDevoile .7s cubic-bezier(.7, 0, .2, 1) .85s forwards; }
+.bn-intro-tag { margin-top: 2.7rem; font-family: var(--bn-font); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: clamp(11px, 2.6vw, 14px); color: var(--bn-gris); text-align: center; opacity: 0; animation: bnApparait .5s ease 2.5s forwards; }
+/* La signature « powered by Kader Allou » s’écrit une seule fois, directement sous le logo, une fois le logo dévoilé
+   (elle ne passe plus d’abord en grand au centre : on la voyait deux fois). Police League Spartan, celle de la marque BE+ */
+.bn-intro-signe { position: absolute; left: 50%; top: calc(min(300px, 60vw) * 179 / 300 + .35rem); z-index: 2; transform: translate(-50%, 0) scale(.72); white-space: nowrap; color: var(--bn-blanc); font-family: var(--bn-font); font-weight: 800; letter-spacing: -.01em; line-height: 1; font-size: clamp(24px, 6.6vw, 36px); clip-path: inset(-20% 100% -30% -2%); animation: bnEcrit .8s cubic-bezier(.45, .05, .35, 1) 1.6s forwards; pointer-events: none; }
 .bn-intro-signe .sg-pb { font-size: .5em; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; margin-right: .5em; color: var(--bn-gris); vertical-align: .18em; }
 @keyframes bnEcrit { to { clip-path: inset(-20% -2% -30% -2%); } }
-@keyframes bnSignePose { from { top: calc(min(300px, 60vw) * 179 / 600); transform: translate(-50%, -50%); } to { top: calc(min(300px, 60vw) * 179 / 300 + .35rem); transform: translate(-50%, 0) scale(.72); } }
 .ol-contact { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; justify-content: space-between; border: 1.5px solid var(--ink); background: var(--surface); padding: 1.1rem 1.3rem; }
 /* Menu (bouton ☰) : le panneau tient toujours dans l'écran et défile ; « À propos », le compte et le thème restent accessibles
    sans dézoomer, au-dessus de la barre d'onglets et des zones de sécurité de l'iPhone */
@@ -1019,6 +1018,68 @@ html.cb-app .tabbar.bn-scope { left: 0 !important; right: 0 !important; bottom: 
   .pf-app-long { display: none; }
   .pf-app-opts { grid-template-columns: 1fr 1fr; }
   .pf-app-opts > button span + span { display: none !important; } /* sur téléphone : le nom de l'option suffit */
+}
+/* ---------- Manuels et exemples de l’espace rédaction (js/manuels.js) ---------- */
+.mn-top { display: inline-flex; align-items: center; gap: .5rem; }
+.mn-topbtn { min-height: 38px; padding: 0 .8rem; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); cursor: pointer; font-family: var(--bn-font); font-weight: 700; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; display: inline-flex; align-items: center; gap: .4rem; }
+.mn-topbtn:hover { background: var(--inv-bg); color: var(--on-inv); }
+.mn-intro { max-width: 62ch; }
+.mn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: .6rem; margin-top: 1rem; }
+.mn-item { display: flex; flex-direction: column; gap: .35rem; text-align: left; border: 1.5px solid var(--line-2); background: var(--surface); padding: 1rem 1rem .9rem; cursor: pointer; color: var(--text); min-height: 150px; }
+.mn-item:hover { border-color: var(--ink); }
+.mn-item strong { font-family: var(--bn-font); font-weight: 800; font-size: 1.1rem; line-height: 1.15; color: var(--ink); }
+.mn-num { font-family: var(--bn-font); font-weight: 800; font-size: 13px; color: var(--gold-text); letter-spacing: .06em; }
+.mn-pitch { font-size: 13.5px; line-height: 1.45; color: var(--text-2); flex: 1; }
+.mn-go { font-size: 12.5px; font-weight: 700; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.mn-nav { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .8rem; }
+.mn-pos { font-size: 13px; color: var(--muted); font-weight: 700; }
+.mn-h { margin: .2rem 0 .5rem; }
+.mn-lead { font-size: 1.05rem; line-height: 1.55; color: var(--text); margin: 0 0 .4rem; max-width: 70ch; }
+.mn-pour { font-size: 14px; color: var(--text-2); margin: 0 0 1.25rem; }
+.mn-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 1.5rem; align-items: start; }
+.mn-sec { min-width: 0; }
+.mn-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+.mn-steps li { display: flex; gap: .7rem; align-items: flex-start; font-size: 14.5px; line-height: 1.55; }
+.mn-stn { flex: none; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; background: var(--inv-bg); color: var(--on-inv); font-family: var(--bn-font); font-weight: 800; font-size: 14px; }
+.mn-tips { margin-top: 1.2rem; padding: .85rem 1rem .4rem; border-left: 4px solid var(--gold-text); background: var(--surface); }
+.mn-act { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; margin-top: 1.1rem; }
+.mn-note { font-size: 12.5px; color: var(--muted); flex: 1 1 220px; }
+.mn-ex { border: 1.5px dashed var(--line-2); padding: 1rem; background: var(--surface); }
+.mn-ex-h { display: flex; justify-content: space-between; align-items: center; gap: .6rem; margin-bottom: .8rem; flex-wrap: wrap; }
+.mn-fict { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--line-2); }
+.mn-art { border: 1px solid var(--line); background: var(--bg); }
+.mn-art-img { aspect-ratio: 16 / 5; background: linear-gradient(135deg, #10283a 0%, #1f4a63 60%, #f2b33d 160%); display: flex; align-items: flex-end; justify-content: flex-end; padding: .5rem; }
+.mn-art-img span { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .7); }
+.mn-art-b { padding: .9rem 1rem 1rem; font-size: 14px; line-height: 1.6; }
+.mn-art-b p { margin: 0 0 .6rem; }
+.mn-art-tag { font-size: 12px; color: var(--gold-text); letter-spacing: .1em; }
+.mn-art-t { font-family: var(--bn-font); font-weight: 800; font-size: 1.35rem; line-height: 1.1; margin: .25rem 0 .5rem; color: var(--ink); }
+.mn-art-d { font-weight: 700; color: var(--text); }
+.mn-art-h { font-family: var(--bn-font); font-weight: 800; font-size: 1rem; margin: .9rem 0 .35rem; color: var(--ink); }
+.mn-tbl { display: grid; border: 1px solid var(--line); background: var(--bg); font-size: 13.5px; }
+.mn-tr { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border-top: 1px solid var(--line); }
+.mn-tr:first-child { border-top: 0; }
+.mn-tr > span { padding: .55rem .65rem; line-height: 1.4; min-width: 0; overflow-wrap: anywhere; }
+.mn-tr > span + span { border-left: 1px solid var(--line); }
+.mn-th { background: var(--inv-bg); color: var(--on-inv); font-weight: 700; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+.mn-more { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.mn-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.mn-chips .rx-tbtn { white-space: normal; text-align: left; min-height: 40px; padding: .35rem .7rem; text-transform: none; letter-spacing: 0; font-size: 14px; }
+.mn-pager { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.mn-pg { display: flex; flex-direction: column; gap: .15rem; text-align: left; border: 1.5px solid var(--line-2); background: var(--surface); color: var(--text); padding: .6rem .85rem; cursor: pointer; min-height: 56px; max-width: 100%; }
+.mn-pg-n { text-align: right; align-items: flex-end; }
+.mn-pg span { font-size: 12px; color: var(--muted); font-weight: 700; }
+.mn-pg strong { font-family: var(--bn-font); font-size: 15px; color: var(--ink); }
+.mn-pg:hover { border-color: var(--ink); }
+@media (max-width: 860px) { .mn-cols { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) {
+  .mn-topbtn { padding: 0 .6rem; }
+  .mn-tr:not(.mn-th) { grid-auto-flow: row; grid-auto-columns: auto; }
+  .mn-th { display: none; }
+  .mn-tr:not(.mn-th) > span + span { border-left: 0; padding-top: 0; }
+  .mn-tr:not(.mn-th) > span:first-child { font-weight: 700; }
+  .mn-tr:not(.mn-th) > span[data-k]:not([data-k=""]):not(:first-child)::before { content: attr(data-k) " : "; color: var(--muted); font-weight: 700; font-size: 12px; }
+  .mn-pg, .mn-pg-n { flex: 1 1 100%; }
 }
 /* ---------- Partager sur mes réseaux (js/partage.js) ---------- */
 .sh-btn { display: inline-flex; align-items: center; gap: .45rem; }
@@ -5991,7 +6052,7 @@ img, video, canvas, svg { max-width: 100%; }
       </aside>
 
       <div style="flex: 999 1 640px; min-width: 0">
-        <div class="rx-topbar"><span class="cond rx-crumb">Espace rédaction · {{rx.crumb}}</span><button type="button" class="rx-help" onClick="{{rx.aide.open}}" aria-label="Aide en ligne" title="Aide en ligne"><span aria-hidden="true">?</span></button></div>
+        <div class="rx-topbar"><span class="cond rx-crumb">Espace rédaction · {{rx.crumb}}</span><span class="mn-top"><sc-if value="{{man.ici.show}}" hint-placeholder-val="{{ true }}"><button type="button" class="mn-topbtn" onClick="{{man.ici.open}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 21V5M9 8h6M9 12h6"></path></svg>Manuel</button></sc-if><button type="button" class="rx-help" onClick="{{rx.aide.open}}" aria-label="Aide en ligne" title="Aide en ligne"><span aria-hidden="true">?</span></button></span></div>
         <sc-if value="{{rxSrvSql}}" hint-placeholder-val="{{ false }}"><div class="rx-alert rx-srv" role="status"><strong>Étape à faire :</strong> lancer le fichier <code>supabase/redaction.sql</code> dans Supabase (guide : docs/ESPACE-ADMIN.md, partie « Rédaction »). D’ici là, les articles écrits ici ne sont pas enregistrés et disparaissent en fermant la page.</div></sc-if>
         <sc-if value="{{rxSrvErr}}" hint-placeholder-val="{{ false }}"><div class="rx-alert rx-srv" role="status"><strong>Articles non chargés :</strong> {{rxSrvMsg}}. Vérifiez votre connexion puis rechargez la page.</div></sc-if>
         <sc-if value="{{rxSrvOk}}" hint-placeholder-val="{{ false }}"><div class="rx-srv-ok" role="status">{{rxSrvLabel}}</div></sc-if>
@@ -6069,6 +6130,51 @@ img, video, canvas, svg { max-width: 100%; }
               <li><strong>Respect.</strong> Pas d’attaque contre un arbitre, un adversaire ou un autre club. La passion, oui ; la polémique, non.</li>
               <li><strong>Partenaires.</strong> Pour remercier ou chercher un sponsor, passez par la carte des commerces : Casa Besports fait la mise en relation et la suit.</li>
             </ol>
+          </div>
+        </sc-if>
+        <!-- MANUELS ET EXEMPLES : un manuel par outil de la rédaction (js/manuels.js) -->
+        <sc-if value="{{stGuides}}" hint-placeholder-val="{{ false }}">
+          <div class="glass rx-card mn-card">
+            <sc-if value="{{man.isList}}" hint-placeholder-val="{{ true }}">
+              <div class="rx-head"><div><div class="eb">Pour bien démarrer · {{man.n}} outils</div><h1 class="h2">Manuels et exemples</h1></div></div>
+              <p class="tr-p mn-intro">{{man.intro}}</p>
+              <div class="mn-grid"><sc-for list="{{man.items}}" as="mi" hint-placeholder-count="8"><button type="button" class="mn-item" onClick="{{mi.open}}"><span class="mn-num">{{mi.num}}</span><strong>{{mi.nom}}</strong><span class="mn-pitch">{{mi.pitch}}</span><span class="mn-go">Lire le manuel et l’exemple →</span></button></sc-for></div>
+            </sc-if>
+            <sc-if value="{{man.isFiche}}" hint-placeholder-val="{{ false }}">
+              <div class="mn-nav"><button type="button" class="rx-link" onClick="{{man.back}}">← Tous les manuels</button><span class="mn-pos">{{man.f.pos}}</span></div>
+              <div class="eb">Manuel d’utilisation</div>
+              <h1 class="h2 mn-h">{{man.f.nom}}</h1>
+              <p class="mn-lead">{{man.f.pitch}}</p>
+              <p class="mn-pour"><strong>Pour qui :</strong> {{man.f.pour}}</p>
+              <div class="mn-cols">
+                <section class="mn-sec" aria-label="Pas à pas">
+                  <div class="rx-sub">Pas à pas</div>
+                  <ol class="mn-steps"><sc-for list="{{man.f.etapes}}" as="st" hint-placeholder-count="4"><li><span class="mn-stn" aria-hidden="true">{{st.n}}</span><span>{{st.t}}</span></li></sc-for></ol>
+                  <sc-if value="{{man.f.hasAstuces}}" hint-placeholder-val="{{ true }}"><div class="mn-tips"><div class="rx-sub">Bons réflexes</div><ul class="rx-ul"><sc-for list="{{man.f.astuces}}" as="as" hint-placeholder-count="2"><li>{{as.t}}</li></sc-for></ul></div></sc-if>
+                  <div class="mn-act"><button type="button" class="btn btn-dark" onClick="{{man.f.openTool}}">{{man.f.openLabel}}</button></div>
+                </section>
+                <section class="mn-sec mn-ex" aria-label="Exemple">
+                  <div class="mn-ex-h"><div class="rx-sub" style="margin: 0">{{man.f.exTitre}}</div><span class="rx-badge mn-fict">Exemple fictif</span></div>
+                  <sc-if value="{{man.f.exIsArticle}}" hint-placeholder-val="{{ false }}">
+                    <article class="mn-art">
+                      <div class="mn-art-img" role="img" aria-label="{{man.f.art.alt}}"><span>Photo</span></div>
+                      <div class="mn-art-b">
+                        <div class="cond mn-art-tag">{{man.f.art.tag}}</div>
+                        <h3 class="mn-art-t">{{man.f.art.titre}}</h3>
+                        <p class="mn-art-d">{{man.f.art.chapeau}}</p>
+                        <sc-for list="{{man.f.art.blocs}}" as="bk" hint-placeholder-count="3"><sc-if value="{{bk.isH}}" hint-placeholder-val="{{ false }}"><h4 class="mn-art-h">{{bk.t}}</h4></sc-if><sc-if value="{{bk.isP}}" hint-placeholder-val="{{ true }}"><p>{{bk.t}}</p></sc-if><sc-if value="{{bk.isQ}}" hint-placeholder-val="{{ false }}"><blockquote class="cl-q">{{bk.t}}</blockquote></sc-if><sc-if value="{{bk.isL}}" hint-placeholder-val="{{ false }}"><ul class="rx-ul"><sc-for list="{{bk.items}}" as="li" hint-placeholder-count="2"><li>{{li.t}}</li></sc-for></ul></sc-if></sc-for>
+                      </div>
+                    </article>
+                  </sc-if>
+                  <sc-if value="{{man.f.exIsTable}}" hint-placeholder-val="{{ true }}">
+                    <div class="mn-tbl" role="table"><div class="mn-tr mn-th" role="row"><sc-for list="{{man.f.cols}}" as="co" hint-placeholder-count="3"><span role="columnheader">{{co.t}}</span></sc-for></div><sc-for list="{{man.f.rows}}" as="rw" hint-placeholder-count="4"><div class="mn-tr" role="row"><sc-for list="{{rw.cells}}" as="ce" hint-placeholder-count="3"><span role="cell" data-k="{{ce.k}}">{{ce.t}}</span></sc-for></div></sc-for></div>
+                  </sc-if>
+                  <sc-if value="{{man.f.canCopy}}" hint-placeholder-val="{{ false }}"><div class="mn-act"><button type="button" class="btn btn-gold" onClick="{{man.f.copy}}">{{man.f.copyLabel}}</button><span class="mn-note">Le brouillon reste privé : remplacez l’exemple par votre contenu avant de l’envoyer.</span></div></sc-if>
+                </section>
+              </div>
+              <sc-if value="{{man.f.hasFiches}}" hint-placeholder-val="{{ false }}"><div class="mn-more"><div class="rx-sub">Pour aller plus loin</div><div class="mn-chips"><sc-for list="{{man.f.fiches}}" as="fa" hint-placeholder-count="2"><button type="button" class="rx-tbtn" onClick="{{fa.open}}">{{fa.titre}}</button></sc-for></div></div></sc-if>
+              <div class="mn-pager"><sc-if value="{{man.f.hasPrev}}" hint-placeholder-val="{{ false }}"><button type="button" class="mn-pg" onClick="{{man.f.prev}}"><span>← Précédent</span><strong>{{man.f.prevNom}}</strong></button></sc-if><span style="flex: 1"></span><sc-if value="{{man.f.hasNext}}" hint-placeholder-val="{{ true }}"><button type="button" class="mn-pg mn-pg-n" onClick="{{man.f.next}}"><span>Suivant →</span><strong>{{man.f.nextNom}}</strong></button></sc-if></div>
+            </sc-if>
           </div>
         </sc-if>
         <!-- RÉSEAU : mises en relation, annuaire, certifications, fiches clubs (administration) -->
@@ -9847,6 +9953,7 @@ img, video, canvas, svg { max-width: 100%; }
 <script src="js/pwa.js?v=__VERSION__"></script>
 <script src="js/aide.js?v=__VERSION__"></script>
 <script src="js/redaction.js?v=__VERSION__"></script>
+<script src="js/manuels.js?v=__VERSION__"></script>
 <script>
 // https://github.com/topojson/topojson-client v3.1.0 Copyright 2019 Mike Bostock
 !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t((e=e||self).topojson=e.topojson||{})}(this,function(e){"use strict";function t(e){return e}function r(e){if(null==e)return t;var r,n,o=e.scale[0],a=e.scale[1],i=e.translate[0],c=e.translate[1];return function(e,t){t||(r=n=0);var u=2,f=e.length,s=new Array(f);for(s[0]=(r+=e[0])*o+i,s[1]=(n+=e[1])*a+c;u<f;)s[u]=e[u],++u;return s}}function n(e){var t,n=r(e.transform),o=1/0,a=o,i=-o,c=-o;function u(e){(e=n(e))[0]<o&&(o=e[0]),e[0]>i&&(i=e[0]),e[1]<a&&(a=e[1]),e[1]>c&&(c=e[1])}function f(e){switch(e.type){case"GeometryCollection":e.geometries.forEach(f);break;case"Point":u(e.coordinates);break;case"MultiPoint":e.coordinates.forEach(u)}}for(t in e.arcs.forEach(function(e){for(var t,r=-1,u=e.length;++r<u;)(t=n(e[r],r))[0]<o&&(o=t[0]),t[0]>i&&(i=t[0]),t[1]<a&&(a=t[1]),t[1]>c&&(c=t[1])}),e.objects)f(e.objects[t]);return[o,a,i,c]}function o(e,t){var r=t.id,n=t.bbox,o=null==t.properties?{}:t.properties,i=a(e,t);return null==r&&null==n?{type:"Feature",properties:o,geometry:i}:null==n?{type:"Feature",id:r,properties:o,geometry:i}:{type:"Feature",id:r,bbox:n,properties:o,geometry:i}}function a(e,t){var n=r(e.transform),o=e.arcs;function a(e,t){t.length&&t.pop();for(var r=o[e<0?~e:e],a=0,i=r.length;a<i;++a)t.push(n(r[a],a));e<0&&function(e,t){for(var r,n=e.length,o=n-t;o<--n;)r=e[o],e[o++]=e[n],e[n]=r}(t,i)}function i(e){return n(e)}function c(e){for(var t=[],r=0,n=e.length;r<n;++r)a(e[r],t);return t.length<2&&t.push(t[0]),t}function u(e){for(var t=c(e);t.length<4;)t.push(t[0]);return t}function f(e){return e.map(u)}return function e(t){var r,n=t.type;switch(n){case"GeometryCollection":return{type:n,geometries:t.geometries.map(e)};case"Point":r=i(t.coordinates);break;case"MultiPoint":r=t.coordinates.map(i);break;case"LineString":r=c(t.arcs);break;case"MultiLineString":r=t.arcs.map(c);break;case"Polygon":r=f(t.arcs);break;case"MultiPolygon":r=t.arcs.map(f);break;default:return null}return{type:n,coordinates:r}}(t)}function i(e,t){var r={},n={},o={},a=[],i=-1;function c(e,t){for(var n in e){var o=e[n];delete t[o.start],delete o.start,delete o.end,o.forEach(function(e){r[e<0?~e:e]=1}),a.push(o)}}return t.forEach(function(r,n){var o,a=e.arcs[r<0?~r:r];a.length<3&&!a[1][0]&&!a[1][1]&&(o=t[++i],t[i]=r,t[n]=o)}),t.forEach(function(t){var r,a,i=function(t){var r,n=e.arcs[t<0?~t:t],o=n[0];e.transform?(r=[0,0],n.forEach(function(e){r[0]+=e[0],r[1]+=e[1]})):r=n[n.length-1];return t<0?[r,o]:[o,r]}(t),c=i[0],u=i[1];if(r=o[c])if(delete o[r.end],r.push(t),r.end=u,a=n[u]){delete n[a.start];var f=a===r?r:r.concat(a);n[f.start=r.start]=o[f.end=a.end]=f}else n[r.start]=o[r.end]=r;else if(r=n[u])if(delete n[r.start],r.unshift(t),r.start=c,a=o[c]){delete o[a.end];var s=a===r?r:a.concat(r);n[s.start=a.start]=o[s.end=r.end]=s}else n[r.start]=o[r.end]=r;else n[(r=[t]).start=c]=o[r.end=u]=r}),c(o,n),c(n,o),t.forEach(function(e){r[e<0?~e:e]||a.push([e])}),a}function c(e,t,r){var n,o,a;if(arguments.length>1)n=function(e,t,r){var n,o=[],a=[];function i(e){var t=e<0?~e:e;(a[t]||(a[t]=[])).push({i:e,g:n})}function c(e){e.forEach(i)}function u(e){e.forEach(c)}return function e(t){switch(n=t,t.type){case"GeometryCollection":t.geometries.forEach(e);break;case"LineString":c(t.arcs);break;case"MultiLineString":case"Polygon":u(t.arcs);break;case"MultiPolygon":!function(e){e.forEach(u)}(t.arcs)}}(t),a.forEach(null==r?function(e){o.push(e[0].i)}:function(e){r(e[0].g,e[e.length-1].g)&&o.push(e[0].i)}),o}(0,t,r);else for(o=0,n=new Array(a=e.arcs.length);o<a;++o)n[o]=o;return{type:"MultiLineString",arcs:i(e,n)}}function u(e,t){var r={},n=[],o=[];function c(e){e.forEach(function(t){t.forEach(function(t){(r[t=t<0?~t:t]||(r[t]=[])).push(e)})}),n.push(e)}function u(t){return function(e){for(var t,r=-1,n=e.length,o=e[n-1],a=0;++r<n;)t=o,o=e[r],a+=t[0]*o[1]-t[1]*o[0];return Math.abs(a)}(a(e,{type:"Polygon",arcs:[t]}).coordinates[0])}return t.forEach(function e(t){switch(t.type){case"GeometryCollection":t.geometries.forEach(e);break;case"Polygon":c(t.arcs);break;case"MultiPolygon":t.arcs.forEach(c)}}),n.forEach(function(e){if(!e._){var t=[],n=[e];for(e._=1,o.push(t);e=n.pop();)t.push(e),e.forEach(function(e){e.forEach(function(e){r[e<0?~e:e].forEach(function(e){e._||(e._=1,n.push(e))})})})}}),n.forEach(function(e){delete e._}),{type:"MultiPolygon",arcs:o.map(function(t){var n,o=[];if(t.forEach(function(e){e.forEach(function(e){e.forEach(function(e){r[e<0?~e:e].length<2&&o.push(e)})})}),(n=(o=i(e,o)).length)>1)for(var a,c,f=1,s=u(o[0]);f<n;++f)(a=u(o[f]))>s&&(c=o[0],o[0]=o[f],o[f]=c,s=a);return o}).filter(function(e){return e.length>0})}}function f(e,t){for(var r=0,n=e.length;r<n;){var o=r+n>>>1;e[o]<t?r=o+1:n=o}return r}function s(e){if(null==e)return t;var r,n,o=e.scale[0],a=e.scale[1],i=e.translate[0],c=e.translate[1];return function(e,t){t||(r=n=0);var u=2,f=e.length,s=new Array(f),l=Math.round((e[0]-i)/o),h=Math.round((e[1]-c)/a);for(s[0]=l-r,r=l,s[1]=h-n,n=h;u<f;)s[u]=e[u],++u;return s}}e.bbox=n,e.feature=function(e,t){return"string"==typeof t&&(t=e.objects[t]),"GeometryCollection"===t.type?{type:"FeatureCollection",features:t.geometries.map(function(t){return o(e,t)})}:o(e,t)},e.merge=function(e){return a(e,u.apply(this,arguments))},e.mergeArcs=u,e.mesh=function(e){return a(e,c.apply(this,arguments))},e.meshArcs=c,e.neighbors=function(e){var t={},r=e.map(function(){return[]});function n(e,r){e.forEach(function(e){e<0&&(e=~e);var n=t[e];n?n.push(r):t[e]=[r]})}function o(e,t){e.forEach(function(e){n(e,t)})}var a={LineString:n,MultiLineString:o,Polygon:o,MultiPolygon:function(e,t){e.forEach(function(e){o(e,t)})}};for(var i in e.forEach(function e(t,r){"GeometryCollection"===t.type?t.geometries.forEach(function(t){e(t,r)}):t.type in a&&a[t.type](t.arcs,r)}),t)for(var c=t[i],u=c.length,s=0;s<u;++s)for(var l=s+1;l<u;++l){var h,p=c[s],g=c[l];(h=r[p])[i=f(h,g)]!==g&&h.splice(i,0,g),(h=r[g])[i=f(h,p)]!==p&&h.splice(i,0,p)}return r},e.quantize=function(e,t){if(e.transform)throw new Error("already quantized");if(t&&t.scale)u=e.bbox;else{if(!((r=Math.floor(t))>=2))throw new Error("n must be ≥2");var r,o=(u=e.bbox||n(e))[0],a=u[1],i=u[2],c=u[3];t={scale:[i-o?(i-o)/(r-1):1,c-a?(c-a)/(r-1):1],translate:[o,a]}}var u,f,l=s(t),h=e.objects,p={};function g(e){return l(e)}function y(e){var t;switch(e.type){case"GeometryCollection":t={type:"GeometryCollection",geometries:e.geometries.map(y)};break;case"Point":t={type:"Point",coordinates:g(e.coordinates)};break;case"MultiPoint":t={type:"MultiPoint",coordinates:e.coordinates.map(g)};break;default:return e}return null!=e.id&&(t.id=e.id),null!=e.bbox&&(t.bbox=e.bbox),null!=e.properties&&(t.properties=e.properties),t}for(f in h)p[f]=y(h[f]);return{type:"Topology",bbox:u,transform:t,objects:p,arcs:e.arcs.map(function(e){var t,r=0,n=1,o=e.length,a=new Array(o);for(a[0]=l(e[0],0);++r<o;)((t=l(e[r],r))[0]||t[1])&&(a[n++]=t);return 1===n&&(a[n++]=[0,0]),a.length=n,a})}},e.transform=r,e.untransform=s,Object.defineProperty(e,"__esModule",{value:!0})});
